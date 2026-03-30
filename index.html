@@ -63,9 +63,9 @@
     .carousel-wrap{position:relative;width:100%;background:#111;overflow:hidden}
     .carousel-track{display:flex;transition:transform .42s cubic-bezier(.22,1,.36,1)}
     .carousel-slide{flex-shrink:0;width:100%}
-    .carousel-slide img{width:100%;display:block;object-fit:cover;object-position:center}
-    .carousel-slide img.portrait{height:490px}
-    .carousel-slide img.landscape{height:300px}
+    .carousel-slide img{width:100%;display:block;object-fit:contain;object-position:center;max-height:480px;background:#000}
+    .carousel-slide img.portrait{max-height:480px}
+    .carousel-slide img.landscape{max-height:480px}
     .carousel-btn{position:absolute;top:50%;transform:translateY(-50%);width:32px;height:32px;background:rgba(250,248,244,.88);border:1px solid var(--rule-heavy);color:var(--ink);font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:5;transition:background .2s}
     .carousel-btn:hover{background:rgba(250,248,244,1)}
     .carousel-btn.prev{left:10px} .carousel-btn.next{right:10px}
@@ -165,10 +165,11 @@
 <div id="map"></div>
 <header>
   <div class="logo-wrap" onclick="goHome()">
-    <img class="logo-img" src="https://i.imgur.com/tCUpwsa.jpeg" alt="Requation" />
+    <img class="logo-img" src="https://i.imgur.com/WFp0h8H.jpeg" alt="Requation" style="height:52px;width:52px;object-fit:cover" />
     <span class="logo-text">Requation</span>
   </div>
   <nav>
+    <a href="#" onclick="goHome();return false;">Home</a>
     <a href="#" onclick="openModal('about');return false;">About</a>
     <a href="#" onclick="openModal('contact');return false;">Contact</a>
   </nav>
@@ -257,8 +258,6 @@
     <button class="btn-secondary">Schedule Tour</button>
   </div>
 </div>
-
-<div id="hint">Select a <span>marker</span> to explore properties</div>
 
 <div class="modal-overlay" id="modal-about">
   <div class="modal">
@@ -406,7 +405,7 @@ const properties=[
     id:'laveen',name:'Greenest Estate',short:'Laveen',
     coords:[-112.1620,33.3680],tag:'For Sale By Owner',
     subtitle:'11403 S 27th Dr · Laveen, AZ 85339',
-    type:'Single Family Estate',beds:'4',baths:'3',sqft:'3,200',price:'$649,000',
+    type:'Single Family Estate',beds:'4',baths:'3',sqft:'3,200',price:'$2,000,000',
     description:"The Greenest Estate in Laveen — a masterfully landscaped single-family home on approximately 1 acre in one of Maricopa County's fastest-growing communities. Mountain views, solar-ready infrastructure, and direct Loop 202 Dobbins exit access position this home at the intersection of lifestyle and connectivity.",
     tags:['Laveen','~1 Acre','Phoenix Metro','Solar Ready','Mountain Views','Loop 202','FSBO','Waymo Corridor'],
     images:[
@@ -597,7 +596,6 @@ function openPanel(p){
   buildNeighborhood(p);
   switchTab('property');
   document.getElementById('panel').classList.add('open');
-  document.getElementById('hint').style.opacity='0';
   map.flyTo({center:p.localCenter,zoom:p.localZoom,pitch:p.localPitch,bearing:p.localBearing,duration:2000,essential:true});
   map.once('moveend',()=>addPoiMarkers(p));
 }
@@ -643,19 +641,16 @@ function carouselRender(){
 
 function closePanel(){
   document.getElementById('panel').classList.remove('open');
-  document.getElementById('hint').style.opacity='1';
   if(activeProperty){map.flyTo({center:activeProperty.localCenter,zoom:activeProperty.localZoom-1,pitch:activeProperty.localPitch,bearing:activeProperty.localBearing,duration:900,essential:true});}
 }
 function goHome(){
   document.getElementById('panel').classList.remove('open');
-  document.getElementById('hint').style.opacity='1';
   clearPoiMarkers();activeProperty=null;
   map.flyTo({center:[-115.5,34.0],zoom:5.5,pitch:22,bearing:-8,duration:1400,essential:true});
 }
 function openModal(id){document.getElementById('modal-'+id).classList.add('active');}
 function closeModal(id){document.getElementById('modal-'+id).classList.remove('active');}
 document.querySelectorAll('.modal-overlay').forEach(el=>el.addEventListener('click',e=>{if(e.target===el)el.classList.remove('active');}));
-setTimeout(()=>{document.getElementById('hint').style.opacity='0';},6000);
 </script>
 
 </body>
