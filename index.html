@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Requation — Real Estate Intelligence</title>
+  <link href="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.css" rel="stylesheet" />
+  <script src="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root{--gold:#C9A84C;--gold-light:#e2c47a;--gold-dim:rgba(201,168,76,.15);--gold-border:rgba(201,168,76,.32);--dark:#0a0a0a;--dark-2:#111;--dark-3:#181818;--dark-4:#222;--text:#e8e0d0;--text-muted:#8a8070;--waymo:#1A73E8;--waymo-dim:rgba(26,115,232,.14);--waymo-border:rgba(26,115,232,.38);--panel-width:500px;--header-h:70px}
+    *,::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html,body{height:100%;background:var(--dark);color:var(--text);font-family:'Montserrat',sans-serif;overflow:hidden}
+    header{position:fixed;top:0;left:0;right:0;height:var(--header-h);z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0 36px;background:linear-gradient(180deg,rgba(10,10,10,.97) 0%,rgba(10,10,10,.85) 100%);border-bottom:1px solid var(--gold-border);backdrop-filter:blur(12px)}
+    .logo-wrap{display:flex;align-items:center;gap:14px;cursor:pointer}
+    .logo-wrap:hover .logo-text{color:var(--gold-light)}
+    .logo-img{height:42px;width:auto;object-fit:contain;border-radius:4px}
+    .logo-text{font-family:'Cormorant Garamond',serif;font-size:1.65rem;font-weight:500;color:var(--gold);letter-spacing:.08em;text-transform:uppercase;transition:color .25s}
+    nav{display:flex;align-items:center;gap:32px}
+    nav a{font-size:.72rem;font-weight:500;letter-spacing:.18em;text-transform:uppercase;color:var(--text-muted);text-decoration:none;position:relative;transition:color .25s}
+    nav a::after{content:'';position:absolute;bottom:-4px;left:0;right:0;height:1px;background:var(--gold);transform:scaleX(0);transition:transform .3s}
+    nav a:hover{color:var(--gold)} nav a:hover::after{transform:scaleX(1)}
+    #map{position:fixed;top:0;left:0;width:100%;height:100%}
+    .req-marker{cursor:pointer;width:42px;height:42px;display:flex;align-items:center;justify-content:center;position:relative}
+    .req-marker .pulse-ring{position:absolute;width:42px;height:42px;border:2px solid var(--gold);border-radius:50%;animation:pulseRing 2.4s ease-out infinite;opacity:0}
+    .req-marker .pulse-ring:nth-child(2){animation-delay:1.2s}
+    .req-marker .dot{width:14px;height:14px;background:var(--gold);border-radius:50%;border:2px solid #fff;box-shadow:0 0 12px rgba(201,168,76,.8);z-index:1;transition:transform .2s}
+    .req-marker:hover .dot{transform:scale(1.3)}
+    .req-marker .label{position:absolute;bottom:-22px;left:50%;transform:translateX(-50%);font-size:.58rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);white-space:nowrap;text-shadow:0 1px 4px rgba(0,0,0,.9)}
+    @keyframes pulseRing{0%{transform:scale(.6);opacity:.7}100%{transform:scale(2.2);opacity:0}}
+    .poi-marker{cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px}
+    .poi-dot{width:9px;height:9px;border-radius:50%;border:1.5px solid rgba(255,255,255,.8);box-shadow:0 0 5px rgba(0,0,0,.7)}
+    .poi-label{font-size:.48rem;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:#fff;white-space:nowrap;text-shadow:0 1px 3px #000;background:rgba(0,0,0,.6);padding:2px 4px;border-radius:3px}
+    .poi-marker.waymo .poi-dot{width:12px;height:12px;box-shadow:0 0 10px rgba(26,115,232,.9)}
+    .poi-marker.waymo .poi-label{background:rgba(26,115,232,.85)}
+    #panel{position:fixed;top:var(--header-h);right:0;width:var(--panel-width);height:calc(100% - var(--header-h));background:linear-gradient(160deg,rgba(12,12,12,.99) 0%,rgba(20,16,8,.99) 100%);border-left:1px solid var(--gold-border);transform:translateX(calc(var(--panel-width) + 4px));transition:transform .55s cubic-bezier(.22,1,.36,1);z-index:90;display:flex;flex-direction:column;overflow:hidden}
+    #panel.open{transform:translateX(0)}
+    .panel-header{padding:20px 26px 15px;border-bottom:1px solid var(--gold-border);position:relative;flex-shrink:0}
+    .panel-tag{font-size:.58rem;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);margin-bottom:5px;display:flex;align-items:center;gap:8px}
+    .waymo-badge{background:var(--waymo);color:#fff;font-size:.5rem;letter-spacing:.1em;padding:2px 7px;border-radius:20px;font-weight:600}
+    .panel-title{font-family:'Cormorant Garamond',serif;font-size:1.7rem;font-weight:400;color:var(--text);line-height:1.2;cursor:pointer;transition:color .2s}
+    .panel-title:hover{color:var(--gold)}
+    .panel-subtitle{font-size:.67rem;color:var(--text-muted);margin-top:4px;letter-spacing:.04em}
+    #panel-close{position:absolute;top:18px;right:20px;width:30px;height:30px;background:var(--gold-dim);border:1px solid var(--gold-border);border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s,transform .2s;color:var(--gold);font-size:.95rem}
+    #panel-close:hover{background:rgba(201,168,76,.3);transform:rotate(90deg)}
+    .panel-tabs{display:flex;border-bottom:1px solid var(--gold-border);flex-shrink:0;background:rgba(10,10,10,.5)}
+    .panel-tab{flex:1;padding:12px 4px;text-align:center;font-size:.56rem;letter-spacing:.14em;text-transform:uppercase;color:var(--text-muted);cursor:pointer;border:none;background:none;border-bottom:2px solid transparent;transition:color .2s,border-color .2s}
+    .panel-tab.active{color:var(--gold);border-bottom-color:var(--gold)}
+    .panel-tab:hover{color:var(--gold-light)}
+    .panel-body{flex:1;overflow-y:auto;padding:0;scrollbar-width:thin;scrollbar-color:var(--gold-border) transparent}
+    .panel-body::-webkit-scrollbar{width:3px}
+    .panel-body::-webkit-scrollbar-thumb{background:var(--gold-border);border-radius:2px}
+    .tab-pane{display:none} .tab-pane.active{display:block}
+    .carousel-wrap{position:relative;width:100%;background:#000;overflow:hidden}
+    .carousel-track{display:flex;transition:transform .42s cubic-bezier(.22,1,.36,1)}
+    .carousel-slide{flex-shrink:0;width:100%}
+    .carousel-slide img{width:100%;display:block;object-fit:cover;object-position:center}
+    .carousel-slide img.portrait{height:490px}
+    .carousel-slide img.landscape{height:300px}
+    .carousel-btn{position:absolute;top:50%;transform:translateY(-50%);width:34px;height:34px;background:rgba(10,10,10,.78);border:1px solid var(--gold-border);border-radius:50%;color:var(--gold);font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:5;transition:background .2s}
+    .carousel-btn:hover{background:rgba(201,168,76,.25)}
+    .carousel-btn.prev{left:10px} .carousel-btn.next{right:10px}
+    .carousel-counter{position:absolute;bottom:9px;right:12px;font-size:.52rem;color:rgba(255,255,255,.6);background:rgba(0,0,0,.65);padding:2px 7px;border-radius:20px}
+    .carousel-dots{display:flex;justify-content:center;flex-wrap:wrap;gap:4px;padding:7px 10px 4px;background:#000}
+    .carousel-dot{width:5px;height:5px;border-radius:50%;background:var(--gold-border);cursor:pointer;transition:background .2s,transform .2s;flex-shrink:0}
+    .carousel-dot.active{background:var(--gold);transform:scale(1.3)}
+    .video-section{padding:16px 20px 10px}
+    .section-label{font-size:.57rem;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--gold-dim)}
+    .video-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+    .video-item{position:relative;width:100%;padding-bottom:177.78%;background:#000;border-radius:5px;overflow:hidden;border:1px solid var(--gold-border)}
+    .video-item iframe{position:absolute;top:0;left:0;width:100%;height:100%;border:none}
+    .panel-pad{padding:16px 20px}
+    .stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:16px}
+    .stat-card{background:var(--gold-dim);border:1px solid var(--gold-border);border-radius:5px;padding:11px 13px}
+    .stat-label{font-size:.55rem;letter-spacing:.14em;text-transform:uppercase;color:var(--text-muted);margin-bottom:4px}
+    .stat-value{font-family:'Cormorant Garamond',serif;font-size:1.2rem;color:var(--gold);font-weight:500}
+    .section-title{font-size:.57rem;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:8px;margin-top:15px;padding-bottom:6px;border-bottom:1px solid var(--gold-dim)}
+    .section-text{font-size:.76rem;line-height:1.75;color:var(--text-muted)}
+    .tag-list{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+    .tag{font-size:.55rem;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);background:var(--gold-dim);border:1px solid var(--gold-border);border-radius:3px;padding:4px 8px}
+
+/* COMP CARDS */
+.comp-intro-text{font-size:.74rem;line-height:1.7;color:var(--text-muted);margin-bottom:14px}
+.comp-card{background:var(--dark-4);border:1px solid rgba(255,255,255,.07);border-radius:7px;overflow:hidden;margin-bottom:10px;transition:border-color .2s}
+.comp-card:hover{border-color:var(--gold-border)}
+.comp-card-top{display:flex;justify-content:space-between;align-items:flex-start;padding:12px 14px 6px}
+.comp-address{font-size:.71rem;font-weight:500;color:var(--text);line-height:1.35;flex:1}
+.comp-price{font-family:'Cormorant Garamond',serif;font-size:1.12rem;color:var(--gold);font-weight:500;flex-shrink:0;margin-left:10px}
+.comp-chips{display:flex;gap:6px;padding:0 14px 8px;flex-wrap:wrap}
+.comp-chip{font-size:.53rem;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted);background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:3px;padding:3px 7px}
+.comp-note{font-size:.67rem;color:var(--text-muted);padding:8px 14px 10px;line-height:1.55;border-top:1px solid rgba(255,255,255,.05)}
+.comp-source-row{display:flex;justify-content:space-between;align-items:center;padding:0 14px 10px}
+.comp-source{font-size:.52rem;letter-spacing:.1em;text-transform:uppercase;color:rgba(201,168,76,.45)}
+.comp-status{font-size:.52rem;letter-spacing:.1em;text-transform:uppercase;color:#4CAF50;font-weight:600}
+
+/* NEIGHBORHOOD */
+.nbhd-cats{display:flex;gap:6px;flex-wrap:wrap;padding:12px 20px 8px}
+.nbhd-cat-btn{font-size:.54rem;letter-spacing:.1em;text-transform:uppercase;padding:5px 10px;border-radius:20px;border:1px solid var(--gold-border);background:none;color:var(--text-muted);cursor:pointer;transition:all .2s;white-space:nowrap}
+.nbhd-cat-btn.active,.nbhd-cat-btn:hover{background:var(--gold-dim);color:var(--gold);border-color:var(--gold)}
+.nbhd-list{padding:4px 20px 20px;display:flex;flex-direction:column;gap:8px}
+.nbhd-card{display:flex;align-items:center;gap:11px;background:var(--dark-4);border:1px solid rgba(255,255,255,.06);border-radius:6px;padding:10px 13px;transition:border-color .2s}
+.nbhd-card:hover{border-color:var(--gold-border)}
+.nbhd-icon{font-size:1.25rem;flex-shrink:0;width:30px;text-align:center}
+.nbhd-info{flex:1;min-width:0}
+.nbhd-name{font-size:.73rem;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nbhd-meta{font-size:.59rem;color:var(--text-muted);margin-top:2px}
+.nbhd-dist{font-size:.59rem;color:var(--gold);flex-shrink:0}
+
+/* WAYMO */
+.waymo-section{margin:16px 20px;border:1px solid var(--waymo-border);border-radius:8px;overflow:hidden;background:linear-gradient(135deg,rgba(26,115,232,.08) 0%,rgba(10,10,10,0) 100%)}
+.waymo-header{background:rgba(26,115,232,.18);padding:13px 17px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--waymo-border)}
+.waymo-icon{font-size:1.5rem}
+.waymo-title{font-family:'Cormorant Garamond',serif;font-size:1.15rem;color:#fff;font-weight:500}
+.waymo-subtitle{font-size:.56rem;letter-spacing:.12em;text-transform:uppercase;color:rgba(26,115,232,.9);margin-top:2px}
+.waymo-body{padding:13px 17px}
+.waymo-body p{font-size:.75rem;line-height:1.72;color:var(--text-muted);margin-bottom:10px}
+.waymo-body p:last-child{margin-bottom:0}
+.waymo-body strong{color:#fff}
+.waymo-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;margin-top:11px}
+.waymo-stat{background:rgba(26,115,232,.12);border:1px solid var(--waymo-border);border-radius:5px;padding:9px;text-align:center}
+.waymo-stat-val{font-family:'Cormorant Garamond',serif;font-size:1.25rem;color:var(--waymo);font-weight:500}
+.waymo-stat-lbl{font-size:.49rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);margin-top:2px}
+.panel-cta{padding:13px 20px 18px;display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--gold-border);flex-shrink:0}
+.btn-primary{width:100%;padding:12px;background:var(--gold);color:var(--dark);border:none;border-radius:4px;font-size:.66rem;font-weight:600;letter-spacing:.18em;text-transform:uppercase;cursor:pointer;transition:background .2s,transform .15s}
+.btn-primary:hover{background:var(--gold-light);transform:translateY(-1px)}
+.btn-secondary{width:100%;padding:11px;background:transparent;color:var(--gold);border:1px solid var(--gold-border);border-radius:4px;font-size:.66rem;font-weight:500;letter-spacing:.18em;text-transform:uppercase;cursor:pointer;transition:background .2s,transform .15s}
+.btn-secondary:hover{background:var(--gold-dim);transform:translateY(-1px)}
+#hint{position:fixed;bottom:36px;left:50%;transform:translateX(-50%);background:rgba(10,10,10,.88);border:1px solid var(--gold-border);border-radius:40px;padding:12px 22px;font-size:.68rem;letter-spacing:.14em;color:var(--text-muted);backdrop-filter:blur(10px);z-index:80;transition:opacity .5s;pointer-events:none}
+#hint span{color:var(--gold)}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:200;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+.modal-overlay.active{display:flex}
+.modal{background:var(--dark-3);border:1px solid var(--gold-border);border-radius:8px;width:90%;max-width:520px;padding:40px;position:relative;animation:modalIn .3s ease}
+@keyframes modalIn{from{opacity:0;transform:translateY(20px) scale(.97)}to{opacity:1;transform:translateY(0) scale(1)}}
+.modal-close{position:absolute;top:18px;right:20px;background:none;border:none;color:var(--text-muted);font-size:1.3rem;cursor:pointer;transition:color .2s}
+.modal-close:hover{color:var(--gold)}
+.modal-tag{font-size:.6rem;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);margin-bottom:12px;display:block}
+.modal-title{font-family:'Cormorant Garamond',serif;font-size:2rem;color:var(--text);margin-bottom:16px}
+.modal-body{font-size:.82rem;line-height:1.75;color:var(--text-muted)}
+.modal-divider{height:1px;background:var(--gold-dim);margin:22px 0}
+.contact-row{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.contact-icon{width:32px;height:32px;background:var(--gold-dim);border:1px solid var(--gold-border);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.85rem;flex-shrink:0}
+.contact-info{font-size:.8rem;color:var(--text-muted)}
+.contact-info strong{display:block;font-size:.65rem;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);margin-bottom:2px}
+@media(max-width:640px){:root{--panel-width:100vw}header{padding:0 18px}.logo-text{font-size:1.2rem}.video-grid{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+<div id="map"></div>
+<header>
+  <div class="logo-wrap" onclick="goHome()">
+    <img class="logo-img" src="https://i.imgur.com/tCUpwsa.jpeg" alt="Requation" />
+    <span class="logo-text">Requation</span>
+  </div>
+  <nav>
+    <a href="#" onclick="openModal('about');return false;">About</a>
+    <a href="#" onclick="openModal('contact');return false;">Contact</a>
+  </nav>
+</header>
+
+<div id="panel">
+  <div class="panel-header">
+    <div class="panel-tag"><span id="panel-tag-text">Property</span><span class="waymo-badge">⟴ Waymo Ready</span></div>
+    <div class="panel-title" id="panel-title" onclick="goHome()">—</div>
+    <div class="panel-subtitle" id="panel-subtitle">—</div>
+    <button id="panel-close" onclick="closePanel()">&#x2715;</button>
+  </div>
+  <div class="panel-tabs">
+    <button class="panel-tab active" onclick="switchTab('property')">Property</button>
+    <button class="panel-tab" onclick="switchTab('comps')">Comps</button>
+    <button class="panel-tab" onclick="switchTab('neighborhood')">Neighborhood</button>
+    <button class="panel-tab" onclick="switchTab('waymo')">Waymo</button>
+  </div>
+  <div class="panel-body" id="panel-body">
+
+<div class="tab-pane active" id="tab-property">
+  <div class="carousel-wrap">
+    <div class="carousel-track" id="carousel-track"></div>
+    <button class="carousel-btn prev" onclick="carouselMove(-1)">&#8249;</button>
+    <button class="carousel-btn next" onclick="carouselMove(1)">&#8250;</button>
+    <div class="carousel-counter" id="carousel-counter">1 / —</div>
+  </div>
+  <div class="carousel-dots" id="carousel-dots"></div>
+  <div class="panel-pad">
+    <div class="stats-grid" id="stats-grid"></div>
+    <div class="section-title">About This Property</div>
+    <p class="section-text" id="prop-desc"></p>
+    <div class="section-title">Market Tags</div>
+    <div class="tag-list" id="prop-tags"></div>
+  </div>
+  <div class="video-section">
+    <div class="section-label" id="video-label">Documentary</div>
+    <div class="video-grid" id="video-grid"></div>
+  </div>
+  <div style="height:20px"></div>
+</div>
+
+<div class="tab-pane" id="tab-comps">
+  <div class="panel-pad" style="padding-bottom:6px">
+    <div class="section-title" style="margin-top:4px" id="comps-headline"></div>
+    <p class="comp-intro-text" id="comps-intro"></p>
+  </div>
+  <div style="padding:0 20px 24px" id="comps-list"></div>
+</div>
+
+<div class="tab-pane" id="tab-neighborhood">
+  <div class="nbhd-cats" id="nbhd-cats"></div>
+  <div class="nbhd-list" id="nbhd-list"></div>
+</div>
+
+<div class="tab-pane" id="tab-waymo">
+  <div class="waymo-section" style="margin-top:16px">
+    <div class="waymo-header">
+      <div class="waymo-icon">🚗</div>
+      <div><div class="waymo-title">Waymo Last-Mile Hub</div><div class="waymo-subtitle">Autonomous Vehicle Ready · Requation Network</div></div>
+    </div>
+    <div class="waymo-body">
+      <p>Requation positions every listing as a <strong>node in the Waymo autonomous vehicle network</strong> — the missing link between where people live and where they want to go.</p>
+      <p>Google has publicly acknowledged the last-mile connectivity gap. Sergei Brin's return to AI and Sundar Pichai's compensation tied directly to Waymo's success signal one thing: <strong>the race to solve last-mile is on.</strong></p>
+      <p>This property sits within a Waymo-serviceable corridor. Requation is building the <strong>3D Yellow Pages on Maps</strong> — every home, every business, every stop, discoverable from above.</p>
+      <div class="waymo-stats">
+        <div class="waymo-stat"><div class="waymo-stat-val">&lt;0.3mi</div><div class="waymo-stat-lbl">To Waymo Stop</div></div>
+        <div class="waymo-stat"><div class="waymo-stat-val">24/7</div><div class="waymo-stat-lbl">AV Coverage</div></div>
+        <div class="waymo-stat"><div class="waymo-stat-val">3D</div><div class="waymo-stat-lbl">Map Ready</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="panel-pad">
+    <div class="section-title">Why This Matters</div>
+    <p class="section-text">The autonomous vehicle era rewrites real estate value. Proximity to Waymo stops becomes the new walkability score — a quantifiable, searchable signal on Google Maps that surfaces your property to buyers who live AV-first.</p>
+    <p class="section-text" style="margin-top:11px">Requation makes this visible — aerial, interactive, and discoverable at the exact moment a buyer is navigating their next neighborhood from above.</p>
+    <div class="section-title" style="margin-top:18px">The Requation Vision</div>
+    <p class="section-text">A living 3D map where every listing, every business, and every Waymo stop is a connected, searchable data point — not a static pin. Real estate intelligence at the speed of Maps.</p>
+  </div>
+  <div style="height:20px"></div>
+</div>
+
+  </div>
+  <div class="panel-cta">
+    <button class="btn-primary">Request Analysis</button>
+    <button class="btn-secondary">Schedule Tour</button>
+  </div>
+</div>
+
+<div id="hint">Select a <span>marker</span> to explore properties</div>
+
+<div class="modal-overlay" id="modal-about">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('about')">&#x2715;</button>
+    <span class="modal-tag">Who We Are</span>
+    <div class="modal-title">Real Estate Intelligence</div>
+    <div class="modal-body">Requation is a data-driven real estate platform delivering precision market analysis, off-market acquisitions, and portfolio intelligence across high-growth U.S. markets.<br><br>Our vision: a 3D Yellow Pages on Google Maps — every property, every business, every Waymo stop discoverable from the air in real time.</div>
+    <div class="modal-divider"></div>
+    <div class="modal-body">From downtown Los Angeles to the expanding Phoenix corridor, Requation partners with investors, family offices, and developer groups seeking asymmetric returns.</div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-contact">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('contact')">&#x2715;</button>
+    <span class="modal-tag">Get In Touch</span>
+    <div class="modal-title">Contact Us</div>
+    <div class="modal-divider"></div>
+    <div class="contact-row"><div class="contact-icon">✉</div><div class="contact-info"><strong>Email</strong>info@requation.com</div></div>
+    <div class="contact-row"><div class="contact-icon">☎</div><div class="contact-info"><strong>Phone</strong>+1 (800) REQ-UATION</div></div>
+    <div class="contact-row"><div class="contact-icon">◎</div><div class="contact-info"><strong>Headquarters</strong>Los Angeles, California</div></div>
+    <div class="modal-divider"></div>
+    <div class="modal-body">For investment inquiries, partnership opportunities, or media requests, reach out via email and a member of our team will respond within one business day.</div>
+  </div>
+</div>
+
+<script>
+const properties=[
+  {
+    id:'dtla',name:'South Park Brutalist',short:'DTLA',
+    coords:[-118.2637,34.0422],tag:'For Sale By Owner',
+    subtitle:'801 S Grand Ave, Unit 1612 · Los Angeles CA 90017',
+    type:'High-Rise Condo',beds:'2',baths:'2',sqft:'1,300',price:'$885,000',
+    description:'A brutalist icon 25 feet from Whole Foods, 100 feet from Philz Coffee, and less than a mile from Roy Lichtenstein at The Broad and symphonies at Walt Disney Concert Hall. Unit 1612 at 801 S Grand — 2BR/2BA, 1,300 sqft on the 16th floor of South Park DTLA.',
+    tags:['South Park DTLA','High-Rise','Brutalist','Walk Score 98','FSBO','Waymo Corridor'],
+    images:[
+      'https://i.imgur.com/1K9P4FK',
+      'https://i.imgur.com/YIN8O41.jpeg','https://i.imgur.com/C2uei3w.jpeg','https://i.imgur.com/yhnjPo6.jpeg',
+      'https://i.imgur.com/JQsQZmA.jpeg','https://i.imgur.com/N4s3BiK.jpeg','https://i.imgur.com/NKGvYiS.jpeg',
+      'https://i.imgur.com/uSjnr0A.jpeg','https://i.imgur.com/F71ADpi.jpeg','https://i.imgur.com/HBNlkj8.jpeg',
+      'https://i.imgur.com/PCwZVOS.jpeg','https://i.imgur.com/WpmEw8f.jpeg','https://i.imgur.com/ChMBKSr.jpeg',
+      'https://i.imgur.com/sofwRew.jpeg','https://i.imgur.com/jfOae1A.jpeg','https://i.imgur.com/cLSYiDl.jpeg',
+      'https://i.imgur.com/4idl4U9.jpeg','https://i.imgur.com/fl1ZFd6.jpeg','https://i.imgur.com/tbFhHcl.jpeg',
+      'https://i.imgur.com/UHJ2hM2.jpeg','https://i.imgur.com/3rFddwE.jpeg','https://i.imgur.com/yvAxOaD.jpeg',
+      'https://i.imgur.com/yXh2Ywf.jpeg','https://i.imgur.com/GSbSrYM.jpeg','https://i.imgur.com/D2GRI06.jpeg'
+    ],
+    videos:['GFD0WG60c6Q','1mXG5MJ6i1U','nig4DmfKW_I','FR8hkxtha9A','oH3JefYb6YM','Ny_5OMGToC4'],
+    comps:{
+      headline:'Active 2BR/2BA Comps · DTLA / 90017',
+      intro:'All listings below are active 2-bedroom, 2-bathroom condos in or adjacent to 90017. Your 16th-floor unit at $885K / $681 per SF is priced competitively for a high-rise with South Park walkability and direct Whole Foods access.',
+      listings:[
+        {
+          address:'Metropolis Tower II #4111 — 877 Francisco St',
+          price:'$1,899,000',
+          chips:['2 BD','2 BA','1,309 SF','41st Floor','$1,450/SF'],
+          note:'41st-floor luxury high-rise in the same South Park corridor. At $1,899/SF your unit delivers comparable city-living at less than half the price — compelling value for the same zip code.',
+          source:'DLXco / 90017',status:'Active'
+        },
+        {
+          address:'1111 Grand Ave #518 — Grand Lofts',
+          price:'$POA',
+          chips:['2 BD','2 BA','2,070 SF','Corner Unit','Floor-to-Ceiling'],
+          note:'Rare 2,070 SF corner unit two blocks from your building. Larger footprint but same South Park neighborhood. Shows strong buyer appetite for 2BD units at this address.',
+          source:'RealEstateLA.com / 90015',status:'Active'
+        },
+        {
+          address:'The Rowan Lofts #1013 — DTLA',
+          price:'$474,000',
+          chips:['2 BD','2 BA','860 SF','$551/SF','Loft Style'],
+          note:'Entry-level 2/2 at 860 SF — 440 SF smaller than your unit. At $474K it anchors the low end of the 2/2 market. Your 1,300 SF at $885K is $681/SF, proportionally premium but justified by floor height and building quality.',
+          source:'DLXco / DTLA',status:'Active'
+        },
+        {
+          address:'SKY Loft #1612 — S Grand Ave (Same Building)',
+          price:'$POA',
+          chips:['2 BD','2 BA','16th Floor','City Views','Live/Work'],
+          note:'16th-floor 2BR/2BA in a comparable S Grand Ave tower — traditional and loft-style combined layout, floor-to-ceiling windows, stunning city views from every room. Direct same-floor comp.',
+          source:'Homes.com / 90017',status:'Active'
+        },
+        {
+          address:'Bunker Hill Towers — 26th Floor DTLA',
+          price:'POA',
+          chips:['4 BD','4.5 BA','High-Rise','3 Exposures','Panoramic'],
+          note:'Top-tier benchmark — largest unit in Bunker Hill Towers. Included to show ceiling of the DTLA high-rise market. Your 2/2 sits well below this tier at strong value.',
+          source:'Homes.com / DTLA',status:'Active'
+        },
+      ]
+    },
+    neighborhood:{
+      'Restaurants':[
+        {name:'Bottega Louie',meta:'Grand Café · Italian-American',dist:'0.1 mi',icon:'🍽️'},
+        {name:'Perch LA',meta:'Rooftop French Bistro',dist:'0.2 mi',icon:'🥂'},
+        {name:'Broken Spanish',meta:'Modern Mexican',dist:'0.3 mi',icon:'🌮'},
+        {name:'Otium',meta:'California Contemporary',dist:'0.4 mi',icon:'🍷'},
+        {name:'Officine Brera',meta:'Northern Italian',dist:'0.5 mi',icon:'🍝'},
+      ],
+      'Coffee':[
+        {name:'Philz Coffee',meta:'Specialty Pour-Over',dist:'100 ft',icon:'☕'},
+        {name:'Groundwork Coffee',meta:'Organic Roasters',dist:'0.3 mi',icon:'☕'},
+        {name:'Blue Bottle Coffee',meta:'Third Wave Specialty',dist:'0.6 mi',icon:'☕'},
+      ],
+      'Grocery':[
+        {name:'Whole Foods Market',meta:'Premium Grocery',dist:'25 ft',icon:'🛒'},
+        {name:'Ralphs DTLA',meta:'Full-Service Grocery',dist:'0.4 mi',icon:'🛒'},
+      ],
+      'Culture':[
+        {name:'The Broad',meta:'Contemporary Art Museum',dist:'0.8 mi',icon:'🖼️'},
+        {name:'MOCA Grand Ave',meta:'Museum of Contemporary Art',dist:'0.9 mi',icon:'🎨'},
+        {name:'Walt Disney Concert Hall',meta:'LA Philharmonic · Gehry',dist:'0.9 mi',icon:'🎶'},
+        {name:'Grand Park',meta:'12-Acre Urban Park',dist:'1.0 mi',icon:'🌳'},
+      ],
+      'Hotels':[
+        {name:'InterContinental DTLA',meta:'73-Story Luxury · Wilshire Grand',dist:'0.1 mi',icon:'🏨'},
+        {name:'The Westin Bonaventure',meta:'Iconic Atrium Hotel',dist:'0.3 mi',icon:'🏨'},
+        {name:'Freehand Los Angeles',meta:'Boutique Hotel & Bar',dist:'0.5 mi',icon:'🏨'},
+        {name:'NoMad Los Angeles',meta:'Design Hotel',dist:'0.6 mi',icon:'🏨'},
+      ],
+      'Hair Salons':[
+        {name:"Rudy's Barbershop",meta:'Full-Service Salon',dist:'0.2 mi',icon:'✂️'},
+        {name:'Headlines Salon DTLA',meta:'Color & Cut Specialists',dist:'0.4 mi',icon:'✂️'},
+      ],
+      'Gyms':[
+        {name:'Equinox DTLA',meta:'Premium Fitness',dist:'0.3 mi',icon:'💪'},
+        {name:'LA Fitness',meta:'Full-Service Gym',dist:'0.5 mi',icon:'💪'},
+        {name:"Barry's Bootcamp",meta:'HIIT Training',dist:'0.6 mi',icon:'🏋️'},
+      ],
+      'Pet':[
+        {name:'Downtown Dog Lounge',meta:'Daycare & Boarding',dist:'0.4 mi',icon:'🐾'},
+        {name:'VCA Animal Hospital',meta:'Full-Service Vet',dist:'0.7 mi',icon:'🐾'},
+      ],
+    },
+    pois:[
+      {name:'Whole Foods',coords:[-118.2641,34.0408],color:'#4CAF50'},
+      {name:'Philz Coffee',coords:[-118.2630,34.0415],color:'#8B5E3C'},
+      {name:'Bottega Louie',coords:[-118.2565,34.0462],color:'#E91E63'},
+      {name:'The Broad',coords:[-118.2504,34.0544],color:'#9C27B0'},
+      {name:'MOCA',coords:[-118.2495,34.0543],color:'#FF5722'},
+      {name:'Disney Hall',coords:[-118.2497,34.0553],color:'#FF9800'},
+      {name:'InterContinental',coords:[-118.2559,34.0459],color:'#607D8B'},
+      {name:'Waymo Stop',coords:[-118.2590,34.0430],color:'#1A73E8',waymo:true},
+    ],
+    localCenter:[-118.2570,34.0490],localZoom:15,localPitch:65,localBearing:20
+  },
+  {
+    id:'laveen',name:'Greenest Estate',short:'Laveen',
+    coords:[-112.1620,33.3680],tag:'For Sale By Owner',
+    subtitle:'11403 S 27th Dr · Laveen, AZ 85339',
+    type:'Single Family Estate',beds:'4',baths:'3',sqft:'3,200',price:'$649,000',
+    description:"The Greenest Estate in Laveen — a masterfully landscaped single-family home on approximately 1 acre in one of Maricopa County's fastest-growing communities. Mountain views, solar-ready infrastructure, and direct Loop 202 Dobbins exit access position this home at the intersection of lifestyle and connectivity.",
+    tags:['Laveen','~1 Acre','Phoenix Metro','Solar Ready','Mountain Views','Loop 202','FSBO','Waymo Corridor'],
+    images:[
+      'https://i.imgur.com/0aYf87y.jpeg','https://i.imgur.com/F0YLfoC.jpeg','https://i.imgur.com/ycRr5XE.jpeg',
+      'https://i.imgur.com/1MBjfkr.jpeg','https://i.imgur.com/uiikzzR.jpeg','https://i.imgur.com/1qQr4rf.jpeg',
+      'https://i.imgur.com/ubOV3jq.jpeg','https://i.imgur.com/DlP9Thj.jpeg','https://i.imgur.com/9Ti4py8.jpeg',
+      'https://i.imgur.com/0jwRIjB.jpeg','https://i.imgur.com/TE7zKJM.jpeg','https://i.imgur.com/ytIcEu5.jpeg',
+      'https://i.imgur.com/SI8gjc2.jpeg','https://i.imgur.com/Th4TUUP.jpeg','https://i.imgur.com/yCjxa3y.jpeg',
+      'https://i.imgur.com/R2qggs3.jpeg','https://i.imgur.com/ruUGtpV.jpeg','https://i.imgur.com/K7eReJW.jpeg',
+      'https://i.imgur.com/yoI9pMA.jpeg','https://i.imgur.com/yJKd4FM.jpeg','https://i.imgur.com/uJq82zM.jpeg',
+      'https://i.imgur.com/0M3jwXx.jpeg','https://i.imgur.com/4oX65PU.jpeg','https://i.imgur.com/UjNsMrN.jpeg',
+      'https://i.imgur.com/fJUhniW.jpeg'
+    ],
+    videos:['wn9pZDkd6bo','lTk4aLK1MYo','HmJqTSnu1e8','Rp3JzD2jseY','jKe7eilvgHM','hrPKYsoz_0U','KEuwFQn8bmA','yKjrEa8IT9c','M7MY9zNWY50','ut67g0F1lXw','YO1DPp3Bi8c','sJMBOYnNlgE','sU1NmE_Bu6I'],
+    comps:{
+      headline:'Active 1-Acre / 2+ Bath Comps · Laveen 85339',
+      intro:'Active listings on 1+ acre lots in 85339 with 2 or more bathrooms. Median list price for acre-lot homes in Laveen is $900K. Your 4BD/3BA estate at $649K on ~1 acre is priced well below the acreage median — a significant value opportunity.',
+      listings:[
+        {
+          address:'10445 S 27th Ave — Laveen Unsubdivided',
+          price:'$894,000',
+          chips:['4 BD','3 BA','3,068 SF','1.36 Acres','Mountain Views'],
+          note:'Your nearest direct comp — 4/3 at 3,068 SF on 1.36 acres, just 1.3 miles from your address on the same S 27th corridor. Listed at $894K. Your home offers similar specs at $245K less.',
+          source:'LandWatch / Kenneth James Realty · 85339',status:'Active'
+        },
+        {
+          address:'5133 W McNeil St — Laveen Estates',
+          price:'$650,000',
+          chips:['4 BD','3 BA','1,825 SF','1+ Acre','Farmhouse'],
+          note:'Closest price comp at $650K — farmhouse-style 4/3 on over an acre. Only 1,825 SF however, meaning your home delivers 75% more square footage at virtually the same price.',
+          source:'Kenneth James Realty · 85339',status:'Active'
+        },
+        {
+          address:'2927 W Latona Rd — Laveen',
+          price:'$890,000',
+          chips:['4 BD','3 BA','2,691 SF','1+ Acre'],
+          note:'4/3 on 1+ acre at $890K. Larger than McNeil but 509 SF smaller than your home. Priced $241K above your listing — your estate is the best value per SF among active acre-lot comps.',
+          source:'Kenneth James Realty · 85339',status:'Active'
+        },
+        {
+          address:'3923 W Fox Rd — Sunset Cove Estates',
+          price:'$1,350,000',
+          chips:['4 BD','4 BA','3,462 SF','1 Acre','Sunset Cove','Gated'],
+          note:'Premium end of the 1-acre market in Laveen — gated Sunset Cove Estates community, South Mountain views, luxury custom build. Sets the ceiling. Your home offers comparable acreage at less than half the price.',
+          source:'LandWatch / 85339',status:'Active'
+        },
+        {
+          address:'4427 W Calle Poco — Laveen',
+          price:'$750,000',
+          chips:['4 BD','3 BA','2,663 SF','2.16 Acres','No HOA'],
+          note:'2.16 acres, 4/3, no HOA — larger land parcel at $750K. At 2,663 SF it is 537 SF smaller than your home. Reinforces that Laveen acreage with 3+ baths commands a strong premium your pricing undercuts.',
+          source:'LandWatch / 85339',status:'Active'
+        },
+        {
+          address:'5040 W Steinway Dr — La Sondra',
+          price:'$760,000',
+          chips:['3 BD','2 BA','1,941 SF','1+ Acre','Horse Property'],
+          note:'1-acre horse property with irrigation — 3/2 at 1,941 SF, priced at $760K. Fewer bedrooms, smaller footprint, no 3rd bath. Your 4/3 at 3,200 SF for $649K is the superior offering at $111K less.',
+          source:'Kenneth James Realty · 85339',status:'Active'
+        },
+      ]
+    },
+    neighborhood:{
+      'Grocery':[
+        {name:"Fry's Food Store",meta:'Full-Service Grocery',dist:'1.2 mi',icon:'🛒'},
+        {name:'Walmart Supercenter',meta:'Supercenter',dist:'1.5 mi',icon:'🛒'},
+        {name:'Safeway',meta:'Grocery & Pharmacy',dist:'1.8 mi',icon:'🛒'},
+        {name:'Sprouts Farmers Market',meta:'Natural & Organic',dist:'2.1 mi',icon:'🛒'},
+        {name:'Aldi',meta:'Discount Grocery',dist:'2.3 mi',icon:'🛒'},
+      ],
+      'Coffee':[
+        {name:'Starbucks',meta:'Laveen Village',dist:'0.9 mi',icon:'☕'},
+        {name:"Dunkin'",meta:'Coffee & Donuts',dist:'1.1 mi',icon:'☕'},
+      ],
+      'Restaurants':[
+        {name:'Chingon Kitchen',meta:'George Lopez · Fast Casual Mexican',dist:'2.4 mi',icon:'🌮'},
+        {name:"Ditka's at Vee Quiva",meta:'Steakhouse · Casino',dist:'2.5 mi',icon:'🥩'},
+        {name:'Fatburger',meta:'Vee Quiva Food Court',dist:'2.5 mi',icon:'🍔'},
+        {name:'Panda Express',meta:'Vee Quiva Food Court',dist:'2.5 mi',icon:'🍱'},
+      ],
+      'Hotels':[
+        {name:'Vee Quiva Hotel & Casino',meta:'4-Diamond · Gila River · 90 Rooms',dist:'2.4 mi',icon:'🏨'},
+        {name:'Hampton Inn Laveen',meta:'Extended Stay',dist:'3.1 mi',icon:'🏨'},
+      ],
+      'Gyms':[
+        {name:'Planet Fitness Laveen',meta:'Judgement Free Zone',dist:'1.4 mi',icon:'💪'},
+        {name:'Orangetheory Fitness',meta:'HIIT · Heart Rate Training',dist:'2.0 mi',icon:'🏋️'},
+      ],
+      'Hair Salons':[
+        {name:'Great Clips',meta:'Walk-In Welcome',dist:'1.2 mi',icon:'✂️'},
+        {name:'Sport Clips',meta:"Men's Hair Care",dist:'1.6 mi',icon:'✂️'},
+      ],
+      'Pet':[
+        {name:'Banfield Pet Hospital',meta:'Preventive Vet Care',dist:'1.5 mi',icon:'🐾'},
+        {name:'PetSmart Laveen',meta:'Grooming & Supplies',dist:'1.6 mi',icon:'🐾'},
+      ],
+      'Retail':[
+        {name:'Home Depot',meta:'Home Improvement',dist:'1.8 mi',icon:'🔨'},
+        {name:"Lowe's",meta:'Home Improvement',dist:'2.0 mi',icon:'🔨'},
+        {name:'Vee Quiva Casino',meta:'Gaming · Dining · Hotel · 202 Fwy',dist:'2.4 mi',icon:'🎰'},
+      ],
+    },
+    pois:[
+      {name:'Starbucks',coords:[-112.1510,33.3740],color:'#00704A'},
+      {name:"Fry's",coords:[-112.1490,33.3760],color:'#E63946'},
+      {name:'Walmart',coords:[-112.1470,33.3800],color:'#007DC6'},
+      {name:'Home Depot',coords:[-112.1460,33.3780],color:'#F96302'},
+      {name:'Vee Quiva',coords:[-112.1570,33.3095],color:'#9C27B0'},
+      {name:'Loop 202·Dobbins',coords:[-112.1520,33.3620],color:'#2196F3'},
+      {name:'Waymo Stop',coords:[-112.1580,33.3700],color:'#1A73E8',waymo:true},
+    ],
+    localCenter:[-112.1560,33.3680],localZoom:14.5,localPitch:65,localBearing:-15
+  }
+];
+
+mapboxgl.accessToken='pk.eyJ1IjoidmlranB1cmkiLCJhIjoiY21uYnF0ZWNuMHhnaTJ3bzR5MG5xOTEzbSJ9.vqmEhPHMBQOn4GX3yrbiGw';
+const map=new mapboxgl.Map({container:'map',style:'mapbox://styles/mapbox/satellite-streets-v12',center:[-115.5,34.0],zoom:5.5,pitch:22,bearing:-8,attributionControl:false});
+map.addControl(new mapboxgl.AttributionControl({compact:true}));
+map.addControl(new mapboxgl.NavigationControl({showCompass:false}),'bottom-right');
+
+let activeProperty=null,poiMarkers=[],_ci=0,_ct=1;
+
+map.on('load',()=>{
+  try{map.setPaintProperty('satellite','raster-brightness-max',.78);map.setPaintProperty('satellite','raster-saturation',-.15);map.setPaintProperty('satellite','raster-contrast',.1);}catch(e){}
+  properties.forEach(addPropertyMarker);
+});
+
+function addPropertyMarker(p){
+  const el=document.createElement('div');
+  el.className='req-marker';
+  el.innerHTML=`<div class="pulse-ring"></div><div class="pulse-ring"></div><div class="dot"></div><div class="label">${p.short}</div>`;
+  el.addEventListener('click',()=>openPanel(p));
+  new mapboxgl.Marker({element:el,anchor:'center'}).setLngLat(p.coords).addTo(map);
+}
+
+function addPoiMarkers(p){
+  clearPoiMarkers();
+  p.pois.forEach(poi=>{
+    const el=document.createElement('div');
+    el.className='poi-marker'+(poi.waymo?' waymo':'');
+    el.innerHTML=`<div class="poi-dot" style="background:${poi.color}"></div><div class="poi-label">${poi.name}</div>`;
+    poiMarkers.push(new mapboxgl.Marker({element:el,anchor:'bottom'}).setLngLat(poi.coords).addTo(map));
+  });
+}
+function clearPoiMarkers(){poiMarkers.forEach(m=>m.remove());poiMarkers=[];}
+
+function openPanel(p){
+  activeProperty=p;
+  document.getElementById('panel-tag-text').textContent=p.tag;
+  document.getElementById('panel-title').textContent=p.name;
+  document.getElementById('panel-subtitle').textContent=p.subtitle;
+  _ci=0;_ct=p.images.length;
+  document.getElementById('carousel-track').innerHTML=p.images.map((u,i)=>
+    `<div class="carousel-slide"><img src="${u}" alt="Photo ${i+1}" loading="${i<3?'eager':'lazy'}" onload="this.classList.add(this.naturalHeight>this.naturalWidth?'portrait':'landscape')" class="landscape"/></div>`
+  ).join('');
+  document.getElementById('carousel-counter').textContent=`1 / ${_ct}`;
+  document.getElementById('carousel-dots').innerHTML=p.images.map((_,i)=>
+    `<div class="carousel-dot${i===0?' active':''}" onclick="carouselGoTo(${i})"></div>`
+  ).join('');
+  document.getElementById('stats-grid').innerHTML=`
+    <div class="stat-card"><div class="stat-label">Price</div><div class="stat-value">${p.price}</div></div>
+    <div class="stat-card"><div class="stat-label">Type</div><div class="stat-value" style="font-size:.9rem">${p.type}</div></div>
+    <div class="stat-card"><div class="stat-label">Beds / Baths</div><div class="stat-value">${p.beds}BR / ${p.baths}BA</div></div>
+    <div class="stat-card"><div class="stat-label">Size</div><div class="stat-value" style="font-size:1rem">${p.sqft} SF</div></div>
+  `;
+  document.getElementById('prop-desc').textContent=p.description;
+  document.getElementById('prop-tags').innerHTML=p.tags.map(t=>`<span class="tag">${t}</span>`).join('');
+  document.getElementById('video-label').textContent=`Documentary — ${p.name}`;
+  document.getElementById('video-grid').innerHTML=p.videos.map((v,i)=>
+    `<div class="video-item"><iframe src="https://www.youtube.com/embed/${v}?rel=0&modestbranding=1" loading="${i>1?'lazy':'eager'}" allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture" allowfullscreen></iframe></div>`
+  ).join('');
+  document.getElementById('comps-headline').textContent=p.comps.headline;
+  document.getElementById('comps-intro').textContent=p.comps.intro;
+  document.getElementById('comps-list').innerHTML=p.comps.listings.map(c=>`
+    <div class="comp-card">
+      <div class="comp-card-top">
+        <div class="comp-address">${c.address}</div>
+        <div class="comp-price">${c.price}</div>
+      </div>
+      <div class="comp-chips">${c.chips.map(ch=>`<span class="comp-chip">${ch}</span>`).join('')}</div>
+      <div class="comp-note">${c.note}</div>
+      <div class="comp-source-row">
+        <span class="comp-source">${c.source}</span>
+        <span class="comp-status">● ${c.status}</span>
+      </div>
+    </div>
+  `).join('');
+  buildNeighborhood(p);
+  switchTab('property');
+  document.getElementById('panel').classList.add('open');
+  document.getElementById('hint').style.opacity='0';
+  map.flyTo({center:p.localCenter,zoom:p.localZoom,pitch:p.localPitch,bearing:p.localBearing,duration:2000,essential:true});
+  map.once('moveend',()=>addPoiMarkers(p));
+}
+
+function buildNeighborhood(p){
+  const cats=Object.keys(p.neighborhood);
+  document.getElementById('nbhd-cats').innerHTML=cats.map((c,i)=>
+    `<button class="nbhd-cat-btn${i===0?' active':''}" onclick="showCat('${c}',this)">${c}</button>`
+  ).join('');
+  showItems(p.neighborhood[cats[0]]);
+}
+function showCat(cat,btn){
+  document.querySelectorAll('.nbhd-cat-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  showItems(activeProperty.neighborhood[cat]);
+}
+function showItems(items){
+  document.getElementById('nbhd-list').innerHTML=items.map(item=>`
+    <div class="nbhd-card">
+      <div class="nbhd-icon">${item.icon}</div>
+      <div class="nbhd-info"><div class="nbhd-name">${item.name}</div><div class="nbhd-meta">${item.meta}</div></div>
+      <div class="nbhd-dist">${item.dist}</div>
+    </div>
+  `).join('');
+}
+
+function switchTab(name){
+  const names=['property','comps','neighborhood','waymo'];
+  document.querySelectorAll('.panel-tab').forEach((t,i)=>t.classList.toggle('active',names[i]===name));
+  document.querySelectorAll('.tab-pane').forEach(p=>p.classList.toggle('active',p.id==='tab-'+name));
+  document.getElementById('panel-body').scrollTop=0;
+}
+
+function carouselMove(d){_ci=(_ci+d+_ct)%_ct;carouselRender();}
+function carouselGoTo(i){_ci=i;carouselRender();}
+function carouselRender(){
+  const t=document.getElementById('carousel-track');
+  if(t)t.style.transform=`translateX(-${_ci*100}%)`;
+  const c=document.getElementById('carousel-counter');
+  if(c)c.textContent=`${_ci+1} / ${_ct}`;
+  document.querySelectorAll('.carousel-dot').forEach((d,i)=>d.classList.toggle('active',i===_ci));
+}
+
+function closePanel(){
+  document.getElementById('panel').classList.remove('open');
+  document.getElementById('hint').style.opacity='1';
+  if(activeProperty){map.flyTo({center:activeProperty.localCenter,zoom:activeProperty.localZoom-1,pitch:activeProperty.localPitch,bearing:activeProperty.localBearing,duration:900,essential:true});}
+}
+function goHome(){
+  document.getElementById('panel').classList.remove('open');
+  document.getElementById('hint').style.opacity='1';
+  clearPoiMarkers();activeProperty=null;
+  map.flyTo({center:[-115.5,34.0],zoom:5.5,pitch:22,bearing:-8,duration:1400,essential:true});
+}
+function openModal(id){document.getElementById('modal-'+id).classList.add('active');}
+function closeModal(id){document.getElementById('modal-'+id).classList.remove('active');}
+document.querySelectorAll('.modal-overlay').forEach(el=>el.addEventListener('click',e=>{if(e.target===el)el.classList.remove('active');}));
+setTimeout(()=>{document.getElementById('hint').style.opacity='0';},6000);
+</script>
+
+</body>
+</html>
