@@ -76,8 +76,7 @@
     .video-section{padding:16px 20px 10px}
     .section-label{font-family:'Source Serif 4',serif;font-size:.57rem;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-3);margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--rule-heavy)}
     .video-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-    .video-item{display:flex;flex-direction:column;background:#111;overflow:hidden;border:1px solid var(--rule)}
-    .video-item .video-frame{position:relative;width:100%;padding-bottom:177.78%}
+    .video-item{position:relative;width:100%;padding-bottom:177.78%;background:#111;overflow:hidden;border:1px solid var(--rule)}
     .video-item iframe{position:absolute;top:0;left:0;width:100%;height:100%;border:none}
     .panel-pad{padding:16px 20px}
 
@@ -166,7 +165,8 @@
 <div id="map"></div>
 <header>
   <div class="logo-wrap" onclick="goHome()">
-    <img class="logo-img" src="https://i.imgur.com/WFp0h8H.jpeg" alt="Requation" style="height:60px;width:auto;object-fit:contain" />
+    <img class="logo-img" src="https://i.imgur.com/WFp0h8H.jpeg" alt="Requation" style="height:52px;width:52px;object-fit:cover" />
+    <span class="logo-text">Requation</span>
   </div>
   <nav>
     <a href="#" onclick="goHome();return false;">Home</a>
@@ -184,6 +184,7 @@
   </div>
   <div class="panel-tabs">
     <button class="panel-tab active" onclick="switchTab('property')">Property</button>
+    <button class="panel-tab" onclick="switchTab('comps')">Comps</button>
     <button class="panel-tab" onclick="switchTab('neighborhood')">Neighborhood</button>
     <button class="panel-tab" onclick="switchTab('waymo')">Waymo</button>
   </div>
@@ -209,6 +210,14 @@
     <div class="video-grid" id="video-grid"></div>
   </div>
   <div style="height:20px"></div>
+</div>
+
+<div class="tab-pane" id="tab-comps">
+  <div class="panel-pad" style="padding-bottom:6px">
+    <div class="section-title" style="margin-top:4px" id="comps-headline"></div>
+    <p class="comp-intro-text" id="comps-intro"></p>
+  </div>
+  <div style="padding:0 20px 24px" id="comps-list"></div>
 </div>
 
 <div class="tab-pane" id="tab-neighborhood">
@@ -296,7 +305,6 @@ const properties=[
       'https://i.imgur.com/yXh2Ywf.jpeg','https://i.imgur.com/GSbSrYM.jpeg','https://i.imgur.com/D2GRI06.jpeg'
     ],
     videos:['GFD0WG60c6Q','1mXG5MJ6i1U','nig4DmfKW_I','FR8hkxtha9A','oH3JefYb6YM','Ny_5OMGToC4'],
-    videoTitles:['Urban Light','City Views 16th Floor','The Walkable City','DTLA Night','City of Angels Dawn','South Park Urban Living'],
     comps:{
       headline:'Active 2BR/2BA Comps · DTLA / 90017',
       intro:'All listings below are active 2-bedroom, 2-bathroom condos in or adjacent to 90017. Your 16th-floor unit at $885K / $681 per SF is priced competitively for a high-rise with South Park walkability and direct Whole Foods access.',
@@ -412,7 +420,6 @@ const properties=[
       'https://i.imgur.com/fJUhniW.jpeg'
     ],
     videos:['wn9pZDkd6bo','lTk4aLK1MYo','HmJqTSnu1e8','Rp3JzD2jseY','jKe7eilvgHM','hrPKYsoz_0U','KEuwFQn8bmA','yKjrEa8IT9c','M7MY9zNWY50','ut67g0F1lXw','YO1DPp3Bi8c','sJMBOYnNlgE','sU1NmE_Bu6I'],
-    videoTitles:['Desert Rain Monsoon','Natures Light','Love Desert Sky','Kubla Khan Desert','Morrisons Desert','Monsoon South Mountain','Desert Nature Golden Hour','Rain on Mesa','Desert Light Estate','Natures Canvas Arizona','Green Estate Monsoon','Desert Love South Mountain','Light Shadow Laveen'],
     comps:{
       headline:'Active 1-Acre / 2+ Bath Comps · Laveen 85339',
       intro:'Active listings on 1+ acre lots in 85339 with 2 or more bathrooms. Median list price for acre-lot homes in Laveen is $900K. Your 4BD/3BA estate at $649K on ~1 acre is priced well below the acreage median — a significant value opportunity.',
@@ -568,7 +575,7 @@ function openPanel(p){
   document.getElementById('prop-tags').innerHTML=p.tags.map(t=>`<span class="tag">${t}</span>`).join('');
   document.getElementById('video-label').textContent=`Documentary — ${p.name}`;
   document.getElementById('video-grid').innerHTML=p.videos.map((v,i)=>
-    `<div class="video-item"><div class="video-frame"><iframe src="https://www.youtube.com/embed/${v}?rel=0&modestbranding=1" loading="${i>1?'lazy':'eager'}" allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture" allowfullscreen></iframe></div><div style="padding:5px 6px 6px;font-family:'Source Serif 4',serif;font-size:.52rem;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);background:var(--cream-2);border-top:1px solid var(--rule)">${(p.videoTitles&&p.videoTitles[i])||''}</div></div>`
+    `<div class="video-item"><iframe src="https://www.youtube.com/embed/${v}?rel=0&modestbranding=1" loading="${i>1?'lazy':'eager'}" allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture" allowfullscreen></iframe></div>`
   ).join('');
   document.getElementById('comps-headline').textContent=p.comps.headline;
   document.getElementById('comps-intro').textContent=p.comps.intro;
@@ -590,50 +597,36 @@ function openPanel(p){
   switchTab('property');
   document.getElementById('panel').classList.add('open');
   map.flyTo({center:p.localCenter,zoom:p.localZoom,pitch:p.localPitch,bearing:p.localBearing,duration:2000,essential:true});
+  map.once('moveend',()=>addPoiMarkers(p));
 }
 
 function buildNeighborhood(p){
-  const cats=['For Sale',...Object.keys(p.neighborhood)];
+  const cats=Object.keys(p.neighborhood);
   document.getElementById('nbhd-cats').innerHTML=cats.map((c,i)=>
     `<button class="nbhd-cat-btn${i===0?' active':''}" onclick="showCat('${c}',this)">${c}</button>`
   ).join('');
-  showCatItems('For Sale',p);
+  showItems(p.neighborhood[cats[0]]);
 }
 function showCat(cat,btn){
   document.querySelectorAll('.nbhd-cat-btn').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
-  showCatItems(cat,activeProperty);
+  showItems(activeProperty.neighborhood[cat]);
 }
-function showCatItems(cat,p){
-  if(cat==='For Sale'){
-    document.getElementById('nbhd-list').innerHTML=p.comps.listings.map(c=>`
-      <div class="nbhd-card" style="flex-direction:column;align-items:flex-start;gap:4px">
-        <div style="display:flex;justify-content:space-between;width:100%;align-items:flex-start">
-          <div class="nbhd-name" style="white-space:normal">${c.address}</div>
-          <div class="nbhd-dist" style="margin-left:10px;flex-shrink:0">${c.price}</div>
-        </div>
-        <div style="display:flex;gap:4px;flex-wrap:wrap">${c.chips.map(ch=>`<span class="tag">${ch}</span>`).join('')}</div>
-        <div class="nbhd-meta" style="white-space:normal;line-height:1.5">${c.note}</div>
-        <div style="font-family:'Source Serif 4',serif;font-size:.5rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);margin-top:2px">${c.source} · <span style="color:#2E7D32;font-weight:600">${c.status}</span></div>
-      </div>
-    `).join('');
-  } else {
-    document.getElementById('nbhd-list').innerHTML=p.neighborhood[cat].map(item=>`
-      <div class="nbhd-card">
-        <div class="nbhd-icon">${item.icon}</div>
-        <div class="nbhd-info"><div class="nbhd-name">${item.name}</div><div class="nbhd-meta">${item.meta}</div></div>
-        <div class="nbhd-dist">${item.dist}</div>
-      </div>
-    `).join('');
-  }
+function showItems(items){
+  document.getElementById('nbhd-list').innerHTML=items.map(item=>`
+    <div class="nbhd-card">
+      <div class="nbhd-icon">${item.icon}</div>
+      <div class="nbhd-info"><div class="nbhd-name">${item.name}</div><div class="nbhd-meta">${item.meta}</div></div>
+      <div class="nbhd-dist">${item.dist}</div>
+    </div>
+  `).join('');
 }
 
 function switchTab(name){
-  const names=['property','neighborhood','waymo'];
+  const names=['property','comps','neighborhood','waymo'];
   document.querySelectorAll('.panel-tab').forEach((t,i)=>t.classList.toggle('active',names[i]===name));
   document.querySelectorAll('.tab-pane').forEach(p=>p.classList.toggle('active',p.id==='tab-'+name));
   document.getElementById('panel-body').scrollTop=0;
-  if(name==='neighborhood'&&activeProperty){addPoiMarkers(activeProperty);}
 }
 
 function carouselMove(d){_ci=(_ci+d+_ct)%_ct;carouselRender();}
