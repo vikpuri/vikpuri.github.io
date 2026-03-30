@@ -158,6 +158,8 @@
 .contact-icon{width:30px;height:30px;background:var(--cream-2);border:1px solid var(--rule-heavy);display:flex;align-items:center;justify-content:center;font-size:.8rem;flex-shrink:0}
 .contact-info{font-family:'Source Serif 4',serif;font-size:.8rem;color:var(--ink-3)}
 .contact-info strong{display:block;font-family:'Source Serif 4',serif;font-size:.58rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink);margin-bottom:2px}
+.video-title{padding:4px 6px 5px;font-family:'Montserrat',sans-serif;font-size:.5rem;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted);background:var(--dark-4);border-top:1px solid rgba(255,255,255,.06);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mapboxgl-ctrl-attrib{font-size:9px !important;opacity:0.5 !important}
 @media(max-width:640px){:root{--panel-width:100vw}header{padding:0 18px}.logo-text{font-size:1.2rem}.video-grid{grid-template-columns:1fr}}
   </style>
 </head>
@@ -284,6 +286,29 @@
 </div>
 
 <script>
+const DTLA_VIDEOS=[
+{id:'GFD0WG60c6Q',title:'Urban Light — South Park'},
+{id:'1mXG5MJ6i1U',title:'City Views — 16th Floor'},
+{id:'nig4DmfKW_I',title:'The Walkable City'},
+{id:'FR8hkxtha9A',title:'DTLA — Night'},
+{id:'oH3JefYb6YM',title:'City of Angels — Dawn'},
+{id:'Ny_5OMGToC4',title:'South Park — Urban Living'}
+];
+const LAV_VIDEOS=[
+{id:'wn9pZDkd6bo',title:'Desert Rain — Monsoon Season'},
+{id:'lTk4aLK1MYo',title:"Nature's Light — Laveen"},
+{id:'HmJqTSnu1e8',title:'Love & Desert Sky'},
+{id:'Rp3JzD2jseY',title:'Kubla Khan — Desert Pleasuredome'},
+{id:'jKe7eilvgHM',title:"Morrison's Desert"},
+{id:'hrPKYsoz_0U',title:'Monsoon at South Mountain'},
+{id:'KEuwFQn8bmA',title:'Desert Nature — Golden Hour'},
+{id:'yKjrEa8IT9c',title:'Rain on the Mesa'},
+{id:'M7MY9zNWY50',title:'Desert Light — Laveen Estate'},
+{id:'ut67g0F1lXw',title:"Nature's Canvas — Arizona"},
+{id:'YO1DPp3Bi8c',title:'The Green Estate — Monsoon'},
+{id:'sJMBOYnNlgE',title:'Desert Love — South Mountain'},
+{id:'sU1NmE_Bu6I',title:'Light & Shadow — Laveen'}
+];
 const properties=[
   {
     id:'dtla',name:'South Park Brutalist',short:'DTLA',
@@ -303,7 +328,7 @@ const properties=[
       'https://i.imgur.com/UHJ2hM2.jpeg','https://i.imgur.com/3rFddwE.jpeg','https://i.imgur.com/yvAxOaD.jpeg',
       'https://i.imgur.com/yXh2Ywf.jpeg','https://i.imgur.com/GSbSrYM.jpeg','https://i.imgur.com/D2GRI06.jpeg'
     ],
-    videos:['GFD0WG60c6Q','1mXG5MJ6i1U','nig4DmfKW_I','FR8hkxtha9A','oH3JefYb6YM','Ny_5OMGToC4'],
+    videos:DTLA_VIDEOS,
     comps:{
       headline:'Active 2BR/2BA Comps · DTLA / 90017',
       intro:'All listings below are active 2-bedroom, 2-bathroom condos in or adjacent to 90017. Your 16th-floor unit at $885K / $681 per SF is priced competitively for a high-rise with South Park walkability and direct Whole Foods access.',
@@ -418,7 +443,7 @@ const properties=[
       'https://i.imgur.com/0M3jwXx.jpeg','https://i.imgur.com/4oX65PU.jpeg','https://i.imgur.com/UjNsMrN.jpeg',
       'https://i.imgur.com/fJUhniW.jpeg'
     ],
-    videos:['wn9pZDkd6bo','lTk4aLK1MYo','HmJqTSnu1e8','Rp3JzD2jseY','jKe7eilvgHM','hrPKYsoz_0U','KEuwFQn8bmA','yKjrEa8IT9c','M7MY9zNWY50','ut67g0F1lXw','YO1DPp3Bi8c','sJMBOYnNlgE','sU1NmE_Bu6I'],
+    videos:LAV_VIDEOS,
     comps:{
       headline:'Active 1-Acre / 2+ Bath Comps · Laveen 85339',
       intro:'Active listings on 1+ acre lots in 85339 with 2 or more bathrooms. Median list price for acre-lot homes in Laveen is $900K. Your 4BD/3BA estate at $649K on ~1 acre is priced well below the acreage median — a significant value opportunity.',
@@ -574,7 +599,7 @@ function openPanel(p){
   document.getElementById('prop-tags').innerHTML=p.tags.map(t=>`<span class="tag">${t}</span>`).join('');
   document.getElementById('video-label').textContent=`Documentary — ${p.name}`;
   document.getElementById('video-grid').innerHTML=p.videos.map((v,i)=>
-    `<div class="video-item"><iframe src="https://www.youtube.com/embed/${v}?rel=0&modestbranding=1" loading="${i>1?'lazy':'eager'}" allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture" allowfullscreen></iframe></div>`
+    `<div class="video-item"><iframe src="https://www.youtube.com/embed/${v.id}?rel=0&modestbranding=1" loading="${i>1?'lazy':'eager'}" allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture" allowfullscreen></iframe><div class="video-title">${v.title}</div></div>`
   ).join('');
   document.getElementById('comps-headline').textContent=p.comps.headline;
   document.getElementById('comps-intro').textContent=p.comps.intro;
