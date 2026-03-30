@@ -158,7 +158,7 @@
 .contact-icon{width:30px;height:30px;background:var(--cream-2);border:1px solid var(--rule-heavy);display:flex;align-items:center;justify-content:center;font-size:.8rem;flex-shrink:0}
 .contact-info{font-family:'Source Serif 4',serif;font-size:.8rem;color:var(--ink-3)}
 .contact-info strong{display:block;font-family:'Source Serif 4',serif;font-size:.58rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink);margin-bottom:2px}
-.video-title{padding:4px 6px 5px;font-family:'Montserrat',sans-serif;font-size:.5rem;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted);background:var(--dark-4);border-top:1px solid rgba(255,255,255,.06);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.video-title{font-family:'Cormorant Garamond',serif;font-size:.65rem;color:var(--ink-muted,#888);padding:4px 0 8px;text-align:center}
 .mapboxgl-ctrl-attrib{font-size:9px !important;opacity:0.5 !important}
 @media(max-width:640px){:root{--panel-width:100vw}header{padding:0 18px}.logo-text{font-size:1.2rem}.video-grid{grid-template-columns:1fr}}
   </style>
@@ -599,7 +599,7 @@ function openPanel(p){
   document.getElementById('prop-tags').innerHTML=p.tags.map(t=>`<span class="tag">${t}</span>`).join('');
   document.getElementById('video-label').textContent=`Documentary — ${p.name}`;
   document.getElementById('video-grid').innerHTML=p.videos.map((v,i)=>
-    `<div class="video-item"><iframe src="https://www.youtube.com/embed/${v.id}?rel=0&modestbranding=1" loading="${i>1?'lazy':'eager'}" allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture" allowfullscreen></iframe><div class="video-title">${v.title}</div></div>`
+    `<div><div class="video-item"><iframe src="https://www.youtube.com/embed/${v.id}?rel=0&modestbranding=1" loading="${i>1?'lazy':'eager'}" allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture" allowfullscreen></iframe></div><div class="video-title">${v.title}</div></div>`
   ).join('');
   document.getElementById('comps-headline').textContent=p.comps.headline;
   document.getElementById('comps-intro').textContent=p.comps.intro;
