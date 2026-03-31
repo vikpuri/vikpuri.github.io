@@ -22,7 +22,9 @@
     html,body{height:100%;background:var(--cream);color:var(--ink);font-family:'Source Serif 4',Georgia,serif;overflow:hidden}
     header{position:fixed;top:0;left:0;right:0;height:var(--header-h);z-index:100;display:flex;align-items:center;justify-content:space-between;flex-direction:row;padding:0 36px;background:var(--cream);border-bottom:2px solid var(--ink);backdrop-filter:none}
     header nav{order:0}
-    header .logo-svg{order:1}
+    header .logo-svg{order:1;display:flex;align-items:center;margin-top:2px}
+    .nav-home{font-family:'Source Serif 4',serif;font-size:.72rem;font-weight:400;letter-spacing:.14em;text-transform:uppercase;color:var(--text-muted);text-decoration:none;background:none;border:none;padding:0;cursor:pointer;transition:color .25s}
+    .nav-home:hover{color:var(--ink)}
     .logo-wrap{display:flex;align-items:center;gap:14px;cursor:pointer}
     .logo-wrap:hover .logo-text{color:var(--gold)}
     .logo-img{height:40px;width:auto;object-fit:contain;border-radius:3px}
@@ -178,7 +180,7 @@
     <a href="#" onclick="openModal('contact');return false;">Contact</a>
   </nav>
   <div class="logo-svg" onclick="goHome()" style="cursor:pointer;display:flex;align-items:center">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 380 85" height="48">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="-10 0 400 85" height="48">
       <text x="2" y="62" font-family="Raleway,'Century Gothic',Arial,sans-serif" font-size="40" font-weight="400" font-style="italic" fill="#B22234">r</text>
       <text x="20" y="70" font-family="Raleway,'Century Gothic',Arial,sans-serif" font-size="74" font-weight="200" fill="#999999">/</text>
       <text x="52" y="70" font-family="Raleway,'Century Gothic',Arial,sans-serif" font-size="62" font-weight="300" fill="#3C3B6E">Σ</text>
