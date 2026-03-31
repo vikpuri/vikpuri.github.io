@@ -167,7 +167,7 @@
   </style>
 </head>
 <body>
-<div id="intro" style="position:fixed;inset:0;background:#1A1810;z-index:999;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px;transition:opacity 1.5s ease"><img src="https://i.imgur.com/WFp0h8H.jpeg" style="width:80px;height:80px;object-fit:contain;border-radius:8px;animation:rise 1.2s ease forwards"><div style="font-family:Playfair Display,serif;font-size:2rem;color:#C9A84C;letter-spacing:.2em;text-transform:uppercase;animation:rise 1.4s ease forwards">Requation</div><div style="font-size:.6rem;letter-spacing:.3em;color:#6B6455;text-transform:uppercase;animation:rise 1.6s ease forwards">Real Estate Intelligence</div></div>
+<div id="intro" style="position:fixed;inset:0;background:#1A1810;z-index:999;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px;transition:opacity 1.5s ease"><div style="font-family:Playfair Display,serif;font-size:3rem;color:#C9A84C;letter-spacing:.4em;text-transform:uppercase;animation:rise 1.4s ease forwards">Requation</div><div style="font-size:.6rem;letter-spacing:.3em;color:#6B6455;text-transform:uppercase;animation:rise 1.6s ease forwards">Real Estate Intelligence</div></div>
 <div id="map"></div>
 <header>
   <a onclick="goHome();return false;" href="#">
@@ -546,7 +546,7 @@ const properties=[
 ];
 
 mapboxgl.accessToken='pk.eyJ1IjoidmlranB1cmkiLCJhIjoiY21uYnF0ZWNuMHhnaTJ3bzR5MG5xOTEzbSJ9.vqmEhPHMBQOn4GX3yrbiGw';
-const map=new mapboxgl.Map({container:'map',style:'mapbox://styles/mapbox/satellite-streets-v12',center:[-115.5,34.0],zoom:5.5,pitch:22,bearing:-8,attributionControl:false});
+const map=new mapboxgl.Map({container:'map',style:'mapbox://styles/mapbox/light-v11',center:[-115.5,34.0],zoom:5.5,pitch:22,bearing:-8,attributionControl:false});
 map.addControl(new mapboxgl.AttributionControl({compact:true}));
 map.addControl(new mapboxgl.NavigationControl({showCompass:false}),'bottom-right');
 
