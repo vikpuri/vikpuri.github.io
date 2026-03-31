@@ -167,10 +167,12 @@
   </style>
 </head>
 <body>
-<div id="intro" style="position:fixed;inset:0;background:#1A1810;z-index:999;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px;transition:opacity 1.5s ease"><div style="font-family:Playfair Display,serif;font-size:3rem;color:#C9A84C;letter-spacing:.4em;text-transform:uppercase;animation:rise 1.4s ease forwards">Requation</div><div style="font-size:.6rem;letter-spacing:.3em;color:#6B6455;text-transform:uppercase;animation:rise 1.6s ease forwards">Real Estate Intelligence</div></div>
+<div id="intro" style="position:fixed;inset:0;background:#1A1810;z-index:999;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px;transition:opacity 1.5s ease"><img src="https://i.imgur.com/WFp0h8H.jpeg" style="width:140px;height:140px;object-fit:contain;filter:drop-shadow(0 0 40px rgba(201,168,76,0.5));animation:rise 1.2s ease forwards"></div>
 <div id="map"></div>
 <header>
-  <span onclick="goHome()" style="cursor:pointer;font-family:Playfair Display,serif;font-size:1.4rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#1A1810">Requation</span>
+  <a onclick="goHome();return false;" href="#">
+    <img src="https://i.imgur.com/WFp0h8H.jpeg" alt="Requation" height="56px" style="cursor:pointer" />
+  </a>
   <nav>
     <a href="#" onclick="goHome();return false;">Home</a>
     <a href="#" onclick="openModal('about');return false;">About</a>
