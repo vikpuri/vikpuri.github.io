@@ -8,7 +8,7 @@
   <script src="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&family=Source+Serif+4:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&family=Raleway:ital,wght@0,300;1,400&family=Source+Serif+4:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet" />
   <style>
     :root{
       --gold:#B8922A;--gold-light:#C9A84C;--gold-dim:rgba(184,146,42,.1);--gold-border:rgba(184,146,42,.3);
@@ -20,7 +20,9 @@
     }
     *,::before,*::after{box-sizing:border-box;margin:0;padding:0}
     html,body{height:100%;background:var(--cream);color:var(--ink);font-family:'Source Serif 4',Georgia,serif;overflow:hidden}
-    header{position:fixed;top:0;left:0;right:0;height:var(--header-h);z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0 36px;background:var(--cream);border-bottom:2px solid var(--ink);backdrop-filter:none}
+    header{position:fixed;top:0;left:0;right:0;height:var(--header-h);z-index:100;display:flex;align-items:center;justify-content:space-between;flex-direction:row;padding:0 36px;background:var(--cream);border-bottom:2px solid var(--ink);backdrop-filter:none}
+    header nav{order:0}
+    header .logo-svg{order:1}
     .logo-wrap{display:flex;align-items:center;gap:14px;cursor:pointer}
     .logo-wrap:hover .logo-text{color:var(--gold)}
     .logo-img{height:40px;width:auto;object-fit:contain;border-radius:3px}
@@ -167,17 +169,22 @@
   </style>
 </head>
 <body>
-<div id="intro" style="position:fixed;inset:0;background:#1A1810;z-index:999;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px;transition:opacity 1.5s ease"><img src="https://i.imgur.com/WFp0h8H.jpeg" style="width:140px;height:140px;object-fit:contain;filter:drop-shadow(0 0 40px rgba(201,168,76,0.5));animation:rise 1.2s ease forwards"></div>
+<div id="intro" style="position:fixed;inset:0;background:#1A1810;z-index:999;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px;transition:opacity 1.5s ease"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 380 85" height="120" style="filter:drop-shadow(0 0 40px rgba(201,168,76,0.5));animation:rise 1.2s ease forwards"><text x="2" y="62" font-family="Raleway,'Century Gothic',Arial,sans-serif" font-size="40" font-weight="400" font-style="italic" fill="#B22234">r</text><text x="20" y="70" font-family="Raleway,'Century Gothic',Arial,sans-serif" font-size="74" font-weight="200" fill="#999999">/</text><text x="52" y="70" font-family="Raleway,'Century Gothic',Arial,sans-serif" font-size="62" font-weight="300" fill="#3C3B6E">Σ</text><text x="100" y="68" font-family="Raleway,'Century Gothic',Arial,sans-serif" font-size="60" font-weight="300" fill="#3C3B6E" letter-spacing="-2">quation</text></svg></div>
 <div id="map"></div>
 <header>
-  <a onclick="goHome();return false;" href="#">
-    <img src="https://i.imgur.com/WFp0h8H.jpeg" alt="Requation" height="56px" style="cursor:pointer" />
-  </a>
   <nav>
-    <a href="#" onclick="goHome();return false;">Home</a>
+    <button class="nav-btn nav-home" onclick="goHome()">Home</button>
     <a href="#" onclick="openModal('about');return false;">About</a>
     <a href="#" onclick="openModal('contact');return false;">Contact</a>
   </nav>
+  <div class="logo-svg" onclick="goHome()" style="cursor:pointer;display:flex;align-items:center">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 380 85" height="48">
+      <text x="2" y="62" font-family="Raleway,'Century Gothic',Arial,sans-serif" font-size="40" font-weight="400" font-style="italic" fill="#B22234">r</text>
+      <text x="20" y="70" font-family="Raleway,'Century Gothic',Arial,sans-serif" font-size="74" font-weight="200" fill="#999999">/</text>
+      <text x="52" y="70" font-family="Raleway,'Century Gothic',Arial,sans-serif" font-size="62" font-weight="300" fill="#3C3B6E">Σ</text>
+      <text x="100" y="68" font-family="Raleway,'Century Gothic',Arial,sans-serif" font-size="60" font-weight="300" fill="#3C3B6E" letter-spacing="-2">quation</text>
+    </svg>
+  </div>
 </header>
 
 <div id="panel">
