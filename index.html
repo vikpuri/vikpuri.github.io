@@ -599,7 +599,7 @@ function openPanel(p){
   document.getElementById('prop-tags').innerHTML=p.tags.map(t=>`<span class="tag">${t}</span>`).join('');
   document.getElementById('video-label').textContent=`Documentary — ${p.name}`;
   document.getElementById('video-grid').innerHTML=p.videos.map((v,i)=>
-    `<div><div class="video-item"><iframe src="https://www.youtube.com/embed/${v.id}?rel=0&modestbranding=1" loading="${i>1?'lazy':'eager'}" allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture" allowfullscreen></iframe></div><div class="video-title">${v.title}</div></div>`
+    `<div><div class="video-item"><iframe src="https://www.youtube.com/embed/${v.id}?rel=0&modestbranding=1&showinfo=0&iv_load_policy=3&color=white" loading="${i>1?'lazy':'eager'}" allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture" allowfullscreen></iframe></div><div class="video-title">${v.title}</div></div>`
   ).join('');
   document.getElementById('comps-headline').textContent=p.comps.headline;
   document.getElementById('comps-intro').textContent=p.comps.intro;
