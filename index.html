@@ -76,7 +76,8 @@
     .video-section{padding:16px 20px 10px}
     .section-label{font-family:'Source Serif 4',serif;font-size:.57rem;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-3);margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--rule-heavy)}
     .video-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-    .video-item{position:relative;width:100%;padding-bottom:177.78%;background:#111;overflow:hidden;border:1px solid var(--rule)}
+    .video-item{position:relative;width:100%;padding-bottom:56.25%;background:#111;overflow:hidden;border:1px solid var(--rule)}
+    .video-item iframe{position:absolute;top:0;left:0;width:100%;height:100%;border:none}
     .video-item iframe{position:absolute;top:0;left:0;width:100%;height:100%;border:none}
     .panel-pad{padding:16px 20px}
 
@@ -158,6 +159,7 @@
 .contact-icon{width:30px;height:30px;background:var(--cream-2);border:1px solid var(--rule-heavy);display:flex;align-items:center;justify-content:center;font-size:.8rem;flex-shrink:0}
 .contact-info{font-family:'Source Serif 4',serif;font-size:.8rem;color:var(--ink-3)}
 .contact-info strong{display:block;font-family:'Source Serif 4',serif;font-size:.58rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink);margin-bottom:2px}
+.video-play{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:48px;height:48px;background:rgba(0,0,0,.7);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.2rem}
 .video-title{font-family:'Cormorant Garamond',serif;font-size:.65rem;color:var(--ink-muted,#888);padding:4px 0 8px;text-align:center}
 .mapboxgl-ctrl-attrib{font-size:9px !important;opacity:0.5 !important}
 @media(max-width:640px){:root{--panel-width:100vw}header{padding:0 18px}.logo-text{font-size:1.2rem}.video-grid{grid-template-columns:1fr}}
@@ -599,7 +601,7 @@ function openPanel(p){
   document.getElementById('prop-tags').innerHTML=p.tags.map(t=>`<span class="tag">${t}</span>`).join('');
   document.getElementById('video-label').textContent=`Documentary — ${p.name}`;
   document.getElementById('video-grid').innerHTML=p.videos.map((v,i)=>
-    `<div><div class="video-item"><iframe src="https://www.youtube.com/embed/${v.id}?rel=0&modestbranding=1&showinfo=0&iv_load_policy=3&color=white" loading="${i>1?'lazy':'eager'}" allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture" allowfullscreen></iframe></div><div class="video-title">${v.title}</div></div>`
+    `<div><div class="video-item" onclick="this.innerHTML='<iframe src=\\'https://www.youtube.com/embed/${v.id}?autoplay=1&rel=0&modestbranding=1\\' allow=\\'autoplay\\' allowfullscreen></iframe>'" style="background:url(https://img.youtube.com/vi/${v.id}/mqdefault.jpg) center/cover;cursor:pointer"><div class="video-play">&#9654;</div></div><div class="video-title">${v.title}</div></div>`
   ).join('');
   document.getElementById('comps-headline').textContent=p.comps.headline;
   document.getElementById('comps-intro').textContent=p.comps.intro;
