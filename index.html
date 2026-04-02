@@ -47,7 +47,7 @@
     .poi-marker.waymo .poi-dot{width:12px;height:12px;box-shadow:0 0 10px rgba(26,115,232,.9)}
     .poi-marker.waymo .poi-label{background:rgba(26,115,232,.9)}
     .condo-marker{cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px}
-    .condo-dot{width:10px;height:10px;border-radius:50%;background:#00CED1;border:2px solid #fff;box-shadow:0 0 6px rgba(0,206,209,0.8)}
+    .condo-dot{position:absolute;width:10px;height:10px;border-radius:50%;background:#00CED1;border:2px solid #fff;box-shadow:0 0 6px rgba(0,206,209,0.8)}
     .condo-label{font-size:.5rem;font-weight:700;letter-spacing:.06em;color:#00CED1;white-space:nowrap;text-shadow:0 1px 3px #000;background:rgba(0,0,0,.7);padding:2px 5px;border-radius:2px}
     #panel{position:fixed;top:auto;bottom:0;right:0;left:0;width:100%;max-width:520px;margin:0 auto;height:80vh;background:var(--cream);border-left:none;border-top:2px solid var(--ink);border-radius:16px 16px 0 0;transform:translateY(100%);transition:transform .55s cubic-bezier(.22,1,.36,1);z-index:90;display:flex;flex-direction:column;overflow:hidden}
     #panel.open{transform:translateY(0)}
@@ -613,7 +613,7 @@ function addCondoMarker(p){
   el.className='condo-marker';
   el.innerHTML=`<div class="condo-dot"></div><div class="condo-label">${p.name} ${p.price}</div>`;
   el.addEventListener('click',()=>window.open(p.agentLink,'_blank'));
-  new mapboxgl.Marker({element:el,anchor:'top'}).setLngLat(p.coords).addTo(map);
+  new mapboxgl.Marker({element:el,anchor:'center',draggable:false}).setLngLat(p.coords).addTo(map);
 }
 
 function addPoiMarkers(p){
