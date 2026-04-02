@@ -289,7 +289,6 @@
 </div>
 
 <script>
-const LA_BASE=[-118.2641,34.0408];
 const LA_DEFAULT_POIS=[
   {name:'Whole Foods',coords:[-118.2641,34.0408],color:'#4CAF50'},
   {name:"Trader Joe's",coords:[-118.2630,34.0415],color:'#C8102E'},
@@ -631,15 +630,11 @@ function addPropertyMarker(p){
 
 function addPoiMarkers(p){
   clearPoiMarkers();
-  const isDefault=p.pois===LA_DEFAULT_POIS;
   p.pois.forEach(poi=>{
-    const coords=isDefault
-      ?[p.localCenter[0]+(poi.coords[0]-LA_BASE[0]),p.localCenter[1]+(poi.coords[1]-LA_BASE[1])]
-      :poi.coords;
     const el=document.createElement('div');
     el.className='poi-marker'+(poi.waymo?' waymo':'');
     el.innerHTML=`<div class="poi-dot" style="background:${poi.color}"></div><div class="poi-label">${poi.name}</div>`;
-    poiMarkers.push(new mapboxgl.Marker({element:el,anchor:'bottom'}).setLngLat(coords).addTo(map));
+    poiMarkers.push(new mapboxgl.Marker({element:el,anchor:'bottom'}).setLngLat(poi.coords).addTo(map));
   });
 }
 function clearPoiMarkers(){poiMarkers.forEach(m=>m.remove());poiMarkers=[];}
