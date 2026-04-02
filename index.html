@@ -264,6 +264,7 @@
     <p class="section-text">A living 3D map where every listing, every business, and every Waymo stop is a connected, searchable data point — not a static pin. Real estate intelligence at the speed of Maps.</p>
   </div>
   <div style="height:20px"></div>
+  <div style="font-size:.52rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-muted);text-align:center;padding:8px 0">Source: <a id="agent-link" href="#" target="_blank" style="color:var(--gold)">View on Zillow →</a></div>
 </div>
 
   </div>
@@ -326,6 +327,7 @@ const properties=[
     type:'High-Rise Condo',beds:'2',baths:'2',sqft:'1,300',price:'$885,000',
     description:'A brutalist icon 25 feet from Whole Foods, 100 feet from Philz Coffee, and less than a mile from Roy Lichtenstein at The Broad and symphonies at Walt Disney Concert Hall. Unit 1612 at 801 S Grand — 2BR/2BA, 1,300 sqft on the 16th floor of South Park DTLA.',
     tags:['South Park DTLA','High-Rise','Brutalist','Walk Score 98','FSBO','Waymo Corridor'],
+    agentLink:'https://www.zillow.com/homes/for_sale/',
     images:[
       'https://i.imgur.com/1K9P4FK',
       'https://i.imgur.com/YIN8O41.jpeg','https://i.imgur.com/C2uei3w.jpeg','https://i.imgur.com/yhnjPo6.jpeg',
@@ -421,6 +423,12 @@ const properties=[
         {name:'Downtown Dog Lounge',meta:'Daycare & Boarding',dist:'0.4 mi',icon:'🐾'},
         {name:'VCA Animal Hospital',meta:'Full-Service Vet',dist:'0.7 mi',icon:'🐾'},
       ],
+      'Parking':[{name:'Joe Auto Parks',meta:'Downtown Parking',dist:'0.1 mi',icon:'🅿️'},{name:'Pershing Square Garage',meta:'City Parking',dist:'0.3 mi',icon:'🅿️'}],
+      'Parks':[{name:'Pershing Square',meta:'Historic Downtown Park',dist:'0.4 mi',icon:'🌳'},{name:'Grand Park',meta:'12-Acre Urban Park',dist:'1.0 mi',icon:'🌳'}],
+      'Libraries':[{name:'LA Central Library',meta:'Historic Public Library',dist:'0.5 mi',icon:'📚'}],
+      'Credit Unions':[{name:'Self-Help Federal CU',meta:'Community Banking',dist:'0.2 mi',icon:'🏦'}],
+      'Shopping':[{name:'Apple Store Broadway',meta:'Apple Retail',dist:'0.6 mi',icon:'🍎'},{name:'Adidas Broadway',meta:'Sport & Lifestyle',dist:'0.6 mi',icon:'👟'},{name:'West Elm',meta:'Home Furnishings',dist:'0.6 mi',icon:'🛋️'},{name:'Jewelry District',meta:'7th & Broadway',dist:'0.4 mi',icon:'💎'},{name:'Grand Central Market',meta:'Historic Food Hall',dist:'0.7 mi',icon:'🏪'}],
+      'Movie Theaters':[{name:'Regal LA Live',meta:'Stadium Seating · IMAX',dist:'0.8 mi',icon:'🎬'},{name:'AMC Broadway',meta:'Downtown Cinema',dist:'0.6 mi',icon:'🎬'},{name:'Alamo Drafthouse',meta:'Dine-In Cinema',dist:'1.2 mi',icon:'🎬'}],
     },
     pois:[
       {name:'Whole Foods',coords:[-118.2641,34.0408],color:'#4CAF50'},
@@ -431,6 +439,20 @@ const properties=[
       {name:'Disney Hall',coords:[-118.2497,34.0553],color:'#FF9800'},
       {name:'InterContinental',coords:[-118.2559,34.0459],color:'#607D8B'},
       {name:'Waymo Stop',coords:[-118.2590,34.0430],color:'#1A73E8',waymo:true},
+      {name:'Ritz Carlton',coords:[-118.2556,34.0484],color:'#8B7355'},
+      {name:'Parking - Joe Auto',coords:[-118.2635,34.0418],color:'#607D8B'},
+      {name:'Pershing Square',coords:[-118.2536,34.0505],color:'#4CAF50'},
+      {name:"Angel's Flight",coords:[-118.2499,34.0534],color:'#FF6F00'},
+      {name:'Grand Central Mkt',coords:[-118.2489,34.0536],color:'#E91E63'},
+      {name:'Apple Store',coords:[-118.2519,34.0510],color:'#555555'},
+      {name:'Adidas Broadway',coords:[-118.2513,34.0505],color:'#111111'},
+      {name:'West Elm',coords:[-118.2508,34.0500],color:'#795548'},
+      {name:'Jewelry District',coords:[-118.2545,34.0462],color:'#FFC107'},
+      {name:'LA Central Library',coords:[-118.2556,34.0501],color:'#795548'},
+      {name:'Regal LA Live',coords:[-118.2673,34.0430],color:'#880E4F'},
+      {name:'AMC Broadway',coords:[-118.2515,34.0508],color:'#880E4F'},
+      {name:'Alamo Drafthouse',coords:[-118.2448,34.0420],color:'#880E4F'},
+      {name:'Credit Union',coords:[-118.2630,34.0440],color:'#1565C0'},
     ],
     localCenter:[-118.2570,34.0490],localZoom:15,localPitch:65,localBearing:20
   },
@@ -441,6 +463,7 @@ const properties=[
     type:'Equestrian Estate',beds:'4',baths:'4.5',sqft:'5,400',price:'$2,000,000',
     description:"In Xanadu did Kubla Khan a stately pleasure-dome decree — and on the northern slope of South Mountain, another pleasure-dome rose from desert stone, as if conjured by the same fierce dreaming. Here, where the demon woman wailed for her demon lover beneath a waning moon, where Saguaros stand sentinel and arroyos carve the earth on three sides like a moat of God's own making — here stands the Urban Farmhouse. Dark skies absolute. No future building permitted. The mountain at your back, eternity ahead. 4.4 acres on the largest City Park in America. 5,400 square feet of deliberate living — Barn, Pool House, 8 levels of landscape architecture ascending like stanzas. The largest saltwater pool in Maricopa County, 85,000 gallons, a mirror for the Milky Way. 75 minutes from Los Angeles airports, yet so removed from the world's fever that Haboobs roll toward you like revelation and the city lights below seem someone else's dream. For the Creative who needs space to think. The CEO who needs space to breathe. The investor who understands that land this rare, this protected, this impossible — is never built again. Come, possess it. As Donne wrote — one little room, an everywhere.",
     tags:['Laveen','4.4 Acres','Phoenix Metro','Solar Ready','Mountain Views','Loop 202','FSBO','Waymo Corridor','Equestrian Estate','Urban Farmhouse','LA 75 Min'],
+    agentLink:'https://www.zillow.com/homes/for_sale/',
     images:[
       'https://i.imgur.com/0aYf87y.jpeg','https://i.imgur.com/F0YLfoC.jpeg','https://i.imgur.com/ycRr5XE.jpeg',
       'https://i.imgur.com/1MBjfkr.jpeg','https://i.imgur.com/uiikzzR.jpeg','https://i.imgur.com/1qQr4rf.jpeg',
@@ -540,6 +563,11 @@ const properties=[
         {name:"Lowe's",meta:'Home Improvement',dist:'2.0 mi',icon:'🔨'},
         {name:'Vee Quiva Casino',meta:'Gaming · Dining · Hotel · 202 Fwy',dist:'2.4 mi',icon:'🎰'},
       ],
+      'Parks':[{name:'Desert Foothills Park',meta:'Desert Nature Park',dist:'0.8 mi',icon:'🌳'}],
+      'Libraries':[{name:'Laveen Library',meta:'Maricopa County Library',dist:'0.9 mi',icon:'📚'}],
+      'Credit Unions':[{name:'Desert Financial CU',meta:'Arizona Credit Union',dist:'1.5 mi',icon:'🏦'}],
+      'Movie Theaters':[{name:'Harkins Superstition',meta:'Harkins Theatres · 25 screens',dist:'8.2 mi',icon:'🎬'}],
+      'Parking':[{name:'Vee Quiva Parking',meta:'Free Casino Parking',dist:'2.4 mi',icon:'🅿️'}],
     },
     pois:[
       {name:'Starbucks',coords:[-112.1510,33.3740],color:'#00704A'},
@@ -549,6 +577,11 @@ const properties=[
       {name:'Vee Quiva',coords:[-112.1570,33.3095],color:'#9C27B0'},
       {name:'Loop 202·Dobbins',coords:[-112.1520,33.3620],color:'#2196F3'},
       {name:'Waymo Stop',coords:[-112.1580,33.3700],color:'#1A73E8',waymo:true},
+      {name:'Laveen Library',coords:[-112.1590,33.3755],color:'#795548'},
+      {name:'Desert Foothills Park',coords:[-112.1540,33.3690],color:'#4CAF50'},
+      {name:'Desert Financial CU',coords:[-112.1500,33.3780],color:'#1565C0'},
+      {name:'Harkins Theatre',coords:[-112.0980,33.3780],color:'#880E4F'},
+      {name:'Parking Vee Quiva',coords:[-112.1570,33.3100],color:'#607D8B'},
     ],
     localCenter:[-112.1560,33.3680],localZoom:14.5,localPitch:65,localBearing:-15
   }
@@ -605,6 +638,7 @@ function openPanel(p){
     <div class="stat-card"><div class="stat-label">Size</div><div class="stat-value" style="font-size:1rem">${p.sqft} SF</div></div>
   `;
   document.getElementById('prop-desc').textContent=p.description;
+  document.getElementById('agent-link').href=p.agentLink||'#';
   document.getElementById('prop-tags').innerHTML=p.tags.map(t=>`<span class="tag">${t}</span>`).join('');
   document.getElementById('video-label').textContent=`Documentary — ${p.name}`;
   document.getElementById('video-grid').innerHTML=p.videos.map((v,i)=>
