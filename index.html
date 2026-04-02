@@ -262,7 +262,6 @@
     <p class="section-text">A living 3D map where every listing, every business, and every Waymo stop is a connected, searchable data point — not a static pin. Real estate intelligence at the speed of Maps.</p>
   </div>
   <div style="height:20px"></div>
-  <div style="font-size:.52rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-muted);text-align:center;padding:8px 0">Source: <a id="agent-link" href="#" target="_blank" style="color:var(--gold)">View on Zillow →</a></div>
 </div>
 
   </div>
@@ -619,7 +618,7 @@ function addCondoMarker(p){
   lbl.textContent=p.name+' '+p.price;
   el.appendChild(dot);
   el.appendChild(lbl);
-  el.addEventListener('click',()=>window.open(p.agentLink,'_blank'));
+  el.addEventListener('click',()=>openPanel(p));
   new mapboxgl.Marker({element:el,anchor:'top'}).setLngLat(p.coords).addTo(map);
 }
 
@@ -654,7 +653,6 @@ function openPanel(p){
     <div class="stat-card"><div class="stat-label">Size</div><div class="stat-value" style="font-size:1rem">${p.sqft} SF</div></div>
   `;
   document.getElementById('prop-desc').textContent=p.description;
-  document.getElementById('agent-link').href=p.agentLink||'#';
   document.getElementById('prop-tags').innerHTML=p.tags.map(t=>`<span class="tag">${t}</span>`).join('');
   document.getElementById('video-label').textContent=`Documentary — ${p.name}`;
   document.getElementById('video-grid').innerHTML=p.videos.map((v,i)=>
