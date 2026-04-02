@@ -187,6 +187,14 @@
   </div>
 </header>
 
+<div id="db-listing-panel" style="position:fixed;bottom:0;left:0;right:0;z-index:85;background:var(--cream);border-top:2px solid var(--ink);border-radius:16px 16px 0 0;padding:16px 20px 24px;max-width:420px;margin:0 auto;transform:translateY(100%);transition:transform .45s cubic-bezier(.22,1,.36,1);box-shadow:0 -4px 24px rgba(0,0,0,.12)">
+  <button onclick="document.getElementById('db-listing-panel').style.transform='translateY(100%)';clearDBPois();" style="position:absolute;top:12px;right:14px;background:none;border:1px solid var(--rule-heavy);width:26px;height:26px;cursor:pointer;font-size:.8rem;color:var(--ink-3)">✕</button>
+  <div id="db-addr" style="font-family:'Playfair Display',serif;font-size:1rem;font-weight:700;color:var(--ink);margin-bottom:4px"></div>
+  <div id="db-price" style="font-size:1.15rem;font-weight:700;color:var(--gold);margin-bottom:6px"></div>
+  <div id="db-meta" style="font-size:.78rem;color:var(--ink-3);margin-bottom:12px"></div>
+  <a id="db-redfin" href="#" target="_blank" style="display:inline-block;padding:8px 18px;background:var(--ink);color:var(--cream);font-size:.78rem;font-weight:600;text-decoration:none;border-radius:3px;letter-spacing:.04em">View on Redfin →</a>
+</div>
+
 <div id="panel">
   <div class="panel-header">
     <div class="panel-tag"><span id="panel-tag-text">Property</span><span class="waymo-badge">⟴ Waymo Ready</span></div>
@@ -588,27 +596,64 @@ const properties=[
   }
 ];
 
+const SB_URL='https://mpmprnjhunjfeacikgml.supabase.co';
+const SB_KEY='sb_publishable_T6XISHd9O2Ol0raPaEASqQ_klUXnyY3';
+const SB_HEADERS={'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY};
+let dbPoiMarkers=[];
+
+function clearDBPois(){dbPoiMarkers.forEach(m=>m.remove());dbPoiMarkers=[];}
+
+const POI_COLORS={Grocery:'#4CAF50',Coffee:'#FF9800',Theater:'#9C27B0',Fitness:'#F44336',Transit:'#2196F3',Attraction:'#FF5722','Food Hall':'#795548',Medical:'#E91E63',Shopping:'#3F51B5',Food:'#FF5722'};
+
+async function showDBPanel(p){
+  clearDBPois();
+  // fly to property
+  map.flyTo({center:[parseFloat(p.lng),parseFloat(p.lat)],zoom:15,pitch:65,bearing:0,duration:1200,essential:true});
+  // fetch nearby POIs by zip
+  try {
+    const r=await fetch(SB_URL+'/rest/v1/pois?select=*&Zip=eq.'+p.zip,{headers:SB_HEADERS});
+    const pois=await r.json();
+    pois.forEach(poi=>{
+      if(!poi.lat||!poi.lng)return;
+      const color=POI_COLORS[poi.category]||'#aaa';
+      const el=document.createElement('div');
+      el.style.cssText='cursor:default;display:flex;flex-direction:column;align-items:center;gap:1px';
+      const dot=document.createElement('div');
+      dot.style.cssText=`width:8px;height:8px;border-radius:50%;background:${color};border:1.5px solid #fff;box-shadow:0 0 4px ${color}99`;
+      const lbl=document.createElement('div');
+      lbl.style.cssText='font-size:.38rem;font-weight:600;color:#fff;white-space:nowrap;background:rgba(0,0,0,.75);padding:1px 3px;border-radius:2px';
+      lbl.textContent=poi.name;
+      el.appendChild(dot);el.appendChild(lbl);
+      const m=new mapboxgl.Marker({element:el,anchor:'bottom'}).setLngLat([parseFloat(poi.lng),parseFloat(poi.lat)]).addTo(map);
+      dbPoiMarkers.push(m);
+    });
+  } catch(e){console.error('POI fetch failed',e);}
+  // show bottom panel
+  const panel=document.getElementById('db-listing-panel');
+  document.getElementById('db-addr').textContent=p.address||p.name||'';
+  document.getElementById('db-price').textContent=p.price?'$'+Number(p.price).toLocaleString():'';
+  document.getElementById('db-meta').textContent=[p.beds&&p.beds+' bd',p.baths&&p.baths+' ba',p.sqft&&Number(p.sqft).toLocaleString()+' sqft'].filter(Boolean).join(' · ');
+  document.getElementById('db-redfin').href=p.redfin_url||'#';
+  document.getElementById('db-redfin').style.display=p.redfin_url?'inline-block':'none';
+  panel.style.transform='translateY(0)';
+}
+
 async function loadDBListings() {
   try {
-    const resp = await fetch('https://mpmprnjhunjfeacikgml.supabase.co/rest/v1/properties?select=name,lat,lng,price,zip,redfin_url,address,beds,baths,sqft&mls_status=eq.active&limit=400', {
-      headers: {
-        'apikey':'sb_publishable_T6XISHd9O2Ol0raPaEASqQ_klUXnyY3',
-        'Authorization':'Bearer sb_publishable_T6XISHd9O2Ol0raPaEASqQ_klUXnyY3'
-      }
-    });
+    const resp = await fetch(SB_URL+'/rest/v1/properties?select=name,lat,lng,price,zip,redfin_url,address,beds,baths,sqft&mls_status=eq.active&limit=400', {headers:SB_HEADERS});
     const listings = await resp.json();
     listings.forEach(p => {
       if (!p.lat || !p.lng) return;
       const el = document.createElement('div');
       el.style.cssText='cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px';
       const dot = document.createElement('div');
-      dot.style.cssText='width:6px;height:6px;border-radius:50%;background:#00CED1;border:1.5px solid white;box-shadow:0 0 4px rgba(0,206,209,0.8)';
+      dot.style.cssText='width:10px;height:10px;border-radius:50%;background:#00CED1;border:1.5px solid white;box-shadow:0 0 4px rgba(0,206,209,0.8)';
       const lbl = document.createElement('div');
-      lbl.style.cssText='font-size:.42rem;font-weight:600;color:#00CED1;white-space:nowrap;background:rgba(0,0,0,.7);padding:1px 4px;border-radius:2px';
+      lbl.style.cssText='font-size:.55rem;font-weight:600;color:#00CED1;white-space:nowrap;background:rgba(0,0,0,.7);padding:1px 4px;border-radius:2px';
       lbl.textContent='$'+(p.price/1000).toFixed(0)+'K';
       el.appendChild(dot);
       el.appendChild(lbl);
-      el.addEventListener('click',()=>{ if(p.redfin_url) window.open(p.redfin_url,'_blank'); });
+      el.addEventListener('click',()=>showDBPanel(p));
       new mapboxgl.Marker({element:el,anchor:'bottom'}).setLngLat([parseFloat(p.lng),parseFloat(p.lat)]).addTo(map);
     });
     console.log('Loaded '+listings.length+' listings from Supabase');
@@ -616,7 +661,7 @@ async function loadDBListings() {
 }
 
 mapboxgl.accessToken='pk.eyJ1IjoidmlranB1cmkiLCJhIjoiY21uYnF0ZWNuMHhnaTJ3bzR5MG5xOTEzbSJ9.vqmEhPHMBQOn4GX3yrbiGw';
-const map=new mapboxgl.Map({container:'map',style:'mapbox://styles/mapbox/light-v11',center:[-115.21,33.71],zoom:5.2,pitch:0,bearing:0,attributionControl:false});
+const map=new mapboxgl.Map({container:'map',style:'mapbox://styles/mapbox/light-v11',center:[-118.35,34.05],zoom:11,pitch:45,bearing:0,attributionControl:false});
 map.addControl(new mapboxgl.AttributionControl({compact:true}));
 map.addControl(new mapboxgl.NavigationControl({showCompass:false}),'bottom-right');
 
@@ -625,7 +670,6 @@ let activeProperty=null,poiMarkers=[],_ci=0,_ct=1;
 map.on('load',()=>{
   try{map.setPaintProperty('satellite','raster-brightness-max',.78);map.setPaintProperty('satellite','raster-saturation',-.15);map.setPaintProperty('satellite','raster-contrast',.1);}catch(e){}
   properties.forEach(p=>p.tag==='Active Listing'?addCondoMarker(p):addPropertyMarker(p));
-  map.fitBounds([[-119.0,32.8],[-111.5,34.5]],{padding:60,pitch:0});
   loadDBListings();
 });
 
@@ -754,8 +798,9 @@ function closePanel(){
 }
 function goHome(){
   document.getElementById('panel').classList.remove('open');
-  clearPoiMarkers();activeProperty=null;
-  map.flyTo({center:[-115.21,33.71],zoom:5.2,pitch:0,bearing:0,duration:1400,essential:true});
+  document.getElementById('db-listing-panel').style.transform='translateY(100%)';
+  clearPoiMarkers();clearDBPois();activeProperty=null;
+  map.flyTo({center:[-118.35,34.05],zoom:11,pitch:45,bearing:0,duration:1400,essential:true});
 }
 function openModal(id){document.getElementById('modal-'+id).classList.add('active');}
 function closeModal(id){document.getElementById('modal-'+id).classList.remove('active');}
