@@ -590,7 +590,7 @@ const properties=[
 ];
 
 mapboxgl.accessToken='pk.eyJ1IjoidmlranB1cmkiLCJhIjoiY21uYnF0ZWNuMHhnaTJ3bzR5MG5xOTEzbSJ9.vqmEhPHMBQOn4GX3yrbiGw';
-const map=new mapboxgl.Map({container:'map',style:'mapbox://styles/mapbox/light-v11',center:[-115.8,34.0],zoom:6.8,pitch:0,bearing:0,attributionControl:false});
+const map=new mapboxgl.Map({container:'map',style:'mapbox://styles/mapbox/light-v11',center:[-115.2,33.8],zoom:6,pitch:0,bearing:0,attributionControl:false});
 map.addControl(new mapboxgl.AttributionControl({compact:true}));
 map.addControl(new mapboxgl.NavigationControl({showCompass:false}),'bottom-right');
 
@@ -728,7 +728,7 @@ function closePanel(){
 function goHome(){
   document.getElementById('panel').classList.remove('open');
   clearPoiMarkers();activeProperty=null;
-  map.flyTo({center:[-115.8,34.0],zoom:6.8,pitch:0,bearing:0,duration:1400,essential:true});
+  map.flyTo({center:[-115.2,33.8],zoom:6,pitch:0,bearing:0,duration:1400,essential:true});
 }
 function openModal(id){document.getElementById('modal-'+id).classList.add('active');}
 function closeModal(id){document.getElementById('modal-'+id).classList.remove('active');}
