@@ -201,6 +201,7 @@
   <div class="panel-tabs">
     <button class="panel-tab active" onclick="switchTab('property')">Property</button>
     <button class="panel-tab" onclick="switchTab('comps')">Comps</button>
+    <button id="tab-index" class="panel-tab" onclick="switchTab('index')" style="display:none">INDEX</button>
     <button class="panel-tab" onclick="switchTab('neighborhood')">Neighborhood</button>
     <button class="panel-tab" onclick="switchTab('waymo')">Waymo</button>
   </div>
@@ -234,6 +235,12 @@
     <p class="comp-intro-text" id="comps-intro"></p>
   </div>
   <div style="padding:0 20px 24px" id="comps-list"></div>
+</div>
+
+<div class="tab-pane" id="tab-index">
+  <div class="panel-pad">
+    <p style="font-size:.82rem;line-height:1.7;color:var(--text-muted);margin-bottom:14px"><strong style="color:var(--ink)">The Market</strong><br>330 active luxury condos across 15 ZIP codes. Combined asking value exceeding $480 million. Median household income in the corridor: $100,000 — doubled in a decade. The most realistically attainable luxury addresses on earth for 95% of Americans.</p><p style="font-size:.82rem;line-height:1.7;color:var(--text-muted);margin-bottom:14px"><strong style="color:var(--ink)">The Brands</strong><br>Whole Foods. Equinox. Apple. Tesla. Regal Cinemas. Bottega Louie. Philz Coffee. The Grove. LA Live — a $2.5 billion entertainment complex that hosts the Grammys, the NBA Finals and every major touring act on earth.</p><p style="font-size:.82rem;line-height:1.7;color:var(--text-muted);margin-bottom:14px"><strong style="color:var(--ink)">The Institutions</strong><br>USC — 1 mile. UCLA — 30 minutes by Metro. Cedars-Sinai — top 10 hospital in America. LA Convention Center — $190 million in annual economic impact. The Broad. Walt Disney Concert Hall. MOCA.</p><p style="font-size:.82rem;line-height:1.7;color:var(--text-muted);margin-bottom:14px"><strong style="color:var(--ink)">The Infrastructure</strong><br>6 Metro rail lines. Walk Score 98. Waymo operational. FIFA World Cup 2026. Olympics 2028. The infrastructure of a world capital, priced like a regional city.</p><p style="font-size:.82rem;line-height:1.7;color:var(--text-muted);margin-bottom:14px"><strong style="color:var(--ink)">The Address</strong><br>There is no city on earth where $750,000 buys you this. Not New York. Not London. Not Tokyo. In Los Angeles, in 2026, it does.</p><p style="font-size:.82rem;line-height:1.7;color:var(--gold);font-style:italic">Requation mapped it first.</p>
+  </div>
 </div>
 
 <div class="tab-pane" id="tab-neighborhood">
@@ -755,6 +762,7 @@ function openPanel(p){
     </div>
   `).join('');
   buildNeighborhood(p);
+  if(p.id==='dtla'){document.getElementById('tab-comps').style.display='none';document.getElementById('tab-index').style.display='inline-block';}else{document.getElementById('tab-comps').style.display='inline-block';document.getElementById('tab-index').style.display='none';}
   switchTab('property');
   document.getElementById('panel').classList.add('open');
   map.flyTo({center:p.localCenter,zoom:p.localZoom,pitch:p.localPitch,bearing:p.localBearing,duration:2000,essential:true});
