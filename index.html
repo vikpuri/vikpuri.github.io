@@ -620,13 +620,10 @@ async function showDBPanel(p){
       if(!poi.lat||!poi.lng)return;
       const color=POI_COLORS[poi.category]||'#aaa';
       const el=document.createElement('div');
-      el.style.cssText='cursor:default;display:flex;flex-direction:column;align-items:center;gap:1px';
+      el.style.cssText='cursor:default';
       const dot=document.createElement('div');
       dot.style.cssText=`width:8px;height:8px;border-radius:50%;background:${color};border:1.5px solid #fff;box-shadow:0 0 4px ${color}99`;
-      const lbl=document.createElement('div');
-      lbl.style.cssText='font-size:.38rem;font-weight:600;color:#fff;white-space:nowrap;background:rgba(0,0,0,.75);padding:1px 3px;border-radius:2px';
-      lbl.textContent=poi.name;
-      el.appendChild(dot);el.appendChild(lbl);
+      el.appendChild(dot);
       const m=new mapboxgl.Marker({element:el,anchor:'bottom'}).setLngLat([parseFloat(poi.lng),parseFloat(poi.lat)]).addTo(map);
       dbPoiMarkers.push(m);
     });
@@ -696,14 +693,10 @@ function addPropertyMarker(p){
 }
 function addCondoMarker(p){
   const el=document.createElement('div');
-  el.style.cssText='cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px';
+  el.style.cssText='cursor:pointer';
   const dot=document.createElement('div');
   dot.style.cssText='width:10px;height:10px;border-radius:50%;background:#00CED1;border:2px solid #fff;box-shadow:0 0 8px rgba(0,206,209,0.9)';
-  const lbl=document.createElement('div');
-  lbl.style.cssText='font-size:.48rem;font-weight:700;color:#00CED1;white-space:nowrap;text-shadow:0 1px 3px #000;background:rgba(0,0,0,.75);padding:2px 5px;border-radius:2px;margin-top:2px';
-  lbl.textContent=p.name+' '+p.price;
   el.appendChild(dot);
-  el.appendChild(lbl);
   el.addEventListener('click',()=>openPanel(p));
   new mapboxgl.Marker({element:el,anchor:'top'}).setLngLat(p.coords).addTo(map);
 }
