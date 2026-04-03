@@ -599,9 +599,12 @@ const properties=[
 const SB_URL='https://mpmprnjhunjfeacikgml.supabase.co';
 const SB_KEY='sb_publishable_T6XISHd9O2Ol0raPaEASqQ_klUXnyY3';
 const SB_HEADERS={'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY};
-let dbPoiMarkers=[];
+let dbPoiMarkers=[], dbMarkers=[], dbMarkersLoaded=false;
 
 function clearDBPois(){dbPoiMarkers.forEach(m=>m.remove());dbPoiMarkers=[];}
+function clearDBMarkers(){dbMarkers.forEach(m=>m.remove());dbMarkers=[];dbMarkersLoaded=false;}
+
+const LA_BOUNDS={minLng:-119.0,maxLng:-117.5,minLat:33.5,maxLat:34.5};
 
 const POI_COLORS={Grocery:'#4CAF50',Coffee:'#FF9800',Theater:'#9C27B0',Fitness:'#F44336',Transit:'#2196F3',Attraction:'#FF5722','Food Hall':'#795548',Medical:'#E91E63',Shopping:'#3F51B5',Food:'#FF5722'};
 
@@ -639,6 +642,9 @@ async function showDBPanel(p){
 }
 
 async function loadDBListings() {
+  if (dbMarkersLoaded) return;
+  if (!map || map.getZoom() < 10) return;
+  dbMarkersLoaded = true;
   try {
     const resp = await fetch(SB_URL+'/rest/v1/properties?select=name,lat,lng,price,zip,redfin_url,address,beds,baths,sqft&mls_status=eq.active&limit=400', {headers:SB_HEADERS});
     const listings = await resp.json();
@@ -654,10 +660,11 @@ async function loadDBListings() {
       el.appendChild(dot);
       el.appendChild(lbl);
       el.addEventListener('click',()=>showDBPanel(p));
-      new mapboxgl.Marker({element:el,anchor:'bottom'}).setLngLat([parseFloat(p.lng),parseFloat(p.lat)]).addTo(map);
+      const m=new mapboxgl.Marker({element:el,anchor:'bottom'}).setLngLat([parseFloat(p.lng),parseFloat(p.lat)]).addTo(map);
+      dbMarkers.push(m);
     });
     console.log('Loaded '+listings.length+' listings from Supabase');
-  } catch(e) { console.error('DB load failed',e); }
+  } catch(e) { console.error('DB load failed',e); dbMarkersLoaded=false; }
 }
 
 mapboxgl.accessToken='pk.eyJ1IjoidmlranB1cmkiLCJhIjoiY21uYnF0ZWNuMHhnaTJ3bzR5MG5xOTEzbSJ9.vqmEhPHMBQOn4GX3yrbiGw';
@@ -670,7 +677,14 @@ let activeProperty=null,poiMarkers=[],_ci=0,_ct=1;
 map.on('load',()=>{
   try{map.setPaintProperty('satellite','raster-brightness-max',.78);map.setPaintProperty('satellite','raster-saturation',-.15);map.setPaintProperty('satellite','raster-contrast',.1);}catch(e){}
   properties.forEach(p=>p.tag==='Active Listing'?addCondoMarker(p):addPropertyMarker(p));
-  loadDBListings();
+});
+
+map.on('zoomend',()=>{
+  const zoom=map.getZoom();
+  const c=map.getCenter();
+  const inLA=c.lng>=LA_BOUNDS.minLng&&c.lng<=LA_BOUNDS.maxLng&&c.lat>=LA_BOUNDS.minLat&&c.lat<=LA_BOUNDS.maxLat;
+  if(zoom>=11&&inLA){loadDBListings();}
+  else if(zoom<10){clearDBMarkers();}
 });
 
 function addPropertyMarker(p){
@@ -799,7 +813,7 @@ function closePanel(){
 function goHome(){
   document.getElementById('panel').classList.remove('open');
   document.getElementById('db-listing-panel').style.transform='translateY(100%)';
-  clearPoiMarkers();clearDBPois();activeProperty=null;
+  clearPoiMarkers();clearDBPois();clearDBMarkers();activeProperty=null;
   map.flyTo({center:[-118.35,34.05],zoom:11,pitch:45,bearing:0,duration:1400,essential:true});
 }
 function openModal(id){document.getElementById('modal-'+id).classList.add('active');}
