@@ -812,10 +812,10 @@ function closePanel(){
   if(activeProperty){map.flyTo({center:activeProperty.localCenter,zoom:activeProperty.localZoom-1,pitch:activeProperty.localPitch,bearing:activeProperty.localBearing,duration:900,essential:true});}
 }
 function goHome(){
+  map.fitBounds([[-119.0,32.8],[-111.5,34.5]],{padding:{top:80,bottom:80,left:40,right:40},pitch:30,duration:1200});
   document.getElementById('panel').classList.remove('open');
   document.getElementById('db-listing-panel').style.transform='translateY(100%)';
   clearPoiMarkers();clearDBPois();clearDBMarkers();activeProperty=null;
-  map.flyTo({center:[-118.35,34.05],zoom:11,pitch:45,bearing:0,duration:1400,essential:true});
 }
 function openModal(id){document.getElementById('modal-'+id).classList.add('active');}
 function closeModal(id){document.getElementById('modal-'+id).classList.remove('active');}
