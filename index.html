@@ -643,7 +643,6 @@ async function showDBPanel(p){
 
 async function loadDBListings() {
   if (dbMarkersLoaded) return;
-  if (!map || map.getZoom() < 10) return;
   dbMarkersLoaded = true;
   try {
     const resp = await fetch(SB_URL+'/rest/v1/properties?select=name,lat,lng,price,zip,redfin_url,address,beds,baths,sqft&mls_status=eq.active&limit=400', {headers:SB_HEADERS});
@@ -651,14 +650,10 @@ async function loadDBListings() {
     listings.forEach(p => {
       if (!p.lat || !p.lng) return;
       const el = document.createElement('div');
-      el.style.cssText='cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px';
+      el.style.cssText='cursor:pointer';
       const dot = document.createElement('div');
       dot.style.cssText='width:10px;height:10px;border-radius:50%;background:#00CED1;border:1.5px solid white;box-shadow:0 0 4px rgba(0,206,209,0.8)';
-      const lbl = document.createElement('div');
-      lbl.style.cssText='font-size:.55rem;font-weight:600;color:#00CED1;white-space:nowrap;background:rgba(0,0,0,.7);padding:1px 4px;border-radius:2px';
-      lbl.textContent='$'+(p.price/1000).toFixed(0)+'K';
       el.appendChild(dot);
-      el.appendChild(lbl);
       el.addEventListener('click',()=>showDBPanel(p));
       const m=new mapboxgl.Marker({element:el,anchor:'bottom'}).setLngLat([parseFloat(p.lng),parseFloat(p.lat)]).addTo(map);
       dbMarkers.push(m);
@@ -765,6 +760,7 @@ function openPanel(p){
   document.getElementById('panel').classList.add('open');
   map.flyTo({center:p.localCenter,zoom:p.localZoom,pitch:p.localPitch,bearing:p.localBearing,duration:2000,essential:true});
   map.once('moveend',()=>addPoiMarkers(p));
+  if(p.localCenter[0]<-115){loadDBListings();}
 }
 
 function buildNeighborhood(p){
