@@ -663,7 +663,7 @@ async function loadDBListings() {
 }
 
 mapboxgl.accessToken='pk.eyJ1IjoidmlranB1cmkiLCJhIjoiY21uYnF0ZWNuMHhnaTJ3bzR5MG5xOTEzbSJ9.vqmEhPHMBQOn4GX3yrbiGw';
-const map=new mapboxgl.Map({container:'map',style:'mapbox://styles/mapbox/satellite-streets-v12',pitch:30,bearing:0,attributionControl:false});
+const map=new mapboxgl.Map({container:'map',style:'mapbox://styles/mapbox/satellite-streets-v12',pitch:30,bearing:45,attributionControl:false});
 map.fitBounds([[-119.0,32.8],[-111.5,34.5]],{padding:{top:80,bottom:80,left:40,right:40},pitch:30,duration:0});
 map.addControl(new mapboxgl.AttributionControl({compact:true}));
 map.addControl(new mapboxgl.NavigationControl({showCompass:false}),'bottom-right');
@@ -674,7 +674,7 @@ map.on('load',()=>{
   try{map.setPaintProperty('satellite','raster-brightness-max',.78);map.setPaintProperty('satellite','raster-saturation',-.15);map.setPaintProperty('satellite','raster-contrast',.1);}catch(e){}
   map.addSource('mapbox-dem',{type:'raster-dem',url:'mapbox://mapbox.mapbox-terrain-dem-v1',tileSize:512,maxzoom:14});
   map.setTerrain({source:'mapbox-dem',exaggeration:1.5});
-  map.addLayer({id:'sky',type:'sky',paint:{'sky-type':'atmosphere','sky-atmosphere-sun':[0.0,0.0],'sky-atmosphere-sun-intensity':15}});
+  map.addLayer({id:'sky',type:'sky',paint:{'sky-type':'atmosphere','sky-atmosphere-sun':[0.0,90.0],'sky-atmosphere-sun-intensity':5,'sky-atmosphere-color':'rgba(255,183,77,0.8)','sky-atmosphere-halo-color':'rgba(255,120,50,0.4)'}});
   properties.forEach(p=>p.tag==='Active Listing'?addCondoMarker(p):addPropertyMarker(p));
 });
 
