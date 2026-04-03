@@ -667,7 +667,7 @@ map.on('load',()=>{
   try{map.setPaintProperty('satellite','raster-brightness-max',.78);map.setPaintProperty('satellite','raster-saturation',-.15);map.setPaintProperty('satellite','raster-contrast',.1);}catch(e){}
   map.setConfigProperty('basemap','lightPreset','day');
   map.setConfigProperty('basemap','show3dObjects',true);
-  properties.forEach(p=>p.tag==='Active Listing'?addCondoMarker(p):addPropertyMarker(p));
+  properties.forEach(p=>{ if(p.tag==='Active Listing') addCondoMarker(p); else if(p.id==='laveen') addTerrainMarker(p); else addPropertyMarker(p); });
 });
 
 map.on('zoomend',()=>{
@@ -684,6 +684,13 @@ function addPropertyMarker(p){
   el.innerHTML=`<div class="pulse-ring"></div><div class="pulse-ring"></div><div class="dot"></div><div class="label">${p.short} ${p.price}</div>`;
   el.addEventListener('click',()=>openPanel(p));
   const marker = new mapboxgl.Marker({element:el,anchor:'center',pitchAlignment:'map',rotationAlignment:'map'}).setLngLat(p.coords).addTo(map);
+}
+function addTerrainMarker(p){
+  map.addSource('prop-'+p.id,{type:'geojson',data:{type:'Feature',geometry:{type:'Point',coordinates:p.coords},properties:{title:p.short}}});
+  map.addLayer({id:'prop-'+p.id,type:'circle',source:'prop-'+p.id,paint:{'circle-radius':10,'circle-color':'#C9A84C','circle-stroke-width':2,'circle-stroke-color':'#ffffff','circle-pitch-alignment':'map','circle-pitch-scale':'map'}});
+  map.on('click','prop-'+p.id,()=>openPanel(p));
+  map.on('mouseenter','prop-'+p.id,()=>map.getCanvas().style.cursor='pointer');
+  map.on('mouseleave','prop-'+p.id,()=>map.getCanvas().style.cursor='');
 }
 function addCondoMarker(p){
   const el=document.createElement('div');
