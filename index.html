@@ -33,7 +33,7 @@
     nav a{font-family:'Source Serif 4',serif;font-size:.72rem;font-weight:400;letter-spacing:.14em;text-transform:uppercase;color:var(--text-muted);text-decoration:none;position:relative;transition:color .25s}
     nav a::after{content:'';position:absolute;bottom:-4px;left:0;right:0;height:1px;background:var(--ink);transform:scaleX(0);transition:transform .3s}
     nav a:hover{color:var(--ink)} nav a:hover::after{transform:scaleX(1)}
-    #map{position:fixed;top:0;left:0;width:100%;height:100%}
+    #map{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0}
     .req-marker{cursor:pointer;width:42px;height:42px;display:flex;align-items:center;justify-content:center;position:relative}
     .req-marker .pulse-ring{position:absolute;width:42px;height:42px;border:2px solid var(--gold);border-radius:50%;animation:pulseRing 2.4s ease-out infinite;opacity:0}
     .req-marker .pulse-ring:nth-child(2){animation-delay:1.2s}
@@ -174,7 +174,7 @@
   </style>
 </head>
 <body>
-<div id="intro" style="position:fixed;inset:0;background:#1A1810;z-index:999;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px;transition:opacity 1.5s ease"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 440 100" height="140" style="filter:drop-shadow(0 0 40px rgba(201,168,76,0.6))"><defs><filter id="gb"><feGaussianBlur stdDeviation="1.2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><text x="4" y="32" font-family="Raleway,'Century Gothic',Arial,sans-serif" font-size="34" font-weight="600" font-style="italic" fill="#B22234">r</text><text x="18" y="88" font-family="Raleway,'Century Gothic',Arial,sans-serif" font-size="92" font-weight="400" fill="#7A7A7A">/</text><text x="44" y="88" font-family="Raleway,'Century Gothic',Arial,sans-serif" font-size="80" font-weight="600" fill="#4F6FB8">Σ</text><text x="102" y="88" font-family="Raleway,'Century Gothic',Arial,sans-serif" font-size="28" font-weight="600" font-style="italic" fill="#D4A843" opacity="0.8" filter="url(#gb)" letter-spacing="2" font-variant="small-caps">QUATION</text></svg></div>
+<div id="intro" style="position:fixed;inset:0;z-index:10;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px;transition:opacity 1.5s ease"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 440 100" height="140" style="filter:drop-shadow(0 0 40px rgba(201,168,76,0.6))"><defs><filter id="gb"><feGaussianBlur stdDeviation="1.2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><text x="4" y="32" font-family="Raleway,'Century Gothic',Arial,sans-serif" font-size="34" font-weight="600" font-style="italic" fill="#B22234">r</text><text x="18" y="88" font-family="Raleway,'Century Gothic',Arial,sans-serif" font-size="92" font-weight="400" fill="#7A7A7A">/</text><text x="44" y="88" font-family="Raleway,'Century Gothic',Arial,sans-serif" font-size="80" font-weight="600" fill="#4F6FB8">Σ</text><text x="102" y="88" font-family="Raleway,'Century Gothic',Arial,sans-serif" font-size="28" font-weight="600" font-style="italic" fill="#D4A843" opacity="0.8" filter="url(#gb)" letter-spacing="2" font-variant="small-caps">QUATION</text></svg></div>
 <div id="map"></div>
 <header>
   <nav>
