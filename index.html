@@ -685,7 +685,8 @@ function addPropertyMarker(p){
   el.className='req-marker';
   el.innerHTML=`<div class="pulse-ring"></div><div class="pulse-ring"></div><div class="dot"></div><div class="label">${p.short} ${p.price}</div>`;
   el.addEventListener('click',()=>openPanel(p));
-  new mapboxgl.Marker({element:el,anchor:'center'}).setLngLat(p.coords).addTo(map);
+  const lngLat=p.coords[0]<-111?[-112.1180767,33.3427905]:p.coords;
+  new mapboxgl.Marker({element:el,anchor:'center',draggable:false}).setLngLat(lngLat).addTo(map);
 }
 function addCondoMarker(p){
   const el=document.createElement('div');
