@@ -651,7 +651,7 @@ async function loadDBListings() {
       const dot = document.createElement('div');
       dot.style.cssText='width:10px;height:10px;border-radius:50%;background:#00CED1;border:1.5px solid white;box-shadow:0 0 4px rgba(0,206,209,0.8)';
       el.appendChild(dot);
-      el.addEventListener('click',()=>showDBPanel(p));
+      el.addEventListener('click',()=>{ if(p.redfin_url) window.open(p.redfin_url,'_blank'); });
       const m=new mapboxgl.Marker({element:el,anchor:'bottom'}).setLngLat([parseFloat(p.lng),parseFloat(p.lat)]).addTo(map);
       dbMarkers.push(m);
     });
