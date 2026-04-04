@@ -200,7 +200,7 @@
   </div>
   <div class="panel-tabs">
     <button class="panel-tab active" onclick="switchTab('property')">Property</button>
-    <button class="panel-tab" onclick="switchTab('comps')">Comps</button>
+    <button id="btn-comps" class="panel-tab" onclick="switchTab('comps')">Comps</button>
     <button id="tab-index" class="panel-tab" onclick="switchTab('index')" style="display:none">INDEX</button>
     <button class="panel-tab" onclick="switchTab('neighborhood')">Neighborhood</button>
     <button class="panel-tab" onclick="switchTab('waymo')">Waymo</button>
@@ -762,7 +762,7 @@ function openPanel(p){
     </div>
   `).join('');
   buildNeighborhood(p);
-  if(p.id==='dtla'){document.getElementById('tab-comps').style.display='none';document.getElementById('tab-index').style.display='inline-block';}else{document.getElementById('tab-comps').style.display='inline-block';document.getElementById('tab-index').style.display='none';}
+  if(p.id==='dtla'){document.getElementById('btn-comps').style.display='none';document.getElementById('tab-comps').style.display='none';document.getElementById('tab-index').style.display='inline-block';}else{document.getElementById('btn-comps').style.display='inline-block';document.getElementById('tab-comps').style.display='inline-block';document.getElementById('tab-index').style.display='none';}
   switchTab('property');
   document.getElementById('panel').classList.add('open');
   map.flyTo({center:p.localCenter,zoom:p.localZoom,pitch:p.localPitch,bearing:p.localBearing,duration:2000,essential:true});
@@ -793,7 +793,7 @@ function showItems(items){
 }
 
 function switchTab(name){
-  const names=['property','comps','neighborhood','waymo'];
+  const names=['property','comps','index','neighborhood','waymo'];
   document.querySelectorAll('.panel-tab').forEach((t,i)=>t.classList.toggle('active',names[i]===name));
   document.querySelectorAll('.tab-pane').forEach(p=>p.classList.toggle('active',p.id==='tab-'+name));
   document.getElementById('panel-body').scrollTop=0;
