@@ -674,7 +674,7 @@ async function fetchRestaurants(){
     data.forEach(r=>{
       if(!r.lat||!r.lng)return;
       const el=document.createElement('div');
-      el.style.cssText='cursor:pointer;font-family:Raleway,Arial,sans-serif;font-size:14px;font-weight:700;font-style:italic;color:#B22234;text-shadow:0 1px 3px rgba(0,0,0,0.4);line-height:1;user-select:none';
+      el.style.cssText='cursor:pointer;font-family:Raleway,Arial,sans-serif;font-size:16px;font-weight:700;font-style:italic;color:#B22234;text-shadow:0 2px 4px rgba(0,0,0,0.6);line-height:1;user-select:none;z-index:999;position:relative;';
       el.textContent='r';
       el.title=r.name+' · '+r.rating+'★';
       el.addEventListener('click',()=>{
