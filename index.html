@@ -674,12 +674,12 @@ async function fetchRestaurants(){
     data.forEach(r=>{
       if(!r.lat||!r.lng)return;
       const el=document.createElement('div');
-      el.style.cssText='cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px';
-      const dot=document.createElement('div');
-      dot.style.cssText='width:8px;height:8px;border-radius:50%;background:#E8472A;border:1.5px solid #fff;box-shadow:0 0 6px rgba(232,71,42,0.8)';
-      el.appendChild(dot);
+      el.style.cssText='cursor:pointer;font-family:Raleway,Arial,sans-serif;font-size:14px;font-weight:700;font-style:italic;color:#B22234;text-shadow:0 1px 3px rgba(0,0,0,0.4);line-height:1;user-select:none';
+      el.textContent='r';
+      el.title=r.name+' · '+r.rating+'★';
       el.addEventListener('click',()=>{
-        if(r.waymo_url)window.open(r.waymo_url,'_blank');
+        const info=`${r.name}\n${r.rating}★ · ${r.address}\n\nWaymo: ${r.waymo_url}`;
+        alert(info);
       });
       new mapboxgl.Marker({element:el,anchor:'center',pitchAlignment:'map'}).setLngLat([parseFloat(r.lng),parseFloat(r.lat)]).addTo(map);
     });
