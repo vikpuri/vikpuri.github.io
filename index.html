@@ -662,6 +662,31 @@ async function loadDBListings() {
   } catch(e) { console.error('DB load failed',e); dbMarkersLoaded=false; }
 }
 
+async function fetchRestaurants(){
+  try{
+    const resp=await fetch('https://mpmprnjhunjfeacikgml.supabase.co/rest/v1/restaurants?select=*&limit=100',{
+      headers:{
+        'apikey':'sb_publishable_T6XISHd9O2Ol0raPaEASqQ_klUXnyY3',
+        'Authorization':'Bearer sb_publishable_T6XISHd9O2Ol0raPaEASqQ_klUXnyY3'
+      }
+    });
+    const data=await resp.json();
+    data.forEach(r=>{
+      if(!r.lat||!r.lng)return;
+      const el=document.createElement('div');
+      el.style.cssText='cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px';
+      const dot=document.createElement('div');
+      dot.style.cssText='width:8px;height:8px;border-radius:50%;background:#E8472A;border:1.5px solid #fff;box-shadow:0 0 6px rgba(232,71,42,0.8)';
+      el.appendChild(dot);
+      el.addEventListener('click',()=>{
+        if(r.waymo_url)window.open(r.waymo_url,'_blank');
+      });
+      new mapboxgl.Marker({element:el,anchor:'center',pitchAlignment:'map'}).setLngLat([parseFloat(r.lng),parseFloat(r.lat)]).addTo(map);
+    });
+    console.log('Loaded '+data.length+' restaurants');
+  }catch(e){console.error('Restaurant load failed',e);}
+}
+
 mapboxgl.accessToken='pk.eyJ1IjoidmlranB1cmkiLCJhIjoiY21uYnF0ZWNuMHhnaTJ3bzR5MG5xOTEzbSJ9.vqmEhPHMBQOn4GX3yrbiGw';
 const map=new mapboxgl.Map({container:'map',style:'mapbox://styles/mapbox/standard',pitch:30,bearing:45,attributionControl:false});
 map.fitBounds([[-119.0,32.8],[-111.5,34.5]],{padding:{top:80,bottom:80,left:40,right:40},pitch:30,duration:0});
@@ -768,6 +793,7 @@ function openPanel(p){
   map.flyTo({center:p.localCenter,zoom:p.localZoom,pitch:p.localPitch,bearing:p.localBearing,duration:2000,essential:true});
   map.once('moveend',()=>addPoiMarkers(p));
   if(p.localCenter[0]<-115){loadDBListings();}
+  if(p.id==='dtla'){fetchRestaurants();}
 }
 
 function buildNeighborhood(p){
