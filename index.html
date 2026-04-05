@@ -866,6 +866,7 @@ function carouselRender(){
 function closePanel(){
   window.location.hash='';
   document.getElementById('panel').classList.remove('open');
+  clearPoiMarkers();clearDBPois();
 }
 function goHome(){
   map.fitBounds([[-119.0,32.8],[-111.5,34.5]],{padding:{top:80,bottom:80,left:40,right:40},pitch:30,duration:1200});
