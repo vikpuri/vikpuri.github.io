@@ -700,6 +700,43 @@ map.on('load',()=>{
   map.setConfigProperty('basemap','lightPreset','day');
   map.setConfigProperty('basemap','show3dObjects',true);
   properties.forEach(p=>{ if(p.tag==='Active Listing') addCondoMarker(p); else if(p.id==='laveen') addTerrainMarker(p); else addPropertyMarker(p); });
+
+  map.on('click', (e) => {
+    const features = map.queryRenderedFeatures(e.point, {
+      layers: ['poi-label']
+    });
+    if (!features.length) return;
+    const poi = features[0];
+    const name = poi.properties.name;
+    const coords = poi.geometry.coordinates;
+    if (!name) return;
+
+    fetch('https://mpmprnjhunjfeacikgml.supabase.co/rest/v1/restaurants?select=*&name=eq.'+encodeURIComponent(name), {
+      headers: {
+        'apikey': 'sb_publishable_T6XISHd9O2Ol0raPaEASqQ_klUXnyY3',
+        'Authorization': 'Bearer sb_publishable_T6XISHd9O2Ol0raPaEASqQ_klUXnyY3'
+      }
+    })
+    .then(r => r.json())
+    .then(data => {
+      if (data.length > 0) {
+        const r = data[0];
+        const popup = new mapboxgl.Popup({offset: 15})
+          .setLngLat(coords)
+          .setHTML(`
+            <div style="font-family:Raleway,sans-serif;padding:8px">
+              <div style="font-size:.9rem;font-weight:700;color:#1A1810">${r.name}</div>
+              <div style="font-size:.75rem;color:#888;margin:2px 0">${r.rating}★ · ${r.address}</div>
+              <div style="margin-top:8px;display:flex;gap:8px">
+                <a href="${r.waymo_url}" target="_blank" style="font-size:.7rem;background:#1A73E8;color:#fff;padding:4px 8px;border-radius:3px;text-decoration:none">🚗 Waymo</a>
+                <a href="${r.yelp_url}" target="_blank" style="font-size:.7rem;background:#B22234;color:#fff;padding:4px 8px;border-radius:3px;text-decoration:none">r/Σ View</a>
+              </div>
+            </div>
+          `)
+          .addTo(map);
+      }
+    });
+  });
 });
 
 map.on('zoomend',()=>{
