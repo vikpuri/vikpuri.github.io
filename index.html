@@ -6,7 +6,12 @@
   <meta property="og:title" content="Requation — Human Intelligence">
   <meta property="og:description" content="3D Real Estate Intelligence — DTLA & Laveen">
   <meta property="og:url" content="https://requation.com">
-  <meta property="og:image" content="https://i.imgur.com/WFp0h8H.jpeg">
+  <meta property="og:image" id="og-image" content="https://i.imgur.com/3rFddwE.jpeg">
+  <script>
+  if(window.location.hash==='#laveen'){
+    document.getElementById('og-image').setAttribute('content','https://i.imgur.com/6YlnSK6.jpeg');
+  }
+  </script>
   <title>Requation — Real Estate Intelligence</title>
   <link href="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.css" rel="stylesheet" />
   <script src="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.js"></script>
