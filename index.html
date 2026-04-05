@@ -664,26 +664,72 @@ async function loadDBListings() {
 
 async function fetchRestaurants(){
   try{
-    const resp=await fetch('https://mpmprnjhunjfeacikgml.supabase.co/rest/v1/restaurants?select=*&limit=100',{
-      headers:{
-        'apikey':'sb_publishable_T6XISHd9O2Ol0raPaEASqQ_klUXnyY3',
-        'Authorization':'Bearer sb_publishable_T6XISHd9O2Ol0raPaEASqQ_klUXnyY3'
-      }
+    const resp=await fetch('https://mpmprnjhunjfeacikgml.supabase.co/rest/v1/restaurants?select=*&zip=in.(90017,90015,90013,90014)&limit=50',{
+      headers:{'apikey':'sb_publishable_T6XISHd9O2Ol0raPaEASqQ_klUXnyY3','Authorization':'Bearer sb_publishable_T6XISHd9O2Ol0raPaEASqQ_klUXnyY3'}
     });
     const data=await resp.json();
-    data.forEach(r=>{
-      if(!r.lat||!r.lng)return;
-      const el=document.createElement('div');
-      el.style.cssText='cursor:pointer;font-family:Raleway,Arial,sans-serif;font-size:16px;font-weight:700;font-style:italic;color:#B22234;text-shadow:0 2px 4px rgba(0,0,0,0.6);line-height:1;user-select:none;z-index:999;position:relative;';
-      el.textContent='r';
-      el.title=r.name+' · '+r.rating+'★';
-      el.addEventListener('click',()=>{
-        const info=`${r.name}\n${r.rating}★ · ${r.address}\n\nWaymo: ${r.waymo_url}`;
-        alert(info);
-      });
-      new mapboxgl.Marker({element:el,anchor:'center',pitchAlignment:'map'}).setLngLat([parseFloat(r.lng),parseFloat(r.lat)]).addTo(map);
+    const geojson={type:'FeatureCollection',features:data.map(r=>({
+      type:'Feature',
+      geometry:{type:'Point',coordinates:[parseFloat(r.lng),parseFloat(r.lat)]},
+      properties:{name:r.name,rating:r.rating,address:r.address,waymo_url:r.waymo_url,yelp_url:r.yelp_url}
+    }))};
+
+    if(map.getSource('restaurants'))map.removeLayer('restaurants-layer'),map.removeSource('restaurants');
+
+    map.addSource('restaurants',{type:'geojson',data:geojson});
+    map.addLayer({
+      id:'restaurants-layer',
+      type:'circle',
+      source:'restaurants',
+      paint:{
+        'circle-radius':8,
+        'circle-color':'#B22234',
+        'circle-stroke-width':2,
+        'circle-stroke-color':'#ffffff',
+        'circle-pitch-alignment':'map',
+        'circle-pitch-scale':'map'
+      }
     });
-    console.log('Loaded '+data.length+' restaurants');
+    map.addLayer({
+      id:'restaurants-label',
+      type:'symbol',
+      source:'restaurants',
+      layout:{
+        'text-field':['get','name'],
+        'text-size':11,
+        'text-anchor':'top',
+        'text-offset':[0,1],
+        'text-font':['Open Sans Italic','Arial Unicode MS Regular']
+      },
+      paint:{
+        'text-color':'#B22234',
+        'text-halo-color':'#FAF8F4',
+        'text-halo-width':2
+      }
+    });
+
+    map.on('click','restaurants-layer',(e)=>{
+      const r=e.features[0].properties;
+      new mapboxgl.Popup({offset:15})
+        .setLngLat(e.features[0].geometry.coordinates)
+        .setHTML(`
+          <div style="font-family:Raleway,sans-serif;padding:10px;min-width:200px">
+            <div style="font-size:.9rem;font-weight:700;color:#1A1810">${r.name}</div>
+            <div style="font-size:.75rem;color:#888;margin:4px 0">${r.rating}★</div>
+            <div style="font-size:.72rem;color:#666;margin-bottom:8px">${r.address}</div>
+            <div style="display:flex;gap:8px">
+              <a href="${r.waymo_url}" target="_blank" style="font-size:.7rem;background:#1A73E8;color:#fff;padding:5px 10px;border-radius:3px;text-decoration:none">🚗 Waymo</a>
+              <a href="${r.yelp_url}" target="_blank" style="font-size:.7rem;background:#B22234;color:#fff;padding:5px 10px;border-radius:3px;text-decoration:none">View</a>
+            </div>
+          </div>
+        `)
+        .addTo(map);
+    });
+
+    map.on('mouseenter','restaurants-layer',()=>map.getCanvas().style.cursor='pointer');
+    map.on('mouseleave','restaurants-layer',()=>map.getCanvas().style.cursor='');
+
+    console.log('Loaded '+data.length+' restaurants as GL layer');
   }catch(e){console.error('Restaurant load failed',e);}
 }
 
