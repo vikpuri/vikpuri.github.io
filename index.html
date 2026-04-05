@@ -720,6 +720,7 @@ async function fetchRestaurants(){
             <div style="display:flex;gap:8px">
               <a href="${r.waymo_url}" target="_blank" style="font-size:.7rem;background:#1A73E8;color:#fff;padding:5px 10px;border-radius:3px;text-decoration:none">🚗 Waymo</a>
               <a href="${r.yelp_url}" target="_blank" style="font-size:.7rem;background:#B22234;color:#fff;padding:5px 10px;border-radius:3px;text-decoration:none">View</a>
+              <a href="https://www.yelp.com/search?find_desc=Order+Food&find_loc=${encodeURIComponent(r.address)}" target="_blank" style="font-size:.7rem;background:#4CAF50;color:#fff;padding:5px 10px;border-radius:3px;text-decoration:none">🍽️ Order</a>
             </div>
           </div>
         `)
