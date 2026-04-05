@@ -246,6 +246,7 @@
 <div class="tab-pane" id="tab-neighborhood">
   <div class="nbhd-cats" id="nbhd-cats"></div>
   <div class="nbhd-list" id="nbhd-list"></div>
+  <div id="nbhd-restaurants"></div>
 </div>
 
 <div class="tab-pane" id="tab-waymo">
@@ -886,6 +887,33 @@ function buildNeighborhood(p){
     `<button class="nbhd-cat-btn${i===0?' active':''}" onclick="showCat('${c}',this)">${c}</button>`
   ).join('');
   showItems(p.neighborhood[cats[0]]);
+  document.getElementById('nbhd-restaurants').innerHTML='';
+  if(p.id==='dtla') buildRestaurantList();
+}
+async function buildRestaurantList(){
+  try{
+    const resp=await fetch('https://mpmprnjhunjfeacikgml.supabase.co/rest/v1/restaurants?select=name,rating,address,waymo_url&zip=in.(90017,90015,90013,90014)&order=rating.desc&limit=50',{
+      headers:{'apikey':'sb_publishable_T6XISHd9O2Ol0raPaEASqQ_klUXnyY3','Authorization':'Bearer sb_publishable_T6XISHd9O2Ol0raPaEASqQ_klUXnyY3'}
+    });
+    const data=await resp.json();
+    if(!data.length) return;
+    const el=document.getElementById('nbhd-restaurants');
+    el.innerHTML=`
+      <div style="padding:14px 20px 6px;border-top:1px solid var(--rule);margin-top:8px">
+        <div style="font-family:'Source Serif 4',serif;font-size:.53rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);margin-bottom:10px">Human Intelligence · Curated Restaurants</div>
+        ${data.map(r=>`
+          <div class="nbhd-card">
+            <div class="nbhd-icon">🍽️</div>
+            <div class="nbhd-info">
+              <div class="nbhd-name">${r.name}</div>
+              <div class="nbhd-meta">${r.address}</div>
+            </div>
+            <a href="${r.waymo_url}" target="_blank" style="font-family:'Source Serif 4',serif;font-size:.59rem;color:var(--gold);font-weight:600;text-decoration:none;flex-shrink:0">${r.rating}★</a>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  }catch(e){console.error('Restaurant list failed',e);}
 }
 function showCat(cat,btn){
   document.querySelectorAll('.nbhd-cat-btn').forEach(b=>b.classList.remove('active'));
