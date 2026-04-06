@@ -488,7 +488,99 @@ const properties=[
       'https://i.imgur.com/fJUhniW.jpeg'
     ],
     videos:LAV_VIDEOS,
-    neighborhood:{'Grocery':[{name:"Fry's Food Store",meta:'Full Service Grocery',dist:'1.2 mi',icon:'🛒'},{name:'Walmart',meta:'Supercenter',dist:'1.4 mi',icon:'🛒'},{name:'Aldi',meta:'Discount Grocery',dist:'2.1 mi',icon:'🛒'},{name:'Sprouts',meta:'Farmers Market',dist:'2.3 mi',icon:'🥦'}],'Coffee':[{name:'Starbucks',meta:'Coffee & Drinks',dist:'1.1 mi',icon:'☕'},{name:"Dunkin'",meta:'Coffee & Donuts',dist:'1.3 mi',icon:'☕'}],'Home Improvement':[{name:'Home Depot',meta:'Home Improvement',dist:'1.5 mi',icon:'🔨'},{name:"Lowe's",meta:'Home Improvement',dist:'1.8 mi',icon:'🔨'}],'Entertainment':[{name:'Vee Quiva Casino',meta:'Gila River Casino',dist:'2.0 mi',icon:'🎰'},{name:'Harkins Theatre',meta:'Movie Theater',dist:'4.2 mi',icon:'🎬'}],'Fitness':[{name:'Planet Fitness',meta:'24hr Gym',dist:'1.6 mi',icon:'💪'},{name:'LA Fitness',meta:'Full Service Gym',dist:'2.0 mi',icon:'💪'}],'Pet Care':[{name:'PetSmart',meta:'Pet Supplies & Care',dist:'1.8 mi',icon:'🐾'}],'Education':[{name:'Laveen Elementary',meta:'Charter School',dist:'0.8 mi',icon:'🏫'},{name:'Vista del Sur',meta:'Charter School',dist:'1.2 mi',icon:'🏫'}],'Transit':[{name:'Valley Metro Rail',meta:'Phoenix Light Rail',dist:'3.5 mi',icon:'🚇'},{name:'Loop 202 Freeway',meta:'South Mountain Freeway',dist:'1.0 mi',icon:'🛣️'}]},
+    comps:{
+      headline:'Active 1-Acre / 2+ Bath Comps · Laveen 85339',
+      intro:'Active listings on 1+ acre lots in 85339 with 2 or more bathrooms. Median list price for acre-lot homes in Laveen is $900K. Your 4BD/3BA estate at $649K on ~1 acre is priced well below the acreage median — a significant value opportunity.',
+      listings:[
+        {
+          address:'10445 S 27th Ave — Laveen Unsubdivided',
+          price:'$894,000',
+          chips:['4 BD','3 BA','3,068 SF','1.36 Acres','Mountain Views'],
+          note:'Your nearest direct comp — 4/3 at 3,068 SF on 1.36 acres, just 1.3 miles from your address on the same S 27th corridor. Listed at $894K. Your home offers similar specs at $245K less.',
+          source:'LandWatch / Kenneth James Realty · 85339',status:'Active'
+        },
+        {
+          address:'5133 W McNeil St — Laveen Estates',
+          price:'$650,000',
+          chips:['4 BD','3 BA','1,825 SF','1+ Acre','Farmhouse'],
+          note:'Closest price comp at $650K — farmhouse-style 4/3 on over an acre. Only 1,825 SF however, meaning your home delivers 75% more square footage at virtually the same price.',
+          source:'Kenneth James Realty · 85339',status:'Active'
+        },
+        {
+          address:'2927 W Latona Rd — Laveen',
+          price:'$890,000',
+          chips:['4 BD','3 BA','2,691 SF','1+ Acre'],
+          note:'4/3 on 1+ acre at $890K. Larger than McNeil but 509 SF smaller than your home. Priced $241K above your listing — your estate is the best value per SF among active acre-lot comps.',
+          source:'Kenneth James Realty · 85339',status:'Active'
+        },
+        {
+          address:'3923 W Fox Rd — Sunset Cove Estates',
+          price:'$1,350,000',
+          chips:['4 BD','4 BA','3,462 SF','1 Acre','Sunset Cove','Gated'],
+          note:'Premium end of the 1-acre market in Laveen — gated Sunset Cove Estates community, South Mountain views, luxury custom build. Sets the ceiling. Your home offers comparable acreage at less than half the price.',
+          source:'LandWatch / 85339',status:'Active'
+        },
+        {
+          address:'4427 W Calle Poco — Laveen',
+          price:'$750,000',
+          chips:['4 BD','3 BA','2,663 SF','2.16 Acres','No HOA'],
+          note:'2.16 acres, 4/3, no HOA — larger land parcel at $750K. At 2,663 SF it is 537 SF smaller than your home. Reinforces that Laveen acreage with 3+ baths commands a strong premium your pricing undercuts.',
+          source:'LandWatch / 85339',status:'Active'
+        },
+        {
+          address:'5040 W Steinway Dr — La Sondra',
+          price:'$760,000',
+          chips:['3 BD','2 BA','1,941 SF','1+ Acre','Horse Property'],
+          note:'1-acre horse property with irrigation — 3/2 at 1,941 SF, priced at $760K. Fewer bedrooms, smaller footprint, no 3rd bath. Your 4/3 at 3,200 SF for $649K is the superior offering at $111K less.',
+          source:'Kenneth James Realty · 85339',status:'Active'
+        },
+      ]
+    },
+    neighborhood:{
+      'Grocery':[
+        {name:"Fry's Food Store",meta:'Full-Service Grocery',dist:'1.2 mi',icon:'🛒'},
+        {name:'Walmart Supercenter',meta:'Supercenter',dist:'1.5 mi',icon:'🛒'},
+        {name:'Safeway',meta:'Grocery & Pharmacy',dist:'1.8 mi',icon:'🛒'},
+        {name:'Sprouts Farmers Market',meta:'Natural & Organic',dist:'2.1 mi',icon:'🛒'},
+        {name:'Aldi',meta:'Discount Grocery',dist:'2.3 mi',icon:'🛒'},
+      ],
+      'Coffee':[
+        {name:'Starbucks',meta:'Laveen Village',dist:'0.9 mi',icon:'☕'},
+        {name:"Dunkin'",meta:'Coffee & Donuts',dist:'1.1 mi',icon:'☕'},
+      ],
+      'Restaurants':[
+        {name:'Chingon Kitchen',meta:'George Lopez · Fast Casual Mexican',dist:'2.4 mi',icon:'🌮'},
+        {name:"Ditka's at Vee Quiva",meta:'Steakhouse · Casino',dist:'2.5 mi',icon:'🥩'},
+        {name:'Fatburger',meta:'Vee Quiva Food Court',dist:'2.5 mi',icon:'🍔'},
+        {name:'Panda Express',meta:'Vee Quiva Food Court',dist:'2.5 mi',icon:'🍱'},
+      ],
+      'Hotels':[
+        {name:'Vee Quiva Hotel & Casino',meta:'4-Diamond · Gila River · 90 Rooms',dist:'2.4 mi',icon:'🏨'},
+        {name:'Hampton Inn Laveen',meta:'Extended Stay',dist:'3.1 mi',icon:'🏨'},
+      ],
+      'Gyms':[
+        {name:'Planet Fitness Laveen',meta:'Judgement Free Zone',dist:'1.4 mi',icon:'💪'},
+        {name:'Orangetheory Fitness',meta:'HIIT · Heart Rate Training',dist:'2.0 mi',icon:'🏋️'},
+      ],
+      'Hair Salons':[
+        {name:'Great Clips',meta:'Walk-In Welcome',dist:'1.2 mi',icon:'✂️'},
+        {name:'Sport Clips',meta:"Men's Hair Care",dist:'1.6 mi',icon:'✂️'},
+      ],
+      'Pet':[
+        {name:'Banfield Pet Hospital',meta:'Preventive Vet Care',dist:'1.5 mi',icon:'🐾'},
+        {name:'PetSmart Laveen',meta:'Grooming & Supplies',dist:'1.6 mi',icon:'🐾'},
+      ],
+      'Retail':[
+        {name:'Home Depot',meta:'Home Improvement',dist:'1.8 mi',icon:'🔨'},
+        {name:"Lowe's",meta:'Home Improvement',dist:'2.0 mi',icon:'🔨'},
+        {name:'Vee Quiva Casino',meta:'Gaming · Dining · Hotel · 202 Fwy',dist:'2.4 mi',icon:'🎰'},
+      ],
+      'Parks':[{name:'Desert Foothills Park',meta:'Desert Nature Park',dist:'0.8 mi',icon:'🌳'}],
+      'Libraries':[{name:'Laveen Library',meta:'Maricopa County Library',dist:'0.9 mi',icon:'📚'}],
+      'Credit Unions':[{name:'Desert Financial CU',meta:'Arizona Credit Union',dist:'1.5 mi',icon:'🏦'}],
+      'Movie Theaters':[{name:'Harkins Superstition',meta:'Harkins Theatres · 25 screens',dist:'8.2 mi',icon:'🎬'}],
+      'Parking':[{name:'Vee Quiva Parking',meta:'Free Casino Parking',dist:'2.4 mi',icon:'🅿️'}],
+    },
     pois:[
       {name:'Starbucks',coords:[-112.1510,33.3740],color:'#00704A'},
       {name:"Fry's",coords:[-112.1490,33.3760],color:'#E63946'},
@@ -572,7 +664,7 @@ async function loadDBListings() {
 
 async function fetchRestaurants(){
   try{
-    const resp=await fetch('https://mpmprnjhunjfeacikgml.supabase.co/rest/v1/restaurants?select=*&limit=200',{
+    const resp=await fetch('https://mpmprnjhunjfeacikgml.supabase.co/rest/v1/restaurants?select=*&zip=in.(90017,90015,90013,90014)&limit=50',{
       headers:{'apikey':'sb_publishable_T6XISHd9O2Ol0raPaEASqQ_klUXnyY3','Authorization':'Bearer sb_publishable_T6XISHd9O2Ol0raPaEASqQ_klUXnyY3'}
     });
     const data=await resp.json();
@@ -835,7 +927,7 @@ function goHome(){
   map.fitBounds([[-119.0,32.8],[-111.5,34.5]],{padding:{top:80,bottom:80,left:40,right:40},pitch:30,duration:1200});
   document.getElementById('panel').classList.remove('open');
   document.getElementById('db-listing-panel').style.transform='translateY(100%)';
-  activeProperty=null;
+  clearPoiMarkers();clearDBPois();clearDBMarkers();activeProperty=null;
 }
 function openModal(id){document.getElementById('modal-'+id).classList.add('active');}
 function closeModal(id){document.getElementById('modal-'+id).classList.remove('active');}
