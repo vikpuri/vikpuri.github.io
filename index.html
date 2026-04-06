@@ -665,37 +665,31 @@ map.on('load',()=>{
   map.setConfigProperty('basemap','show3dObjects',true);
   properties.forEach(p=>{ if(p.tag==='Active Listing') addCondoMarker(p); else if(p.id==='laveen') addTerrainMarker(p); else addPropertyMarker(p); });
 
-  map.on('click', (e) => {
-    const features = map.queryRenderedFeatures(e.point, {
-      layers: ['poi-label']
-    });
-    if (!features.length) return;
-    const f = features[0];
-    const name = f.properties.name;
-    const category = f.properties.category_en || '';
-    if (!name) return;
-    if (!category.toLowerCase().includes('food') &&
-        !category.toLowerCase().includes('restaurant') &&
-        !category.toLowerCase().includes('cafe') &&
-        !category.toLowerCase().includes('bar')) return;
-
-    const coords = f.geometry.coordinates;
-    const yelpSearch = 'https://www.yelp.com/search?find_desc='+encodeURIComponent(name)+'&find_loc='+encodeURIComponent('Los Angeles CA');
-    const waymo = 'https://waymo.com/waymo-one/?destination='+encodeURIComponent(name+' Los Angeles');
-
-    new mapboxgl.Popup({offset:15})
-      .setLngLat(coords)
-      .setHTML(`
-        <div style="font-family:Raleway,sans-serif;padding:10px;min-width:180px">
-          <div style="font-size:.85rem;font-weight:700;color:#1A1810">${name}</div>
-          <div style="font-size:.7rem;color:#888;margin:2px 0">${category}</div>
-          <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">
-            <a href="${yelpSearch}" target="_blank" style="font-size:.68rem;background:#B22234;color:#fff;padding:4px 8px;border-radius:3px;text-decoration:none">Order · Yelp</a>
-            <a href="${waymo}" target="_blank" style="font-size:.68rem;background:#1A73E8;color:#fff;padding:4px 8px;border-radius:3px;text-decoration:none">Ride · Waymo</a>
-          </div>
-        </div>
-      `)
-      .addTo(map);
+  map.on('click',(e)=>{
+    const features=map.queryRenderedFeatures(e.point,{layers:['poi-label']});
+    if(!features.length)return;
+    const f=features[0];
+    const name=f.properties.name;
+    if(!name)return;
+    const coords=f.geometry.coordinates;
+    fetch(`https://phenomenal-fenglisu-7217d6.netlify.app/.netlify/functions/yelp?name=${encodeURIComponent(name)}&lat=${coords[1]}&lng=${coords[0]}`)
+      .then(r=>r.json())
+      .then(data=>{
+        if(!data.businesses||!data.businesses.length)return;
+        const b=data.businesses[0];
+        const order=b.transactions&&b.transactions.includes('pickup')?`<a href="${b.url}" target="_blank" style="font-size:.7rem;background:#4CAF50;color:#fff;padding:5px 10px;border-radius:3px;text-decoration:none">Order</a>`:'';
+        const waymo=`<a href="https://waymo.com/waymo-one/?destination=${encodeURIComponent(b.location.address1+' '+b.location.city)}" target="_blank" style="font-size:.7rem;background:#1A73E8;color:#fff;padding:5px 10px;border-radius:3px;text-decoration:none">Waymo</a>`;
+        new mapboxgl.Popup({offset:15})
+          .setLngLat(coords)
+          .setHTML(`<div style="font-family:Raleway,sans-serif;padding:10px;min-width:200px">
+            <div style="font-size:.9rem;font-weight:700;color:#1A1810">${b.name}</div>
+            <div style="font-size:.75rem;color:#888;margin:3px 0">${b.rating}★ · ${b.review_count} reviews · ${b.price||''}</div>
+            <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">
+              ${order}${waymo}<a href="${b.url}" target="_blank" style="font-size:.7rem;background:#B22234;color:#fff;padding:5px 10px;border-radius:3px;text-decoration:none">Yelp</a>
+            </div>
+          </div>`)
+          .addTo(map);
+      });
   });
 });
 
