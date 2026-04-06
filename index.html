@@ -831,6 +831,7 @@ function clearPoiMarkers(){poiMarkers.forEach(m=>m.remove());poiMarkers=[];}
 
 function openPanel(p){
   activeProperty=p;
+  if(p.id==='dtla'){history.replaceState(null,'','/dtla.html');}else if(p.id==='laveen'){history.replaceState(null,'','/laveen.html');}
   document.getElementById('panel-tag-text').textContent=p.tag;
   document.getElementById('panel-title').textContent=p.name;
   document.getElementById('panel-subtitle').textContent=p.subtitle;
@@ -920,6 +921,7 @@ function carouselRender(){
 }
 
 function closePanel(){
+  history.replaceState(null,'','/');
   document.getElementById('panel').classList.remove('open');
   if(activeProperty){map.flyTo({center:activeProperty.localCenter,zoom:activeProperty.localZoom-1,pitch:activeProperty.localPitch,bearing:activeProperty.localBearing,duration:900,essential:true});}
 }
