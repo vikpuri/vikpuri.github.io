@@ -1,10 +1,15 @@
 exports.handler = async (event) => {
-  const { name, lat, lng } = event.queryStringParameters;
+  const { name, lat, lng, zip } = event.queryStringParameters;
   try {
-    const response = await fetch(
-      `https://api.yelp.com/v3/businesses/search?term=${encodeURIComponent(name)}&latitude=${lat}&longitude=${lng}&limit=1`,
-      { headers: { Authorization: `Bearer ${process.env.YELP_API_KEY}` } }
-    );
+    let url;
+    if (zip) {
+      url = `https://api.yelp.com/v3/businesses/search?location=${zip}&categories=restaurants,food&limit=20&sort_by=rating`;
+    } else {
+      url = `https://api.yelp.com/v3/businesses/search?term=${encodeURIComponent(name)}&latitude=${lat}&longitude=${lng}&limit=1`;
+    }
+    const response = await fetch(url, {
+      headers: { Authorization: `Bearer ${process.env.YELP_API_KEY}` }
+    });
     const data = await response.json();
     return {
       statusCode: 200,
