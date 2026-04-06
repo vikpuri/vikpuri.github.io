@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Requation — Real Estate Intelligence</title>
   <meta property="og:title" content="South Park Brutalist — Requation DTLA">
   <meta property="og:description" content="2BR/2BA 16th Floor · 801 S Grand Ave · $885,000 · 3D neighborhood intelligence">
   <meta property="og:url" content="https://requation.com/dtla.html">
   <meta property="og:image" content="https://i.imgur.com/3rFddwE.jpeg">
-  <title>Requation — Real Estate Intelligence</title>
   <link href="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.css" rel="stylesheet" />
   <script src="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -250,7 +250,6 @@
 <div class="tab-pane" id="tab-neighborhood">
   <div class="nbhd-cats" id="nbhd-cats"></div>
   <div class="nbhd-list" id="nbhd-list"></div>
-  <div id="nbhd-restaurants"></div>
 </div>
 
 <div class="tab-pane" id="tab-waymo">
@@ -340,7 +339,7 @@ const properties=[
     tags:['South Park DTLA','High-Rise','Brutalist','Walk Score 98','FSBO','Waymo Corridor'],
     agentLink:'https://www.zillow.com/homes/for_sale/',
     images:[
-      'https://i.imgur.com/3rFddwE.jpeg',
+      'https://i.imgur.com/1K9P4FK',
       'https://i.imgur.com/YIN8O41.jpeg','https://i.imgur.com/C2uei3w.jpeg','https://i.imgur.com/yhnjPo6.jpeg',
       'https://i.imgur.com/JQsQZmA.jpeg','https://i.imgur.com/N4s3BiK.jpeg','https://i.imgur.com/NKGvYiS.jpeg',
       'https://i.imgur.com/uSjnr0A.jpeg','https://i.imgur.com/F71ADpi.jpeg','https://i.imgur.com/HBNlkj8.jpeg',
@@ -393,7 +392,18 @@ const properties=[
       ]
     },
     neighborhood:{
-      'Order-In':[],
+      'Restaurants':[
+        {name:'Bottega Louie',meta:'Grand Café · Italian-American',dist:'0.1 mi',icon:'🍽️'},
+        {name:'Perch LA',meta:'Rooftop French Bistro',dist:'0.2 mi',icon:'🥂'},
+        {name:'Broken Spanish',meta:'Modern Mexican',dist:'0.3 mi',icon:'🌮'},
+        {name:'Otium',meta:'California Contemporary',dist:'0.4 mi',icon:'🍷'},
+        {name:'Officine Brera',meta:'Northern Italian',dist:'0.5 mi',icon:'🍝'},
+      ],
+      'Coffee':[
+        {name:'Philz Coffee',meta:'Specialty Pour-Over',dist:'100 ft',icon:'☕'},
+        {name:'Groundwork Coffee',meta:'Organic Roasters',dist:'0.3 mi',icon:'☕'},
+        {name:'Blue Bottle Coffee',meta:'Third Wave Specialty',dist:'0.6 mi',icon:'☕'},
+      ],
       'Grocery':[
         {name:'Whole Foods Market',meta:'Premium Grocery',dist:'25 ft',icon:'🛒'},
         {name:'Ralphs DTLA',meta:'Full-Service Grocery',dist:'0.4 mi',icon:'🛒'},
@@ -471,7 +481,7 @@ const properties=[
     tags:['Laveen','4.4 Acres','Phoenix Metro','Solar Ready','Mountain Views','Loop 202','FSBO','Waymo Corridor','Equestrian Estate','Urban Farmhouse','LA 75 Min'],
     agentLink:'https://www.zillow.com/homes/for_sale/',
     images:[
-      'https://i.imgur.com/6YlnSK6.jpeg','https://i.imgur.com/F0YLfoC.jpeg','https://i.imgur.com/ycRr5XE.jpeg',
+      'https://i.imgur.com/0aYf87y.jpeg','https://i.imgur.com/F0YLfoC.jpeg','https://i.imgur.com/ycRr5XE.jpeg',
       'https://i.imgur.com/1MBjfkr.jpeg','https://i.imgur.com/uiikzzR.jpeg','https://i.imgur.com/1qQr4rf.jpeg',
       'https://i.imgur.com/ubOV3jq.jpeg','https://i.imgur.com/DlP9Thj.jpeg','https://i.imgur.com/9Ti4py8.jpeg',
       'https://i.imgur.com/0jwRIjB.jpeg','https://i.imgur.com/TE7zKJM.jpeg','https://i.imgur.com/ytIcEu5.jpeg',
@@ -482,8 +492,99 @@ const properties=[
       'https://i.imgur.com/fJUhniW.jpeg'
     ],
     videos:LAV_VIDEOS,
-    comps:{headline:'',intro:'',listings:[]},
-    neighborhood:{'Grocery':[{name:'Fry\'s Food Store',meta:'Full Service Grocery',dist:'1.2 mi',icon:'🛒'},{name:'Walmart',meta:'Supercenter',dist:'1.4 mi',icon:'🛒'},{name:'Aldi',meta:'Discount Grocery',dist:'2.1 mi',icon:'🛒'},{name:'Sprouts',meta:'Farmers Market',dist:'2.3 mi',icon:'🥦'}],'Coffee':[{name:'Starbucks',meta:'Coffee & Drinks',dist:'1.1 mi',icon:'☕'},{name:'Dunkin\'',meta:'Coffee & Donuts',dist:'1.3 mi',icon:'☕'}],'Home Improvement':[{name:'Home Depot',meta:'Home Improvement',dist:'1.5 mi',icon:'🔨'},{name:'Lowe\'s',meta:'Home Improvement',dist:'1.8 mi',icon:'🔨'}],'Entertainment':[{name:'Vee Quiva Casino',meta:'Gila River Casino',dist:'2.0 mi',icon:'🎰'},{name:'Harkins Theatre',meta:'Movie Theater',dist:'4.2 mi',icon:'🎬'}],'Fitness':[{name:'Planet Fitness',meta:'24hr Gym',dist:'1.6 mi',icon:'💪'},{name:'LA Fitness',meta:'Full Service Gym',dist:'2.0 mi',icon:'💪'}],'Pet Care':[{name:'PetSmart',meta:'Pet Supplies & Care',dist:'1.8 mi',icon:'🐾'}],'Education':[{name:'Laveen Elementary',meta:'Charter School',dist:'0.8 mi',icon:'🏫'},{name:'Vista del Sur',meta:'Charter School',dist:'1.2 mi',icon:'🏫'}],'Transit':[{name:'Valley Metro Rail',meta:'Phoenix Light Rail',dist:'3.5 mi',icon:'🚇'},{name:'Loop 202 Freeway',meta:'South Mountain Freeway',dist:'1.0 mi',icon:'🛣️'}]},
+    comps:{
+      headline:'Active 1-Acre / 2+ Bath Comps · Laveen 85339',
+      intro:'Active listings on 1+ acre lots in 85339 with 2 or more bathrooms. Median list price for acre-lot homes in Laveen is $900K. Your 4BD/3BA estate at $649K on ~1 acre is priced well below the acreage median — a significant value opportunity.',
+      listings:[
+        {
+          address:'10445 S 27th Ave — Laveen Unsubdivided',
+          price:'$894,000',
+          chips:['4 BD','3 BA','3,068 SF','1.36 Acres','Mountain Views'],
+          note:'Your nearest direct comp — 4/3 at 3,068 SF on 1.36 acres, just 1.3 miles from your address on the same S 27th corridor. Listed at $894K. Your home offers similar specs at $245K less.',
+          source:'LandWatch / Kenneth James Realty · 85339',status:'Active'
+        },
+        {
+          address:'5133 W McNeil St — Laveen Estates',
+          price:'$650,000',
+          chips:['4 BD','3 BA','1,825 SF','1+ Acre','Farmhouse'],
+          note:'Closest price comp at $650K — farmhouse-style 4/3 on over an acre. Only 1,825 SF however, meaning your home delivers 75% more square footage at virtually the same price.',
+          source:'Kenneth James Realty · 85339',status:'Active'
+        },
+        {
+          address:'2927 W Latona Rd — Laveen',
+          price:'$890,000',
+          chips:['4 BD','3 BA','2,691 SF','1+ Acre'],
+          note:'4/3 on 1+ acre at $890K. Larger than McNeil but 509 SF smaller than your home. Priced $241K above your listing — your estate is the best value per SF among active acre-lot comps.',
+          source:'Kenneth James Realty · 85339',status:'Active'
+        },
+        {
+          address:'3923 W Fox Rd — Sunset Cove Estates',
+          price:'$1,350,000',
+          chips:['4 BD','4 BA','3,462 SF','1 Acre','Sunset Cove','Gated'],
+          note:'Premium end of the 1-acre market in Laveen — gated Sunset Cove Estates community, South Mountain views, luxury custom build. Sets the ceiling. Your home offers comparable acreage at less than half the price.',
+          source:'LandWatch / 85339',status:'Active'
+        },
+        {
+          address:'4427 W Calle Poco — Laveen',
+          price:'$750,000',
+          chips:['4 BD','3 BA','2,663 SF','2.16 Acres','No HOA'],
+          note:'2.16 acres, 4/3, no HOA — larger land parcel at $750K. At 2,663 SF it is 537 SF smaller than your home. Reinforces that Laveen acreage with 3+ baths commands a strong premium your pricing undercuts.',
+          source:'LandWatch / 85339',status:'Active'
+        },
+        {
+          address:'5040 W Steinway Dr — La Sondra',
+          price:'$760,000',
+          chips:['3 BD','2 BA','1,941 SF','1+ Acre','Horse Property'],
+          note:'1-acre horse property with irrigation — 3/2 at 1,941 SF, priced at $760K. Fewer bedrooms, smaller footprint, no 3rd bath. Your 4/3 at 3,200 SF for $649K is the superior offering at $111K less.',
+          source:'Kenneth James Realty · 85339',status:'Active'
+        },
+      ]
+    },
+    neighborhood:{
+      'Grocery':[
+        {name:"Fry's Food Store",meta:'Full-Service Grocery',dist:'1.2 mi',icon:'🛒'},
+        {name:'Walmart Supercenter',meta:'Supercenter',dist:'1.5 mi',icon:'🛒'},
+        {name:'Safeway',meta:'Grocery & Pharmacy',dist:'1.8 mi',icon:'🛒'},
+        {name:'Sprouts Farmers Market',meta:'Natural & Organic',dist:'2.1 mi',icon:'🛒'},
+        {name:'Aldi',meta:'Discount Grocery',dist:'2.3 mi',icon:'🛒'},
+      ],
+      'Coffee':[
+        {name:'Starbucks',meta:'Laveen Village',dist:'0.9 mi',icon:'☕'},
+        {name:"Dunkin'",meta:'Coffee & Donuts',dist:'1.1 mi',icon:'☕'},
+      ],
+      'Restaurants':[
+        {name:'Chingon Kitchen',meta:'George Lopez · Fast Casual Mexican',dist:'2.4 mi',icon:'🌮'},
+        {name:"Ditka's at Vee Quiva",meta:'Steakhouse · Casino',dist:'2.5 mi',icon:'🥩'},
+        {name:'Fatburger',meta:'Vee Quiva Food Court',dist:'2.5 mi',icon:'🍔'},
+        {name:'Panda Express',meta:'Vee Quiva Food Court',dist:'2.5 mi',icon:'🍱'},
+      ],
+      'Hotels':[
+        {name:'Vee Quiva Hotel & Casino',meta:'4-Diamond · Gila River · 90 Rooms',dist:'2.4 mi',icon:'🏨'},
+        {name:'Hampton Inn Laveen',meta:'Extended Stay',dist:'3.1 mi',icon:'🏨'},
+      ],
+      'Gyms':[
+        {name:'Planet Fitness Laveen',meta:'Judgement Free Zone',dist:'1.4 mi',icon:'💪'},
+        {name:'Orangetheory Fitness',meta:'HIIT · Heart Rate Training',dist:'2.0 mi',icon:'🏋️'},
+      ],
+      'Hair Salons':[
+        {name:'Great Clips',meta:'Walk-In Welcome',dist:'1.2 mi',icon:'✂️'},
+        {name:'Sport Clips',meta:"Men's Hair Care",dist:'1.6 mi',icon:'✂️'},
+      ],
+      'Pet':[
+        {name:'Banfield Pet Hospital',meta:'Preventive Vet Care',dist:'1.5 mi',icon:'🐾'},
+        {name:'PetSmart Laveen',meta:'Grooming & Supplies',dist:'1.6 mi',icon:'🐾'},
+      ],
+      'Retail':[
+        {name:'Home Depot',meta:'Home Improvement',dist:'1.8 mi',icon:'🔨'},
+        {name:"Lowe's",meta:'Home Improvement',dist:'2.0 mi',icon:'🔨'},
+        {name:'Vee Quiva Casino',meta:'Gaming · Dining · Hotel · 202 Fwy',dist:'2.4 mi',icon:'🎰'},
+      ],
+      'Parks':[{name:'Desert Foothills Park',meta:'Desert Nature Park',dist:'0.8 mi',icon:'🌳'}],
+      'Libraries':[{name:'Laveen Library',meta:'Maricopa County Library',dist:'0.9 mi',icon:'📚'}],
+      'Credit Unions':[{name:'Desert Financial CU',meta:'Arizona Credit Union',dist:'1.5 mi',icon:'🏦'}],
+      'Movie Theaters':[{name:'Harkins Superstition',meta:'Harkins Theatres · 25 screens',dist:'8.2 mi',icon:'🎬'}],
+      'Parking':[{name:'Vee Quiva Parking',meta:'Free Casino Parking',dist:'2.4 mi',icon:'🅿️'}],
+    },
     pois:[
       {name:'Starbucks',coords:[-112.1510,33.3740],color:'#00704A'},
       {name:"Fry's",coords:[-112.1490,33.3760],color:'#E63946'},
@@ -637,14 +738,6 @@ async function fetchRestaurants(){
   }catch(e){console.error('Restaurant load failed',e);}
 }
 
-function handleHash(){
-  const hash=window.location.hash;
-  if(hash==='#dtla') setTimeout(()=>openPanel(properties.find(p=>p.id==='dtla')),1000);
-  if(hash==='#laveen') setTimeout(()=>openPanel(properties.find(p=>p.id==='laveen')),1000);
-}
-window.addEventListener('hashchange',handleHash);
-handleHash();
-
 mapboxgl.accessToken='pk.eyJ1IjoidmlranB1cmkiLCJhIjoiY21uYnF0ZWNuMHhnaTJ3bzR5MG5xOTEzbSJ9.vqmEhPHMBQOn4GX3yrbiGw';
 const map=new mapboxgl.Map({container:'map',style:'mapbox://styles/mapbox/standard',pitch:30,bearing:45,attributionControl:false});
 map.fitBounds([[-119.0,32.8],[-111.5,34.5]],{padding:{top:80,bottom:80,left:40,right:40},pitch:30,duration:0});
@@ -741,7 +834,6 @@ function addPoiMarkers(p){
 function clearPoiMarkers(){poiMarkers.forEach(m=>m.remove());poiMarkers=[];}
 
 function openPanel(p){
-  window.location.hash=p.id;
   activeProperty=p;
   document.getElementById('panel-tag-text').textContent=p.tag;
   document.getElementById('panel-title').textContent=p.name;
@@ -798,33 +890,6 @@ function buildNeighborhood(p){
     `<button class="nbhd-cat-btn${i===0?' active':''}" onclick="showCat('${c}',this)">${c}</button>`
   ).join('');
   showItems(p.neighborhood[cats[0]]);
-  document.getElementById('nbhd-restaurants').innerHTML='';
-  if(p.id==='dtla') buildRestaurantList();
-}
-async function buildRestaurantList(){
-  try{
-    const resp=await fetch('https://mpmprnjhunjfeacikgml.supabase.co/rest/v1/restaurants?select=name,rating,address,waymo_url&zip=in.(90017,90015,90013,90014)&order=rating.desc&limit=50',{
-      headers:{'apikey':'sb_publishable_T6XISHd9O2Ol0raPaEASqQ_klUXnyY3','Authorization':'Bearer sb_publishable_T6XISHd9O2Ol0raPaEASqQ_klUXnyY3'}
-    });
-    const data=await resp.json();
-    if(!data.length) return;
-    const el=document.getElementById('nbhd-restaurants');
-    el.innerHTML=`
-      <div style="padding:14px 20px 6px;border-top:1px solid var(--rule);margin-top:8px">
-        <div style="font-family:'Source Serif 4',serif;font-size:.53rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);margin-bottom:10px">Human Intelligence · Curated Restaurants</div>
-        ${data.map(r=>`
-          <div class="nbhd-card">
-            <div class="nbhd-icon">🍽️</div>
-            <div class="nbhd-info">
-              <div class="nbhd-name">${r.name}</div>
-              <div class="nbhd-meta">${r.address}</div>
-            </div>
-            <a href="${r.waymo_url}" target="_blank" style="font-family:'Source Serif 4',serif;font-size:.59rem;color:var(--gold);font-weight:600;text-decoration:none;flex-shrink:0">${r.rating}★</a>
-          </div>
-        `).join('')}
-      </div>
-    `;
-  }catch(e){console.error('Restaurant list failed',e);}
 }
 function showCat(cat,btn){
   document.querySelectorAll('.nbhd-cat-btn').forEach(b=>b.classList.remove('active'));
@@ -859,7 +924,6 @@ function carouselRender(){
 }
 
 function closePanel(){
-  window.location.hash='';
   document.getElementById('panel').classList.remove('open');
   if(activeProperty){map.flyTo({center:activeProperty.localCenter,zoom:activeProperty.localZoom-1,pitch:activeProperty.localPitch,bearing:activeProperty.localBearing,duration:900,essential:true});}
 }
@@ -872,7 +936,6 @@ function goHome(){
 function openModal(id){document.getElementById('modal-'+id).classList.add('active');}
 function closeModal(id){document.getElementById('modal-'+id).classList.remove('active');}
 document.querySelectorAll('.modal-overlay').forEach(el=>el.addEventListener('click',e=>{if(e.target===el)el.classList.remove('active');}));
-window.location.hash='dtla'; setTimeout(()=>openPanel(properties.find(p=>p.id==='dtla')),1000);
 </script>
 
 </body>
