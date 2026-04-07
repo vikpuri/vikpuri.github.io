@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Requation — Real Estate Intelligence</title>
+  <meta property="og:title" content="Urban Farmhouse — Requation Laveen">
+  <meta property="og:description" content="4BR/4.5BA · 5,400SF · 4.4 Acres · South Mountain · $2,000,000">
+  <meta property="og:url" content="https://requation.com/laveen.html">
+  <meta property="og:image" content="https://i.imgur.com/6YlnSK6.jpeg">
+  <link href="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.css" rel="stylesheet" />
+  <script src="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&family=Raleway:ital,wght@0,300;1,400&family=Source+Serif+4:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet" />
+  <style>
+    :root{
+      --gold:#B8922A;--gold-light:#C9A84C;--gold-dim:rgba(184,146,42,.1);--gold-border:rgba(184,146,42,.3);
+      --cream:#FAF8F4;--cream-2:#F4F1EB;--cream-3:#EDE9E0;--ink:#1C1C1C;--ink-2:#2E2E2E;--ink-3:#444;
+      --rule:rgba(0,0,0,.12);--rule-heavy:rgba(0,0,0,.22);
+      --text:var(--ink);--text-muted:#666;
+      --waymo:#1A73E8;--waymo-dim:rgba(26,115,232,.08);--waymo-border:rgba(26,115,232,.28);
+      --panel-width:500px;--header-h:68px
+    }
+    *,::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html,body{height:100%;background:var(--cream);color:var(--ink);font-family:'Source Serif 4',Georgia,serif;overflow:hidden}
+    header{position:fixed;top:0;left:0;right:0;height:var(--header-h);z-index:100;display:flex;align-items:center;justify-content:space-between;flex-direction:row;padding:0 36px;background:var(--cream);border-bottom:2px solid var(--ink);backdrop-filter:none}
+    header nav{order:0}
+    header .logo-svg{order:1;display:flex;align-items:center;margin-top:2px}
+    .nav-home{font-family:'Source Serif 4',serif;font-size:.72rem;font-weight:400;letter-spacing:.14em;text-transform:uppercase;color:var(--text-muted);text-decoration:none;background:none;border:none;padding:0;cursor:pointer;transition:color .25s}
+    .nav-home:hover{color:var(--ink)}
+    .logo-wrap{display:flex;align-items:center;gap:14px;cursor:pointer}
+    .logo-wrap:hover .logo-text{color:var(--gold)}
+    .logo-img{height:40px;width:auto;object-fit:contain;border-radius:3px}
+    .logo-text{font-family:'Playfair Display',serif;font-size:1.55rem;font-weight:600;color:var(--ink);letter-spacing:.04em;text-transform:uppercase;transition:color .25s}
+    nav{display:flex;align-items:center;gap:32px}
+    nav a{font-family:'Source Serif 4',serif;font-size:.72rem;font-weight:400;letter-spacing:.14em;text-transform:uppercase;color:var(--text-muted);text-decoration:none;position:relative;transition:color .25s}
+    nav a::after{content:'';position:absolute;bottom:-4px;left:0;right:0;height:1px;background:var(--ink);transform:scaleX(0);transition:transform .3s}
+    nav a:hover{color:var(--ink)} nav a:hover::after{transform:scaleX(1)}
+    #map{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0}
+    .req-marker{cursor:pointer;width:42px;height:42px;display:flex;align-items:center;justify-content:center;position:relative;will-change:transform}
+    .req-marker .pulse-ring{position:absolute;width:42px;height:42px;border:2px solid var(--gold);border-radius:50%;animation:none;opacity:0;transform-origin:center center}
+    .req-marker .dot{width:14px;height:14px;background:var(--gold);border-radius:50%;border:2px solid #fff;box-shadow:0 0 12px rgba(184,146,42,.8);z-index:1;transition:transform .2s}
+    .req-marker:hover .dot{transform:scale(1.3)}
+    .req-marker .label{position:absolute;bottom:-22px;left:50%;transform:translateX(-50%);font-family:'Source Serif 4',serif;font-size:.55rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#fff;white-space:nowrap;text-shadow:0 1px 4px rgba(0,0,0,.9)}
+    .poi-marker{cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px}
+    .poi-dot{width:9px;height:9px;border-radius:50%;border:1.5px solid rgba(255,255,255,.8);box-shadow:0 0 5px rgba(0,0,0,.7)}
+    .poi-label{font-size:.46rem;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:#fff;white-space:nowrap;text-shadow:0 1px 3px #000;background:rgba(0,0,0,.65);padding:2px 4px;border-radius:2px}
+    .poi-marker.waymo .poi-dot{width:12px;height:12px;box-shadow:0 0 10px rgba(26,115,232,.9)}
+    .poi-marker.waymo .poi-label{background:rgba(26,115,232,.9)}
+    .condo-marker{cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px}
+    .condo-dot{position:absolute;width:10px;height:10px;border-radius:50%;background:#00CED1;border:2px solid #fff;box-shadow:0 0 6px rgba(0,206,209,0.8)}
+    .condo-label{font-size:.5rem;font-weight:700;letter-spacing:.06em;color:#00CED1;white-space:nowrap;text-shadow:0 1px 3px #000;background:rgba(0,0,0,.7);padding:2px 5px;border-radius:2px}
+    #panel{position:fixed;top:auto;bottom:0;right:0;left:0;width:100%;max-width:520px;margin:0 auto;height:80vh;background:var(--cream);border-left:none;border-top:2px solid var(--ink);border-radius:16px 16px 0 0;transform:translateY(100%);transition:transform .55s cubic-bezier(.22,1,.36,1);z-index:90;display:flex;flex-direction:column;overflow:hidden}
+    #panel.open{transform:translateY(0)}
+    .panel-header{padding:18px 24px 14px;border-bottom:2px solid var(--ink);position:relative;flex-shrink:0;background:var(--cream)}
+    .panel-tag{font-family:'Source Serif 4',serif;font-size:.58rem;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:4px;display:flex;align-items:center;gap:8px}
+    .waymo-badge{background:var(--waymo);color:#fff;font-size:.48rem;letter-spacing:.1em;padding:2px 7px;border-radius:2px;font-weight:600;font-family:'Source Serif 4',serif}
+    .panel-title{font-family:'Playfair Display',serif;font-size:1.65rem;font-weight:500;color:var(--ink);line-height:1.2;cursor:pointer;transition:color .2s}
+    .panel-title:hover{color:var(--gold)}
+    .panel-subtitle{font-family:'Source Serif 4',serif;font-size:.68rem;color:var(--text-muted);margin-top:4px;letter-spacing:.02em}
+    #panel-close{position:absolute;top:16px;right:18px;width:28px;height:28px;background:rgba(0,206,209,0.45);border:1px solid var(--rule-heavy);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s,transform .2s;color:#fff;font-size:.85rem}
+    #panel-close:hover{background:var(--cream-3);transform:rotate(90deg)}
+    .panel-tabs{display:flex;border-bottom:1px solid var(--rule-heavy);flex-shrink:0;background:var(--cream-2)}
+    .panel-tab{flex:1;padding:11px 4px;text-align:center;font-family:'Source Serif 4',serif;font-size:.56rem;letter-spacing:.12em;text-transform:uppercase;color:var(--text-muted);cursor:pointer;border:none;background:none;border-bottom:2px solid transparent;transition:color .2s,border-color .2s}
+    .panel-tab.active{color:var(--ink);border-bottom-color:var(--ink)}
+    .panel-tab:hover{color:var(--ink)}
+    .panel-body{flex:1;overflow-y:auto;padding:0;scrollbar-width:thin;scrollbar-color:var(--rule-heavy) transparent;background:var(--cream)}
+    .panel-body::-webkit-scrollbar{width:3px}
+    .panel-body::-webkit-scrollbar-thumb{background:var(--rule-heavy);border-radius:0}
+    .tab-pane{display:none} .tab-pane.active{display:block}
+    .carousel-wrap{position:relative;width:100%;background:#111;overflow:hidden}
+    .carousel-track{display:flex;transition:transform .42s cubic-bezier(.22,1,.36,1)}
+    .carousel-slide{flex-shrink:0;width:100%}
+    .carousel-slide img{width:100%;display:block;object-fit:contain;object-position:center;max-height:480px;background:#000}
+    .carousel-slide img.portrait{max-height:480px}
+    .carousel-slide img.landscape{max-height:480px}
+    .carousel-btn{position:absolute;top:50%;transform:translateY(-50%);width:32px;height:32px;background:rgba(250,248,244,.88);border:1px solid var(--rule-heavy);color:var(--ink);font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:5;transition:background .2s}
+    .carousel-btn:hover{background:rgba(250,248,244,1)}
+    .carousel-btn.prev{left:10px} .carousel-btn.next{right:10px}
+    .carousel-counter{position:absolute;bottom:9px;right:12px;font-family:'Source Serif 4',serif;font-size:.5rem;color:rgba(255,255,255,.8);background:rgba(0,0,0,.6);padding:2px 8px;letter-spacing:.08em}
+    .carousel-dots{display:flex;justify-content:center;flex-wrap:wrap;gap:5px;padding:8px 10px 5px;background:var(--cream-2);border-bottom:1px solid var(--rule)}
+    .carousel-dot{width:5px;height:5px;border-radius:50%;background:var(--rule-heavy);cursor:pointer;transition:background .2s,transform .2s;flex-shrink:0}
+    .carousel-dot.active{background:var(--ink);transform:scale(1.3)}
+    .video-section{padding:16px 20px 10px}
+    .section-label{font-family:'Source Serif 4',serif;font-size:.57rem;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-3);margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--rule-heavy)}
+    .video-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+    .video-item{position:relative;width:100%;padding-bottom:56.25%;background:#111;overflow:hidden;border:1px solid var(--rule)}
+    .video-item iframe{position:absolute;top:0;left:0;width:100%;height:100%;border:none}
+    .video-item iframe{position:absolute;top:0;left:0;width:100%;height:100%;border:none}
+    .panel-pad{padding:16px 20px}
+
+    /* NEWSPAPER DATA TABLE — stats grid */
+    .stats-grid{display:grid;grid-template-columns:1fr 1fr;margin-bottom:18px;border:1px solid var(--rule-heavy);border-bottom:none}
+    .stat-card{padding:10px 14px;border-bottom:1px solid var(--rule-heavy);border-right:1px solid var(--rule)}
+    .stat-card:nth-child(even){border-right:none}
+    .stat-label{font-family:'Source Serif 4',serif;font-size:.52rem;letter-spacing:.14em;text-transform:uppercase;color:var(--text-muted);margin-bottom:3px}
+    .stat-value{font-family:'Playfair Display',serif;font-size:1.25rem;color:var(--ink);font-weight:500}
+
+    .section-title{font-family:'Source Serif 4',serif;font-size:.57rem;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-3);margin-bottom:8px;margin-top:18px;padding-bottom:5px;border-bottom:1px solid var(--rule-heavy)}
+    .section-text{font-family:'Source Serif 4',serif;font-size:.82rem;line-height:1.78;color:var(--ink-3)}
+    .tag-list{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
+    .tag{font-family:'Source Serif 4',serif;font-size:.52rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);background:var(--cream-2);border:1px solid var(--rule);padding:3px 8px}
+
+/* COMP CARDS */
+.comp-intro-text{font-family:'Source Serif 4',serif;font-size:.78rem;line-height:1.72;color:var(--ink-3);margin-bottom:14px}
+.comp-card{background:var(--cream);border:none;border-top:1px solid var(--rule);margin-bottom:0;transition:background .2s}
+.comp-card:first-child{border-top:none}
+.comp-card:hover{background:var(--cream-2)}
+.comp-card-top{display:flex;justify-content:space-between;align-items:flex-start;padding:12px 0 5px}
+.comp-address{font-family:'Source Serif 4',serif;font-size:.74rem;font-weight:600;color:var(--ink);line-height:1.35;flex:1}
+.comp-price{font-family:'Playfair Display',serif;font-size:1.05rem;color:var(--gold);font-weight:500;flex-shrink:0;margin-left:12px}
+.comp-chips{display:flex;gap:5px;padding:0 0 7px;flex-wrap:wrap}
+.comp-chip{font-family:'Source Serif 4',serif;font-size:.5rem;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);background:var(--cream-3);border:1px solid var(--rule);padding:2px 6px}
+.comp-note{font-family:'Source Serif 4',serif;font-size:.7rem;color:var(--ink-3);padding:7px 0 10px;line-height:1.6;border-top:1px solid var(--rule)}
+.comp-source-row{display:flex;justify-content:space-between;align-items:center;padding:0 0 10px}
+.comp-source{font-family:'Source Serif 4',serif;font-size:.5rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted)}
+.comp-status{font-family:'Source Serif 4',serif;font-size:.5rem;letter-spacing:.1em;text-transform:uppercase;color:#2E7D32;font-weight:600}
+#comps-list{padding:0 20px 24px}
+.comp-card-top,.comp-chips,.comp-note,.comp-source-row{padding-left:0;padding-right:0}
+
+/* NEIGHBORHOOD */
+.nbhd-cats{display:flex;gap:5px;flex-wrap:wrap;padding:12px 20px 8px;border-bottom:1px solid var(--rule)}
+.nbhd-cat-btn{font-family:'Source Serif 4',serif;font-size:.53rem;letter-spacing:.1em;text-transform:uppercase;padding:4px 10px;border:1px solid var(--rule-heavy);background:none;color:var(--text-muted);cursor:pointer;transition:all .2s;white-space:nowrap}
+.nbhd-cat-btn.active,.nbhd-cat-btn:hover{background:var(--ink);color:var(--cream);border-color:var(--ink)}
+.nbhd-list{padding:4px 20px 20px;display:flex;flex-direction:column;gap:0}
+.nbhd-card{display:flex;align-items:center;gap:11px;background:none;border:none;border-bottom:1px solid var(--rule);padding:9px 0;transition:background .15s}
+.nbhd-card:hover{background:var(--cream-2);padding-left:6px;padding-right:6px;margin:0 -6px}
+.nbhd-icon{font-size:1.1rem;flex-shrink:0;width:26px;text-align:center}
+.nbhd-info{flex:1;min-width:0}
+.nbhd-name{font-family:'Source Serif 4',serif;font-size:.73rem;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nbhd-meta{font-family:'Source Serif 4',serif;font-size:.59rem;color:var(--text-muted);margin-top:1px}
+.nbhd-dist{font-family:'Source Serif 4',serif;font-size:.59rem;color:var(--gold);flex-shrink:0;font-weight:600}
+
+/* WAYMO */
+.waymo-section{margin:16px 20px;border:1px solid var(--waymo-border);overflow:hidden;background:var(--waymo-dim)}
+.waymo-header{background:rgba(26,115,232,.1);padding:13px 17px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--waymo-border)}
+.waymo-icon{font-size:1.4rem}
+.waymo-title{font-family:'Playfair Display',serif;font-size:1.1rem;color:var(--ink);font-weight:500}
+.waymo-subtitle{font-family:'Source Serif 4',serif;font-size:.54rem;letter-spacing:.12em;text-transform:uppercase;color:var(--waymo);margin-top:2px}
+.waymo-body{padding:13px 17px}
+.waymo-body p{font-family:'Source Serif 4',serif;font-size:.78rem;line-height:1.72;color:var(--ink-3);margin-bottom:10px}
+.waymo-body p:last-child{margin-bottom:0}
+.waymo-body strong{color:var(--ink)}
+.waymo-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0;margin-top:12px;border:1px solid var(--waymo-border)}
+.waymo-stat{background:rgba(26,115,232,.06);border-right:1px solid var(--waymo-border);padding:9px;text-align:center}
+.waymo-stat:last-child{border-right:none}
+.waymo-stat-val{font-family:'Playfair Display',serif;font-size:1.2rem;color:var(--waymo);font-weight:500}
+.waymo-stat-lbl{font-family:'Source Serif 4',serif;font-size:.49rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);margin-top:2px}
+.panel-cta{padding:13px 20px 18px;display:flex;flex-direction:column;gap:8px;border-top:2px solid var(--ink);flex-shrink:0;background:var(--cream)}
+.btn-primary{width:100%;padding:12px;background:var(--ink);color:var(--cream);border:none;font-family:'Source Serif 4',serif;font-size:.66rem;font-weight:600;letter-spacing:.18em;text-transform:uppercase;cursor:pointer;transition:background .2s,transform .15s}
+.btn-primary:hover{background:var(--ink-2);transform:translateY(-1px)}
+.btn-secondary{width:100%;padding:11px;background:transparent;color:var(--ink);border:1px solid var(--rule-heavy);font-family:'Source Serif 4',serif;font-size:.66rem;font-weight:400;letter-spacing:.18em;text-transform:uppercase;cursor:pointer;transition:background .2s,transform .15s}
+.btn-secondary:hover{background:var(--cream-3);transform:translateY(-1px)}
+#hint{position:fixed;bottom:36px;left:50%;transform:translateX(-50%);background:rgba(250,248,244,.95);border:1px solid var(--rule-heavy);padding:11px 22px;font-family:'Source Serif 4',serif;font-size:.66rem;letter-spacing:.12em;color:var(--text-muted);backdrop-filter:blur(8px);z-index:80;transition:opacity .5s;pointer-events:none}
+#hint span{color:var(--gold);font-weight:600}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(28,28,28,.55);z-index:200;align-items:center;justify-content:center;backdrop-filter:blur(3px)}
+.modal-overlay.active{display:flex}
+.modal{background:var(--cream);border:1px solid var(--rule-heavy);border-top:3px solid var(--ink);width:90%;max-width:520px;padding:40px;position:relative;animation:modalIn .3s ease;overflow-y:auto;max-height:70vh}
+@keyframes modalIn{from{opacity:0;transform:translateY(16px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
+.modal-close{position:absolute;top:16px;right:18px;background:none;border:none;color:var(--text-muted);font-size:1.2rem;cursor:pointer;transition:color .2s}
+.modal-close:hover{color:var(--ink)}
+.modal-tag{font-family:'Source Serif 4',serif;font-size:.58rem;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:10px;display:block}
+.modal-title{font-family:'Playfair Display',serif;font-size:1.9rem;color:var(--ink);margin-bottom:14px;font-weight:500}
+.modal-body{font-family:'Source Serif 4',serif;font-size:.82rem;line-height:1.78;color:var(--ink-3)}
+.modal-divider{height:1px;background:var(--rule-heavy);margin:20px 0}
+.contact-row{display:flex;align-items:center;gap:12px;margin-bottom:13px}
+.contact-icon{width:30px;height:30px;background:var(--cream-2);border:1px solid var(--rule-heavy);display:flex;align-items:center;justify-content:center;font-size:.8rem;flex-shrink:0}
+.contact-info{font-family:'Source Serif 4',serif;font-size:.8rem;color:var(--ink-3)}
+.contact-info strong{display:block;font-family:'Source Serif 4',serif;font-size:.58rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink);margin-bottom:2px}
+.video-play{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:48px;height:48px;background:rgba(0,0,0,.7);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.2rem}
+.video-title{font-family:'Cormorant Garamond',serif;font-size:.65rem;color:var(--ink-muted,#888);padding:4px 0 8px;text-align:center}
+.mapboxgl-ctrl-attrib{font-size:9px !important;opacity:0.5 !important}
+@media(max-width:640px){:root{--panel-width:100vw}header{padding:0 18px}.logo-text{font-size:1.2rem}.video-grid{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+<div id="map"></div>
+<header>
+  <nav>
+    <button class="nav-btn nav-home" onclick="goHome()">Home</button>
+    <a href="#" onclick="openModal('about');return false;">About</a>
+    <a href="#" onclick="openModal('contact');return false;">Contact</a>
+  </nav>
+  <div class="logo-svg" onclick="goHome()" style="cursor:pointer;display:flex;align-items:center">
+    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 440 100' height='44'%3E%3Cdefs%3E%3Cfilter id='gb'%3E%3CfeGaussianBlur stdDeviation='1.2' result='b'/%3E%3CfeMerge%3E%3CfeMergeNode in='b'/%3E%3CfeMergeNode in='SourceGraphic'/%3E%3C/feMerge%3E%3C/filter%3E%3C/defs%3E%3Ctext x='4' y='32' font-family='Raleway,Arial,sans-serif' font-size='34' font-weight='600' font-style='italic' fill='%23B22234'%3Er%3C/text%3E%3Ctext x='18' y='88' font-family='Raleway,Arial,sans-serif' font-size='92' font-weight='400' fill='%237A7A7A'%3E/%3C/text%3E%3Ctext x='44' y='88' font-family='Raleway,Arial,sans-serif' font-size='80' font-weight='600' fill='%234F6FB8'%3E%CE%A3%3C/text%3E%3Ctext x='102' y='88' font-family='Raleway,Arial,sans-serif' font-size='28' font-weight='600' font-style='italic' fill='%23D4A843' opacity='0.8' filter='url(%23gb)' letter-spacing='2' font-variant='small-caps'%3EQUATION%3C/text%3E%3C/svg%3E" height="44" style="cursor:pointer" alt="Requation">
+  </div>
+</header>
+
+<div id="db-listing-panel" style="position:fixed;bottom:0;left:0;right:0;z-index:85;background:var(--cream);border-top:2px solid var(--ink);border-radius:16px 16px 0 0;padding:16px 20px 24px;max-width:420px;margin:0 auto;transform:translateY(100%);transition:transform .45s cubic-bezier(.22,1,.36,1);box-shadow:0 -4px 24px rgba(0,0,0,.12)">
+  <button onclick="document.getElementById('db-listing-panel').style.transform='translateY(100%)';clearDBPois();" style="position:absolute;top:12px;right:14px;background:none;border:1px solid var(--rule-heavy);width:26px;height:26px;cursor:pointer;font-size:.8rem;color:var(--ink-3)">✕</button>
+  <div id="db-addr" style="font-family:'Playfair Display',serif;font-size:1rem;font-weight:700;color:var(--ink);margin-bottom:4px"></div>
+  <div id="db-price" style="font-size:1.15rem;font-weight:700;color:var(--gold);margin-bottom:6px"></div>
+  <div id="db-meta" style="font-size:.78rem;color:var(--ink-3);margin-bottom:12px"></div>
+  <a id="db-redfin" href="#" target="_blank" style="display:inline-block;padding:8px 18px;background:var(--ink);color:var(--cream);font-size:.78rem;font-weight:600;text-decoration:none;border-radius:3px;letter-spacing:.04em">View on Redfin →</a>
+</div>
+
+<div id="panel">
+  <div class="panel-header">
+    <div class="panel-tag"><span id="panel-tag-text">Property</span><span class="waymo-badge">⟴ Waymo Ready</span></div>
+    <div class="panel-title" id="panel-title" onclick="goHome()">—</div>
+    <div class="panel-subtitle" id="panel-subtitle">—</div>
+    <button id="panel-close" onclick="closePanel()" style="background:var(--ink);border-radius:4px;padding:4px 10px;border:none;"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 440 100" height="32" style="display:block"><text x="4" y="32" font-family="Raleway,Arial,sans-serif" font-size="34" font-weight="600" font-style="italic" fill="#B22234">r</text><text x="18" y="88" font-family="Raleway,Arial,sans-serif" font-size="92" font-weight="400" fill="#FAF8F4">/</text><text x="44" y="88" font-family="Raleway,Arial,sans-serif" font-size="80" font-weight="600" fill="#FAF8F4">Σ</text></svg></button>
+  </div>
+  <div class="panel-tabs">
+    <button class="panel-tab active" onclick="switchTab('property')">Property</button>
+    <button id="btn-comps" class="panel-tab" onclick="switchTab('comps')">Comps</button>
+    <button id="tab-index" class="panel-tab" onclick="switchTab('index')" style="display:none">INDEX</button>
+    <button class="panel-tab" onclick="switchTab('neighborhood')">Neighborhood</button>
+    <button class="panel-tab" onclick="switchTab('waymo')">Waymo</button>
+  </div>
+  <div class="panel-body" id="panel-body">
+
+<div class="tab-pane active" id="tab-property">
+  <div class="carousel-wrap">
+    <div class="carousel-track" id="carousel-track"></div>
+    <button class="carousel-btn prev" onclick="carouselMove(-1)">&#8249;</button>
+    <button class="carousel-btn next" onclick="carouselMove(1)">&#8250;</button>
+    <div class="carousel-counter" id="carousel-counter">1 / —</div>
+  </div>
+  <div class="carousel-dots" id="carousel-dots"></div>
+  <div class="panel-pad">
+    <div class="stats-grid" id="stats-grid"></div>
+    <div class="section-title">About This Property</div>
+    <p class="section-text" id="prop-desc"></p>
+    <div class="section-title">Market Tags</div>
+    <div class="tag-list" id="prop-tags"></div>
+  </div>
+  <div class="video-section">
+    <div class="section-label" id="video-label">Documentary</div>
+    <div class="video-grid" id="video-grid"></div>
+  </div>
+  <div style="height:20px"></div>
+</div>
+
+<div class="tab-pane" id="tab-comps">
+  <div class="panel-pad" style="padding-bottom:6px">
+    <div class="section-title" style="margin-top:4px" id="comps-headline"></div>
+    <p class="comp-intro-text" id="comps-intro"></p>
+  </div>
+  <div style="padding:0 20px 24px" id="comps-list"></div>
+</div>
+
+<div class="tab-pane" id="tab-index">
+  <div class="panel-pad">
+    <p style="font-size:.82rem;line-height:1.7;color:var(--text-muted);margin-bottom:14px"><strong style="color:var(--ink)">The Market</strong><br>330 active luxury condos across 15 ZIP codes. Combined asking value exceeding $480 million. Median household income in the corridor: $100,000 — doubled in a decade. The most realistically attainable luxury addresses on earth for 95% of Americans.</p><p style="font-size:.82rem;line-height:1.7;color:var(--text-muted);margin-bottom:14px"><strong style="color:var(--ink)">The Brands</strong><br>Whole Foods. Equinox. Apple. Tesla. Regal Cinemas. Bottega Louie. Philz Coffee. The Grove. LA Live — a $2.5 billion entertainment complex that hosts the Grammys, the NBA Finals and every major touring act on earth.</p><p style="font-size:.82rem;line-height:1.7;color:var(--text-muted);margin-bottom:14px"><strong style="color:var(--ink)">The Institutions</strong><br>USC — 1 mile. UCLA — 30 minutes by Metro. Cedars-Sinai — top 10 hospital in America. LA Convention Center — $190 million in annual economic impact. The Broad. Walt Disney Concert Hall. MOCA.</p><p style="font-size:.82rem;line-height:1.7;color:var(--text-muted);margin-bottom:14px"><strong style="color:var(--ink)">The Infrastructure</strong><br>6 Metro rail lines. Walk Score 98. Waymo operational. FIFA World Cup 2026. Olympics 2028. The infrastructure of a world capital, priced like a regional city.</p><p style="font-size:.82rem;line-height:1.7;color:var(--text-muted);margin-bottom:14px"><strong style="color:var(--ink)">The Address</strong><br>There is no city on earth where $750,000 buys you this. Not New York. Not London. Not Tokyo. In Los Angeles, in 2026, it does.</p><p style="font-size:.82rem;line-height:1.7;color:var(--gold);font-style:italic">Requation mapped it first.</p>
+  </div>
+</div>
+
+<div class="tab-pane" id="tab-neighborhood">
+  <div class="nbhd-cats" id="nbhd-cats"></div>
+  <div class="nbhd-list" id="nbhd-list"></div>
+</div>
+
+<div class="tab-pane" id="tab-waymo">
+  <div class="waymo-section" style="margin-top:16px">
+    <div class="waymo-header">
+      <div class="waymo-icon">🚗</div>
+      <div><div class="waymo-title">Waymo Last-Mile Hub</div><div class="waymo-subtitle">Autonomous Vehicle Ready · Requation Network</div></div>
+    </div>
+    <div class="waymo-body">
+      <p>Requation positions every listing as a <strong>node in the Waymo autonomous vehicle network</strong> — the missing link between where people live and where they want to go.</p>
+      <p>Google has publicly acknowledged the last-mile connectivity gap. Sergei Brin's return to AI and Sundar Pichai's compensation tied directly to Waymo's success signal one thing: <strong>the race to solve last-mile is on.</strong></p>
+      <p>This property sits within a Waymo-serviceable corridor. Requation is building the <strong>3D Yellow Pages on Maps</strong> — every home, every business, every stop, discoverable from above.</p>
+      <div class="waymo-stats">
+        <div class="waymo-stat"><div class="waymo-stat-val">&lt;0.3mi</div><div class="waymo-stat-lbl">To Waymo Stop</div></div>
+        <div class="waymo-stat"><div class="waymo-stat-val">24/7</div><div class="waymo-stat-lbl">AV Coverage</div></div>
+        <div class="waymo-stat"><div class="waymo-stat-val">3D</div><div class="waymo-stat-lbl">Map Ready</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="panel-pad">
+    <div class="section-title">Why This Matters</div>
+    <p class="section-text">The autonomous vehicle era rewrites real estate value. Proximity to Waymo stops becomes the new walkability score — a quantifiable, searchable signal on Google Maps that surfaces your property to buyers who live AV-first.</p>
+    <p class="section-text" style="margin-top:11px">Requation makes this visible — aerial, interactive, and discoverable at the exact moment a buyer is navigating their next neighborhood from above.</p>
+    <div class="section-title" style="margin-top:18px">The Requation Vision</div>
+    <p class="section-text">A living 3D map where every listing, every business, and every Waymo stop is a connected, searchable data point — not a static pin. Real estate intelligence at the speed of Maps.</p>
+  </div>
+  <div style="height:20px"></div>
+</div>
+
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-about">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('about')">&#x2715;</button>
+    <span class="modal-tag">Who We Are</span>
+    <div class="modal-title">Real Estate Intelligence</div>
+    <div class="modal-body">I needed to sell my house. Not because I wanted to. Because I had to.<br><br>The MLS controls 80% of the American real estate market. It is a private, for-profit syndicate — not a public utility, not a cooperative, not a service. A corporation. Far away. Collecting both sides of every transaction through a doctrine called procuring cause, until 2024, when the courts finally said enough.<br><br>I said it sooner.<br><br>Requation is an effort to change the real estate equation — from MegaCorp to every American. Not a listing site. Not a portal. A map. Seen from above, in three dimensions, the way a city actually works. Every property in context. Every neighborhood alive with the intelligence that buyers deserve and sellers have been denied.<br><br>I have done this before. In White Center, Seattle — one of America's most forgotten neighborhoods — I once brought fruit to a food desert. Just showed up with produce where there was none. Nobody paid me. That is not the point. The point is that neighborhoods breathe. They need tending.<br><br>Requation tends them.<br><br>Not to disrupt. Not to raise a Series A. To sell my own properties first — and then to hand every American owner the same map that corporations have kept to themselves.<br><br>r/Σ = Real Estate as an Equation. Finally solved.</div>
+    <div class="modal-divider"></div>
+
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-contact">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('contact')">&#x2715;</button>
+    <span class="modal-tag">Get In Touch</span>
+    <div class="modal-title">Contact Us</div>
+    <div class="modal-divider"></div>
+    <div class="contact-row"><div class="contact-icon">☎</div><div class="contact-info"><strong>Phone</strong>+1 (213) 215-8870</div></div>
+    <div class="modal-divider"></div>
+    <div class="modal-body">For investment inquiries, partnership opportunities, or media requests, reach out via email and a member of our team will respond within one business day.</div>
+  </div>
+</div>
+
+<script>
+const DTLA_VIDEOS=[
+{id:'GFD0WG60c6Q',title:'Urban Light — South Park'},
+{id:'1mXG5MJ6i1U',title:'City Views — 16th Floor'},
+{id:'nig4DmfKW_I',title:'The Walkable City'},
+{id:'FR8hkxtha9A',title:'DTLA — Night'},
+{id:'oH3JefYb6YM',title:'City of Angels — Dawn'},
+{id:'Ny_5OMGToC4',title:'South Park — Urban Living'}
+];
+const LAV_VIDEOS=[
+{id:'wn9pZDkd6bo',title:'Desert Rain — Monsoon Season'},
+{id:'lTk4aLK1MYo',title:"Nature's Light — Laveen"},
+{id:'HmJqTSnu1e8',title:'Love & Desert Sky'},
+{id:'Rp3JzD2jseY',title:'Kubla Khan — Desert Pleasuredome'},
+{id:'jKe7eilvgHM',title:"Morrison's Desert"},
+{id:'hrPKYsoz_0U',title:'Monsoon at South Mountain'},
+{id:'KEuwFQn8bmA',title:'Desert Nature — Golden Hour'},
+{id:'yKjrEa8IT9c',title:'Rain on the Mesa'},
+{id:'M7MY9zNWY50',title:'Desert Light — Laveen Estate'},
+{id:'ut67g0F1lXw',title:"Nature's Canvas — Arizona"},
+{id:'YO1DPp3Bi8c',title:'The Green Estate — Monsoon'},
+{id:'sJMBOYnNlgE',title:'Desert Love — South Mountain'},
+{id:'sU1NmE_Bu6I',title:'Light & Shadow — Laveen'}
+];
+const properties=[
+  {
+    id:'dtla',name:'South Park Brutalist',short:'DTLA',
+    coords:[-118.2637,34.0422],tag:'For Sale By Owner',
+    subtitle:'801 S Grand Ave, Unit 1612 · Los Angeles CA 90017',
+    type:'High-Rise Condo',beds:'2',baths:'2',sqft:'1,300',price:'$885,000',
+    description:'A brutalist icon 25 feet from Whole Foods, 100 feet from Philz Coffee, and less than a mile from Roy Lichtenstein at The Broad and symphonies at Walt Disney Concert Hall. Unit 1612 at 801 S Grand — 2BR/2BA, 1,300 sqft on the 16th floor of South Park DTLA.',
+    tags:['South Park DTLA','High-Rise','Brutalist','Walk Score 98','FSBO','Waymo Corridor'],
+    agentLink:'https://www.zillow.com/homes/for_sale/',
+    images:[
+      'https://i.imgur.com/1K9P4FK',
+      'https://i.imgur.com/YIN8O41.jpeg','https://i.imgur.com/C2uei3w.jpeg','https://i.imgur.com/yhnjPo6.jpeg',
+      'https://i.imgur.com/JQsQZmA.jpeg','https://i.imgur.com/N4s3BiK.jpeg','https://i.imgur.com/NKGvYiS.jpeg',
+      'https://i.imgur.com/uSjnr0A.jpeg','https://i.imgur.com/F71ADpi.jpeg','https://i.imgur.com/HBNlkj8.jpeg',
+      'https://i.imgur.com/PCwZVOS.jpeg','https://i.imgur.com/WpmEw8f.jpeg','https://i.imgur.com/ChMBKSr.jpeg',
+      'https://i.imgur.com/sofwRew.jpeg','https://i.imgur.com/jfOae1A.jpeg','https://i.imgur.com/cLSYiDl.jpeg',
+      'https://i.imgur.com/4idl4U9.jpeg','https://i.imgur.com/fl1ZFd6.jpeg','https://i.imgur.com/tbFhHcl.jpeg',
+      'https://i.imgur.com/UHJ2hM2.jpeg','https://i.imgur.com/3rFddwE.jpeg','https://i.imgur.com/yvAxOaD.jpeg',
+      'https://i.imgur.com/yXh2Ywf.jpeg','https://i.imgur.com/GSbSrYM.jpeg','https://i.imgur.com/D2GRI06.jpeg'
+    ],
+    videos:DTLA_VIDEOS,
+    comps:{
+      headline:'Active 2BR/2BA Comps · DTLA / 90017',
+      intro:'All listings below are active 2-bedroom, 2-bathroom condos in or adjacent to 90017. Your 16th-floor unit at $885K / $681 per SF is priced competitively for a high-rise with South Park walkability and direct Whole Foods access.',
+      listings:[
+        {
+          address:'Metropolis Tower II #4111 — 877 Francisco St',
+          price:'$1,899,000',
+          chips:['2 BD','2 BA','1,309 SF','41st Floor','$1,450/SF'],
+          note:'41st-floor luxury high-rise in the same South Park corridor. At $1,899/SF your unit delivers comparable city-living at less than half the price — compelling value for the same zip code.',
+          source:'DLXco / 90017',status:'Active'
+        },
+        {
+          address:'1111 Grand Ave #518 — Grand Lofts',
+          price:'$POA',
+          chips:['2 BD','2 BA','2,070 SF','Corner Unit','Floor-to-Ceiling'],
+          note:'Rare 2,070 SF corner unit two blocks from your building. Larger footprint but same South Park neighborhood. Shows strong buyer appetite for 2BD units at this address.',
+          source:'RealEstateLA.com / 90015',status:'Active'
+        },
+        {
+          address:'The Rowan Lofts #1013 — DTLA',
+          price:'$474,000',
+          chips:['2 BD','2 BA','860 SF','$551/SF','Loft Style'],
+          note:'Entry-level 2/2 at 860 SF — 440 SF smaller than your unit. At $474K it anchors the low end of the 2/2 market. Your 1,300 SF at $885K is $681/SF, proportionally premium but justified by floor height and building quality.',
+          source:'DLXco / DTLA',status:'Active'
+        },
+        {
+          address:'SKY Loft #1612 — S Grand Ave (Same Building)',
+          price:'$POA',
+          chips:['2 BD','2 BA','16th Floor','City Views','Live/Work'],
+          note:'16th-floor 2BR/2BA in a comparable S Grand Ave tower — traditional and loft-style combined layout, floor-to-ceiling windows, stunning city views from every room. Direct same-floor comp.',
+          source:'Homes.com / 90017',status:'Active'
+        },
+        {
+          address:'Bunker Hill Towers — 26th Floor DTLA',
+          price:'POA',
+          chips:['4 BD','4.5 BA','High-Rise','3 Exposures','Panoramic'],
+          note:'Top-tier benchmark — largest unit in Bunker Hill Towers. Included to show ceiling of the DTLA high-rise market. Your 2/2 sits well below this tier at strong value.',
+          source:'Homes.com / DTLA',status:'Active'
+        },
+      ]
+    },
+    neighborhood:{
+      'Restaurants':[
+        {name:'Bottega Louie',meta:'Grand Café · Italian-American',dist:'0.1 mi',icon:'🍽️'},
+        {name:'Perch LA',meta:'Rooftop French Bistro',dist:'0.2 mi',icon:'🥂'},
+        {name:'Broken Spanish',meta:'Modern Mexican',dist:'0.3 mi',icon:'🌮'},
+        {name:'Otium',meta:'California Contemporary',dist:'0.4 mi',icon:'🍷'},
+        {name:'Officine Brera',meta:'Northern Italian',dist:'0.5 mi',icon:'🍝'},
+      ],
+      'Coffee':[
+        {name:'Philz Coffee',meta:'Specialty Pour-Over',dist:'100 ft',icon:'☕'},
+        {name:'Groundwork Coffee',meta:'Organic Roasters',dist:'0.3 mi',icon:'☕'},
+        {name:'Blue Bottle Coffee',meta:'Third Wave Specialty',dist:'0.6 mi',icon:'☕'},
+      ],
+      'Grocery':[
+        {name:'Whole Foods Market',meta:'Premium Grocery',dist:'25 ft',icon:'🛒'},
+        {name:'Ralphs DTLA',meta:'Full-Service Grocery',dist:'0.4 mi',icon:'🛒'},
+      ],
+      'Culture':[
+        {name:'The Broad',meta:'Contemporary Art Museum',dist:'0.8 mi',icon:'🖼️'},
+        {name:'MOCA Grand Ave',meta:'Museum of Contemporary Art',dist:'0.9 mi',icon:'🎨'},
+        {name:'Walt Disney Concert Hall',meta:'LA Philharmonic · Gehry',dist:'0.9 mi',icon:'🎶'},
+        {name:'Grand Park',meta:'12-Acre Urban Park',dist:'1.0 mi',icon:'🌳'},
+      ],
+      'Hotels':[
+        {name:'InterContinental DTLA',meta:'73-Story Luxury · Wilshire Grand',dist:'0.1 mi',icon:'🏨'},
+        {name:'The Westin Bonaventure',meta:'Iconic Atrium Hotel',dist:'0.3 mi',icon:'🏨'},
+        {name:'Freehand Los Angeles',meta:'Boutique Hotel & Bar',dist:'0.5 mi',icon:'🏨'},
+        {name:'NoMad Los Angeles',meta:'Design Hotel',dist:'0.6 mi',icon:'🏨'},
+      ],
+      'Hair Salons':[
+        {name:"Rudy's Barbershop",meta:'Full-Service Salon',dist:'0.2 mi',icon:'✂️'},
+        {name:'Headlines Salon DTLA',meta:'Color & Cut Specialists',dist:'0.4 mi',icon:'✂️'},
+      ],
+      'Gyms':[
+        {name:'Equinox DTLA',meta:'Premium Fitness',dist:'0.3 mi',icon:'💪'},
+        {name:'LA Fitness',meta:'Full-Service Gym',dist:'0.5 mi',icon:'💪'},
+        {name:"Barry's Bootcamp",meta:'HIIT Training',dist:'0.6 mi',icon:'🏋️'},
+      ],
+      'Pet':[
+        {name:'Downtown Dog Lounge',meta:'Daycare & Boarding',dist:'0.4 mi',icon:'🐾'},
+        {name:'VCA Animal Hospital',meta:'Full-Service Vet',dist:'0.7 mi',icon:'🐾'},
+      ],
+      'Parking':[{name:'Joe Auto Parks',meta:'Downtown Parking',dist:'0.1 mi',icon:'🅿️'},{name:'Pershing Square Garage',meta:'City Parking',dist:'0.3 mi',icon:'🅿️'}],
+      'Parks':[{name:'Pershing Square',meta:'Historic Downtown Park',dist:'0.4 mi',icon:'🌳'},{name:'Grand Park',meta:'12-Acre Urban Park',dist:'1.0 mi',icon:'🌳'}],
+      'Libraries':[{name:'LA Central Library',meta:'Historic Public Library',dist:'0.5 mi',icon:'📚'}],
+      'Credit Unions':[{name:'Self-Help Federal CU',meta:'Community Banking',dist:'0.2 mi',icon:'🏦'}],
+      'Shopping':[{name:'Apple Store Broadway',meta:'Apple Retail',dist:'0.6 mi',icon:'🍎'},{name:'Adidas Broadway',meta:'Sport & Lifestyle',dist:'0.6 mi',icon:'👟'},{name:'West Elm',meta:'Home Furnishings',dist:'0.6 mi',icon:'🛋️'},{name:'Jewelry District',meta:'7th & Broadway',dist:'0.4 mi',icon:'💎'},{name:'Grand Central Market',meta:'Historic Food Hall',dist:'0.7 mi',icon:'🏪'}],
+      'Movie Theaters':[{name:'Regal LA Live',meta:'Stadium Seating · IMAX',dist:'0.8 mi',icon:'🎬'},{name:'AMC Broadway',meta:'Downtown Cinema',dist:'0.6 mi',icon:'🎬'},{name:'Alamo Drafthouse',meta:'Dine-In Cinema',dist:'1.2 mi',icon:'🎬'}],
+    },
+    pois:[
+      {name:'Whole Foods',coords:[-118.2641,34.0408],color:'#4CAF50'},
+      {name:'Philz Coffee',coords:[-118.2630,34.0415],color:'#8B5E3C'},
+      {name:'Bottega Louie',coords:[-118.2565,34.0462],color:'#E91E63'},
+      {name:'The Broad',coords:[-118.2504,34.0544],color:'#9C27B0'},
+      {name:'MOCA',coords:[-118.2495,34.0543],color:'#FF5722'},
+      {name:'Disney Hall',coords:[-118.2497,34.0553],color:'#FF9800'},
+      {name:'InterContinental',coords:[-118.2559,34.0459],color:'#607D8B'},
+      {name:'Waymo Stop',coords:[-118.2590,34.0430],color:'#1A73E8',waymo:true},
+      {name:'Ritz Carlton',coords:[-118.2556,34.0484],color:'#8B7355'},
+      {name:'Figueroa Hotel',coords:[-118.2606,34.0434],color:'#C0392B'},
+      {name:'Parking - Joe Auto',coords:[-118.2635,34.0418],color:'#607D8B'},
+      {name:'Pershing Square',coords:[-118.2536,34.0505],color:'#4CAF50'},
+      {name:"Angel's Flight",coords:[-118.2499,34.0534],color:'#FF6F00'},
+      {name:'Grand Central Mkt',coords:[-118.2489,34.0536],color:'#E91E63'},
+      {name:'Apple Store',coords:[-118.2519,34.0510],color:'#555555'},
+      {name:'Adidas Broadway',coords:[-118.2513,34.0505],color:'#111111'},
+      {name:'West Elm',coords:[-118.2508,34.0500],color:'#795548'},
+      {name:'Jewelry District',coords:[-118.2545,34.0462],color:'#FFC107'},
+      {name:'LA Central Library',coords:[-118.2556,34.0501],color:'#795548'},
+      {name:'Regal LA Live',coords:[-118.2673,34.0430],color:'#880E4F'},
+      {name:'AMC Broadway',coords:[-118.2515,34.0508],color:'#880E4F'},
+      {name:'Alamo Drafthouse',coords:[-118.2448,34.0420],color:'#880E4F'},
+      {name:'Credit Union',coords:[-118.2630,34.0440],color:'#1565C0'},
+    ],
+    localCenter:[-118.2587,34.0455],localZoom:16,localPitch:65,localBearing:200
+  },
+  {id:'metropolis2',name:'Metropolis Tower II',short:'Metropolis',coords:[-118.2642514,34.0483633],tag:'Active Listing',subtitle:'877 Francisco St · Los Angeles CA 90017',type:'High-Rise Condo',beds:'2',baths:'2',sqft:'1,309',price:'$1,899,000',description:'41st floor luxury residence in South Park DTLA. Breathtaking panoramic views from LA to the ocean.',tags:['DTLA','South Park','High-Rise','Luxury'],images:[],videos:[],comps:{headline:'',intro:'',listings:[]},neighborhood:{},pois:[],localCenter:[-118.2642514,34.0483633],localZoom:15,localPitch:65,localBearing:20},
+  {id:'shoreham',name:'Shoreham Towers',short:'WeHo',coords:[-118.3828802,34.0927247],tag:'Active Listing',subtitle:'8787 Shoreham Dr · West Hollywood CA 90069',type:'Luxury Condo',beds:'2',baths:'2',sqft:'1,400',price:'$1,250,000',description:'14-story landmark above the Sunset Strip. Views from DTLA to the Pacific. Steps from the Roxy and Comedy Store.',tags:['West Hollywood','Sunset Strip','Luxury'],images:[],videos:[],comps:{headline:'',intro:'',listings:[]},neighborhood:{},pois:[],localCenter:[-118.3828802,34.0927247],localZoom:15,localPitch:65,localBearing:20},
+  {id:'blairhouse',name:'Blair House',short:'Wilshire',coords:[-118.43139,34.0642686],tag:'Active Listing',subtitle:'10490 Wilshire Blvd · Los Angeles CA 90024',type:'High-Rise Condo',beds:'2',baths:'2',sqft:'1,800',price:'$1,450,000',description:'Iconic Wilshire Corridor high-rise. Pool, tennis court, sweeping views. Beverly Hills adjacent.',tags:['Wilshire Corridor','High-Rise','Beverly Hills Adjacent'],images:[],videos:[],comps:{headline:'',intro:'',listings:[]},neighborhood:{},pois:[],localCenter:[-118.43139,34.0642686],localZoom:15,localPitch:65,localBearing:20},
+  {id:'oceanave',name:'101 Ocean Ave',short:'Santa Monica',coords:[-118.51567,34.0269371],tag:'Active Listing',subtitle:'101 Ocean Ave · Santa Monica CA 90402',type:'Luxury Condo',beds:'2',baths:'2',sqft:'1,500',price:'$2,200,000',description:'Iconic Santa Monica oceanfront building. Floor-to-ceiling windows, ocean views, steps from the sand and Pier.',tags:['Santa Monica','Oceanfront','Luxury'],images:[],videos:[],comps:{headline:'',intro:'',listings:[]},neighborhood:{},pois:[],localCenter:[-118.51567,34.0269371],localZoom:15,localPitch:65,localBearing:20},
+  {id:'bentley',name:'1810 Bentley',short:'West LA',coords:[-118.4413223,34.0458818],tag:'Active Listing',subtitle:'1810 S Bentley Ave · Los Angeles CA 90025',type:'Luxury Condo',beds:'2',baths:'2',sqft:'1,600',price:'$1,350,000',description:'Prime West LA between Westwood and Santa Monica. Steps from Sawtelle dining district and UCLA.',tags:['West LA','Westwood','Luxury'],images:[],videos:[],comps:{headline:'',intro:'',listings:[]},neighborhood:{},pois:[],localCenter:[-118.4413223,34.0458818],localZoom:15,localPitch:65,localBearing:20},
+  {
+    id:'laveen',name:'Urban Farmhouse',short:'Laveen',
+    coords:[-112.1180767,33.3427905],tag:'For Sale By Owner',
+    subtitle:'11403 S 27th Dr · Laveen, AZ 85339',
+    type:'Equestrian Estate',beds:'4',baths:'4.5',sqft:'5,400',price:'$2,000,000',
+    description:"In Xanadu did Kubla Khan a stately pleasure-dome decree — and on the northern slope of South Mountain, another pleasure-dome rose from desert stone, as if conjured by the same fierce dreaming. Here, where the demon woman wailed for her demon lover beneath a waning moon, where Saguaros stand sentinel and arroyos carve the earth on three sides like a moat of God's own making — here stands the Urban Farmhouse. Dark skies absolute. No future building permitted. The mountain at your back, eternity ahead. 4.4 acres on the largest City Park in America. 5,400 square feet of deliberate living — Barn, Pool House, 8 levels of landscape architecture ascending like stanzas. The largest saltwater pool in Maricopa County, 85,000 gallons, a mirror for the Milky Way. 75 minutes from Los Angeles airports, yet so removed from the world's fever that Haboobs roll toward you like revelation and the city lights below seem someone else's dream. For the Creative who needs space to think. The CEO who needs space to breathe. The investor who understands that land this rare, this protected, this impossible — is never built again. Come, possess it. As Donne wrote — one little room, an everywhere.",
+    tags:['Laveen','4.4 Acres','Phoenix Metro','Solar Ready','Mountain Views','Loop 202','FSBO','Waymo Corridor','Equestrian Estate','Urban Farmhouse','LA 75 Min'],
+    agentLink:'https://www.zillow.com/homes/for_sale/',
+    images:[
+      'https://i.imgur.com/0aYf87y.jpeg','https://i.imgur.com/F0YLfoC.jpeg','https://i.imgur.com/ycRr5XE.jpeg',
+      'https://i.imgur.com/1MBjfkr.jpeg','https://i.imgur.com/uiikzzR.jpeg','https://i.imgur.com/1qQr4rf.jpeg',
+      'https://i.imgur.com/ubOV3jq.jpeg','https://i.imgur.com/DlP9Thj.jpeg','https://i.imgur.com/9Ti4py8.jpeg',
+      'https://i.imgur.com/0jwRIjB.jpeg','https://i.imgur.com/TE7zKJM.jpeg','https://i.imgur.com/ytIcEu5.jpeg',
+      'https://i.imgur.com/SI8gjc2.jpeg','https://i.imgur.com/Th4TUUP.jpeg','https://i.imgur.com/yCjxa3y.jpeg',
+      'https://i.imgur.com/R2qggs3.jpeg','https://i.imgur.com/ruUGtpV.jpeg','https://i.imgur.com/K7eReJW.jpeg',
+      'https://i.imgur.com/yoI9pMA.jpeg','https://i.imgur.com/yJKd4FM.jpeg','https://i.imgur.com/uJq82zM.jpeg',
+      'https://i.imgur.com/0M3jwXx.jpeg','https://i.imgur.com/4oX65PU.jpeg','https://i.imgur.com/UjNsMrN.jpeg',
+      'https://i.imgur.com/fJUhniW.jpeg'
+    ],
+    videos:LAV_VIDEOS,
+    neighborhood:{'Grocery':[{name:"Fry's Food Store",meta:'Full Service Grocery',dist:'1.2 mi',icon:'🛒'},{name:'Walmart',meta:'Supercenter',dist:'1.4 mi',icon:'🛒'},{name:'Aldi',meta:'Discount Grocery',dist:'2.1 mi',icon:'🛒'},{name:'Sprouts',meta:'Farmers Market',dist:'2.3 mi',icon:'🥦'}],'Coffee':[{name:'Starbucks',meta:'Coffee & Drinks',dist:'1.1 mi',icon:'☕'},{name:"Dunkin'",meta:'Coffee & Donuts',dist:'1.3 mi',icon:'☕'}],'Home Improvement':[{name:'Home Depot',meta:'Home Improvement',dist:'1.5 mi',icon:'🔨'},{name:"Lowe's",meta:'Home Improvement',dist:'1.8 mi',icon:'🔨'}],'Entertainment':[{name:'Vee Quiva Casino',meta:'Gila River Casino',dist:'2.0 mi',icon:'🎰'},{name:'Harkins Theatre',meta:'Movie Theater',dist:'4.2 mi',icon:'🎬'}],'Fitness':[{name:'Planet Fitness',meta:'24hr Gym',dist:'1.6 mi',icon:'💪'},{name:'LA Fitness',meta:'Full Service Gym',dist:'2.0 mi',icon:'💪'}],'Pet Care':[{name:'PetSmart',meta:'Pet Supplies & Care',dist:'1.8 mi',icon:'🐾'}],'Education':[{name:'Laveen Elementary',meta:'Charter School',dist:'0.8 mi',icon:'🏫'},{name:'Vista del Sur',meta:'Charter School',dist:'1.2 mi',icon:'🏫'}],'Transit':[{name:'Valley Metro Rail',meta:'Phoenix Light Rail',dist:'3.5 mi',icon:'🚇'},{name:'Loop 202 Freeway',meta:'South Mountain Freeway',dist:'1.0 mi',icon:'🛣️'}]},
+    pois:[
+      {name:'Starbucks',coords:[-112.1510,33.3740],color:'#00704A'},
+      {name:"Fry's",coords:[-112.1490,33.3760],color:'#E63946'},
+      {name:'Walmart',coords:[-112.1470,33.3800],color:'#007DC6'},
+      {name:'Home Depot',coords:[-112.1460,33.3780],color:'#F96302'},
+      {name:'Vee Quiva',coords:[-112.1570,33.3095],color:'#9C27B0'},
+      {name:'Loop 202·Dobbins',coords:[-112.1520,33.3620],color:'#2196F3'},
+      {name:'Waymo Stop',coords:[-112.1580,33.3700],color:'#1A73E8',waymo:true},
+      {name:'Laveen Library',coords:[-112.1590,33.3755],color:'#795548'},
+      {name:'Desert Foothills Park',coords:[-112.1540,33.3690],color:'#4CAF50'},
+      {name:'Desert Financial CU',coords:[-112.1500,33.3780],color:'#1565C0'},
+      {name:'Harkins Theatre',coords:[-112.0980,33.3780],color:'#880E4F'},
+      {name:'Parking Vee Quiva',coords:[-112.1570,33.3100],color:'#607D8B'},
+    ],
+    localCenter:[-112.1180767,33.3427905],localZoom:15.5,localPitch:65,localBearing:45
+  }
+];
+
+const SB_URL='https://mpmprnjhunjfeacikgml.supabase.co';
+const SB_KEY='sb_publishable_T6XISHd9O2Ol0raPaEASqQ_klUXnyY3';
+const SB_HEADERS={'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY};
+let dbPoiMarkers=[], dbMarkers=[], dbMarkersLoaded=false;
+
+function clearDBPois(){dbPoiMarkers.forEach(m=>m.remove());dbPoiMarkers=[];}
+function clearDBMarkers(){dbMarkers.forEach(m=>m.remove());dbMarkers=[];dbMarkersLoaded=false;}
+
+const LA_BOUNDS={minLng:-119.0,maxLng:-117.5,minLat:33.5,maxLat:34.5};
+
+const POI_COLORS={Grocery:'#4CAF50',Coffee:'#FF9800',Theater:'#9C27B0',Fitness:'#F44336',Transit:'#2196F3',Attraction:'#FF5722','Food Hall':'#795548',Medical:'#E91E63',Shopping:'#3F51B5',Food:'#FF5722'};
+
+async function showDBPanel(p){
+  clearDBPois();
+  // fly to property
+  map.flyTo({center:[parseFloat(p.lng),parseFloat(p.lat)],zoom:15,pitch:65,bearing:0,duration:1200,essential:true});
+  // fetch nearby POIs by zip
+  try {
+    const r=await fetch(SB_URL+'/rest/v1/pois?select=*&Zip=eq.'+p.zip,{headers:SB_HEADERS});
+    const pois=await r.json();
+    pois.forEach(poi=>{
+      if(!poi.lat||!poi.lng)return;
+      const color=POI_COLORS[poi.category]||'#aaa';
+      const el=document.createElement('div');
+      el.style.cssText='cursor:default';
+      const dot=document.createElement('div');
+      dot.style.cssText=`width:8px;height:8px;border-radius:50%;background:${color};border:1.5px solid #fff;box-shadow:0 0 4px ${color}99`;
+      el.appendChild(dot);
+      const m=new mapboxgl.Marker({element:el,anchor:'bottom'}).setLngLat([parseFloat(poi.lng),parseFloat(poi.lat)]).addTo(map);
+      dbPoiMarkers.push(m);
+    });
+  } catch(e){console.error('POI fetch failed',e);}
+  // show bottom panel
+  const panel=document.getElementById('db-listing-panel');
+  document.getElementById('db-addr').textContent=p.address||p.name||'';
+  document.getElementById('db-price').textContent=p.price?'$'+Number(p.price).toLocaleString():'';
+  document.getElementById('db-meta').textContent=[p.beds&&p.beds+' bd',p.baths&&p.baths+' ba',p.sqft&&Number(p.sqft).toLocaleString()+' sqft'].filter(Boolean).join(' · ');
+  document.getElementById('db-redfin').href=p.redfin_url||'#';
+  document.getElementById('db-redfin').style.display=p.redfin_url?'inline-block':'none';
+  panel.style.transform='translateY(0)';
+}
+
+async function loadDBListings() {
+  if (dbMarkersLoaded) return;
+  dbMarkersLoaded = true;
+  try {
+    const resp = await fetch(SB_URL+'/rest/v1/properties?select=name,lat,lng,price,zip,redfin_url,address,beds,baths,sqft&mls_status=eq.active&limit=400', {headers:SB_HEADERS});
+    const listings = await resp.json();
+    listings.forEach(p => {
+      if (!p.lat || !p.lng) return;
+      const el = document.createElement('div');
+      el.style.cssText='cursor:pointer';
+      const dot = document.createElement('div');
+      dot.style.cssText='width:4px;height:4px;border-radius:50%;background:#00CED1;border:1.5px solid white;box-shadow:0 0 4px rgba(0,206,209,0.8);opacity:0.4';
+      el.appendChild(dot);
+      el.addEventListener('click',()=>{ if(p.redfin_url) window.open(p.redfin_url,'_blank'); });
+      const m=new mapboxgl.Marker({element:el,anchor:'bottom'}).setLngLat([parseFloat(p.lng),parseFloat(p.lat)]).addTo(map);
+      dbMarkers.push(m);
+    });
+    console.log('Loaded '+listings.length+' listings from Supabase');
+  } catch(e) { console.error('DB load failed',e); dbMarkersLoaded=false; }
+}
+
+async function fetchRestaurants(){
+  try{
+    const resp=await fetch('https://mpmprnjhunjfeacikgml.supabase.co/rest/v1/restaurants?select=*&zip=in.(90017,90015,90013,90014)&limit=50',{
+      headers:{'apikey':'sb_publishable_T6XISHd9O2Ol0raPaEASqQ_klUXnyY3','Authorization':'Bearer sb_publishable_T6XISHd9O2Ol0raPaEASqQ_klUXnyY3'}
+    });
+    const data=await resp.json();
+    const geojson={type:'FeatureCollection',features:data.map(r=>({
+      type:'Feature',
+      geometry:{type:'Point',coordinates:[parseFloat(r.lng),parseFloat(r.lat)]},
+      properties:{name:r.name,rating:r.rating,address:r.address,waymo_url:r.waymo_url,yelp_url:r.yelp_url}
+    }))};
+
+    if(map.getSource('restaurants'))map.removeLayer('restaurants-layer'),map.removeSource('restaurants');
+
+    map.addSource('restaurants',{type:'geojson',data:geojson});
+    map.addLayer({
+      id:'restaurants-layer',
+      type:'circle',
+      source:'restaurants',
+      paint:{
+        'circle-radius':8,
+        'circle-color':'#B22234',
+        'circle-stroke-width':2,
+        'circle-stroke-color':'#ffffff',
+        'circle-pitch-alignment':'map',
+        'circle-pitch-scale':'map'
+      }
+    });
+    map.addLayer({
+      id:'restaurants-label',
+      type:'symbol',
+      source:'restaurants',
+      layout:{
+        'text-field':['get','name'],
+        'text-size':11,
+        'text-anchor':'top',
+        'text-offset':[0,1],
+        'text-font':['Open Sans Italic','Arial Unicode MS Regular']
+      },
+      paint:{
+        'text-color':'#B22234',
+        'text-halo-color':'#FAF8F4',
+        'text-halo-width':2
+      }
+    });
+
+    map.on('click','restaurants-layer',(e)=>{
+      const r=e.features[0].properties;
+      new mapboxgl.Popup({offset:15})
+        .setLngLat(e.features[0].geometry.coordinates)
+        .setHTML(`
+          <div style="font-family:Raleway,sans-serif;padding:10px;min-width:200px">
+            <div style="font-size:.9rem;font-weight:700;color:#1A1810">${r.name}</div>
+            <div style="font-size:.75rem;color:#888;margin:4px 0">${r.rating}★</div>
+            <div style="font-size:.72rem;color:#666;margin-bottom:8px">${r.address}</div>
+            <div style="display:flex;gap:8px">
+              <a href="${r.waymo_url}" target="_blank" style="font-size:.7rem;background:#1A73E8;color:#fff;padding:5px 10px;border-radius:3px;text-decoration:none">🚗 Waymo</a>
+              <a href="${r.yelp_url}" target="_blank" style="font-size:.7rem;background:#B22234;color:#fff;padding:5px 10px;border-radius:3px;text-decoration:none">View</a>
+              <a href="https://www.yelp.com/search?find_desc=Order+Food&find_loc=${encodeURIComponent(r.address)}" target="_blank" style="font-size:.7rem;background:#4CAF50;color:#fff;padding:5px 10px;border-radius:3px;text-decoration:none">🍽️ Order</a>
+            </div>
+          </div>
+        `)
+        .addTo(map);
+    });
+
+    map.on('mouseenter','restaurants-layer',()=>map.getCanvas().style.cursor='pointer');
+    map.on('mouseleave','restaurants-layer',()=>map.getCanvas().style.cursor='');
+
+    console.log('Loaded '+data.length+' restaurants as GL layer');
+  }catch(e){console.error('Restaurant load failed',e);}
+}
+
+mapboxgl.accessToken='pk.eyJ1IjoidmlranB1cmkiLCJhIjoiY21uYnF0ZWNuMHhnaTJ3bzR5MG5xOTEzbSJ9.vqmEhPHMBQOn4GX3yrbiGw';
+const map=new mapboxgl.Map({container:'map',style:'mapbox://styles/mapbox/standard',pitch:30,bearing:45,attributionControl:false});
+map.fitBounds([[-119.0,32.8],[-111.5,34.5]],{padding:{top:80,bottom:80,left:40,right:40},pitch:30,duration:0});
+map.addControl(new mapboxgl.AttributionControl({compact:true}));
+map.addControl(new mapboxgl.NavigationControl({showCompass:false}),'bottom-right');
+
+let activeProperty=null,poiMarkers=[],_ci=0,_ct=1;
+
+map.on('load',()=>{
+  try{map.setPaintProperty('satellite','raster-brightness-max',.78);map.setPaintProperty('satellite','raster-saturation',-.15);map.setPaintProperty('satellite','raster-contrast',.1);}catch(e){}
+  map.setConfigProperty('basemap','lightPreset','day');
+  map.setConfigProperty('basemap','show3dObjects',true);
+  properties.forEach(p=>{ if(p.tag==='Active Listing') addCondoMarker(p); else if(p.id==='laveen') addTerrainMarker(p); else addPropertyMarker(p); });
+
+  map.on('click', (e) => {
+    const features = map.queryRenderedFeatures(e.point, {
+      layers: ['poi-label']
+    });
+    if (!features.length) return;
+    const poi = features[0];
+    const name = poi.properties.name;
+    const coords = poi.geometry.coordinates;
+    if (!name) return;
+
+    fetch('https://mpmprnjhunjfeacikgml.supabase.co/rest/v1/restaurants?select=*&name=eq.'+encodeURIComponent(name), {
+      headers: {
+        'apikey': 'sb_publishable_T6XISHd9O2Ol0raPaEASqQ_klUXnyY3',
+        'Authorization': 'Bearer sb_publishable_T6XISHd9O2Ol0raPaEASqQ_klUXnyY3'
+      }
+    })
+    .then(r => r.json())
+    .then(data => {
+      if (data.length > 0) {
+        const r = data[0];
+        const popup = new mapboxgl.Popup({offset: 15})
+          .setLngLat(coords)
+          .setHTML(`
+            <div style="font-family:Raleway,sans-serif;padding:8px">
+              <div style="font-size:.9rem;font-weight:700;color:#1A1810">${r.name}</div>
+              <div style="font-size:.75rem;color:#888;margin:2px 0">${r.rating}★ · ${r.address}</div>
+              <div style="margin-top:8px;display:flex;gap:8px">
+                <a href="${r.waymo_url}" target="_blank" style="font-size:.7rem;background:#1A73E8;color:#fff;padding:4px 8px;border-radius:3px;text-decoration:none">🚗 Waymo</a>
+                <a href="${r.yelp_url}" target="_blank" style="font-size:.7rem;background:#B22234;color:#fff;padding:4px 8px;border-radius:3px;text-decoration:none">r/Σ View</a>
+              </div>
+            </div>
+          `)
+          .addTo(map);
+      }
+    });
+  });
+});
+
+map.on('zoomend',()=>{
+  const zoom=map.getZoom();
+  const c=map.getCenter();
+  const inLA=c.lng>=LA_BOUNDS.minLng&&c.lng<=LA_BOUNDS.maxLng&&c.lat>=LA_BOUNDS.minLat&&c.lat<=LA_BOUNDS.maxLat;
+  if(zoom>=11&&inLA){loadDBListings();}
+  else if(zoom<10){clearDBMarkers();}
+});
+
+function addPropertyMarker(p){
+  const el=document.createElement('div');
+  el.className='req-marker';
+  el.innerHTML=`<div class="pulse-ring"></div><div class="pulse-ring"></div><div class="dot"></div><div class="label">${p.short} ${p.price}</div>`;
+  el.addEventListener('click',()=>openPanel(p));
+  const marker = new mapboxgl.Marker({element:el,anchor:'center',pitchAlignment:'map',rotationAlignment:'map'}).setLngLat(p.coords).addTo(map);
+}
+function addTerrainMarker(p){
+  map.addSource('prop-'+p.id,{type:'geojson',data:{type:'Feature',geometry:{type:'Point',coordinates:p.coords},properties:{title:p.short}}});
+  map.addLayer({id:'prop-'+p.id,type:'circle',source:'prop-'+p.id,paint:{'circle-radius':10,'circle-color':'#C9A84C','circle-stroke-width':2,'circle-stroke-color':'#ffffff','circle-pitch-alignment':'map','circle-pitch-scale':'map'}});
+  map.on('click','prop-'+p.id,()=>openPanel(p));
+  map.on('mouseenter','prop-'+p.id,()=>map.getCanvas().style.cursor='pointer');
+  map.on('mouseleave','prop-'+p.id,()=>map.getCanvas().style.cursor='');
+}
+function addCondoMarker(p){
+  const el=document.createElement('div');
+  el.style.cssText='cursor:pointer';
+  const dot=document.createElement('div');
+  dot.style.cssText='width:10px;height:10px;border-radius:50%;background:#00CED1;border:2px solid #fff;box-shadow:0 0 8px rgba(0,206,209,0.9)';
+  el.appendChild(dot);
+  el.addEventListener('click',()=>openPanel(p));
+  new mapboxgl.Marker({element:el,anchor:'top'}).setLngLat(p.coords).addTo(map);
+}
+
+function addPoiMarkers(p){
+  clearPoiMarkers();
+  p.pois.forEach(poi=>{
+    const el=document.createElement('div');
+    el.className='poi-marker'+(poi.waymo?' waymo':'');
+    el.innerHTML=`<div class="poi-dot" style="background:${poi.color}"></div><div class="poi-label">${poi.name}</div>`;
+    poiMarkers.push(new mapboxgl.Marker({element:el,anchor:'bottom'}).setLngLat(poi.coords).addTo(map));
+  });
+}
+function clearPoiMarkers(){poiMarkers.forEach(m=>m.remove());poiMarkers=[];}
+
+function openPanel(p){
+  activeProperty=p;
+  document.getElementById('panel-tag-text').textContent=p.tag;
+  document.getElementById('panel-title').textContent=p.name;
+  document.getElementById('panel-subtitle').textContent=p.subtitle;
+  _ci=0;_ct=p.images.length;
+  document.getElementById('carousel-track').innerHTML=p.images.map((u,i)=>
+    `<div class="carousel-slide"><img src="${u}" alt="Photo ${i+1}" loading="${i<3?'eager':'lazy'}" onload="this.classList.add(this.naturalHeight>this.naturalWidth?'portrait':'landscape')" class="landscape"/></div>`
+  ).join('');
+  document.getElementById('carousel-counter').textContent=`1 / ${_ct}`;
+  document.getElementById('carousel-dots').innerHTML=p.images.map((_,i)=>
+    `<div class="carousel-dot${i===0?' active':''}" onclick="carouselGoTo(${i})"></div>`
+  ).join('');
+  document.getElementById('stats-grid').innerHTML=`
+    <div class="stat-card"><div class="stat-label">Price</div><div class="stat-value">${p.price}</div></div>
+    <div class="stat-card"><div class="stat-label">Type</div><div class="stat-value" style="font-size:.9rem">${p.type}</div></div>
+    <div class="stat-card"><div class="stat-label">Beds / Baths</div><div class="stat-value">${p.beds}BR / ${p.baths}BA</div></div>
+    <div class="stat-card"><div class="stat-label">Size</div><div class="stat-value" style="font-size:1rem">${p.sqft} SF</div></div>
+  `;
+  document.getElementById('prop-desc').textContent=p.description;
+  document.getElementById('prop-tags').innerHTML=p.tags.map(t=>`<span class="tag">${t}</span>`).join('');
+  document.getElementById('video-label').textContent=`Documentary — ${p.name}`;
+  document.getElementById('video-grid').innerHTML=p.videos.map((v,i)=>
+    `<div><div class="video-item" onclick="this.innerHTML='<iframe src=\\'https://www.youtube.com/embed/${v.id}?autoplay=1&rel=0&modestbranding=1\\' allow=\\'autoplay\\' allowfullscreen></iframe>'" style="background:url(https://img.youtube.com/vi/${v.id}/mqdefault.jpg) center/cover;cursor:pointer"><div class="video-play">&#9654;</div></div><div class="video-title">${v.title}</div></div>`
+  ).join('');
+  document.getElementById('comps-headline').textContent=p.comps.headline;
+  document.getElementById('comps-intro').textContent=p.comps.intro;
+  document.getElementById('comps-list').innerHTML=p.comps.listings.map(c=>`
+    <div class="comp-card">
+      <div class="comp-card-top">
+        <div class="comp-address">${c.address}</div>
+        <div class="comp-price">${c.price}</div>
+      </div>
+      <div class="comp-chips">${c.chips.map(ch=>`<span class="comp-chip">${ch}</span>`).join('')}</div>
+      <div class="comp-note">${c.note}</div>
+      <div class="comp-source-row">
+        <span class="comp-source">${c.source}</span>
+        <span class="comp-status">● ${c.status}</span>
+      </div>
+    </div>
+  `).join('');
+  buildNeighborhood(p);
+  if(p.id==='dtla'){document.getElementById('btn-comps').style.display='none';document.getElementById('tab-comps').style.display='none';document.getElementById('tab-index').style.display='inline-block';}else{document.getElementById('btn-comps').style.display='inline-block';document.getElementById('tab-comps').style.display='inline-block';document.getElementById('tab-index').style.display='none';}
+  switchTab('property');
+  document.getElementById('panel').classList.add('open');
+  map.flyTo({center:p.localCenter,zoom:p.localZoom,pitch:p.localPitch,bearing:p.localBearing,duration:2000,essential:true});
+  map.once('moveend',()=>addPoiMarkers(p));
+  if(p.localCenter[0]<-115){loadDBListings();}
+  if(p.id==='dtla'){fetchRestaurants();}
+}
+
+function buildNeighborhood(p){
+  const cats=Object.keys(p.neighborhood);
+  document.getElementById('nbhd-cats').innerHTML=cats.map((c,i)=>
+    `<button class="nbhd-cat-btn${i===0?' active':''}" onclick="showCat('${c}',this)">${c}</button>`
+  ).join('');
+  showItems(p.neighborhood[cats[0]]);
+}
+function showCat(cat,btn){
+  document.querySelectorAll('.nbhd-cat-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  showItems(activeProperty.neighborhood[cat]);
+}
+function showItems(items){
+  document.getElementById('nbhd-list').innerHTML=items.map(item=>`
+    <div class="nbhd-card">
+      <div class="nbhd-icon">${item.icon}</div>
+      <div class="nbhd-info"><div class="nbhd-name">${item.name}</div><div class="nbhd-meta">${item.meta}</div></div>
+      <div class="nbhd-dist">${item.dist}</div>
+    </div>
+  `).join('');
+}
+
+function switchTab(name){
+  const names=['property','comps','index','neighborhood','waymo'];
+  document.querySelectorAll('.panel-tab').forEach((t,i)=>t.classList.toggle('active',names[i]===name));
+  document.querySelectorAll('.tab-pane').forEach(p=>p.classList.toggle('active',p.id==='tab-'+name));
+  document.getElementById('panel-body').scrollTop=0;
+}
+
+function carouselMove(d){_ci=(_ci+d+_ct)%_ct;carouselRender();}
+function carouselGoTo(i){_ci=i;carouselRender();}
+function carouselRender(){
+  const t=document.getElementById('carousel-track');
+  if(t)t.style.transform=`translateX(-${_ci*100}%)`;
+  const c=document.getElementById('carousel-counter');
+  if(c)c.textContent=`${_ci+1} / ${_ct}`;
+  document.querySelectorAll('.carousel-dot').forEach((d,i)=>d.classList.toggle('active',i===_ci));
+}
+
+function closePanel(){
+  document.getElementById('panel').classList.remove('open');
+  if(activeProperty){map.flyTo({center:activeProperty.localCenter,zoom:activeProperty.localZoom-1,pitch:activeProperty.localPitch,bearing:activeProperty.localBearing,duration:900,essential:true});}
+}
+function goHome(){
+  map.fitBounds([[-119.0,32.8],[-111.5,34.5]],{padding:{top:80,bottom:80,left:40,right:40},pitch:30,duration:1200});
+  document.getElementById('panel').classList.remove('open');
+  document.getElementById('db-listing-panel').style.transform='translateY(100%)';
+  clearPoiMarkers();clearDBPois();clearDBMarkers();activeProperty=null;
+}
+function openModal(id){document.getElementById('modal-'+id).classList.add('active');}
+function closeModal(id){document.getElementById('modal-'+id).classList.remove('active');}
+document.querySelectorAll('.modal-overlay').forEach(el=>el.addEventListener('click',e=>{if(e.target===el)el.classList.remove('active');}));
+window.addEventListener('load',function(){setTimeout(function(){var p=properties.find(function(x){return x.id==='laveen';});if(p)openPanel(p);},4000);});
+</script>
+
+</body>
+</html>
