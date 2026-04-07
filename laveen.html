@@ -655,7 +655,6 @@ map.addControl(new mapboxgl.NavigationControl({showCompass:false}),'bottom-right
 let activeProperty=null,poiMarkers=[],_ci=0,_ct=1;
 
 map.on('load',()=>{
-  try{map.setPaintProperty('satellite','raster-brightness-max',.78);map.setPaintProperty('satellite','raster-saturation',-.15);map.setPaintProperty('satellite','raster-contrast',.1);}catch(e){}
   map.setConfigProperty('basemap','lightPreset','day');
   map.setConfigProperty('basemap','show3dObjects',true);
   properties.forEach(p=>{ if(p.tag==='Active Listing') addCondoMarker(p); else if(p.id==='laveen') addTerrainMarker(p); else addPropertyMarker(p); });
