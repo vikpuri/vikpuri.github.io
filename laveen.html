@@ -695,6 +695,8 @@ map.on('load',()=>{
       }
     });
   });
+  var lav=properties.find(function(x){return x.id==='laveen';});
+  if(lav) openPanel(lav);
 });
 
 map.on('zoomend',()=>{
@@ -843,7 +845,6 @@ function goHome(){
 function openModal(id){document.getElementById('modal-'+id).classList.add('active');}
 function closeModal(id){document.getElementById('modal-'+id).classList.remove('active');}
 document.querySelectorAll('.modal-overlay').forEach(el=>el.addEventListener('click',e=>{if(e.target===el)el.classList.remove('active');}));
-map.on('load',function(){setTimeout(function(){var p=properties.find(function(x){return x.id==='laveen';});if(p)openPanel(p);},1000);});
 </script>
 
 </body>
