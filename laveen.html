@@ -204,7 +204,6 @@
   </div>
   <div class="panel-tabs">
     <button class="panel-tab active" onclick="switchTab('property')">Property</button>
-    <button id="btn-comps" class="panel-tab" onclick="switchTab('comps')">Comps</button>
     <button id="tab-index" class="panel-tab" onclick="switchTab('index')" style="display:none">INDEX</button>
     <button class="panel-tab" onclick="switchTab('neighborhood')">Neighborhood</button>
     <button class="panel-tab" onclick="switchTab('waymo')">Waymo</button>
@@ -233,13 +232,6 @@
   <div style="height:20px"></div>
 </div>
 
-<div class="tab-pane" id="tab-comps">
-  <div class="panel-pad" style="padding-bottom:6px">
-    <div class="section-title" style="margin-top:4px" id="comps-headline"></div>
-    <p class="comp-intro-text" id="comps-intro"></p>
-  </div>
-  <div style="padding:0 20px 24px" id="comps-list"></div>
-</div>
 
 <div class="tab-pane" id="tab-index">
   <div class="panel-pad">
@@ -875,7 +867,7 @@ function openPanel(p){
     </div>
   `).join('');
   buildNeighborhood(p);
-  if(p.id==='dtla'){document.getElementById('btn-comps').style.display='none';document.getElementById('tab-comps').style.display='none';document.getElementById('tab-index').style.display='inline-block';}else{document.getElementById('btn-comps').style.display='inline-block';document.getElementById('tab-comps').style.display='inline-block';document.getElementById('tab-index').style.display='none';}
+  document.getElementById('tab-index').style.display='none';
   switchTab('property');
   document.getElementById('panel').classList.add('open');
   map.flyTo({center:p.localCenter,zoom:p.localZoom,pitch:p.localPitch,bearing:p.localBearing,duration:2000,essential:true});
