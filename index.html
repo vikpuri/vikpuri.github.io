@@ -783,8 +783,6 @@ function addPoiMarkers(p){
 function clearPoiMarkers(){poiMarkers.forEach(m=>m.remove());poiMarkers=[];}
 
 function openPanel(p){
-  if(p.id==='laveen') window.history.replaceState(null,'','/laveen.html');
-  else if(p.id==='dtla') window.history.replaceState(null,'','/dtla.html');
   activeProperty=p;
   document.getElementById('panel-tag-text').textContent=p.tag;
   document.getElementById('panel-title').textContent=p.name;
@@ -875,12 +873,10 @@ function carouselRender(){
 }
 
 function closePanel(){
-  window.history.replaceState(null,'','/');
   document.getElementById('panel').classList.remove('open');
   if(activeProperty){map.flyTo({center:activeProperty.localCenter,zoom:activeProperty.localZoom-1,pitch:activeProperty.localPitch,bearing:activeProperty.localBearing,duration:900,essential:true});}
 }
 function goHome(){
-  window.history.replaceState(null,'','/');
   map.fitBounds([[-119.0,32.8],[-111.5,34.5]],{padding:{top:80,bottom:80,left:40,right:40},pitch:30,duration:1200});
   document.getElementById('panel').classList.remove('open');
   document.getElementById('db-listing-panel').style.transform='translateY(100%)';
