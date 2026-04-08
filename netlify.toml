@@ -14,4 +14,5 @@
 [[redirects]]
   from = "/laveen"
   to = "/laveen.html"
-  status = 301
+  status = 200
+  force = true

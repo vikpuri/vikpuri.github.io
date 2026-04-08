@@ -785,7 +785,8 @@ map.on('load',()=>{
           `)
           .addTo(map);
       }
-    });
+    })
+    .catch(e=>console.error('POI fetch failed',e));
   });
 });
 
