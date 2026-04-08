@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Requation — Real Estate Intelligence</title>
   <meta property="og:type"         content="website">
-  <meta property="og:url"          content="https://requation.com/dtla.html">
+  <meta property="og:url"          content="https://requation.com/dtla">
   <meta property="og:title"        content="South Park Brutalist — Requation DTLA">
   <meta property="og:description"  content="2BR/2BA 16th Floor · 801 S Grand Ave · $885,000 · 3D neighborhood intelligence">
   <meta property="og:image"        content="https://i.imgur.com/3rFddwE.jpeg">
@@ -841,8 +841,8 @@ function addPoiMarkers(p){
 function clearPoiMarkers(){poiMarkers.forEach(m=>m.remove());poiMarkers=[];}
 
 function openPanel(p){
-  if(p.id==='laveen') window.history.replaceState(null,'','/laveen.html');
-  else if(p.id==='dtla') window.history.replaceState(null,'','/dtla.html');
+  if(p.id==='laveen') window.history.replaceState(null,'','/laveen');
+  else if(p.id==='dtla') window.history.replaceState(null,'','/dtla');
   activeProperty=p;
   document.getElementById('panel-tag-text').textContent=p.tag;
   document.getElementById('panel-title').textContent=p.name;

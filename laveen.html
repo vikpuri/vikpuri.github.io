@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Requation — Real Estate Intelligence</title>
   <meta property="og:type"         content="website">
-  <meta property="og:url"          content="https://requation.com/laveen.html">
+  <meta property="og:url"          content="https://requation.com/laveen">
   <meta property="og:title"        content="Urban Farmhouse — Requation Laveen">
   <meta property="og:description"  content="4BR/4.5BA · 5,400SF · 4.4 Acres · South Mountain · $2,000,000">
   <meta property="og:image"        content="https://i.imgur.com/6YlnSK6.jpeg">
@@ -750,7 +750,6 @@ map.on('load',()=>{
   map.setConfigProperty('basemap','lightPreset','day');
   map.setConfigProperty('basemap','show3dObjects',true);
   properties.forEach(p=>{ if(p.tag==='Active Listing') addCondoMarker(p); else if(p.id==='laveen') addTerrainMarker(p); else addPropertyMarker(p); });
-  setTimeout(()=>{const p=properties.find(x=>x.id==='laveen');if(p){openPanel(p);window.history.replaceState(null,'','/laveen.html');}},800);
 
   map.on('click', (e) => {
     const features = map.queryRenderedFeatures(e.point, {
@@ -834,8 +833,8 @@ function addPoiMarkers(p){
 function clearPoiMarkers(){poiMarkers.forEach(m=>m.remove());poiMarkers=[];}
 
 function openPanel(p){
-  if(p.id==='laveen') window.history.replaceState(null,'','/laveen.html');
-  else if(p.id==='dtla') window.history.replaceState(null,'','/dtla.html');
+  if(p.id==='laveen') window.history.replaceState(null,'','/laveen');
+  else if(p.id==='dtla') window.history.replaceState(null,'','/dtla');
   activeProperty=p;
   document.getElementById('panel-tag-text').textContent=p.tag;
   document.getElementById('panel-title').textContent=p.name;
@@ -940,6 +939,7 @@ function goHome(){
 function openModal(id){document.getElementById('modal-'+id).classList.add('active');}
 function closeModal(id){document.getElementById('modal-'+id).classList.remove('active');}
 document.querySelectorAll('.modal-overlay').forEach(el=>el.addEventListener('click',e=>{if(e.target===el)el.classList.remove('active');}));
+window.addEventListener('load',function(){setTimeout(function(){var p=properties.find(function(x){return x.id==='laveen';});if(p)openPanel(p);},1500);});
 </script>
 
 </body>
