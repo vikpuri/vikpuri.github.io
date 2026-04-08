@@ -783,7 +783,7 @@ function addPoiMarkers(p){
 function clearPoiMarkers(){poiMarkers.forEach(m=>m.remove());poiMarkers=[];}
 
 function openPanel(p){
-  if(p.url) window.history.replaceState(null,'',p.url);
+  if(p.url){ window.location.href=p.url; return; }
   activeProperty=p;
   document.getElementById('panel-tag-text').textContent=p.tag;
   document.getElementById('panel-title').textContent=p.name;
