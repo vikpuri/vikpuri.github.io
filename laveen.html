@@ -859,9 +859,9 @@ function openPanel(p){
   document.getElementById('video-grid').innerHTML=p.videos.map((v,i)=>
     `<div><div class="video-item" onclick="this.innerHTML='<iframe src=\\'https://www.youtube.com/embed/${v.id}?autoplay=1&rel=0&modestbranding=1\\' allow=\\'autoplay\\' allowfullscreen></iframe>'" style="background:url(https://img.youtube.com/vi/${v.id}/mqdefault.jpg) center/cover;cursor:pointer"><div class="video-play">&#9654;</div></div><div class="video-title">${v.title}</div></div>`
   ).join('');
-  document.getElementById('comps-headline').textContent=p.comps.headline;
-  document.getElementById('comps-intro').textContent=p.comps.intro;
-  document.getElementById('comps-list').innerHTML=p.comps.listings.map(c=>`
+  if(document.getElementById('comps-headline')) document.getElementById('comps-headline').textContent=p.comps.headline;
+  if(document.getElementById('comps-intro')) document.getElementById('comps-intro').textContent=p.comps.intro;
+  if(document.getElementById('comps-list')) document.getElementById('comps-list').innerHTML=p.comps.listings.map(c=>`
     <div class="comp-card">
       <div class="comp-card-top">
         <div class="comp-address">${c.address}</div>
