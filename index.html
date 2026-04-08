@@ -327,7 +327,7 @@ const LAV_VIDEOS=[
 ];
 const properties=[
   {
-    id:'dtla',name:'South Park Brutalist',short:'DTLA',
+    id:'dtla',url:'/dtla.html',name:'South Park Brutalist',short:'DTLA',
     coords:[-118.2637,34.0422],tag:'For Sale By Owner',
     subtitle:'801 S Grand Ave, Unit 1612 · Los Angeles CA 90017',
     type:'High-Rise Condo',beds:'2',baths:'2',sqft:'1,300',price:'$885,000',
@@ -469,7 +469,7 @@ const properties=[
   {id:'oceanave',name:'101 Ocean Ave',short:'Santa Monica',coords:[-118.51567,34.0269371],tag:'Active Listing',subtitle:'101 Ocean Ave · Santa Monica CA 90402',type:'Luxury Condo',beds:'2',baths:'2',sqft:'1,500',price:'$2,200,000',description:'Iconic Santa Monica oceanfront building. Floor-to-ceiling windows, ocean views, steps from the sand and Pier.',tags:['Santa Monica','Oceanfront','Luxury'],images:[],videos:[],comps:{headline:'',intro:'',listings:[]},neighborhood:{},pois:[],localCenter:[-118.51567,34.0269371],localZoom:15,localPitch:65,localBearing:20},
   {id:'bentley',name:'1810 Bentley',short:'West LA',coords:[-118.4413223,34.0458818],tag:'Active Listing',subtitle:'1810 S Bentley Ave · Los Angeles CA 90025',type:'Luxury Condo',beds:'2',baths:'2',sqft:'1,600',price:'$1,350,000',description:'Prime West LA between Westwood and Santa Monica. Steps from Sawtelle dining district and UCLA.',tags:['West LA','Westwood','Luxury'],images:[],videos:[],comps:{headline:'',intro:'',listings:[]},neighborhood:{},pois:[],localCenter:[-118.4413223,34.0458818],localZoom:15,localPitch:65,localBearing:20},
   {
-    id:'laveen',name:'Urban Farmhouse',short:'Laveen',
+    id:'laveen',url:'/laveen.html',name:'Urban Farmhouse',short:'Laveen',
     coords:[-112.1180767,33.3427905],tag:'For Sale By Owner',
     subtitle:'11403 S 27th Dr · Laveen, AZ 85339',
     type:'Equestrian Estate',beds:'4',baths:'4.5',sqft:'5,400',price:'$2,000,000',
@@ -783,6 +783,7 @@ function addPoiMarkers(p){
 function clearPoiMarkers(){poiMarkers.forEach(m=>m.remove());poiMarkers=[];}
 
 function openPanel(p){
+  if(p.url) window.history.replaceState(null,'',p.url);
   activeProperty=p;
   document.getElementById('panel-tag-text').textContent=p.tag;
   document.getElementById('panel-title').textContent=p.name;
