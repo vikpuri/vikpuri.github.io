@@ -36,14 +36,11 @@ async function upsertLiving(businesses, zip, market, categoryKey) {
     .map(b => ({
       name:       b.name,
       category:   categoryKey,
-      chain:      inferChain(b.name),
       lat:        b.coordinates.latitude,
       lng:        b.coordinates.longitude,
       zip:        zip,
-      market:     market,
       rating:     b.rating,
       yelp_url:   b.url,
-      redfin_url: `https://www.redfin.com/zipcode/${zip}`,
       waymo_url:  `https://waymo.com/waymo-one/?destination=${encodeURIComponent((b.location.address1||'')+' '+(b.location.city||''))}`,
       phone:      b.phone || '',
       address:    [b.location.address1, b.location.city, b.location.state].filter(Boolean).join(', ')
@@ -51,13 +48,13 @@ async function upsertLiving(businesses, zip, market, categoryKey) {
 
   if (!rows.length) return 0;
 
-  const res = await fetch(`${SUPABASE_URL}/rest/v1/living`, {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/restaurants`, {
     method: 'POST',
     headers: {
       'apikey':        SUPABASE_KEY,
       'Authorization': `Bearer ${SUPABASE_KEY}`,
       'Content-Type':  'application/json',
-      'Prefer':        'resolution=merge-duplicates'
+      'Prefer':        'resolution=ignore-duplicates,return=minimal'
     },
     body: JSON.stringify(rows)
   });

@@ -198,8 +198,8 @@ map.on('load',()=>{
 
 async function loadLiving(){
   try{
-    const resp=await fetch(SB_URL+'/rest/v1/living?select=*&market=eq.CA&limit=500',{headers:SB_HEADERS});
-    if(!resp.ok) throw new Error('living table not found — run migration first');
+    const resp=await fetch(SB_URL+'/rest/v1/restaurants?select=*&zip=in.(90017,90015,90013,90014)&limit=500',{headers:SB_HEADERS});
+    if(!resp.ok) throw new Error('restaurants fetch failed');
     allData=await resp.json();
     renderLayer(allData);
     document.getElementById('count-badge').textContent=allData.length+' businesses';
