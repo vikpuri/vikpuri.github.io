@@ -470,31 +470,30 @@ function renderLayer(data){
 
 // Category filter
 // ── YOUTUBE ──
-const YT_VIDEOS=[
-  {id:'GFD0WG60c6Q',title:'Urban Light — South Park'},
-  {id:'1mXG5MJ6i1U',title:'City Views — 16th Floor'},
-  {id:'nig4DmfKW_I',title:'The Walkable City'},
-  {id:'FR8hkxtha9A',title:'DTLA — Night'},
-  {id:'oH3JefYb6YM',title:'City of Angels — Dawn'},
-  {id:'Ny_5OMGToC4',title:'South Park — Urban Living'}
-];
-// Offsets around the property pin [-118.2637, 34.0422]
-const YT_OFFSETS=[
+const YT_QUERY_LALIFE='South Park DTLA luxury condo for sale Los Angeles';
+const YT_CENTER_LALIFE=[-118.2637,34.0422];
+const YT_OFFSETS_LALIFE=[
   [-118.2655,34.0432],[-118.2637,34.0437],[-118.2619,34.0432],
   [-118.2610,34.0418],[-118.2637,34.0407],[-118.2655,34.0412]
 ];
-let ytIdx=0;
+let ytVideos=[], ytIdx=0;
 
-function addYTMarkers(){
-  YT_VIDEOS.forEach((v,i)=>{
-    const el=document.createElement('div');
-    el.className='yt-marker';
-    el.innerHTML=`<div class="yt-thumb" style="background-image:url(https://img.youtube.com/vi/${v.id}/mqdefault.jpg)"></div><div class="yt-play">▶</div>`;
-    el.addEventListener('click',()=>openYT(i));
-    new mapboxgl.Marker({element:el,anchor:'center'})
-      .setLngLat(YT_OFFSETS[i]||[-118.2637,34.0422])
-      .addTo(map);
-  });
+async function addYTMarkers(){
+  try{
+    const resp=await fetch(`/.netlify/functions/youtube?q=${encodeURIComponent(YT_QUERY_LALIFE)}&maxResults=6`);
+    const data=await resp.json();
+    ytVideos=data.videos||[];
+    ytVideos.forEach((v,i)=>{
+      const el=document.createElement('div');
+      el.className='yt-marker';
+      el.innerHTML=`<div class="yt-thumb" style="background-image:url(${v.thumb})"></div><div class="yt-play">▶</div>`;
+      el.addEventListener('click',()=>openYT(i));
+      new mapboxgl.Marker({element:el,anchor:'center'})
+        .setLngLat(YT_OFFSETS_LALIFE[i]||YT_CENTER_LALIFE)
+        .addTo(map);
+    });
+    console.log('YT markers loaded:',ytVideos.length);
+  }catch(e){console.error('YouTube load failed',e);}
 }
 function openYT(i){
   ytIdx=i;
@@ -502,14 +501,15 @@ function openYT(i){
   document.getElementById('yt-popup').classList.add('open');
 }
 function renderYT(){
-  const v=YT_VIDEOS[ytIdx];
+  const v=ytVideos[ytIdx];
+  if(!v) return;
   document.getElementById('yt-title').textContent=v.title;
   document.getElementById('yt-frame').src=`https://www.youtube.com/embed/${v.id}?autoplay=1&rel=0&modestbranding=1`;
-  document.getElementById('yt-counter').textContent=(ytIdx+1)+' / '+YT_VIDEOS.length;
+  document.getElementById('yt-counter').textContent=(ytIdx+1)+' / '+ytVideos.length;
 }
 function ytStep(dir){
   document.getElementById('yt-frame').src='';
-  ytIdx=(ytIdx+dir+YT_VIDEOS.length)%YT_VIDEOS.length;
+  ytIdx=(ytIdx+dir+ytVideos.length)%ytVideos.length;
   renderYT();
 }
 function closeYT(){

@@ -536,39 +536,31 @@ function buildHomesList(){
 }
 
 // ── YOUTUBE ──
-const YT_VIDEOS=[
-  {id:'wn9pZDkd6bo',title:'Desert Rain — Monsoon Season'},
-  {id:'lTk4aLK1MYo',title:"Nature's Light — Laveen"},
-  {id:'M7MY9zNWY50',title:'Desert Light — Laveen Estate'},
-  {id:'HmJqTSnu1e8',title:'Love & Desert Sky'},
-  {id:'KEuwFQn8bmA',title:'Desert Nature — Golden Hour'},
-  {id:'hrPKYsoz_0U',title:'Monsoon at South Mountain'},
-  {id:'yKjrEa8IT9c',title:'Rain on the Mesa'},
-  {id:'sU1NmE_Bu6I',title:'Light & Shadow — Laveen'},
-  {id:'YO1DPp3Bi8c',title:'The Green Estate — Monsoon'},
-  {id:'sJMBOYnNlgE',title:'Desert Love — South Mountain'},
-  {id:'Rp3JzD2jseY',title:'Kubla Khan — Desert Pleasuredome'},
-  {id:'jKe7eilvgHM',title:"Morrison's Desert"},
-  {id:'ut67g0F1lXw',title:"Nature's Canvas — Arizona"}
-];
-// Offsets around Urban Farmhouse [-112.1180767, 33.3427905]
-const YT_OFFSETS=[
+const YT_QUERY_DESERT='Laveen Arizona acreage home for sale South Phoenix';
+const YT_CENTER_DESERT=[-112.1180767,33.3427905];
+const YT_OFFSETS_DESERT=[
   [-112.1210,33.3445],[-112.1180,33.3452],[-112.1150,33.3445],
   [-112.1136,33.3428],[-112.1150,33.3410],[-112.1180,33.3404],
   [-112.1210,33.3410]
 ];
-let ytIdx=0;
+let ytVideos=[], ytIdx=0;
 
-function addYTMarkers(){
-  YT_VIDEOS.slice(0,7).forEach((v,i)=>{
-    const el=document.createElement('div');
-    el.className='yt-marker';
-    el.innerHTML=`<div class="yt-thumb" style="background-image:url(https://img.youtube.com/vi/${v.id}/mqdefault.jpg)"></div><div class="yt-play">▶</div>`;
-    el.addEventListener('click',()=>openYT(i));
-    new mapboxgl.Marker({element:el,anchor:'center'})
-      .setLngLat(YT_OFFSETS[i]||[-112.1180767,33.3427905])
-      .addTo(map);
-  });
+async function addYTMarkers(){
+  try{
+    const resp=await fetch(`/.netlify/functions/youtube?q=${encodeURIComponent(YT_QUERY_DESERT)}&maxResults=7`);
+    const data=await resp.json();
+    ytVideos=data.videos||[];
+    ytVideos.forEach((v,i)=>{
+      const el=document.createElement('div');
+      el.className='yt-marker';
+      el.innerHTML=`<div class="yt-thumb" style="background-image:url(${v.thumb})"></div><div class="yt-play">▶</div>`;
+      el.addEventListener('click',()=>openYT(i));
+      new mapboxgl.Marker({element:el,anchor:'center'})
+        .setLngLat(YT_OFFSETS_DESERT[i]||YT_CENTER_DESERT)
+        .addTo(map);
+    });
+    console.log('YT markers loaded:',ytVideos.length);
+  }catch(e){console.error('YouTube load failed',e);}
 }
 function openYT(i){
   ytIdx=i;
@@ -576,14 +568,15 @@ function openYT(i){
   document.getElementById('yt-popup').classList.add('open');
 }
 function renderYT(){
-  const v=YT_VIDEOS[ytIdx];
+  const v=ytVideos[ytIdx];
+  if(!v) return;
   document.getElementById('yt-title').textContent=v.title;
   document.getElementById('yt-frame').src=`https://www.youtube.com/embed/${v.id}?autoplay=1&rel=0&modestbranding=1`;
-  document.getElementById('yt-counter').textContent=(ytIdx+1)+' / '+YT_VIDEOS.length;
+  document.getElementById('yt-counter').textContent=(ytIdx+1)+' / '+ytVideos.length;
 }
 function ytStep(dir){
   document.getElementById('yt-frame').src='';
-  ytIdx=(ytIdx+dir+YT_VIDEOS.length)%YT_VIDEOS.length;
+  ytIdx=(ytIdx+dir+ytVideos.length)%ytVideos.length;
   renderYT();
 }
 function closeYT(){
