@@ -172,6 +172,52 @@
     /* ── CLUSTER POPUP ── */
     .cluster-pop{font-family:'DM Mono',monospace;font-size:.65rem;letter-spacing:.08em;text-align:center;padding:4px}
 
+    /* ── YOUTUBE MARKERS ── */
+    .yt-marker{
+      width:72px;height:42px;border-radius:5px;overflow:hidden;
+      cursor:pointer;border:2px solid #FF0000;
+      box-shadow:0 2px 10px rgba(0,0,0,.65);position:relative;
+      transition:transform .15s
+    }
+    .yt-marker:hover{transform:scale(1.08)}
+    .yt-thumb{width:100%;height:100%;background-size:cover;background-position:center}
+    .yt-play{
+      position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+      background:rgba(0,0,0,.35);color:#fff;font-size:16px
+    }
+
+    /* ── YOUTUBE POPUP ── */
+    #yt-popup{
+      position:fixed;inset:0;z-index:400;
+      background:rgba(0,0,0,.92);display:none;
+      flex-direction:column;align-items:center;justify-content:center;
+      backdrop-filter:blur(8px)
+    }
+    #yt-popup.open{display:flex}
+    #yt-title{
+      font-family:'Playfair Display',serif;font-size:1rem;color:var(--cream);
+      margin-bottom:12px;text-align:center;padding:0 20px
+    }
+    #yt-frame-wrap{
+      width:90vw;max-width:640px;aspect-ratio:16/9;background:#000;border-radius:6px;overflow:hidden
+    }
+    #yt-frame-wrap iframe{width:100%;height:100%;border:none}
+    #yt-nav{
+      display:flex;align-items:center;gap:16px;margin-top:14px
+    }
+    .yt-nav-btn{
+      font-family:'DM Mono',monospace;font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;
+      background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);
+      color:var(--cream);padding:7px 16px;border-radius:3px;cursor:pointer
+    }
+    .yt-nav-btn:hover{background:rgba(255,255,255,.2)}
+    #yt-counter{font-family:'DM Mono',monospace;font-size:.6rem;color:rgba(255,255,255,.4);letter-spacing:.08em}
+    #yt-close{
+      position:absolute;top:20px;right:20px;background:none;border:none;
+      color:rgba(255,255,255,.5);font-size:1.4rem;cursor:pointer
+    }
+    #yt-close:hover{color:#fff}
+
     /* ── ATTRIBUTION ── */
     .mapboxgl-ctrl-attrib{font-size:9px!important;opacity:.4!important}
     @media(max-width:640px){
@@ -190,6 +236,17 @@
 </header>
 
 <div id="map"></div>
+
+<div id="yt-popup">
+  <button id="yt-close" onclick="closeYT()">✕</button>
+  <div id="yt-title"></div>
+  <div id="yt-frame-wrap"><iframe id="yt-frame" allowfullscreen allow="autoplay"></iframe></div>
+  <div id="yt-nav">
+    <button class="yt-nav-btn" onclick="ytStep(-1)">← Prev</button>
+    <span id="yt-counter"></span>
+    <button class="yt-nav-btn" onclick="ytStep(1)">Next →</button>
+  </div>
+</div>
 
 <button id="homes-btn" onclick="document.getElementById('homes-panel').classList.toggle('open')">🏠 Homes</button>
 
@@ -225,6 +282,8 @@
   <button class="cat-pill" data-cat="MedSpa">💆 Spa</button>
   <button class="cat-pill" data-cat="Gym">💪 Gym</button>
   <button class="cat-pill" data-cat="Fashion">👗 Boutique</button>
+  <button class="cat-pill" data-cat="Shoes">👟 Shoes</button>
+  <button class="cat-pill" data-cat="Cosmetics">💄 Cosmetics</button>
 </div>
 
 <script>
@@ -276,6 +335,7 @@ map.on('load',()=>{
     .addTo(map);
 
   loadLiving();
+  addYTMarkers();
 });
 
 async function loadLiving(){
@@ -409,6 +469,54 @@ function renderLayer(data){
 }
 
 // Category filter
+// ── YOUTUBE ──
+const YT_VIDEOS=[
+  {id:'GFD0WG60c6Q',title:'Urban Light — South Park'},
+  {id:'1mXG5MJ6i1U',title:'City Views — 16th Floor'},
+  {id:'nig4DmfKW_I',title:'The Walkable City'},
+  {id:'FR8hkxtha9A',title:'DTLA — Night'},
+  {id:'oH3JefYb6YM',title:'City of Angels — Dawn'},
+  {id:'Ny_5OMGToC4',title:'South Park — Urban Living'}
+];
+// Offsets around the property pin [-118.2637, 34.0422]
+const YT_OFFSETS=[
+  [-118.2655,34.0432],[-118.2637,34.0437],[-118.2619,34.0432],
+  [-118.2610,34.0418],[-118.2637,34.0407],[-118.2655,34.0412]
+];
+let ytIdx=0;
+
+function addYTMarkers(){
+  YT_VIDEOS.forEach((v,i)=>{
+    const el=document.createElement('div');
+    el.className='yt-marker';
+    el.innerHTML=`<div class="yt-thumb" style="background-image:url(https://img.youtube.com/vi/${v.id}/mqdefault.jpg)"></div><div class="yt-play">▶</div>`;
+    el.addEventListener('click',()=>openYT(i));
+    new mapboxgl.Marker({element:el,anchor:'center'})
+      .setLngLat(YT_OFFSETS[i]||[-118.2637,34.0422])
+      .addTo(map);
+  });
+}
+function openYT(i){
+  ytIdx=i;
+  renderYT();
+  document.getElementById('yt-popup').classList.add('open');
+}
+function renderYT(){
+  const v=YT_VIDEOS[ytIdx];
+  document.getElementById('yt-title').textContent=v.title;
+  document.getElementById('yt-frame').src=`https://www.youtube.com/embed/${v.id}?autoplay=1&rel=0&modestbranding=1`;
+  document.getElementById('yt-counter').textContent=(ytIdx+1)+' / '+YT_VIDEOS.length;
+}
+function ytStep(dir){
+  document.getElementById('yt-frame').src='';
+  ytIdx=(ytIdx+dir+YT_VIDEOS.length)%YT_VIDEOS.length;
+  renderYT();
+}
+function closeYT(){
+  document.getElementById('yt-frame').src='';
+  document.getElementById('yt-popup').classList.remove('open');
+}
+
 document.querySelectorAll('.cat-pill').forEach(btn=>{
   btn.addEventListener('click',()=>{
     document.querySelectorAll('.cat-pill').forEach(b=>b.classList.remove('active'));
