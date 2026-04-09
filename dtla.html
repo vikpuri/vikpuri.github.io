@@ -255,6 +255,16 @@
 </div>
 
 <div class="tab-pane" id="tab-neighborhood">
+  <div style="padding:16px 20px 0">
+    <a href="/lalife" style="display:flex;align-items:center;justify-content:space-between;background:rgba(0,206,209,.08);border:1px solid rgba(0,206,209,.3);border-radius:8px;padding:12px 16px;text-decoration:none;color:inherit;transition:background .2s" onmouseover="this.style.background='rgba(0,206,209,.15)'" onmouseout="this.style.background='rgba(0,206,209,.08)'">
+      <div>
+        <div style="font-family:'DM Mono',monospace;font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:#00CED1;margin-bottom:3px">Requation Life</div>
+        <div style="font-size:.85rem;font-weight:500">Explore the Neighborhood →</div>
+        <div style="font-size:.72rem;opacity:.55;margin-top:2px">Grocery · Coffee · Cinema · Fitness · Health</div>
+      </div>
+      <div style="font-size:1.4rem;opacity:.7">🗺</div>
+    </a>
+  </div>
   <div class="nbhd-cats" id="nbhd-cats"></div>
   <div class="nbhd-list" id="nbhd-list"></div>
 </div>
@@ -719,24 +729,7 @@ async function fetchRestaurants(){
       }
     });
 
-    map.on('click','restaurants-layer',(e)=>{
-      const r=e.features[0].properties;
-      new mapboxgl.Popup({offset:15})
-        .setLngLat(e.features[0].geometry.coordinates)
-        .setHTML(`
-          <div style="font-family:Raleway,sans-serif;padding:10px;min-width:200px">
-            <div style="font-size:.9rem;font-weight:700;color:#1A1810">${r.name}</div>
-            <div style="font-size:.75rem;color:#888;margin:4px 0">${r.rating}★</div>
-            <div style="font-size:.72rem;color:#666;margin-bottom:8px">${r.address}</div>
-            <div style="display:flex;gap:8px">
-              <a href="${r.waymo_url}" target="_blank" style="font-size:.7rem;background:#1A73E8;color:#fff;padding:5px 10px;border-radius:3px;text-decoration:none">🚗 Waymo</a>
-              <a href="${r.yelp_url}" target="_blank" style="font-size:.7rem;background:#B22234;color:#fff;padding:5px 10px;border-radius:3px;text-decoration:none">View</a>
-              <a href="https://www.yelp.com/search?find_desc=Order+Food&find_loc=${encodeURIComponent(r.address)}" target="_blank" style="font-size:.7rem;background:#4CAF50;color:#fff;padding:5px 10px;border-radius:3px;text-decoration:none">🍽️ Order</a>
-            </div>
-          </div>
-        `)
-        .addTo(map);
-    });
+    map.on('click','restaurants-layer',()=>{ window.location.href='/lalife'; });
 
     map.on('mouseenter','restaurants-layer',()=>map.getCanvas().style.cursor='pointer');
     map.on('mouseleave','restaurants-layer',()=>map.getCanvas().style.cursor='');
@@ -836,6 +829,7 @@ function addPoiMarkers(p){
     const el=document.createElement('div');
     el.className='poi-marker'+(poi.waymo?' waymo':'');
     el.innerHTML=`<div class="poi-dot" style="background:${poi.color}"></div><div class="poi-label">${poi.name}</div>`;
+    el.addEventListener('click',()=>{ window.location.href='/lalife'; });
     poiMarkers.push(new mapboxgl.Marker({element:el,anchor:'bottom'}).setLngLat(poi.coords).addTo(map));
   });
 }
@@ -908,7 +902,7 @@ function showCat(cat,btn){
 }
 function showItems(items){
   document.getElementById('nbhd-list').innerHTML=items.map(item=>`
-    <div class="nbhd-card">
+    <div class="nbhd-card" onclick="window.location.href='/lalife'" style="cursor:pointer">
       <div class="nbhd-icon">${item.icon}</div>
       <div class="nbhd-info"><div class="nbhd-name">${item.name}</div><div class="nbhd-meta">${item.meta}</div></div>
       <div class="nbhd-dist">${item.dist}</div>

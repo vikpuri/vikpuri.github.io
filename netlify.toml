@@ -22,3 +22,9 @@
   to = "/lalife.html"
   status = 200
   force = true
+
+[[redirects]]
+  from = "/desertlife"
+  to = "/desertlife.html"
+  status = 200
+  force = true

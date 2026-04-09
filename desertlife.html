@@ -3,17 +3,17 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Requation Life · DTLA</title>
+  <title>Requation Life · Laveen</title>
   <meta property="og:type"         content="website">
-  <meta property="og:url"          content="https://requation.com/lalife">
-  <meta property="og:title"        content="Life Around South Park — Requation DTLA">
-  <meta property="og:description"  content="Groceries, coffee, fitness, dining, health & more within the South Park DTLA corridor.">
+  <meta property="og:url"          content="https://requation.com/desertlife">
+  <meta property="og:title"        content="Life Around Urban Farmhouse — Requation Laveen">
+  <meta property="og:description"  content="Groceries, coffee, fitness, dining, health & more within the Laveen South Phoenix corridor.">
   <meta property="og:image"        content="https://i.imgur.com/3rFddwE.jpeg">
   <meta property="og:image:width"  content="1200">
   <meta property="og:image:height" content="630">
   <meta name="twitter:card"        content="summary_large_image">
-  <meta name="twitter:title"       content="Life Around South Park — Requation DTLA">
-  <meta name="twitter:description" content="Groceries, coffee, fitness, dining, health & more within the South Park DTLA corridor.">
+  <meta name="twitter:title"       content="Life Around Urban Farmhouse — Requation Laveen">
+  <meta name="twitter:description" content="Groceries, coffee, fitness, dining, health & more within the Laveen South Phoenix corridor.">
   <meta name="twitter:image"       content="https://i.imgur.com/3rFddwE.jpeg">
   <link href="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.css" rel="stylesheet" />
   <script src="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.js"></script>
@@ -94,7 +94,7 @@
       animation:prop-pulse 2s ease-out infinite
     }
     .prop-marker::after{
-      content:'South Park Brutalist';
+      content:'Urban Farmhouse';
       position:absolute;left:50%;transform:translateX(-50%);
       bottom:calc(100% + 8px);white-space:nowrap;
       background:rgba(10,10,10,.9);color:#C9A84C;
@@ -143,14 +143,14 @@
 <body>
 
 <header>
-  <a href="/dtla" class="nav-back">South Park</a>
-  <div class="header-title" onclick="window.location.href='/dtla'" style="cursor:pointer">Requation <span>LIFE</span> · DTLA</div>
+  <a href="/laveen" class="nav-back">Urban Farmhouse</a>
+  <div class="header-title" onclick="window.location.href='/laveen'" style="cursor:pointer">Requation <span>LIFE</span> · Laveen</div>
   <div class="header-badge" id="header-badge">Loading…</div>
 </header>
 
 <div id="map"></div>
 
-<div id="count-badge" id="count-badge">— businesses</div>
+<div id="count-badge">— businesses</div>
 
 <div id="cat-bar">
   <button class="cat-pill active" data-cat="all">All</button>
@@ -176,7 +176,7 @@ const CAT_COLOR={
   'MedSpa':'#E91E63','Gym':'#F44336','Shoes':'#3F51B5',
   'Fashion':'#FF4081','Cosmetics':'#FF80AB'
 };
-const KEY_CHAINS=['Whole Foods','Trader Joe\'s','Home Depot','Lowe\'s','Costco','Walmart','Aldi','AMC','Regal','Cinemark','LA Fitness','Equinox','SoulCycle'];
+const KEY_CHAINS=['Whole Foods','Trader Joe\'s','Home Depot','Lowe\'s','Costco','Walmart','Aldi','Harkins','AMC','Regal','LA Fitness','Planet Fitness','Starbucks'];
 
 let allData=[], activeFilter='all';
 
@@ -185,10 +185,10 @@ mapboxgl.accessToken='pk.eyJ1IjoidmlranB1cmkiLCJhIjoiY21uYnF0ZWNuMHhnaTJ3bzR5MG5
 const map=new mapboxgl.Map({
   container:'map',
   style:'mapbox://styles/mapbox/standard',
-  center:[-118.2587,34.0480],
-  zoom:14.2,
-  pitch:62,
-  bearing:-17.6,
+  center:[-112.1180,33.3430],
+  zoom:13,
+  pitch:55,
+  bearing:20,
   antialias:true,
   attributionControl:false
 });
@@ -204,13 +204,13 @@ map.on('load',()=>{
   map.setConfigProperty('basemap','showRoadLabels',true);
   map.setConfigProperty('basemap','showPlaceLabels',true);
 
-  // Property pin
+  // RPOI — Urban Farmhouse property pin
   const el=document.createElement('div');
   el.className='prop-marker';
-  el.title='801 S Grand Ave — South Park Brutalist';
-  el.addEventListener('click',()=>window.location.href='/dtla');
+  el.title='Urban Farmhouse — Requation Laveen';
+  el.addEventListener('click',()=>window.location.href='/laveen');
   new mapboxgl.Marker({element:el,anchor:'center'})
-    .setLngLat([-118.2637,34.0422])
+    .setLngLat([-112.1180767,33.3427905])
     .addTo(map);
 
   loadLiving();
@@ -218,7 +218,7 @@ map.on('load',()=>{
 
 async function loadLiving(){
   try{
-    const resp=await fetch(SB_URL+'/rest/v1/restaurants?select=*&zip=in.(90017,90015,90013,90014)&limit=500',{headers:SB_HEADERS});
+    const resp=await fetch(SB_URL+'/rest/v1/restaurants?select=*&zip=in.(85339,85041,85042,85044)&limit=500',{headers:SB_HEADERS});
     if(!resp.ok) throw new Error('restaurants fetch failed');
     allData=await resp.json();
     renderLayer(allData);
@@ -227,7 +227,7 @@ async function loadLiving(){
   }catch(e){
     console.warn(e.message);
     document.getElementById('header-badge').textContent='No data yet';
-    document.getElementById('count-badge').textContent='Run migration to populate';
+    document.getElementById('count-badge').textContent='No data';
   }
 }
 
@@ -251,7 +251,6 @@ function buildGeoJSON(data){
 function renderLayer(data){
   const geojson=buildGeoJSON(data);
 
-  // Remove existing layers/sources
   ['living-key-circle','living-key-label','living-clusters','living-count','living-points','living-labels'].forEach(id=>{
     if(map.getLayer(id)) map.removeLayer(id);
   });
@@ -264,7 +263,6 @@ function renderLayer(data){
   });
 
   if(activeFilter==='all'){
-    // Cluster circles
     map.addLayer({
       id:'living-clusters',type:'circle',source:'living',
       filter:['has','point_count'],
@@ -297,7 +295,6 @@ function renderLayer(data){
     map.on('mouseleave','living-clusters',()=>map.getCanvas().style.cursor='');
   }
 
-  // Individual points
   map.addLayer({
     id:'living-points',type:'circle',source:'living',
     filter:['!',['has','point_count']],
@@ -310,7 +307,6 @@ function renderLayer(data){
     }
   });
 
-  // Bold name labels for key chains
   map.addLayer({
     id:'living-labels',type:'symbol',source:'living',
     filter:['all',['!',['has','point_count']],['get','isKey']],
@@ -324,7 +320,6 @@ function renderLayer(data){
     }
   });
 
-  // Popup on individual point click
   map.on('click','living-points',(e)=>{
     const p=e.features[0].properties;
     const stars='★'.repeat(Math.floor(p.rating||0))+'☆'.repeat(5-Math.floor(p.rating||0));
@@ -344,7 +339,6 @@ function renderLayer(data){
   map.on('mouseleave','living-points',()=>map.getCanvas().style.cursor='');
 }
 
-// Category filter
 document.querySelectorAll('.cat-pill').forEach(btn=>{
   btn.addEventListener('click',()=>{
     document.querySelectorAll('.cat-pill').forEach(b=>b.classList.remove('active'));
