@@ -84,12 +84,12 @@
 
     /* ── PROPERTY PIN ── */
     .prop-marker{
-      width:22px;height:22px;background:var(--gold);border-radius:50%;
-      border:3px solid #fff;box-shadow:0 0 20px rgba(201,168,76,1);
+      width:34px;height:34px;background:var(--gold);border-radius:50%;
+      border:3px solid #fff;box-shadow:0 0 28px rgba(201,168,76,1);
       cursor:pointer;position:relative
     }
     .prop-marker::before{
-      content:'';position:absolute;inset:-8px;border-radius:50%;
+      content:'';position:absolute;inset:-12px;border-radius:50%;
       border:2px solid rgba(201,168,76,.5);
       animation:prop-pulse 2s ease-out infinite
     }
@@ -378,9 +378,9 @@ async function loadAZProperties(){
       const el=document.createElement('div');
       el.style.cssText='cursor:pointer;position:relative';
       const dot=document.createElement('div');
-      dot.style.cssText='width:16px;height:16px;border-radius:50%;background:#C9A84C;border:2.5px solid #fff;box-shadow:0 0 14px rgba(201,168,76,.9)';
+      dot.style.cssText='width:26px;height:26px;border-radius:50%;background:#C9A84C;border:3px solid #fff;box-shadow:0 0 22px rgba(201,168,76,.9)';
       const ring=document.createElement('div');
-      ring.style.cssText='position:absolute;inset:-7px;border-radius:50%;border:2px solid rgba(201,168,76,.45);animation:prop-pulse 2s ease-out infinite;pointer-events:none';
+      ring.style.cssText='position:absolute;inset:-11px;border-radius:50%;border:2px solid rgba(201,168,76,.45);animation:prop-pulse 2s ease-out infinite;pointer-events:none';
       el.appendChild(ring);
       el.appendChild(dot);
       el.addEventListener('click',()=>{
