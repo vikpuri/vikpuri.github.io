@@ -127,6 +127,7 @@
     .pop-link:hover{opacity:.75}
     .pop-link.redfin{background:var(--aqua);color:var(--ink)}
     .pop-link.yelp{background:rgba(255,255,255,.12);color:var(--cream);border:1px solid var(--rule)}
+    .pop-link.waymo{background:#1A73E8;color:#fff}
 
     /* ── CLUSTER POPUP ── */
     .cluster-pop{font-family:'DM Mono',monospace;font-size:.65rem;letter-spacing:.08em;text-align:center;padding:4px}
@@ -240,6 +241,7 @@ function buildGeoJSON(data){
       properties:{
         id:b.id,name:b.name,category:b.category||'Other',chain:b.chain||'',
         rating:b.rating,address:b.address,yelp_url:b.yelp_url||'',
+        waymo_url:b.waymo_url||'',
         redfin_url:b.redfin_url||('https://www.redfin.com/zipcode/'+b.zip),
         zip:b.zip,color:CAT_COLOR[b.category]||'#00CED1',
         isKey:KEY_CHAINS.includes(b.chain)||KEY_CHAINS.includes(b.name)
@@ -337,6 +339,7 @@ function renderLayer(data){
         <div class="pop-links">
           <a href="${p.redfin_url}" target="_blank" class="pop-link redfin">Redfin Area</a>
           ${p.yelp_url?`<a href="${p.yelp_url}" target="_blank" class="pop-link yelp">Yelp</a>`:''}
+          ${p.waymo_url?`<a href="${p.waymo_url}" target="_blank" class="pop-link waymo">🚗 Waymo</a>`:''}
         </div>`)
       .addTo(map);
   });
