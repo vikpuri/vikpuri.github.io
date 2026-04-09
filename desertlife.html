@@ -139,12 +139,54 @@
       backdrop-filter:blur(16px)
     }
     #rpoi-panel.open{transform:translateY(0)}
-    #rpoi-close{position:absolute;top:14px;right:16px;background:none;border:1px solid rgba(255,255,255,.15);width:26px;height:26px;border-radius:50%;cursor:pointer;font-size:.8rem;color:rgba(255,255,255,.5);display:flex;align-items:center;justify-content:center}
+    #rpoi-close{position:absolute;top:14px;right:16px;background:none;border:none;cursor:pointer;font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:.08em;color:var(--aqua);text-transform:uppercase;padding:0}
     #rpoi-tag{font-family:'DM Mono',monospace;font-size:.58rem;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin-bottom:6px}
     #rpoi-addr{font-family:'Playfair Display',serif;font-size:1.05rem;font-weight:500;color:var(--cream);margin-bottom:4px;line-height:1.3}
     #rpoi-price{font-size:1.2rem;font-weight:700;color:var(--gold);margin-bottom:6px;font-family:'DM Mono',monospace;letter-spacing:.04em}
     #rpoi-meta{font-size:.75rem;color:rgba(255,255,255,.5);margin-bottom:14px;letter-spacing:.04em}
     #rpoi-redfin{display:inline-block;padding:9px 20px;background:var(--gold);color:var(--ink);font-family:'DM Mono',monospace;font-size:.7rem;font-weight:600;text-decoration:none;border-radius:3px;letter-spacing:.08em;text-transform:uppercase}
+
+    /* ── HOMES BTN ── */
+    #homes-btn{
+      position:fixed;bottom:90px;right:16px;z-index:110;
+      font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;
+      background:var(--gold);color:var(--ink);border:none;border-radius:20px;
+      padding:8px 14px;cursor:pointer;box-shadow:0 2px 12px rgba(201,168,76,.5);
+      display:flex;align-items:center;gap:6px
+    }
+    #homes-btn:hover{opacity:.85}
+
+    /* ── HOMES LIST PANEL ── */
+    #homes-panel{
+      position:fixed;bottom:0;left:0;right:0;z-index:210;
+      background:rgba(12,12,12,.97);border-top:1px solid rgba(201,168,76,.4);
+      border-radius:16px 16px 0 0;
+      max-width:480px;margin:0 auto;
+      transform:translateY(100%);transition:transform .4s cubic-bezier(.22,1,.36,1);
+      backdrop-filter:blur(20px);max-height:70vh;display:flex;flex-direction:column
+    }
+    #homes-panel.open{transform:translateY(0)}
+    #homes-panel-head{
+      display:flex;align-items:center;justify-content:space-between;
+      padding:16px 20px 12px;border-bottom:1px solid var(--rule);flex-shrink:0
+    }
+    #homes-panel-title{font-family:'Playfair Display',serif;font-size:1rem;font-weight:500;color:var(--cream)}
+    #homes-panel-sub{font-family:'DM Mono',monospace;font-size:.58rem;letter-spacing:.1em;color:var(--gold);text-transform:uppercase;margin-top:2px}
+    #homes-close{background:none;border:1px solid rgba(255,255,255,.15);width:26px;height:26px;border-radius:50%;cursor:pointer;font-size:.75rem;color:rgba(255,255,255,.5)}
+    #homes-list{overflow-y:auto;padding:8px 0 24px}
+    .home-item{
+      display:flex;align-items:center;justify-content:space-between;
+      padding:12px 20px;cursor:pointer;border-bottom:1px solid var(--rule);
+      transition:background .15s
+    }
+    .home-item:hover{background:rgba(201,168,76,.06)}
+    .home-item:last-child{border-bottom:none}
+    .home-dot{width:12px;height:12px;border-radius:50%;background:var(--gold);border:2px solid #fff;box-shadow:0 0 8px rgba(201,168,76,.7);flex-shrink:0;margin-right:14px}
+    .home-info{flex:1}
+    .home-addr{font-family:'Source Serif 4',serif;font-size:.85rem;color:var(--cream);margin-bottom:3px}
+    .home-price{font-family:'DM Mono',monospace;font-size:.78rem;color:var(--gold);font-weight:500;margin-bottom:2px}
+    .home-meta{font-size:.68rem;color:rgba(255,255,255,.4);letter-spacing:.03em}
+    .home-arrow{font-size:.75rem;color:rgba(255,255,255,.3);margin-left:10px}
 
     /* ── CLUSTER POPUP ── */
     .cluster-pop{font-family:'DM Mono',monospace;font-size:.65rem;letter-spacing:.08em;text-align:center;padding:4px}
@@ -170,8 +212,21 @@
 
 <div id="count-badge">— businesses</div>
 
+<button id="homes-btn" onclick="document.getElementById('homes-panel').classList.toggle('open')">🏠 Homes</button>
+
+<div id="homes-panel">
+  <div id="homes-panel-head">
+    <div>
+      <div id="homes-panel-title">For Sale · South Phoenix</div>
+      <div id="homes-panel-sub">1 Acre · 2+ Bath · $750K+</div>
+    </div>
+    <button id="homes-close" onclick="document.getElementById('homes-panel').classList.remove('open')">✕</button>
+  </div>
+  <div id="homes-list"></div>
+</div>
+
 <div id="rpoi-panel">
-  <button id="rpoi-close" onclick="document.getElementById('rpoi-panel').classList.remove('open')">✕</button>
+  <button id="rpoi-close" onclick="document.getElementById('rpoi-panel').classList.remove('open');document.getElementById('homes-panel').classList.add('open')">← Back to Homes</button>
   <div id="rpoi-tag">For Sale · Laveen AZ</div>
   <div id="rpoi-addr">—</div>
   <div id="rpoi-price">—</div>
@@ -369,11 +424,13 @@ function renderLayer(data){
   map.on('mouseleave','living-points',()=>map.getCanvas().style.cursor='');
 }
 
+let azProperties=[];
+
 async function loadAZProperties(){
   try{
     const resp=await fetch(SB_URL+'/rest/v1/properties?select=name,address,price,beds,baths,sqft,lat,lng,redfin_url,zip&zip=in.(85339,85041,85042,85044)&price=gte.750000&mls_status=eq.active',{headers:SB_HEADERS});
-    const listings=await resp.json();
-    listings.forEach(p=>{
+    azProperties=await resp.json();
+    azProperties.forEach(p=>{
       if(!p.lat||!p.lng) return;
       const el=document.createElement('div');
       el.style.cssText='cursor:pointer;position:relative';
@@ -383,21 +440,41 @@ async function loadAZProperties(){
       ring.style.cssText='position:absolute;inset:-11px;border-radius:50%;border:2px solid rgba(201,168,76,.45);animation:prop-pulse 2s ease-out infinite;pointer-events:none';
       el.appendChild(ring);
       el.appendChild(dot);
-      el.addEventListener('click',()=>{
-        document.getElementById('rpoi-addr').textContent=p.address||p.name||'';
-        document.getElementById('rpoi-price').textContent=p.price?'$'+Number(p.price).toLocaleString():'';
-        document.getElementById('rpoi-meta').textContent=[p.beds&&p.beds+' bd',p.baths&&p.baths+' ba',p.sqft&&Number(p.sqft).toLocaleString()+' sqft'].filter(Boolean).join(' · ');
-        const link=document.getElementById('rpoi-redfin');
-        link.href=p.redfin_url||'#';
-        link.style.display=p.redfin_url?'inline-block':'none';
-        document.getElementById('rpoi-panel').classList.add('open');
-      });
+      el.addEventListener('click',()=>openRPOIPanel(p));
       new mapboxgl.Marker({element:el,anchor:'center',pitchAlignment:'map',rotationAlignment:'map'})
         .setLngLat([parseFloat(p.lng),parseFloat(p.lat)])
         .addTo(map);
     });
-    console.log('Loaded '+listings.length+' AZ property RPOIs');
+    buildHomesList();
+    console.log('Loaded '+azProperties.length+' AZ property RPOIs');
   }catch(e){console.error('AZ properties load failed',e);}
+}
+
+function openRPOIPanel(p){
+  document.getElementById('rpoi-addr').textContent=p.address||p.name||'';
+  document.getElementById('rpoi-price').textContent=p.price?'$'+Number(p.price).toLocaleString():'';
+  document.getElementById('rpoi-meta').textContent=[p.beds&&p.beds+' bd',p.baths&&p.baths+' ba',p.sqft&&Number(p.sqft).toLocaleString()+' sqft'].filter(Boolean).join(' · ');
+  const link=document.getElementById('rpoi-redfin');
+  link.href=p.redfin_url||'#';
+  link.style.display=p.redfin_url?'inline-block':'none';
+  document.getElementById('homes-panel').classList.remove('open');
+  document.getElementById('rpoi-panel').classList.add('open');
+  map.flyTo({center:[parseFloat(p.lng),parseFloat(p.lat)],zoom:15,duration:900});
+}
+
+function buildHomesList(){
+  const list=document.getElementById('homes-list');
+  list.innerHTML=azProperties.map((p,i)=>`
+    <div class="home-item" onclick="openRPOIPanel(azProperties[${i}])">
+      <div class="home-dot"></div>
+      <div class="home-info">
+        <div class="home-addr">${p.address||p.name}</div>
+        <div class="home-price">${p.price?'$'+Number(p.price).toLocaleString():''}</div>
+        <div class="home-meta">${[p.beds&&p.beds+' bd',p.baths&&p.baths+' ba',p.sqft&&Number(p.sqft).toLocaleString()+' sqft'].filter(Boolean).join(' · ')}</div>
+      </div>
+      <div class="home-arrow">→</div>
+    </div>
+  `).join('');
 }
 
 document.querySelectorAll('.cat-pill').forEach(btn=>{
