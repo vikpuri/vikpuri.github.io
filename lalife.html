@@ -338,6 +338,7 @@ async function loadLiving(){
     if(!resp.ok) throw new Error('restaurants fetch failed');
     allData=await resp.json();
     renderLayer(allData);
+    buildBizList();
     document.getElementById('count-badge').textContent=allData.length+' businesses';
     document.getElementById('header-badge').textContent=allData.length+' places';
   }catch(e){
@@ -515,11 +516,33 @@ function closeYT(){
   document.getElementById('yt-popup').classList.remove('open');
 }
 
+const CAT_EMOJI={'Grocery':'🛒','Hardware':'🔨','Coffee':'☕','FastFood':'🍔','Cinema':'🎬','Dental':'🦷','MedSpa':'💆','Gym':'💪','Fashion':'👗','Shoes':'👟','Cosmetics':'💄'};
+
+function buildBizList(){
+  const sub=document.getElementById('biz-panel-sub');
+  const list=document.getElementById('biz-list');
+  if(sub) sub.textContent=allData.length+' places nearby';
+  list.innerHTML=allData.map(b=>`
+    <div class="biz-item">
+      <div class="biz-icon">${CAT_EMOJI[b.category]||'🏢'}</div>
+      <div class="biz-info">
+        <div class="biz-name">${b.name||'—'}</div>
+        <div class="biz-cat">${b.category||''}</div>
+        <div class="biz-addr">${b.address||b.zip||''}</div>
+      </div>
+    </div>`).join('');
+}
+
 document.querySelectorAll('.cat-pill').forEach(btn=>{
   btn.addEventListener('click',()=>{
+    const wasActive=btn.classList.contains('active');
     document.querySelectorAll('.cat-pill').forEach(b=>b.classList.remove('active'));
-    btn.classList.add('active');
-    activeFilter=btn.dataset.cat;
+    if(wasActive){
+      activeFilter='all';
+    } else {
+      btn.classList.add('active');
+      activeFilter=btn.dataset.cat;
+    }
     const filtered=activeFilter==='all'?allData:allData.filter(b=>b.category===activeFilter);
     document.getElementById('count-badge').textContent=filtered.length+' businesses';
     renderLayer(filtered);
