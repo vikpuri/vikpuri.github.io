@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>Requation Life · Laveen</title>
   <meta property="og:type"         content="website">
   <meta property="og:url"          content="https://requation.com/desertlife">
@@ -31,8 +31,8 @@
 
     /* ── HEADER ── */
     header{
-      position:fixed;top:0;left:0;right:0;height:var(--h);z-index:100;
-      display:flex;align-items:center;justify-content:space-between;padding:0 24px;
+      position:fixed;top:0;left:0;right:0;height:calc(var(--h) + env(safe-area-inset-top,0px));z-index:100;
+      display:flex;align-items:center;justify-content:space-between;padding:env(safe-area-inset-top,0px) 24px 0;
       background:rgba(10,10,10,.88);border-bottom:1px solid var(--rule);
       backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)
     }
@@ -44,7 +44,6 @@
     .nav-back:hover{opacity:.7}
     .nav-back::before{content:'←';font-size:.8rem}
     .header-title{
-      position:absolute;left:50%;transform:translateX(-50%);
       font-family:'Playfair Display',serif;font-size:1rem;font-weight:500;
       letter-spacing:.04em;color:var(--cream)
     }
@@ -191,7 +190,7 @@
     /* ── YOUTUBE ── */
     @keyframes bb-glow{0%,100%{box-shadow:0 6px 28px rgba(0,0,0,.8),0 0 0 0 rgba(255,0,0,0)}50%{box-shadow:0 6px 28px rgba(0,0,0,.8),0 0 24px 4px rgba(255,0,0,.22)}}
     @keyframes yt-blink{0%,100%{opacity:1}50%{opacity:0}}
-    #yt-billboard{position:fixed;top:calc(var(--h)+60px);right:16px;z-index:90;width:280px;border-radius:8px;overflow:hidden;cursor:default;display:none;background:transparent;border:1px solid rgba(255,0,0,.45);animation:bb-glow 4s ease-in-out infinite;backdrop-filter:blur(16px)}
+    #yt-billboard{position:fixed;top:calc(var(--h) + env(safe-area-inset-top,0px) + 60px);right:16px;z-index:90;width:280px;border-radius:8px;overflow:hidden;cursor:default;display:none;background:transparent;border:1px solid rgba(255,0,0,.45);animation:bb-glow 4s ease-in-out infinite;backdrop-filter:blur(16px)}
     .bb-thumb{width:280px;height:158px;background-size:cover;background-position:center;position:relative}
     .bb-play-wrap{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.18)}
     .bb-play-btn{width:44px;height:44px;background:#FF0000;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px;box-shadow:0 0 24px rgba(255,0,0,.55)}
@@ -227,7 +226,7 @@
     }
     /* ── RADIO PLAYER ── */
     @keyframes wave{0%,100%{transform:scaleY(.35)}50%{transform:scaleY(1)}}
-    #radio-player{position:fixed;top:calc(var(--h)+8px);right:16px;z-index:115;width:280px;display:flex;align-items:center;gap:8px;background:rgba(0,40,104,.95);border:1px solid rgba(255,255,255,.22);border-radius:8px;padding:7px 10px;backdrop-filter:blur(14px);box-shadow:0 4px 20px rgba(0,0,0,.55)}
+    #radio-player{position:fixed;top:calc(var(--h) + env(safe-area-inset-top,0px) + 8px);right:16px;z-index:90;width:280px;display:flex;align-items:center;gap:8px;background:rgba(0,40,104,.95);border:1px solid rgba(255,255,255,.22);border-radius:8px;padding:7px 10px;backdrop-filter:blur(14px);box-shadow:0 4px 20px rgba(0,0,0,.55)}
     .radio-info{flex:1;min-width:0}
     .radio-station{font-family:'DM Mono',monospace;font-size:.58rem;letter-spacing:.08em;color:#FAF8F4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
     .radio-genre{font-family:'DM Mono',monospace;font-size:.44rem;color:rgba(255,255,255,.48);margin-top:1px}
@@ -246,8 +245,8 @@
 <body>
 
 <header>
-  <a href="/laveen" class="nav-back">Urban Farmhouse</a>
   <div class="header-title" onclick="window.location.href='/laveen'" style="cursor:pointer">Requation <span>LIFE</span> · Laveen</div>
+  <a href="/laveen" class="nav-back">Urban Farmhouse</a>
   <div class="header-badge" id="header-badge">Loading…</div>
 </header>
 

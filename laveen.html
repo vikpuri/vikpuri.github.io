@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>Requation — Real Estate Intelligence</title>
   <meta property="og:type"         content="website">
   <meta property="og:url"          content="https://requation.com/laveen">
@@ -31,9 +31,9 @@
     }
     *,::before,*::after{box-sizing:border-box;margin:0;padding:0}
     html,body{height:100%;background:var(--cream);color:var(--ink);font-family:'Source Serif 4',Georgia,serif;overflow:hidden}
-    header{position:fixed;top:0;left:0;right:0;height:var(--header-h);z-index:100;display:flex;align-items:center;justify-content:space-between;flex-direction:row;padding:0 36px;background:var(--cream);border-bottom:2px solid var(--ink);backdrop-filter:none}
-    header nav{order:0}
-    header .logo-svg{order:1;display:flex;align-items:center;margin-top:2px}
+    header{position:fixed;top:0;left:0;right:0;height:calc(var(--header-h) + env(safe-area-inset-top,0px));z-index:100;display:flex;align-items:center;justify-content:space-between;flex-direction:row;padding:env(safe-area-inset-top,0px) 36px 0;background:var(--cream);border-bottom:2px solid var(--ink);backdrop-filter:none}
+    header nav{order:1}
+    header .logo-svg{order:0;display:flex;align-items:center;margin-top:2px}
     .nav-home{font-family:'Source Serif 4',serif;font-size:.72rem;font-weight:400;letter-spacing:.14em;text-transform:uppercase;color:var(--text-muted);text-decoration:none;background:none;border:none;padding:0;cursor:pointer;transition:color .25s}
     .nav-home:hover{color:var(--ink)}
     .logo-wrap{display:flex;align-items:center;gap:14px;cursor:pointer}
@@ -199,7 +199,7 @@
   /* ── YOUTUBE ── */
   @keyframes bb-glow{0%,100%{box-shadow:0 6px 28px rgba(0,0,0,.7),0 0 0 0 rgba(255,0,0,0)}50%{box-shadow:0 6px 28px rgba(0,0,0,.7),0 0 24px 4px rgba(255,0,0,.2)}}
   @keyframes yt-blink{0%,100%{opacity:1}50%{opacity:0}}
-  #yt-billboard{position:fixed;top:calc(var(--header-h)+60px);right:16px;z-index:90;width:280px;border-radius:8px;overflow:hidden;cursor:default;display:none;background:transparent;border:1px solid rgba(255,0,0,.45);animation:bb-glow 4s ease-in-out infinite;backdrop-filter:blur(16px)}
+  #yt-billboard{position:fixed;top:calc(var(--header-h) + env(safe-area-inset-top,0px) + 60px);right:16px;z-index:90;width:280px;border-radius:8px;overflow:hidden;cursor:default;display:none;background:transparent;border:1px solid rgba(255,0,0,.45);animation:bb-glow 4s ease-in-out infinite;backdrop-filter:blur(16px)}
   .bb-thumb{width:280px;height:158px;background-size:cover;background-position:center;position:relative}
   .bb-play-wrap{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.18)}
   .bb-play-btn{width:44px;height:44px;background:#FF0000;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px;box-shadow:0 0 24px rgba(255,0,0,.55)}
@@ -221,7 +221,7 @@
   #yt-counter{font-family:'DM Mono',monospace;font-size:.75rem;color:rgba(255,255,255,.5)}
   /* ── RADIO PLAYER ── */
   @keyframes wave{0%,100%{transform:scaleY(.35)}50%{transform:scaleY(1)}}
-  #radio-player{position:fixed;top:calc(var(--header-h)+8px);right:16px;z-index:115;width:280px;display:flex;align-items:center;gap:8px;background:rgba(0,40,104,.95);border:1px solid rgba(255,255,255,.22);border-radius:8px;padding:7px 10px;backdrop-filter:blur(14px);box-shadow:0 4px 20px rgba(0,0,0,.55)}
+  #radio-player{position:fixed;top:calc(var(--header-h) + env(safe-area-inset-top,0px) + 8px);right:16px;z-index:90;width:280px;display:flex;align-items:center;gap:8px;background:rgba(0,40,104,.95);border:1px solid rgba(255,255,255,.22);border-radius:8px;padding:7px 10px;backdrop-filter:blur(14px);box-shadow:0 4px 20px rgba(0,0,0,.55)}
   .radio-info{flex:1;min-width:0}
   .radio-station{font-family:'DM Mono',monospace;font-size:.58rem;letter-spacing:.08em;color:#FAF8F4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .radio-genre{font-family:'DM Mono',monospace;font-size:.44rem;color:rgba(255,255,255,.48);margin-top:1px}
