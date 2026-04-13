@@ -186,6 +186,58 @@ a{color:inherit;text-decoration:none}
 </style>
 </head>
 <body>
+
+<!-- ── LOGIN OVERLAY ── -->
+<div id="login-overlay" style="position:fixed;inset:0;z-index:9999;background:rgba(9,9,15,.97);display:flex;align-items:center;justify-content:center;backdrop-filter:blur(12px)">
+  <div id="login-card" style="background:#111119;border:1px solid rgba(201,168,76,.25);border-radius:14px;padding:44px 40px 38px;width:360px;max-width:90vw;display:flex;flex-direction:column;align-items:center;gap:0;box-shadow:0 0 60px rgba(0,0,0,.6)">
+    <div style="font-family:'Playfair Display',serif;font-size:1.55rem;color:#C9A84C;letter-spacing:.04em;margin-bottom:4px">Requation</div>
+    <div style="font-family:'DM Mono',monospace;font-size:.5rem;color:rgba(245,243,238,.28);letter-spacing:.22em;text-transform:uppercase;margin-bottom:32px">Management Dashboard</div>
+    <input id="pw-input" type="password" placeholder="Enter access code"
+      style="width:100%;background:#16161f;border:1px solid rgba(255,255,255,.1);border-radius:7px;padding:12px 16px;color:#f5f3ee;font-family:'DM Mono',monospace;font-size:.85rem;outline:none;margin-bottom:14px;letter-spacing:.08em"
+      onkeydown="if(event.key==='Enter')tryLogin()"
+    >
+    <button onclick="tryLogin()"
+      style="width:100%;background:rgba(201,168,76,.18);border:1px solid rgba(201,168,76,.4);border-radius:7px;padding:12px;color:#C9A84C;font-family:'Raleway',sans-serif;font-size:.82rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;transition:background .2s"
+      onmouseover="this.style.background='rgba(201,168,76,.3)'" onmouseout="this.style.background='rgba(201,168,76,.18)'"
+    >Unlock</button>
+    <div id="pw-err" style="font-family:'DM Mono',monospace;font-size:.55rem;color:#ef4444;letter-spacing:.1em;margin-top:12px;opacity:0;transition:opacity .2s">Incorrect access code</div>
+  </div>
+</div>
+<style>
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-8px)}40%{transform:translateX(8px)}60%{transform:translateX(-5px)}80%{transform:translateX(5px)}}
+#login-card.shake{animation:shake .4s ease}
+#login-overlay.fade-out{animation:fadeOut .35s ease forwards}
+@keyframes fadeOut{to{opacity:0;pointer-events:none}}
+</style>
+<script>
+(function(){
+  const RQ_HASH='6bc9c2fca2f543e4a67d1d85c0f7b1f2e3a9d8c1';
+  function h(s){let r=0;for(let i=0;i<s.length;i++){const c=s.charCodeAt(i);r=((r<<5)-r)+c;r|=0;}return Math.abs(r).toString(16)}
+  if(sessionStorage.getItem('rq_auth')==='1'){
+    document.getElementById('login-overlay').style.display='none';
+  }
+  window.tryLogin=function(){
+    const v=document.getElementById('pw-input').value;
+    // password: Requation26!
+    if(h(v)===h('Requation26!')){
+      sessionStorage.setItem('rq_auth','1');
+      const o=document.getElementById('login-overlay');
+      o.classList.add('fade-out');
+      setTimeout(()=>o.style.display='none',360);
+    } else {
+      const card=document.getElementById('login-card');
+      const err=document.getElementById('pw-err');
+      card.classList.remove('shake');
+      void card.offsetWidth;
+      card.classList.add('shake');
+      err.style.opacity='1';
+      setTimeout(()=>err.style.opacity='0',2200);
+      document.getElementById('pw-input').value='';
+      document.getElementById('pw-input').focus();
+    }
+  };
+})();
+</script>
 <div class="shell">
 
 <!-- ── TOPBAR ── -->
