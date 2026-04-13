@@ -1,0 +1,12 @@
+{
+  "name": "requation",
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "npx serve . --listen 3000"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.101.1",
+    "csv-parse": "^6.2.1",
+    "dotenv": "^17.4.0"
+  }
+}

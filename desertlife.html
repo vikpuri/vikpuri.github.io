@@ -75,7 +75,7 @@
 
     /* ── COUNT BADGE ── */
     #count-badge{
-      position:fixed;top:calc(var(--h) + 12px);right:16px;z-index:90;
+      position:fixed;top:calc(var(--h) + 12px);left:16px;z-index:90;
       font-family:'DM Mono',monospace;font-size:.58rem;letter-spacing:.1em;
       color:rgba(255,255,255,.5);background:rgba(10,10,10,.7);
       border:1px solid var(--rule);padding:5px 10px;border-radius:4px;
@@ -146,6 +146,8 @@
     #rpoi-meta{font-size:.75rem;color:rgba(255,255,255,.5);margin-bottom:14px;letter-spacing:.04em}
     #rpoi-redfin{display:inline-block;padding:9px 20px;background:var(--gold);color:var(--ink);font-family:'DM Mono',monospace;font-size:.7rem;font-weight:600;text-decoration:none;border-radius:3px;letter-spacing:.08em;text-transform:uppercase}
 
+    /* ── AZ RPOI DOT ── */
+    .az-dot{width:26px;height:26px;border-radius:50%;background:#C9A84C;border:3px solid #fff;box-shadow:0 0 22px rgba(201,168,76,.9)}
     /* ── HOMES BTN ── */
     #homes-btn{
       position:fixed;bottom:90px;right:16px;z-index:110;
@@ -191,48 +193,37 @@
     /* ── CLUSTER POPUP ── */
     .cluster-pop{font-family:'DM Mono',monospace;font-size:.65rem;letter-spacing:.08em;text-align:center;padding:4px}
 
-    /* ── YOUTUBE MARKERS ── */
-    .yt-marker{
-      width:72px;height:42px;border-radius:5px;overflow:hidden;
-      cursor:pointer;border:2px solid #FF0000;
-      box-shadow:0 2px 10px rgba(0,0,0,.65);position:relative;
-      transition:transform .15s
-    }
-    .yt-marker:hover{transform:scale(1.08)}
+    /* ── YOUTUBE ── */
+    @keyframes bb-glow{0%,100%{box-shadow:0 6px 28px rgba(0,0,0,.8),0 0 0 0 rgba(255,0,0,0)}50%{box-shadow:0 6px 28px rgba(0,0,0,.8),0 0 24px 4px rgba(255,0,0,.22)}}
+    @keyframes yt-pulse{0%,100%{box-shadow:0 0 0 0 rgba(255,0,0,.65),0 3px 14px rgba(0,0,0,.9)}65%{box-shadow:0 0 0 10px rgba(255,0,0,0),0 3px 14px rgba(0,0,0,.9)}}
+    @keyframes yt-blink{0%,100%{opacity:1}50%{opacity:0}}
+    #yt-billboard{position:fixed;top:calc(var(--h)+8px);right:16px;z-index:115;width:210px;border-radius:8px;overflow:hidden;cursor:pointer;display:none;background:rgba(6,6,6,.98);border:1px solid rgba(255,0,0,.45);animation:bb-glow 4s ease-in-out infinite;backdrop-filter:blur(16px);transition:transform .2s}
+    #yt-billboard:hover{transform:scale(1.03)}
+    .bb-thumb{width:210px;height:118px;background-size:cover;background-position:center;position:relative}
+    .bb-play-wrap{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.18)}
+    .bb-play-btn{width:44px;height:44px;background:#FF0000;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px;box-shadow:0 0 24px rgba(255,0,0,.55)}
+    .bb-live{position:absolute;top:8px;left:8px;background:rgba(220,20,20,.92);color:#fff;font-family:'DM Mono',monospace;font-size:.42rem;letter-spacing:.14em;text-transform:uppercase;padding:2px 7px 2px 5px;border-radius:2px;display:flex;align-items:center;gap:4px}
+    .bb-live-dot{width:5px;height:5px;border-radius:50%;background:#fff;animation:yt-blink 1s ease-in-out infinite;flex-shrink:0}
+    .bb-info{padding:8px 10px 10px}
+    .bb-label{font-family:'DM Mono',monospace;font-size:.5rem;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,68,68,.85);margin-bottom:2px}
+    .bb-title{font-size:.72rem;color:#FAF8F4;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+    .bb-channel{font-family:'DM Mono',monospace;font-size:.5rem;color:rgba(255,255,255,.3);margin-top:3px}
+    .yt-marker{width:90px;height:51px;border-radius:5px;overflow:hidden;cursor:pointer;border:2px solid #FF0000;position:relative;animation:yt-pulse 2.4s ease-out infinite;transition:transform .15s}
+    .yt-marker:hover{transform:scale(1.12);animation:none;box-shadow:0 0 0 3px rgba(255,0,0,.55),0 4px 20px rgba(0,0,0,.9)}
     .yt-thumb{width:100%;height:100%;background-size:cover;background-position:center}
-    .yt-play{
-      position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
-      background:rgba(0,0,0,.35);color:#fff;font-size:16px
-    }
-
-    /* ── YOUTUBE POPUP ── */
-    #yt-popup{
-      position:fixed;inset:0;z-index:400;
-      background:rgba(0,0,0,.92);display:none;
-      flex-direction:column;align-items:center;justify-content:center;
-      backdrop-filter:blur(8px)
-    }
+    .yt-play{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.26);color:#fff;font-size:18px;transition:background .2s}
+    .yt-marker:hover .yt-play{background:rgba(255,0,0,.42)}
+    .yt-dot{position:absolute;top:5px;right:5px;width:7px;height:7px;border-radius:50%;background:#FF0000;animation:yt-blink 1.2s ease-in-out infinite}
+    #yt-popup{position:fixed;inset:0;z-index:400;background:rgba(0,0,0,.93);display:none;flex-direction:column;align-items:center;justify-content:center;backdrop-filter:blur(10px)}
     #yt-popup.open{display:flex}
-    #yt-title{
-      font-family:'Playfair Display',serif;font-size:1rem;color:var(--cream);
-      margin-bottom:12px;text-align:center;padding:0 20px
-    }
-    #yt-frame-wrap{
-      width:90vw;max-width:640px;aspect-ratio:16/9;background:#000;border-radius:6px;overflow:hidden
-    }
+    #yt-title{font-family:'Playfair Display',serif;font-size:1rem;color:var(--cream);margin-bottom:12px;text-align:center;padding:0 20px}
+    #yt-frame-wrap{width:90vw;max-width:640px;aspect-ratio:16/9;background:#000;border-radius:6px;overflow:hidden}
     #yt-frame-wrap iframe{width:100%;height:100%;border:none}
     #yt-nav{display:flex;align-items:center;gap:16px;margin-top:14px}
-    .yt-nav-btn{
-      font-family:'DM Mono',monospace;font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;
-      background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);
-      color:var(--cream);padding:7px 16px;border-radius:3px;cursor:pointer
-    }
+    .yt-nav-btn{font-family:'DM Mono',monospace;font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:var(--cream);padding:7px 16px;border-radius:3px;cursor:pointer}
     .yt-nav-btn:hover{background:rgba(255,255,255,.2)}
     #yt-counter{font-family:'DM Mono',monospace;font-size:.6rem;color:rgba(255,255,255,.4);letter-spacing:.08em}
-    #yt-close{
-      position:absolute;top:20px;right:20px;background:none;border:none;
-      color:rgba(255,255,255,.5);font-size:1.4rem;cursor:pointer
-    }
+    #yt-close{position:absolute;top:20px;right:20px;background:none;border:none;color:rgba(255,255,255,.5);font-size:1.4rem;cursor:pointer}
     #yt-close:hover{color:#fff}
 
     /* ── ATTRIBUTION ── */
@@ -242,6 +233,22 @@
       #cat-bar{bottom:16px;gap:4px}
       .cat-pill{font-size:.52rem;padding:4px 9px}
     }
+    /* ── RADIO PLAYER ── */
+    @keyframes wave{0%,100%{transform:scaleY(.35)}50%{transform:scaleY(1)}}
+    #radio-player{position:fixed;top:calc(var(--h)+200px);right:16px;z-index:115;width:210px;display:flex;align-items:center;gap:8px;background:rgba(6,6,6,.92);border:1px solid rgba(255,255,255,.1);border-radius:0 0 8px 8px;padding:7px 10px;backdrop-filter:blur(14px);box-shadow:0 4px 20px rgba(0,0,0,.5)}
+    .radio-info{flex:1;min-width:0}
+    .radio-station{font-family:'DM Mono',monospace;font-size:.58rem;letter-spacing:.08em;color:#FAF8F4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .radio-genre{font-family:'DM Mono',monospace;font-size:.44rem;color:rgba(255,255,255,.35);margin-top:1px}
+    #radio-btn{width:28px;height:28px;border-radius:50%;background:#CC0000;border:none;cursor:pointer;color:#fff;font-size:10px;display:flex;align-items:center;justify-content:center;transition:transform .15s,background .15s;flex-shrink:0}
+    #radio-btn:hover{transform:scale(1.12)}
+    #radio-btn.playing{background:#22c55e}
+    .radio-waves{display:none;align-items:flex-end;gap:2px;height:14px}
+    .radio-waves.active{display:flex}
+    .radio-waves span{width:3px;border-radius:1.5px;background:#22c55e}
+    .radio-waves span:nth-child(1){animation:wave .7s ease-in-out infinite}
+    .radio-waves span:nth-child(2){animation:wave .7s ease-in-out infinite .15s}
+    .radio-waves span:nth-child(3){animation:wave .7s ease-in-out infinite .3s}
+    .radio-waves span:nth-child(4){animation:wave .7s ease-in-out infinite .45s}
   </style>
 </head>
 <body>
@@ -253,6 +260,20 @@
 </header>
 
 <div id="map"></div>
+
+<div id="yt-billboard"></div>
+
+<div id="radio-player">
+  <div class="radio-info">
+    <div class="radio-station">99.5 The Mountain</div>
+    <div class="radio-genre">Rock · Phoenix</div>
+  </div>
+  <div class="radio-waves"><span></span><span></span><span></span><span></span></div>
+  <button id="radio-btn" onclick="toggleRadio()" aria-label="Toggle radio">▶</button>
+  <audio id="radio-audio" preload="none">
+    <source src="https://playerservices.streamtheworld.com/api/livestream-redirect/KQMTFMAAC.aac" type="audio/aac">
+  </audio>
+</div>
 
 <div id="yt-popup">
   <button id="yt-close" onclick="closeYT()">✕</button>
@@ -351,6 +372,12 @@ map.on('load',()=>{
   new mapboxgl.Marker({element:el,anchor:'center'})
     .setLngLat([-112.1180767,33.3427905])
     .addTo(map);
+
+  // Atmospheric depth
+  try{map.setFog({'range':[0.5,8],'color':'rgba(14,10,26,.9)','high-color':'#1a1535','horizon-blend':0.07,'space-color':'#070512','star-intensity':0.55});}catch(e){}
+  // Cinematic reveal — wide desert vista emerging
+  map.jumpTo({zoom:10.5,pitch:22,bearing:10});
+  setTimeout(()=>map.easeTo({zoom:11.5,pitch:45,bearing:10,duration:3200,easing:t=>1-Math.pow(1-t,3)}),150);
 
   loadLiving();
   loadAZProperties();
@@ -482,7 +509,7 @@ function renderLayer(data){
   map.on('mouseleave','living-points',()=>map.getCanvas().style.cursor='');
 }
 
-let azProperties=[];
+let azProperties=[], azDots=[];
 
 async function loadAZProperties(){
   try{
@@ -493,7 +520,8 @@ async function loadAZProperties(){
       const el=document.createElement('div');
       el.style.cssText='cursor:pointer;position:relative';
       const dot=document.createElement('div');
-      dot.style.cssText='width:26px;height:26px;border-radius:50%;background:#C9A84C;border:3px solid #fff;box-shadow:0 0 22px rgba(201,168,76,.9)';
+      dot.className='az-dot';
+      azDots.push(dot);
       const ring=document.createElement('div');
       ring.style.cssText='position:absolute;inset:-11px;border-radius:50%;border:2px solid rgba(201,168,76,.45);animation:prop-pulse 2s ease-out infinite;pointer-events:none';
       el.appendChild(ring);
@@ -545,22 +573,41 @@ const YT_OFFSETS_DESERT=[
 ];
 let ytVideos=[], ytIdx=0;
 
-async function addYTMarkers(){
+function populateBillboard(v){
+  const bb=document.getElementById('yt-billboard');
+  bb.innerHTML=`<div class="bb-thumb" style="background-image:url(${v.thumb})"><div class="bb-play-wrap"><div class="bb-play-btn">▶</div></div><div class="bb-live"><div class="bb-live-dot"></div>VIDEO</div></div><div class="bb-info"><div class="bb-label">▶ Featured</div><div class="bb-title">${v.title}</div><div class="bb-channel">${v.channel}</div></div>`;
+  bb.style.display='block';
+  bb.onclick=()=>openYT(0);
+}
+async function fetchYT(query){
   try{
-    const resp=await fetch(`/.netlify/functions/youtube?q=${encodeURIComponent(YT_QUERY_DESERT)}&maxResults=7`);
-    const data=await resp.json();
-    ytVideos=data.videos||[];
-    ytVideos.forEach((v,i)=>{
-      const el=document.createElement('div');
-      el.className='yt-marker';
-      el.innerHTML=`<div class="yt-thumb" style="background-image:url(${v.thumb})"></div><div class="yt-play">▶</div>`;
-      el.addEventListener('click',()=>openYT(i));
-      new mapboxgl.Marker({element:el,anchor:'center'})
-        .setLngLat(YT_OFFSETS_DESERT[i]||YT_CENTER_DESERT)
-        .addTo(map);
-    });
-    console.log('YT markers loaded:',ytVideos.length);
-  }catch(e){console.error('YouTube load failed',e);}
+    const r=await fetch(`/.netlify/functions/youtube?q=${encodeURIComponent(query)}&maxResults=7`);
+    if(r.ok){const d=await r.json();if((d.videos||[]).length) return d.videos;}
+  }catch(e){}
+  try{
+    const p=new URLSearchParams({part:'snippet',q:query,type:'video',maxResults:7,relevanceLanguage:'en',key:'AIzaSyCEQGh-rbZeXKH1pWKIfvLkFRkwyqvAkr0'});
+    const r=await fetch('https://www.googleapis.com/youtube/v3/search?'+p);
+    if(!r.ok) return [];
+    const d=await r.json();
+    return (d.items||[]).map(item=>({
+      id:item.id.videoId,title:item.snippet.title,channel:item.snippet.channelTitle,
+      thumb:item.snippet.thumbnails.medium?.url||item.snippet.thumbnails.default?.url
+    }));
+  }catch(e){return [];}
+}
+async function addYTMarkers(){
+  ytVideos=await fetchYT(YT_QUERY_DESERT);
+  if(ytVideos[0]) populateBillboard(ytVideos[0]);
+  ytVideos.slice(1).forEach((v,i)=>{
+    const el=document.createElement('div');
+    el.className='yt-marker';
+    el.innerHTML=`<div class="yt-thumb" style="background-image:url(${v.thumb})"></div><div class="yt-play">▶</div><div class="yt-dot"></div>`;
+    el.addEventListener('click',()=>openYT(i+1));
+    new mapboxgl.Marker({element:el,anchor:'center'})
+      .setLngLat(YT_OFFSETS_DESERT[i]||YT_CENTER_DESERT)
+      .addTo(map);
+  });
+  console.log('YT loaded:',ytVideos.length,'via desertlife.html');
 }
 function openYT(i){
   ytIdx=i;
@@ -592,6 +639,28 @@ document.querySelectorAll('.cat-pill').forEach(btn=>{
     const filtered=activeFilter==='all'?allData:allData.filter(b=>b.category===activeFilter);
     document.getElementById('count-badge').textContent=filtered.length+' businesses';
     renderLayer(filtered);
+  });
+});
+// ── RADIO ──
+let radioPlaying=false;
+function setRadioState(p){
+  const btn=document.getElementById('radio-btn');
+  const waves=document.querySelector('.radio-waves');
+  radioPlaying=p;
+  if(p){btn.textContent='■';btn.classList.add('playing');if(waves)waves.classList.add('active');}
+  else{btn.textContent='▶';btn.classList.remove('playing');if(waves)waves.classList.remove('active');}
+}
+function toggleRadio(){
+  const audio=document.getElementById('radio-audio');
+  if(radioPlaying){audio.pause();setRadioState(false);}
+  else{audio.play().then(()=>setRadioState(true)).catch(e=>console.warn('Radio:',e));}
+}
+window.addEventListener('load',()=>{
+  const audio=document.getElementById('radio-audio');
+  if(!audio)return;
+  audio.play().then(()=>setRadioState(true)).catch(()=>{
+    const unlock=()=>{if(!radioPlaying)toggleRadio();document.removeEventListener('click',unlock);};
+    document.addEventListener('click',unlock);
   });
 });
 </script>
