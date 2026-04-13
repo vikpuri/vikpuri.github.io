@@ -27,7 +27,7 @@ exports.handler = async (event) => {
       id:        item.id.videoId,
       title:     item.snippet.title,
       channel:   item.snippet.channelTitle,
-      thumb:     item.snippet.thumbnails.medium?.url || item.snippet.thumbnails.default?.url,
+      thumb:     item.snippet.thumbnails.high?.url || item.snippet.thumbnails.medium?.url || item.snippet.thumbnails.default?.url,
       published: item.snippet.publishedAt
     }));
 
