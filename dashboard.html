@@ -266,16 +266,18 @@ a{color:inherit;text-decoration:none}
 @keyframes fadeOut{to{opacity:0;pointer-events:none}}
 </style>
 <script>
+// ── AUTH HELPERS (global so change-password panel can use them) ──
+function rqHash(s){let r=0;for(let i=0;i<s.length;i++){const c=s.charCodeAt(i);r=((r<<5)-r)+c;r|=0;}return Math.abs(r).toString(16)}
+function rqGetHash(){return localStorage.getItem('rq_pw_hash')||rqHash('Requation26!')}
+function rqCheck(pw){return rqHash(pw)===rqGetHash()}
+
 (function(){
-  const RQ_HASH='6bc9c2fca2f543e4a67d1d85c0f7b1f2e3a9d8c1';
-  function h(s){let r=0;for(let i=0;i<s.length;i++){const c=s.charCodeAt(i);r=((r<<5)-r)+c;r|=0;}return Math.abs(r).toString(16)}
   if(sessionStorage.getItem('rq_auth')==='1'){
     document.getElementById('login-overlay').style.display='none';
   }
   window.tryLogin=function(){
     const v=document.getElementById('pw-input').value;
-    // password: Requation26!
-    if(h(v)===h('Requation26!')){
+    if(rqCheck(v)){
       sessionStorage.setItem('rq_auth','1');
       const o=document.getElementById('login-overlay');
       o.classList.add('fade-out');
@@ -303,6 +305,11 @@ a{color:inherit;text-decoration:none}
   <div class="ttime" id="ts">—</div>
   <div class="tversion">v1.0.0</div>
   <div class="tlive">LIVE</div>
+  <button onclick="openChangePw()" title="Change Password"
+    style="background:none;border:1px solid var(--rule2);border-radius:5px;color:var(--t3);cursor:pointer;padding:4px 9px;font-size:.72rem;margin-left:6px;transition:all .15s"
+    onmouseover="this.style.borderColor='rgba(201,168,76,.4)';this.style.color='var(--gold)'"
+    onmouseout="this.style.borderColor='var(--rule2)';this.style.color='var(--t3)'"
+    >🔑</button>
 </header>
 
 <!-- ── SIDEBAR ── -->
@@ -748,6 +755,82 @@ a{color:inherit;text-decoration:none}
   </div>
 </aside>
 <div class="ed-toast" id="ed-toast"></div>
+
+<!-- ── CHANGE PASSWORD MODAL ── -->
+<div id="cpw-backdrop" onclick="closeChangePw()"
+  style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:500;backdrop-filter:blur(4px)"></div>
+<div id="cpw-modal"
+  style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:510;
+         background:#111119;border:1px solid rgba(201,168,76,.25);border-radius:14px;
+         padding:32px 30px 26px;width:340px;max-width:92vw;box-shadow:0 0 60px rgba(0,0,0,.7)">
+  <div style="font-family:'Playfair Display',serif;font-size:1rem;color:var(--gold);margin-bottom:4px">Change Password</div>
+  <div style="font-family:'DM Mono',monospace;font-size:.46rem;color:var(--t4);letter-spacing:.16em;text-transform:uppercase;margin-bottom:22px">Dashboard Access Code</div>
+
+  <div style="margin-bottom:12px">
+    <div style="font-family:'DM Mono',monospace;font-size:.46rem;letter-spacing:.12em;text-transform:uppercase;color:var(--t3);margin-bottom:5px">Current Password</div>
+    <input id="cpw-current" type="password" placeholder="Current password"
+      style="width:100%;background:var(--s3);border:1px solid var(--rule2);border-radius:5px;padding:9px 12px;color:var(--text);font-family:'DM Mono',monospace;font-size:.75rem;outline:none"
+      oninput="cpwClearErr()">
+  </div>
+  <div style="margin-bottom:12px">
+    <div style="font-family:'DM Mono',monospace;font-size:.46rem;letter-spacing:.12em;text-transform:uppercase;color:var(--t3);margin-bottom:5px">New Password</div>
+    <input id="cpw-new" type="password" placeholder="New password (min 6 chars)"
+      style="width:100%;background:var(--s3);border:1px solid var(--rule2);border-radius:5px;padding:9px 12px;color:var(--text);font-family:'DM Mono',monospace;font-size:.75rem;outline:none"
+      oninput="cpwClearErr()">
+  </div>
+  <div style="margin-bottom:18px">
+    <div style="font-family:'DM Mono',monospace;font-size:.46rem;letter-spacing:.12em;text-transform:uppercase;color:var(--t3);margin-bottom:5px">Confirm New Password</div>
+    <input id="cpw-confirm" type="password" placeholder="Confirm new password"
+      style="width:100%;background:var(--s3);border:1px solid var(--rule2);border-radius:5px;padding:9px 12px;color:var(--text);font-family:'DM Mono',monospace;font-size:.75rem;outline:none"
+      onkeydown="if(event.key==='Enter')savePw()" oninput="cpwClearErr()">
+  </div>
+
+  <div id="cpw-err" style="font-family:'DM Mono',monospace;font-size:.52rem;color:var(--red);margin-bottom:12px;min-height:18px"></div>
+
+  <div style="display:flex;gap:8px">
+    <button onclick="savePw()"
+      style="flex:1;padding:9px;border-radius:5px;border:1px solid rgba(201,168,76,.4);background:var(--gold-d);color:var(--gold);font-family:'DM Mono',monospace;font-size:.55rem;letter-spacing:.1em;cursor:pointer;transition:background .15s"
+      onmouseover="this.style.background='rgba(201,168,76,.25)'" onmouseout="this.style.background='var(--gold-d)'"
+    >Save Password</button>
+    <button onclick="closeChangePw()"
+      style="padding:9px 16px;border-radius:5px;border:1px solid var(--rule2);background:none;color:var(--t3);font-family:'DM Mono',monospace;font-size:.55rem;cursor:pointer"
+    >Cancel</button>
+  </div>
+</div>
+
+<script>
+function openChangePw(){
+  document.getElementById('cpw-current').value='';
+  document.getElementById('cpw-new').value='';
+  document.getElementById('cpw-confirm').value='';
+  document.getElementById('cpw-err').textContent='';
+  document.getElementById('cpw-modal').style.display='block';
+  document.getElementById('cpw-backdrop').style.display='block';
+  setTimeout(()=>document.getElementById('cpw-current').focus(),50);
+}
+function closeChangePw(){
+  document.getElementById('cpw-modal').style.display='none';
+  document.getElementById('cpw-backdrop').style.display='none';
+}
+function cpwClearErr(){document.getElementById('cpw-err').textContent='';}
+function savePw(){
+  const cur=document.getElementById('cpw-current').value;
+  const nw=document.getElementById('cpw-new').value;
+  const cf=document.getElementById('cpw-confirm').value;
+  const err=document.getElementById('cpw-err');
+
+  if(!rqCheck(cur)){err.textContent='Current password is incorrect.';return;}
+  if(nw.length<6){err.textContent='New password must be at least 6 characters.';return;}
+  if(nw!==cf){err.textContent='Passwords do not match.';return;}
+
+  localStorage.setItem('rq_pw_hash',rqHash(nw));
+  closeChangePw();
+  toast('Password updated ✓','ok');
+}
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'&&document.getElementById('cpw-modal').style.display==='block')closeChangePw();
+});
+</script>
 
 <script>
 // ── CONFIG ──
