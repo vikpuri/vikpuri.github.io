@@ -715,18 +715,65 @@ async function fetchRestaurants(){
 }
 
 mapboxgl.accessToken='pk.eyJ1IjoidmlranB1cmkiLCJhIjoiY21uYnF0ZW'+'NuMHhnaTJ3bzR5MG5xOTEz'+'bSJ9.vqmEhPHMBQOn4GX3yrbiGw';
-const map=new mapboxgl.Map({container:'map',style:'mapbox://styles/mapbox/standard',pitch:30,bearing:45,attributionControl:false});
-map.fitBounds([[-119.0,32.8],[-111.5,34.5]],{padding:{top:80,bottom:80,left:40,right:40},pitch:30,duration:0});
+const map=new mapboxgl.Map({
+  container:'map',
+  style:'mapbox://styles/mapbox/standard',
+  projection:'globe',
+  center:[-100,38],
+  zoom:1.8,
+  pitch:0,
+  bearing:0,
+  attributionControl:false
+});
 map.addControl(new mapboxgl.AttributionControl({compact:true}));
 map.addControl(new mapboxgl.NavigationControl({showCompass:false}),'bottom-right');
 
 let activeProperty=null,poiMarkers=[],_ci=0,_ct=1;
 
+let _spinId=null;
+function _startSpin(){
+  _spinId=requestAnimationFrame(function spin(){
+    const c=map.getCenter();
+    map.setCenter([c.lng-0.12,c.lat]);
+    _spinId=requestAnimationFrame(spin);
+  });
+}
+function _stopSpin(){if(_spinId){cancelAnimationFrame(_spinId);_spinId=null;}}
+
 map.on('load',()=>{
   try{map.setPaintProperty('satellite','raster-brightness-max',.78);map.setPaintProperty('satellite','raster-saturation',-.15);map.setPaintProperty('satellite','raster-contrast',.1);}catch(e){}
-  map.setConfigProperty('basemap','lightPreset','day');
+
+  // Globe phase — night sky, atmosphere, slow spin
+  map.setConfigProperty('basemap','lightPreset','night');
   map.setConfigProperty('basemap','show3dObjects',true);
+  try{map.setFog({'range':[0.5,10],'color':'rgba(186,210,235,.5)','high-color':'#245cdf','horizon-blend':0.02,'space-color':'#0b0e2e','star-intensity':0.65});}catch(e){}
+
+  // Add markers early — they'll appear when we zoom in
   properties.forEach(p=>{ if(p.tag==='Active Listing') addCondoMarker(p); else if(p.id==='laveen') addTerrainMarker(p); else addPropertyMarker(p); });
+
+  _startSpin();
+  map.once('mousedown',_stopSpin);
+
+  // After 2.8s: stop spin, fly into LA/AZ region
+  setTimeout(()=>{
+    _stopSpin();
+    map.flyTo({
+      center:[-115.2,33.8],
+      zoom:6.2,
+      pitch:30,
+      bearing:10,
+      duration:3200,
+      essential:true,
+      easing:t=>1-Math.pow(1-t,3)
+    });
+    // Switch to day after zoom settles
+    map.once('moveend',()=>{
+      map.setConfigProperty('basemap','lightPreset','day');
+      try{map.setFog({'range':[1,14],'color':'rgba(235,228,212,.3)','high-color':'#b0cce0','horizon-blend':0.05,'space-color':'#c8e0f0','star-intensity':0});}catch(e){}
+      // Settle into fitBounds for final view
+      map.fitBounds([[-119.0,32.8],[-111.5,34.5]],{padding:{top:80,bottom:80,left:40,right:40},pitch:30,duration:1000});
+    });
+  },2800);
 
   map.on('click', (e) => {
     const features = map.queryRenderedFeatures(e.point, {
