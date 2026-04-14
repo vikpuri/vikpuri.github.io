@@ -255,7 +255,7 @@
     <div class="radio-waves"><span></span><span></span><span></span><span></span></div>
     <button id="radio-btn" onclick="toggleRadio()" aria-label="Toggle radio">▶</button>
     <audio id="radio-audio" preload="none"
-      src="https://playerservices.streamtheworld.com/api/livestream-redirect/KQMTFMAAC.aac"></audio>
+      src="https://live.amperwave.net/direct/audacy-kqmtfmaac-imc"></audio>
   </div>
   <div id="yt-billboard"></div>
 </div>
@@ -546,7 +546,7 @@ let ytVideos=[], ytIdx=0;
 
 function populateBillboard(v){
   const bb=document.getElementById('yt-billboard');
-  bb.innerHTML=`<div class="bb-thumb" style="background-image:url(${v.thumb})"><div class="bb-play-wrap"><div class="bb-play-btn">▶</div></div><div class="bb-live"><div class="bb-live-dot"></div>VIDEO</div></div><div class="bb-info"><div class="bb-label">▶ Featured</div><div class="bb-title">${v.title}</div><div class="bb-channel">${v.channel}</div></div>`;
+  bb.innerHTML=`<div class="bb-thumb" style="background-image:url(${v.thumb});cursor:pointer" onclick="openYT(0)"><div class="bb-play-wrap"><div class="bb-play-btn">▶</div></div><div class="bb-live"><div class="bb-live-dot"></div>VIDEO</div></div><div class="bb-info"><div class="bb-label">▶ Featured</div><div class="bb-title">${v.title}</div><div class="bb-channel">${v.channel}</div></div>`;
   bb.style.display='block';
 }
 async function fetchYT(query){
