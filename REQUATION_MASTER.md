@@ -456,7 +456,62 @@ node geocode-az.js
 
 ---
 
-## 12. Future Features (Planned)
+## 12. Work Log
+
+### Session 2026-04-13 — iPhone Safe Area + Logo Redesign
+
+**Committed & Live**
+
+- iPhone notch fix: `viewport-fit=cover` on all 4 pages; header height and padding use `env(safe-area-inset-top, 0px)` so content never disappears behind the iPhone status bar
+- Radio z-index lowered (115→90) so it doesn't overlap header on iPhone
+- Billboard and radio `top` values use `calc(var(--header-h) + env(safe-area-inset-top,0px) + Npx)` for proper positioning under safe-area-aware header
+- Logo left-aligned on property pages (dtla, laveen): `header .logo-svg { order:0; flex:1 }` + `header nav { order:1 }`
+- Life pages (lalife, desertlife): removed `position:absolute; left:50%; transform:translateX(-50%)` from `.header-title` so it sits extreme left
+
+**Logo Redesign — inline SVG (all 3 pages: index, dtla, laveen)**
+
+Root cause of old blurriness: logo was `<img src="data:image/svg+xml...">` — sandboxed SVG can't load Google Fonts → Raleway falls back to Arial → dull/blurry.  
+Fix: replaced with inline SVG so page-loaded fonts render correctly.
+
+Current logo design (work in progress — slash angle being refined):
+```html
+<svg viewBox="0 0 440 100" height="60" width="100%" preserveAspectRatio="xMinYMid meet" overflow="visible">
+  <defs><filter id="gb"><!-- soft glow on quation --></filter></defs>
+  <text x="6" y="42" font-family="EB Garamond,Georgia,serif"
+        font-size="46" font-weight="700" font-style="italic" fill="#B22234">r</text>
+  <line x1="31" y1="76" x2="50" y2="41"
+        stroke="#7A7A7A" stroke-width="5" stroke-linecap="round"/>
+  <text x="56" y="88" font-family="Raleway,Arial,sans-serif"
+        font-size="92" font-weight="600" fill="#4F6FB8">Σ</text>
+  <text x="122" y="88" font-family="Raleway,Arial,sans-serif"
+        font-size="24" font-weight="600" font-style="italic"
+        fill="#D4A843" opacity="0.8" filter="url(#gb)" letter-spacing="2">quation</text>
+</svg>
+```
+
+**Logo design intent (for future Claude sessions):**
+- Brand reads as `r/Σquation` = `r/Equation` = RE/Equation = Requation
+- `r` — red (#B22234), EB Garamond bold italic (math/finance serif), top-left, aligned with slash top
+- `/` — grey SVG line (not a font glyph), forward slash at ~110° obtuse angle (between r and Σ, not touching either)
+- `Σ` — blue (#4F6FB8), Raleway, large (font-size 92), baseline-anchored — Σ IS the E in Equation
+- `quation` — gold (#D4A843), Raleway italic small (font-size 24), soft glow filter, sits right of Σ
+- Colors: red/blue/gold = real estate + equation symbolism
+- Slash must NOT touch r or Σ
+- Slash angle: **work in progress** — target ~110° obtuse (more vertical than 61° current, user still confirming)
+
+**Fonts in use:**
+- EB Garamond 700 italic — for `r` (classic math/LaTeX heritage font)
+- Raleway 600 — for Σ and quation
+- Google Fonts `<link>` updated on all 3 pages to include `&family=EB+Garamond:ital,wght@1,700`
+
+**Next session logo tasks:**
+- [ ] Finalize slash angle (user wants ~110° obtuse, to be confirmed visually)
+- [ ] Ensure slash aligns between top of r and full extent of Σ
+- [ ] Replicate finalized logo to panel-close mini buttons (dtla, laveen, index)
+
+---
+
+## 13. Future Features (Planned)
 
 - [ ] User authentication (Supabase Auth)
 - [ ] Saved properties / favourites
@@ -469,4 +524,4 @@ node geocode-az.js
 
 ---
 
-*Document maintained by Requation development team. Last updated: 2026-04-13.*
+*Document maintained by Requation development team. Last updated: 2026-04-13 (session 2 — logo + iPhone safe area).*
