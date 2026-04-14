@@ -323,13 +323,7 @@ map.on('load',()=>{
   // Property pin — anchored to 801 S Grand Ave, South Park DTLA
   (function(){
     const el=document.createElement('div');
-    el.style.cssText='cursor:pointer;position:relative;text-align:center';
-    const dot=document.createElement('div');
-    dot.style.cssText='width:46px;height:46px;border-radius:50%;background:#B22234;border:3px solid #fff;box-shadow:0 0 24px 6px rgba(178,34,52,.85)';
-    const lbl=document.createElement('div');
-    lbl.style.cssText='position:absolute;top:calc(100% + 5px);left:50%;transform:translateX(-50%);font-family:"Source Serif 4",serif;font-size:.44rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#fff;white-space:nowrap;text-shadow:0 1px 4px rgba(0,0,0,.9);pointer-events:none';
-    lbl.textContent='OWN · South Park';
-    el.appendChild(dot);el.appendChild(lbl);
+    el.className='property-marker homes-active';
     el.addEventListener('click',()=>navigateTo('/dtla'));
     new mapboxgl.Marker({element:el,anchor:'center',pitchAlignment:'map',rotationAlignment:'map'})
       .setLngLat([-118.2637,34.0422]).addTo(map);

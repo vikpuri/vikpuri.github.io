@@ -930,23 +930,26 @@ function switchTab(name){
 
 // ── DIRECTORY ──
 const DIR_ZIPS_LAVEEN='85339,85041,85042,85044';
+const DIR_ZIPS_DTLA='90017,90015,90013,90014';
 const DIR_SB='https://mpmprnjhunjfeacikgml.supabase.co';
 const DIR_KEY='sb_publishable_T6XISHd9O2Ol0raPaEASqQ_klUXnyY3';
 const DIR_CAT={'Grocery':'🛒','Hardware':'🔨','Coffee':'☕','Cafes':'☕','Cafe':'☕','Coffee & Tea':'☕','Bakeries':'🥐','Ice Cream & Frozen Yogurt':'🍦','Gelato':'🍦','Desserts':'🍦','Shaved Ice':'🍦','Shaved Snow':'🍦','FastFood':'🍔','Cinema':'🎬','Dental':'🦷','MedSpa':'💆','Gym':'💪','Fashion':'👗','Shoes':'👟','Cosmetics':'💄'};
 const DIR_ALLOWED=new Set(['Grocery','Hardware','Bakeries','Cafes','Cafe','Coffee','Coffee & Tea','Ice Cream & Frozen Yogurt','Gelato','Desserts','Shaved Ice','Shaved Snow','Shoes','Cosmetics','Cinema','Dental','MedSpa','Gym','Fashion','FastFood']);
-let dirData=[], dirLoaded=false;
+let dirData=[], dirLoaded=false, dirLoadedFor=null;
 
 async function loadDirectory(){
-  if(dirLoaded) return;
+  const zips=(activeProperty&&activeProperty.id==='dtla')?DIR_ZIPS_DTLA:DIR_ZIPS_LAVEEN;
+  if(dirLoaded && dirLoadedFor===zips) return;
+  dirLoaded=false; dirData=[];
   document.getElementById('dir-list').innerHTML='<div class="dir-empty">Loading…</div>';
   try{
-    const r=await fetch(`${DIR_SB}/rest/v1/restaurants?select=name,category,address,zip,yelp_url,waymo_url&zip=in.(${DIR_ZIPS_LAVEEN})&limit=1000&order=name.asc`,
+    const r=await fetch(`${DIR_SB}/rest/v1/restaurants?select=name,category,address,zip,yelp_url,waymo_url&zip=in.(${zips})&limit=1000&order=name.asc`,
       {headers:{'apikey':DIR_KEY,'Authorization':'Bearer '+DIR_KEY}});
     if(!r.ok) throw new Error(r.status);
     const raw=await r.json();
     const seen=new Set();
     dirData=raw.filter(b=>{if(!DIR_ALLOWED.has(b.category))return false;const k=(b.name||'')+'|'+(b.address||'');if(seen.has(k))return false;seen.add(k);return true;});
-    dirLoaded=true;
+    dirLoaded=true; dirLoadedFor=zips;
     renderDir(dirData);
   }catch(e){
     document.getElementById('dir-list').innerHTML='<div class="dir-empty">Could not load directory</div>';
