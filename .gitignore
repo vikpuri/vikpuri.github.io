@@ -4,3 +4,8 @@ dist/
 backups/
 .claude/
 goHome-lines.txt
+*.bak
+*.bak2
+*.bak3
+*.bak4
+tmp_*.json

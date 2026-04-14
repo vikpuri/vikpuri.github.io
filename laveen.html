@@ -985,8 +985,6 @@ function goHome(){
   map.fitBounds([[-119.0,32.8],[-111.5,34.5]],{padding:{top:80,bottom:80,left:40,right:40},pitch:30,duration:1200});
   document.getElementById('panel').classList.remove('open');
   document.getElementById('db-listing-panel').style.transform='translateY(100%)';
-  if(map.getSource('restaurants')){map.setLayoutProperty('restaurants-layer','visibility','none');map.setLayoutProperty('restaurants-label','visibility','none');}
-  if(map.getSource('lav-restaurants')){map.setLayoutProperty('lav-restaurants-layer','visibility','none');}
   clearPoiMarkers();clearDBPois();clearDBMarkers();activeProperty=null;
 }
 function openModal(id){document.getElementById('modal-'+id).classList.add('active');}
