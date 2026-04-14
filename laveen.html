@@ -223,6 +223,29 @@
 <body>
 <div id="map"></div>
 
+<div id="media-col">
+  <div id="radio-player">
+    <div class="radio-info">
+      <div class="radio-station">99.5 The Mountain</div>
+      <div class="radio-genre">Rock · Phoenix</div>
+    </div>
+    <div class="radio-waves"><span></span><span></span><span></span><span></span></div>
+    <button id="radio-btn" onclick="toggleRadio()" aria-label="Toggle radio">▶</button>
+    <audio id="radio-audio" preload="none" src="https://playerservices.streamtheworld.com/api/livestream-redirect/KQMTFMAAC.aac"></audio>
+  </div>
+  <div id="yt-billboard"></div>
+</div>
+<div id="yt-popup">
+  <button id="yt-close" onclick="closeYT()">✕</button>
+  <div id="yt-title"></div>
+  <div id="yt-frame-wrap"><iframe id="yt-frame" allowfullscreen allow="autoplay"></iframe></div>
+  <div id="yt-nav">
+    <button class="yt-nav-btn" onclick="ytStep(-1)">← Prev</button>
+    <span id="yt-counter"></span>
+    <button class="yt-nav-btn" onclick="ytStep(1)">Next →</button>
+  </div>
+</div>
+
 <header>
   <nav>
     <button class="nav-btn nav-home" onclick="goHome()">Home</button>
@@ -1016,29 +1039,6 @@ function cleanupMedia(){const audio=document.getElementById('radio-audio');if(au
 window.addEventListener('pagehide',cleanupMedia);
 window.addEventListener('beforeunload',cleanupMedia);
 </script>
-
-<div id="media-col">
-  <div id="radio-player">
-    <div class="radio-info">
-      <div class="radio-station">99.5 The Mountain</div>
-      <div class="radio-genre">Rock · Phoenix</div>
-    </div>
-    <div class="radio-waves"><span></span><span></span><span></span><span></span></div>
-    <button id="radio-btn" onclick="toggleRadio()" aria-label="Toggle radio">▶</button>
-    <audio id="radio-audio" preload="none" src="https://playerservices.streamtheworld.com/api/livestream-redirect/KQMTFMAAC.aac"></audio>
-  </div>
-  <div id="yt-billboard"></div>
-</div>
-<div id="yt-popup">
-  <button id="yt-close" onclick="closeYT()">✕</button>
-  <div id="yt-title"></div>
-  <div id="yt-frame-wrap"><iframe id="yt-frame" allowfullscreen allow="autoplay"></iframe></div>
-  <div id="yt-nav">
-    <button class="yt-nav-btn" onclick="ytStep(-1)">← Prev</button>
-    <span id="yt-counter"></span>
-    <button class="yt-nav-btn" onclick="ytStep(1)">Next →</button>
-  </div>
-</div>
 
 </body>
 </html>
