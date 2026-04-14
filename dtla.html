@@ -743,7 +743,7 @@ map.on('load',()=>{
   });
   // POI vector layer — hidden until property panel opens for dtla
   map.addSource('restaurants',{type:'vector',url:'mapbox://vikjpuri.la-yelp'});
-  map.addLayer({id:'restaurants-layer',type:'circle',source:'restaurants','source-layer':'yelp',layout:{'visibility':'none'},paint:{'circle-radius':8,'circle-color':'#B22234','circle-stroke-width':2,'circle-stroke-color':'#ffffff','circle-pitch-alignment':'map','circle-pitch-scale':'map'}});
+  map.addLayer({id:'restaurants-layer',type:'symbol',source:'restaurants','source-layer':'yelp',layout:{'visibility':'none','icon-image':['match',['get','category'],'Grocery','grocery','Hardware','hardware','Coffee','cafe','Cafes','cafe','Cafe','cafe','Coffee & Tea','cafe','Bakeries','bakery','Ice Cream & Frozen Yogurt','ice-cream','Gelato','ice-cream','Desserts','ice-cream','Cinema','cinema','Dental','dentist','MedSpa','doctor','Gym','fitness-centre','Shoes','shoe','Fashion','clothing-store','FastFood','fast-food','restaurant'],'icon-size':0.9,'icon-allow-overlap':false}});
   map.addLayer({id:'restaurants-label',type:'symbol',source:'restaurants','source-layer':'yelp',layout:{'visibility':'none','text-field':['get','name'],'text-size':11,'text-anchor':'top','text-offset':[0,1],'text-font':['Open Sans Italic','Arial Unicode MS Regular']},paint:{'text-color':'#B22234','text-halo-color':'#FAF8F4','text-halo-width':2}});
   map.on('click','restaurants-layer',(e)=>{
     if(!e.features.length) return;

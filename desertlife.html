@@ -392,13 +392,27 @@ function renderLayer(){
   map.addSource('living',{type:'vector',url:'mapbox://vikjpuri.az-yelp'});
 
   map.addLayer({
-    id:'living-points',type:'circle',source:'living','source-layer':'yelp',
-    paint:{
-      'circle-color':CAT_COLOR_EXPR,
-      'circle-radius':['interpolate',['linear'],['zoom'],10,4,14,8,16,11],
-      'circle-stroke-width':1.5,
-      'circle-stroke-color':'rgba(255,255,255,.8)',
-      'circle-pitch-alignment':'map'
+    id:'living-points',type:'symbol',source:'living','source-layer':'yelp',
+    layout:{
+      'icon-image':['match',['get','category'],
+        'Grocery','grocery',
+        'Hardware','hardware',
+        'Coffee','cafe','Cafes','cafe','Cafe','cafe','Coffee & Tea','cafe',
+        'Bakeries','bakery',
+        'Ice Cream & Frozen Yogurt','ice-cream','Gelato','ice-cream','Desserts','ice-cream','Shaved Ice','ice-cream','Shaved Snow','ice-cream',
+        'Cinema','cinema',
+        'Dental','dentist',
+        'MedSpa','doctor',
+        'Gym','fitness-centre',
+        'Shoes','shoe',
+        'Fashion','clothing-store',
+        'Cosmetics','shop',
+        'FastFood','fast-food',
+        'restaurant'
+      ],
+      'icon-size':['interpolate',['linear'],['zoom'],10,0.6,14,0.9,16,1.1],
+      'icon-allow-overlap':false,
+      'icon-ignore-placement':false
     }
   });
 
