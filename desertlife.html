@@ -568,7 +568,7 @@ async function fetchYT(query){
 async function addYTMarkers(){
   ytVideos=await fetchYT(YT_QUERY_DESERT);
   if(ytVideos[0]){populateBillboard(ytVideos[0]);}
-  else{const bb=document.getElementById('yt-billboard');bb.innerHTML='<div class="bb-thumb" style="background:linear-gradient(135deg,#1a0505,#3d0000)"><div class="bb-play-wrap"><div class="bb-play-btn">▶</div></div><div class="bb-live"><div class="bb-live-dot"></div>VIDEO</div></div><div class="bb-info"><div class="bb-label">▶ Featured</div><div class="bb-title">Another Brick in the Wall</div><div class="bb-channel">Pink Floyd</div></div>';bb.style.display='block';}
+  else{const bb=document.getElementById('yt-billboard');const v={id:'HrxX9TBj2zY',title:'Another Brick In The Wall, Part Two (Official Music Video)',channel:'Pink Floyd',thumb:'https://img.youtube.com/vi/HrxX9TBj2zY/hqdefault.jpg'};ytVideos=[v];populateBillboard(v);}
 }
 function openYT(i){
   ytIdx=i;
