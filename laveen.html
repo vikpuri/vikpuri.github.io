@@ -190,16 +190,19 @@
 .mapboxgl-ctrl-attrib{font-size:9px !important;opacity:0.5 !important}
 @media(max-width:640px){:root{--panel-width:100vw}header{padding:0 18px}.logo-text{font-size:1.2rem}.video-grid{grid-template-columns:1fr}}
 @media(max-width:640px){
-  #radio-player{width:164px;right:8px}
+  #radio-player{width:164px;left:8px}
   .radio-genre{display:none}
-  #yt-billboard{width:164px;right:8px}
+  #yt-billboard{width:164px;left:8px}
   .bb-thumb{width:164px;height:92px}
   .bb-channel{display:none}
+}
+@media(max-width:640px) and (orientation:portrait){
+  #yt-billboard{display:none!important}
 }
   /* ── YOUTUBE ── */
   @keyframes bb-glow{0%,100%{box-shadow:0 6px 28px rgba(0,0,0,.7),0 0 0 0 rgba(255,0,0,0)}50%{box-shadow:0 6px 28px rgba(0,0,0,.7),0 0 24px 4px rgba(255,0,0,.2)}}
   @keyframes yt-blink{0%,100%{opacity:1}50%{opacity:0}}
-  #yt-billboard{position:fixed;top:calc(var(--header-h) + env(safe-area-inset-top,0px) + 60px);right:16px;z-index:90;width:280px;border-radius:8px;overflow:hidden;cursor:default;display:none;background:transparent;border:1px solid rgba(255,0,0,.45);animation:bb-glow 4s ease-in-out infinite;backdrop-filter:blur(16px)}
+  #yt-billboard{position:fixed;top:calc(var(--header-h) + env(safe-area-inset-top,0px) + 60px);left:16px;z-index:90;width:280px;border-radius:8px;overflow:hidden;cursor:default;display:none;background:transparent;border:1px solid rgba(255,0,0,.45);animation:bb-glow 4s ease-in-out infinite;backdrop-filter:blur(16px)}
   .bb-thumb{width:280px;height:158px;background-size:cover;background-position:center;position:relative}
   .bb-play-wrap{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.18)}
   .bb-play-btn{width:44px;height:44px;background:#FF0000;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px;box-shadow:0 0 24px rgba(255,0,0,.55)}
@@ -221,7 +224,7 @@
   #yt-counter{font-family:'DM Mono',monospace;font-size:.75rem;color:rgba(255,255,255,.5)}
   /* ── RADIO PLAYER ── */
   @keyframes wave{0%,100%{transform:scaleY(.35)}50%{transform:scaleY(1)}}
-  #radio-player{position:fixed;top:calc(var(--header-h) + env(safe-area-inset-top,0px) + 8px);right:16px;z-index:90;width:280px;display:flex;align-items:center;gap:8px;background:rgba(0,40,104,.95);border:1px solid rgba(255,255,255,.22);border-radius:8px;padding:7px 10px;backdrop-filter:blur(14px);box-shadow:0 4px 20px rgba(0,0,0,.55)}
+  #radio-player{position:fixed;top:calc(var(--header-h) + env(safe-area-inset-top,0px) + 8px);left:16px;z-index:90;width:280px;display:flex;align-items:center;gap:8px;background:rgba(0,40,104,.95);border:1px solid rgba(255,255,255,.22);border-radius:8px;padding:7px 10px;backdrop-filter:blur(14px);box-shadow:0 4px 20px rgba(0,0,0,.55)}
   .radio-info{flex:1;min-width:0}
   .radio-station{font-family:'DM Mono',monospace;font-size:.58rem;letter-spacing:.08em;color:#FAF8F4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .radio-genre{font-family:'DM Mono',monospace;font-size:.44rem;color:rgba(255,255,255,.48);margin-top:1px}
@@ -1141,6 +1144,16 @@ window.addEventListener('load',()=>{
     document.addEventListener('click',unlock);
   });
 });
+function cleanupMedia(){
+  const audio=document.getElementById('radio-audio');
+  if(audio){audio.pause();audio.src='';}
+  const f=document.getElementById('yt-frame');
+  if(f)f.src='';
+  const bb=document.getElementById('yt-billboard');
+  if(bb){const fi=bb.querySelector('iframe');if(fi)fi.src='';}
+}
+window.addEventListener('pagehide',cleanupMedia);
+window.addEventListener('beforeunload',cleanupMedia);
 </script>
 
 <div id="yt-billboard"></div>
