@@ -254,6 +254,22 @@
   <div style="font-family:'Source Serif 4',serif;font-size:.44rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#fff;white-space:nowrap;text-shadow:0 1px 4px rgba(0,0,0,.9);margin-top:5px">OWN · South Park</div>
 </div>
 
+<div id="cat-bar">
+  <button class="cat-pill active" data-cat="all">All</button>
+  <button class="cat-pill" data-cat="Grocery">🛒 Grocery</button>
+  <button class="cat-pill" data-cat="Hardware">🔨 Hardware</button>
+  <button class="cat-pill" data-cat="Bakeries">🥐 Bakeries</button>
+  <button class="cat-pill" data-cat="Cafes">☕ Cafes</button>
+  <button class="cat-pill" data-cat="IceCream">🍦 Ice Cream</button>
+  <button class="cat-pill" data-cat="Shoes">👟 Shoes</button>
+  <button class="cat-pill" data-cat="Beauty">💄 Beauty</button>
+  <button class="cat-pill" data-cat="Cinema">🎬 Cinema</button>
+  <button class="cat-pill" data-cat="Dental">🦷 Dental</button>
+  <button class="cat-pill" data-cat="MedSpa">💆 MedSpa</button>
+  <button class="cat-pill" data-cat="Gym">💪 Gym</button>
+  <button class="cat-pill" data-cat="Fashion">👗 Fashion</button>
+</div>
+
 <div id="media-col">
   <div id="radio-player">
     <div class="radio-info">
@@ -308,11 +324,17 @@ const SB_KEY='__SB_KEY__';
 const SB_HEADERS={'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY};
 
 const CAT_COLOR={
-  'Grocery':'#4CAF50','Hardware':'#FF6B35','Coffee':'#8B6E4E',
-  'FastFood':'#FFC107','Cinema':'#9C27B0','Dental':'#00BCD4',
-  'MedSpa':'#E91E63','Gym':'#F44336','Shoes':'#3F51B5',
-  'Fashion':'#FF4081','Cosmetics':'#FF80AB'
+  'Grocery':'#4CAF50','Hardware':'#FF6B35',
+  'Coffee':'#8B6E4E','Cafes':'#8B6E4E','Cafe':'#8B6E4E','Coffee & Tea':'#8B6E4E',
+  'Bakeries':'#FF9800',
+  'Ice Cream & Frozen Yogurt':'#EC407A','Gelato':'#EC407A','Desserts':'#EC407A','Shaved Ice':'#EC407A','Shaved Snow':'#EC407A',
+  'Cinema':'#9C27B0','Dental':'#00BCD4','MedSpa':'#E91E63',
+  'Gym':'#F44336','Shoes':'#3F51B5','Fashion':'#FF4081','Cosmetics':'#FF80AB',
+  'FastFood':'#FFC107'
 };
+const ALLOWED_CATS=new Set(['Grocery','Hardware','Bakeries','Cafes','Cafe','Coffee','Coffee & Tea','Ice Cream & Frozen Yogurt','Gelato','Desserts','Shaved Ice','Shaved Snow','Shoes','Cosmetics','Cinema','Dental','MedSpa','Gym','Fashion','FastFood']);
+const CAT_FILTER_MAP={'Cafes':['Cafes','Cafe','Coffee','Coffee & Tea'],'IceCream':['Ice Cream & Frozen Yogurt','Gelato','Desserts','Shaved Ice','Shaved Snow'],'Beauty':['Cosmetics']};
+function getFiltered(){if(activeFilter==='all')return allData;const cats=CAT_FILTER_MAP[activeFilter]||[activeFilter];return allData.filter(b=>cats.includes(b.category));}
 const KEY_CHAINS=['Whole Foods','Trader Joe\'s','Home Depot','Lowe\'s','Costco','Walmart','Aldi','AMC','Regal','Cinemark','LA Fitness','Equinox','SoulCycle'];
 
 let allData=[], activeFilter='all', rpoiEl=null, caProperties=[], caDots=[];
@@ -356,9 +378,10 @@ map.on('load',()=>{
 
 async function loadLiving(){
   try{
-    const resp=await fetch(SB_URL+'/rest/v1/restaurants?select=*&zip=in.(90017,90015,90013,90014)&limit=500',{headers:SB_HEADERS});
+    const resp=await fetch(SB_URL+'/rest/v1/restaurants?select=*&zip=in.(90017,90015,90013,90014)&limit=1000',{headers:SB_HEADERS});
     if(!resp.ok) throw new Error('restaurants fetch failed');
-    allData=await resp.json();
+    const raw=await resp.json();
+    allData=raw.filter(b=>ALLOWED_CATS.has(b.category));
     renderLayer(allData);
     buildBizList();
     document.getElementById('count-badge').textContent=allData.length+' businesses';
@@ -573,7 +596,7 @@ function closeYT(){
   document.getElementById('yt-popup').classList.remove('open');
 }
 
-const CAT_EMOJI={'Grocery':'🛒','Hardware':'🔨','Coffee':'☕','FastFood':'🍔','Cinema':'🎬','Dental':'🦷','MedSpa':'💆','Gym':'💪','Fashion':'👗','Shoes':'👟','Cosmetics':'💄'};
+const CAT_EMOJI={'Grocery':'🛒','Hardware':'🔨','Coffee':'☕','Cafes':'☕','Cafe':'☕','Coffee & Tea':'☕','Bakeries':'🥐','Ice Cream & Frozen Yogurt':'🍦','Gelato':'🍦','Desserts':'🍦','Shaved Ice':'🍦','Shaved Snow':'🍦','FastFood':'🍔','Cinema':'🎬','Dental':'🦷','MedSpa':'💆','Gym':'💪','Fashion':'👗','Shoes':'👟','Cosmetics':'💄'};
 
 function buildBizList(){
   const sub=document.getElementById('biz-panel-sub');
@@ -600,7 +623,7 @@ document.querySelectorAll('.cat-pill').forEach(btn=>{
       btn.classList.add('active');
       activeFilter=btn.dataset.cat;
     }
-    const filtered=activeFilter==='all'?allData:allData.filter(b=>b.category===activeFilter);
+    const filtered=getFiltered();
     document.getElementById('count-badge').textContent=filtered.length+' businesses';
     renderLayer(filtered);
   });
