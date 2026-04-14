@@ -52,7 +52,7 @@ If a change touches the map, Mapbox constructor, or `map.on('load',...)` — **s
 - `#media-col` z-index: 90. Property panel z-index: 95
 - `/dtla` + `/lalife` radio: KLOS 99.5 FM → `https://playerservices.streamtheworld.com/api/livestream-redirect/KLOSFMAAC.aac`
 - `/laveen` + `/desertlife` radio: 99.5 The Mountain → `https://live.amperwave.net/direct/audacy-kqmtfmaac-imc` (Audacy AmperWave, NOT StreamTheWorld)
-- YT billboard: clicking thumbnail must call `openYT(0)` — bb-thumb needs `onclick="openYT(0)"` in `populateBillboard()`
+- YT billboard: clicking thumbnail calls `playInline(0)` — plays video inline inside the billboard (same size, no popup). Do NOT use `openYT(0)` on the thumbnail — that opens a full-screen overlay which is NOT the desired behaviour.
 - YT fallback: hardcoded Pink Floyd `HrxX9TBj2zY` when API quota is exceeded
 
 ---
