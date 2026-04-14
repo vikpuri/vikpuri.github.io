@@ -823,6 +823,7 @@ map.on('load',()=>{
     })
     .catch(e=>console.error('POI fetch failed',e));
   });
+  map.flyTo({center:[-112.1180767,33.3427905],zoom:15.5,pitch:65,bearing:45,duration:1500,essential:true});
 });
 
 map.on('zoomend',()=>{
