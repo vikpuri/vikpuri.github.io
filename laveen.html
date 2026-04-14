@@ -1021,7 +1021,7 @@ const YT_QUERY_LAVEEN='Another Brick in the Wall Pink Floyd';
 let ytVideos=[],ytIdx=0;
 function populateBillboard(v){
   const bb=document.getElementById('yt-billboard');
-  bb.innerHTML=`<div class="bb-thumb" style="background-image:url(${v.thumb});cursor:pointer" onclick="openYT(0)"><div class="bb-play-wrap"><div class="bb-play-btn">▶</div></div><div class="bb-live"><div class="bb-live-dot"></div>VIDEO</div></div><div class="bb-info"><div class="bb-label">▶ Featured</div><div class="bb-title">${v.title}</div><div class="bb-channel">${v.channel}</div></div>`;
+  bb.innerHTML=`<div class="bb-thumb" style="background-image:url(${v.thumb});cursor:pointer" onclick="playInline(0)"><div class="bb-play-wrap"><div class="bb-play-btn">▶</div></div><div class="bb-live"><div class="bb-live-dot"></div>VIDEO</div></div><div class="bb-info"><div class="bb-label">▶ Featured</div><div class="bb-title">${v.title}</div><div class="bb-channel">${v.channel}</div></div>`;
   bb.style.display='block';
 }
 async function fetchYT(q){
@@ -1034,6 +1034,7 @@ async function addYTMarkers(){
   else{const bb=document.getElementById('yt-billboard');const v={id:'HrxX9TBj2zY',title:'Another Brick In The Wall, Part Two (Official Music Video)',channel:'Pink Floyd',thumb:'https://img.youtube.com/vi/HrxX9TBj2zY/hqdefault.jpg'};ytVideos=[v];populateBillboard(v);}
 }
 function openYT(i){ytIdx=i;renderYT();document.getElementById('yt-popup').classList.add('open');}
+function playInline(i){const v=ytVideos[i];if(!v)return;const bb=document.getElementById('yt-billboard');bb.innerHTML=`<iframe src="https://www.youtube.com/embed/${v.id}?autoplay=1&rel=0&modestbranding=1" style="width:100%;height:158px;border:none;border-radius:8px" allowfullscreen allow="autoplay"></iframe>`;}
 function renderYT(){const v=ytVideos[ytIdx];if(!v)return;document.getElementById('yt-title').textContent=v.title;document.getElementById('yt-frame').src=`https://www.youtube.com/embed/${v.id}?autoplay=1&rel=0&modestbranding=1`;document.getElementById('yt-counter').textContent=(ytIdx+1)+' / '+ytVideos.length;}
 function ytStep(dir){document.getElementById('yt-frame').src='';ytIdx=(ytIdx+dir+ytVideos.length)%ytVideos.length;renderYT();}
 function closeYT(){document.getElementById('yt-frame').src='';document.getElementById('yt-popup').classList.remove('open');}
