@@ -146,7 +146,7 @@
     #rpoi-redfin{display:inline-block;padding:9px 20px;background:var(--gold);color:var(--ink);font-family:'DM Mono',monospace;font-size:.7rem;font-weight:600;text-decoration:none;border-radius:3px;letter-spacing:.08em;text-transform:uppercase}
 
     /* ── AZ RPOI DOT ── */
-    .az-dot{width:26px;height:26px;border-radius:50%;background:#C9A84C;border:3px solid #fff;box-shadow:0 0 22px rgba(201,168,76,.9)}
+    .az-dot{width:46px;height:46px;border-radius:50%;background:#C9A84C;border:3px solid #fff;box-shadow:0 0 36px 6px rgba(201,168,76,.9)}
     /* ── BUSINESSES BTN ── */
     #biz-btn{
       position:fixed;bottom:90px;right:16px;z-index:110;
@@ -501,7 +501,7 @@ async function loadAZProperties(){
       dot.className='az-dot';
       azDots.push(dot);
       const ring=document.createElement('div');
-      ring.style.cssText='position:absolute;inset:-11px;border-radius:50%;border:2px solid rgba(201,168,76,.45);animation:prop-pulse 2s ease-out infinite;pointer-events:none';
+      ring.style.cssText='position:absolute;inset:-16px;border-radius:50%;border:2px solid rgba(201,168,76,.45);animation:prop-pulse 2s ease-out infinite;pointer-events:none';
       el.appendChild(ring);
       el.appendChild(dot);
       el.addEventListener('click',()=>openRPOIPanel(p));
@@ -542,7 +542,7 @@ function buildHomesList(){
 }
 
 // ── YOUTUBE ──
-const YT_QUERY_DESERT='Another Brick in the Wall Pink Floyd';
+const YT_QUERY_DESERT='Laveen Arizona acreage home for sale South Phoenix';
 let ytVideos=[], ytIdx=0;
 
 function populateBillboard(v){

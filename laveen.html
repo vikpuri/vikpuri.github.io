@@ -175,6 +175,7 @@
 .modal-overlay.active{display:flex}
 .modal{background:var(--cream);border:1px solid var(--rule-heavy);border-top:3px solid var(--ink);width:90%;max-width:520px;padding:40px;position:relative;animation:modalIn .3s ease;overflow-y:auto;max-height:70vh}
 @keyframes modalIn{from{opacity:0;transform:translateY(16px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes prop-pulse{0%{transform:scale(1);opacity:.7}70%{transform:scale(1.8);opacity:0}100%{transform:scale(1.8);opacity:0}}
 .modal-close{position:absolute;top:16px;right:18px;background:none;border:none;color:var(--text-muted);font-size:1.2rem;cursor:pointer;transition:color .2s}
 .modal-close:hover{color:var(--ink)}
 .modal-tag{font-family:'Source Serif 4',serif;font-size:.58rem;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:10px;display:block}
@@ -732,12 +733,15 @@ async function loadDBListings() {
     listings.forEach(p => {
       if (!p.lat || !p.lng) return;
       const el = document.createElement('div');
-      el.style.cssText='cursor:pointer';
+      el.style.cssText='cursor:pointer;position:relative';
+      const ring = document.createElement('div');
+      ring.style.cssText='position:absolute;inset:-16px;border-radius:50%;border:2px solid rgba(201,168,76,.45);animation:prop-pulse 2s ease-out infinite;pointer-events:none';
       const dot = document.createElement('div');
-      dot.style.cssText='width:4px;height:4px;border-radius:50%;background:#00CED1;border:1.5px solid white;box-shadow:0 0 4px rgba(0,206,209,0.8);opacity:0.4';
+      dot.style.cssText='width:46px;height:46px;border-radius:50%;background:#C9A84C;border:3px solid #fff;box-shadow:0 0 36px 6px rgba(201,168,76,.9)';
+      el.appendChild(ring);
       el.appendChild(dot);
-      el.addEventListener('click',()=>{ if(p.redfin_url) window.open(p.redfin_url,'_blank'); });
-      const m=new mapboxgl.Marker({element:el,anchor:'bottom'}).setLngLat([parseFloat(p.lng),parseFloat(p.lat)]).addTo(map);
+      el.addEventListener('click',()=>showDBPanel(p));
+      const m=new mapboxgl.Marker({element:el,anchor:'center'}).setLngLat([parseFloat(p.lng),parseFloat(p.lat)]).addTo(map);
       dbMarkers.push(m);
     });
     console.log('Loaded '+listings.length+' listings from Supabase');
@@ -1070,7 +1074,7 @@ document.querySelectorAll('.modal-overlay').forEach(el=>el.addEventListener('cli
 window.addEventListener('load',function(){setTimeout(function(){var p=properties.find(function(x){return x.id==='laveen';});if(p)openPanel(p);},1500);});
 
 // ── YOUTUBE ──
-const YT_QUERY_LAVEEN='Another Brick in the Wall Pink Floyd';
+const YT_QUERY_LAVEEN='Laveen Arizona acreage farmhouse home for sale South Phoenix';
 let ytVideos=[], ytIdx=0, ytMarkersAdded=false;
 
 function populateBillboard(v){

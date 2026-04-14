@@ -132,6 +132,25 @@
     .prop-marker.homes-active{width:54px;height:54px;box-shadow:0 0 52px 10px rgba(201,168,76,.95)}
     .prop-marker.homes-active::before{inset:-22px}
 
+    /* ── RPOI LISTING PANEL ── */
+    #rpoi-panel{
+      position:fixed;bottom:0;left:0;right:0;z-index:200;
+      background:rgba(15,15,15,.97);border-top:1px solid var(--gold);
+      border-radius:16px 16px 0 0;padding:18px 22px 28px;
+      max-width:440px;margin:0 auto;
+      transform:translateY(100%);transition:transform .45s cubic-bezier(.22,1,.36,1);
+      backdrop-filter:blur(16px)
+    }
+    #rpoi-panel.open{transform:translateY(0)}
+    #rpoi-close{position:absolute;top:14px;right:16px;background:none;border:none;cursor:pointer;font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:.08em;color:var(--aqua);text-transform:uppercase;padding:0}
+    #rpoi-tag{font-family:'DM Mono',monospace;font-size:.58rem;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin-bottom:6px}
+    #rpoi-addr{font-family:'Playfair Display',serif;font-size:1.05rem;font-weight:500;color:var(--cream);margin-bottom:4px;line-height:1.3}
+    #rpoi-price{font-size:1.2rem;font-weight:700;color:var(--gold);margin-bottom:6px;font-family:'DM Mono',monospace;letter-spacing:.04em}
+    #rpoi-meta{font-size:.75rem;color:rgba(255,255,255,.5);margin-bottom:14px;letter-spacing:.04em}
+    #rpoi-redfin{display:inline-block;padding:9px 20px;background:var(--gold);color:var(--ink);font-family:'DM Mono',monospace;font-size:.7rem;font-weight:600;text-decoration:none;border-radius:3px;letter-spacing:.08em;text-transform:uppercase}
+    /* ── CA RPOI DOT ── */
+    .ca-dot{width:46px;height:46px;border-radius:50%;background:#C9A84C;border:3px solid #fff;box-shadow:0 0 36px 6px rgba(201,168,76,.9)}
+
     /* ── BUSINESSES BTN ── */
     #biz-btn{position:fixed;bottom:90px;right:16px;z-index:110;font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;background:var(--aqua);color:var(--ink);border:none;border-radius:20px;padding:8px 14px;cursor:pointer;box-shadow:0 2px 12px rgba(0,188,212,.4);display:flex;align-items:center;gap:6px}
     #biz-btn:hover{opacity:.85}
@@ -259,6 +278,14 @@
   <div id="biz-list"></div>
 </div>
 
+<div id="rpoi-panel">
+  <button id="rpoi-close" onclick="document.getElementById('rpoi-panel').classList.remove('open')">← Close</button>
+  <div id="rpoi-tag">For Sale · DTLA CA</div>
+  <div id="rpoi-addr">—</div>
+  <div id="rpoi-price">—</div>
+  <div id="rpoi-meta">—</div>
+  <a id="rpoi-redfin" href="#" target="_blank">View on Redfin →</a>
+</div>
 
 <script>
 const SB_URL='https://mpmprnjhunjfeacikgml.supabase.co';
@@ -273,7 +300,7 @@ const CAT_COLOR={
 };
 const KEY_CHAINS=['Whole Foods','Trader Joe\'s','Home Depot','Lowe\'s','Costco','Walmart','Aldi','AMC','Regal','Cinemark','LA Fitness','Equinox','SoulCycle'];
 
-let allData=[], activeFilter='all', rpoiEl=null;
+let allData=[], activeFilter='all', rpoiEl=null, caProperties=[], caDots=[];
 
 mapboxgl.accessToken='pk.eyJ1IjoidmlranB1cmkiLCJhIjoiY21uYnF0ZWNuMHhnaTJ3bzR5MG5xOTEzbSJ9.vqmEhPHMBQOn4GX3yrbiGw';
 
@@ -316,6 +343,7 @@ map.on('load',()=>{
   setTimeout(()=>map.easeTo({zoom:14.2,pitch:62,bearing:-17.6,duration:3200,easing:t=>1-Math.pow(1-t,3)}),150);
 
   loadLiving();
+  loadCAProperties();
   addYTMarkers();
 });
 
@@ -333,6 +361,41 @@ async function loadLiving(){
     document.getElementById('header-badge').textContent='No data yet';
     document.getElementById('count-badge').textContent='Run migration to populate';
   }
+}
+
+async function loadCAProperties(){
+  try{
+    const resp=await fetch(SB_URL+'/rest/v1/properties?select=name,address,price,beds,baths,sqft,lat,lng,redfin_url,zip&zip=in.(90017,90015,90013,90014)&mls_status=eq.active',{headers:SB_HEADERS});
+    caProperties=await resp.json();
+    caProperties.forEach(p=>{
+      if(!p.lat||!p.lng) return;
+      const el=document.createElement('div');
+      el.style.cssText='cursor:pointer;position:relative';
+      const ring=document.createElement('div');
+      ring.style.cssText='position:absolute;inset:-16px;border-radius:50%;border:2px solid rgba(201,168,76,.45);animation:prop-pulse 2s ease-out infinite;pointer-events:none';
+      const dot=document.createElement('div');
+      dot.className='ca-dot';
+      el.appendChild(ring);
+      el.appendChild(dot);
+      el.addEventListener('click',()=>openRPOIPanel(p));
+      new mapboxgl.Marker({element:el,anchor:'center',pitchAlignment:'map',rotationAlignment:'map'})
+        .setLngLat([parseFloat(p.lng),parseFloat(p.lat)])
+        .addTo(map);
+    });
+    console.log('Loaded '+caProperties.length+' CA property RPOIs');
+  }catch(e){console.error('CA properties load failed',e);}
+}
+
+function openRPOIPanel(p){
+  document.getElementById('rpoi-addr').textContent=p.address||p.name||'';
+  document.getElementById('rpoi-price').textContent=p.price?'$'+Number(p.price).toLocaleString():'';
+  document.getElementById('rpoi-meta').textContent=[p.beds&&p.beds+' bd',p.baths&&p.baths+' ba',p.sqft&&Number(p.sqft).toLocaleString()+' sqft'].filter(Boolean).join(' · ');
+  const link=document.getElementById('rpoi-redfin');
+  link.href=p.redfin_url||'#';
+  link.style.display=p.redfin_url?'inline-block':'none';
+  document.getElementById('biz-panel').classList.remove('open');
+  document.getElementById('rpoi-panel').classList.add('open');
+  map.flyTo({center:[parseFloat(p.lng),parseFloat(p.lat)],zoom:15,duration:900});
 }
 
 function buildGeoJSON(data){
@@ -452,7 +515,7 @@ function renderLayer(data){
 
 // Category filter
 // ── YOUTUBE ──
-const YT_QUERY_LALIFE='Another Brick in the Wall Pink Floyd';
+const YT_QUERY_LALIFE='South Park DTLA luxury condo for sale Los Angeles';
 let ytVideos=[], ytIdx=0;
 
 function populateBillboard(v){
