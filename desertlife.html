@@ -362,6 +362,7 @@ map.on('load',()=>{
   loadLiving();
   loadAZProperties();
   addYTMarkers();
+  map.on('click', ()=>hideMedia());
 });
 
 async function loadLiving(){

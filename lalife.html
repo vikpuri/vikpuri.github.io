@@ -344,6 +344,7 @@ map.on('load',()=>{
   loadLiving();
   loadCAProperties();
   addYTMarkers();
+  map.on('click', ()=>hideMedia());
 });
 
 async function loadLiving(){

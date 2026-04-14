@@ -730,6 +730,7 @@ map.on('load',()=>{
   addYTMapMarkers();
 
   map.on('click', (e) => {
+    hideMedia();
     const features = map.queryRenderedFeatures(e.point, {
       layers: ['poi-label']
     });
@@ -818,6 +819,7 @@ function addPoiMarkers(p){
 function clearPoiMarkers(){poiMarkers.forEach(m=>m.remove());poiMarkers=[];}
 
 function openPanel(p){
+  hideMedia();
   if(p.id==='laveen') window.history.replaceState(null,'','/laveen');
   else if(p.id==='dtla') window.history.replaceState(null,'','/dtla');
   activeProperty=p;
