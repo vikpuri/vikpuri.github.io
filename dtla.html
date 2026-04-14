@@ -679,73 +679,11 @@ async function loadDBListings() {
   } catch(e) { console.error('DB load failed',e); dbMarkersLoaded=false; }
 }
 
-async function fetchRestaurants(){
-  try{
-    const resp=await fetch('https://mpmprnjhunjfeacikgml.supabase.co/rest/v1/restaurants?select=*&zip=in.(90017,90015,90013,90014)&limit=1000',{
-      headers:{'apikey':'sb_publishable_T6XISHd9O2Ol0raPaEASqQ_klUXnyY3','Authorization':'Bearer sb_publishable_T6XISHd9O2Ol0raPaEASqQ_klUXnyY3'}
-    });
-    const data=await resp.json();
-    const geojson={type:'FeatureCollection',features:data.map(r=>({
-      type:'Feature',
-      geometry:{type:'Point',coordinates:[parseFloat(r.lng),parseFloat(r.lat)]},
-      properties:{name:r.name,rating:r.rating,address:r.address,waymo_url:r.waymo_url,yelp_url:r.yelp_url}
-    }))};
-
-    if(map.getSource('restaurants'))map.removeLayer('restaurants-layer'),map.removeSource('restaurants');
-
-    map.addSource('restaurants',{type:'geojson',data:geojson});
-    map.addLayer({
-      id:'restaurants-layer',
-      type:'circle',
-      source:'restaurants',
-      paint:{
-        'circle-radius':8,
-        'circle-color':'#B22234',
-        'circle-stroke-width':2,
-        'circle-stroke-color':'#ffffff',
-        'circle-pitch-alignment':'map',
-        'circle-pitch-scale':'map'
-      }
-    });
-    map.addLayer({
-      id:'restaurants-label',
-      type:'symbol',
-      source:'restaurants',
-      layout:{
-        'text-field':['get','name'],
-        'text-size':11,
-        'text-anchor':'top',
-        'text-offset':[0,1],
-        'text-font':['Open Sans Italic','Arial Unicode MS Regular']
-      },
-      paint:{
-        'text-color':'#B22234',
-        'text-halo-color':'#FAF8F4',
-        'text-halo-width':2
-      }
-    });
-
-    map.on('click','restaurants-layer',(e)=>{
-      if(!e.features.length) return;
-      const p=e.features[0].properties;
-      const stars='★'.repeat(Math.floor(p.rating||0))+'☆'.repeat(5-Math.floor(p.rating||0));
-      new mapboxgl.Popup({offset:14,closeButton:true,maxWidth:'240px'})
-        .setLngLat(e.features[0].geometry.coordinates)
-        .setHTML(`<div style="font-family:Raleway,sans-serif;padding:6px">
-          <div style="font-size:.9rem;font-weight:700;color:#1A1810;margin-bottom:2px">${p.name}</div>
-          <div style="font-size:.72rem;color:#888;margin-bottom:8px">${p.rating?parseFloat(p.rating).toFixed(1)+' '+stars+' · ':''}${p.address||''}</div>
-          <div style="display:flex;gap:7px;flex-wrap:wrap">
-            ${p.yelp_url?`<a href="${p.yelp_url}" target="_blank" style="font-size:.68rem;background:#B22234;color:#fff;padding:5px 10px;border-radius:3px;text-decoration:none;font-weight:600">🍽 Order / View</a>`:''}
-            ${p.waymo_url?`<a href="${p.waymo_url}" target="_blank" style="font-size:.68rem;background:#1A73E8;color:#fff;padding:5px 10px;border-radius:3px;text-decoration:none;font-weight:600">🚗 Waymo</a>`:''}
-          </div></div>`)
-        .addTo(map);
-    });
-
-    map.on('mouseenter','restaurants-layer',()=>map.getCanvas().style.cursor='pointer');
-    map.on('mouseleave','restaurants-layer',()=>map.getCanvas().style.cursor='');
-
-    console.log('Loaded '+data.length+' restaurants as GL layer');
-  }catch(e){console.error('Restaurant load failed',e);}
+function fetchRestaurants(){
+  if(map.getSource('restaurants')){
+    map.setLayoutProperty('restaurants-layer','visibility','visible');
+    map.setLayoutProperty('restaurants-label','visibility','visible');
+  }
 }
 
 mapboxgl.accessToken='pk.eyJ1IjoidmlranB1cmkiLCJhIjoiY21uYnF0ZW'+'NuMHhnaTJ3bzR5MG5xOTEz'+'bSJ9.vqmEhPHMBQOn4GX3yrbiGw';
@@ -803,6 +741,22 @@ map.on('load',()=>{
     })
     .catch(e=>console.error('POI fetch failed',e));
   });
+  // POI vector layer — hidden until property panel opens for dtla
+  map.addSource('restaurants',{type:'vector',url:'mapbox://vikjpuri.la-yelp'});
+  map.addLayer({id:'restaurants-layer',type:'circle',source:'restaurants','source-layer':'yelp',layout:{'visibility':'none'},paint:{'circle-radius':8,'circle-color':'#B22234','circle-stroke-width':2,'circle-stroke-color':'#ffffff','circle-pitch-alignment':'map','circle-pitch-scale':'map'}});
+  map.addLayer({id:'restaurants-label',type:'symbol',source:'restaurants','source-layer':'yelp',layout:{'visibility':'none','text-field':['get','name'],'text-size':11,'text-anchor':'top','text-offset':[0,1],'text-font':['Open Sans Italic','Arial Unicode MS Regular']},paint:{'text-color':'#B22234','text-halo-color':'#FAF8F4','text-halo-width':2}});
+  map.on('click','restaurants-layer',(e)=>{
+    if(!e.features.length) return;
+    const p=e.features[0].properties;
+    const stars='★'.repeat(Math.floor(p.rating||0))+'☆'.repeat(5-Math.floor(p.rating||0));
+    new mapboxgl.Popup({offset:14,closeButton:true,maxWidth:'240px'})
+      .setLngLat(e.lngLat)
+      .setHTML(`<div style="font-family:Raleway,sans-serif;padding:6px"><div style="font-size:.9rem;font-weight:700;color:#1A1810;margin-bottom:2px">${p.name}</div><div style="font-size:.72rem;color:#888;margin-bottom:8px">${p.rating?parseFloat(p.rating).toFixed(1)+' '+stars+' · ':''}${p.address||''}</div><div style="display:flex;gap:7px;flex-wrap:wrap">${p.yelp_url?`<a href="${p.yelp_url}" target="_blank" style="font-size:.68rem;background:#B22234;color:#fff;padding:5px 10px;border-radius:3px;text-decoration:none;font-weight:600">🍽 Order / View</a>`:''}${p.waymo_url?`<a href="${p.waymo_url}" target="_blank" style="font-size:.68rem;background:#1A73E8;color:#fff;padding:5px 10px;border-radius:3px;text-decoration:none;font-weight:600">🚗 Waymo</a>`:''}</div></div>`)
+      .addTo(map);
+  });
+  map.on('mouseenter','restaurants-layer',()=>map.getCanvas().style.cursor='pointer');
+  map.on('mouseleave','restaurants-layer',()=>map.getCanvas().style.cursor='');
+
   map.flyTo({center:[-118.2587,34.0455],zoom:16,pitch:65,bearing:200,duration:1500,essential:true});
 });
 
@@ -980,6 +934,7 @@ function goHome(){
   map.fitBounds([[-119.0,32.8],[-111.5,34.5]],{padding:{top:80,bottom:80,left:40,right:40},pitch:30,duration:1200});
   document.getElementById('panel').classList.remove('open');
   document.getElementById('db-listing-panel').style.transform='translateY(100%)';
+  if(map.getSource('restaurants')){map.setLayoutProperty('restaurants-layer','visibility','none');map.setLayoutProperty('restaurants-label','visibility','none');}
   clearPoiMarkers();clearDBPois();clearDBMarkers();activeProperty=null;
 }
 function openModal(id){document.getElementById('modal-'+id).classList.add('active');}

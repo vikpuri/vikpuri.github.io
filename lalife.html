@@ -342,19 +342,19 @@ map.on('load',()=>{
 });
 
 async function loadLiving(){
+  renderLayer(); // add vector tile layer immediately
   try{
     const resp=await fetch(SB_URL+'/rest/v1/restaurants?select=*&zip=in.(90017,90015,90013,90014)&limit=1000',{headers:SB_HEADERS});
     if(!resp.ok) throw new Error('restaurants fetch failed');
     const raw=await resp.json();
-    allData=raw.filter(b=>ALLOWED_CATS.has(b.category));
-    renderLayer(allData);
+    allData=raw; // all categories, no filter
     buildBizList();
     document.getElementById('count-badge').textContent=allData.length+' businesses';
     document.getElementById('header-badge').textContent=allData.length+' places';
   }catch(e){
     console.warn(e.message);
     document.getElementById('header-badge').textContent='No data yet';
-    document.getElementById('count-badge').textContent='Run migration to populate';
+    document.getElementById('count-badge').textContent='';
   }
 }
 
@@ -393,112 +393,61 @@ function openRPOIPanel(p){
   map.flyTo({center:[parseFloat(p.lng),parseFloat(p.lat)],zoom:15,duration:900});
 }
 
-function buildGeoJSON(data){
-  return{
-    type:'FeatureCollection',
-    features:data.map(b=>({
-      type:'Feature',
-      geometry:{type:'Point',coordinates:[parseFloat(b.lng),parseFloat(b.lat)]},
-      properties:{
-        id:b.id,name:b.name,category:b.category||'Other',chain:b.chain||'',
-        rating:b.rating,address:b.address,yelp_url:b.yelp_url||'',
-        waymo_url:b.waymo_url||'',
-        redfin_url:b.redfin_url||('https://www.redfin.com/zipcode/'+b.zip),
-        zip:b.zip,color:CAT_COLOR[b.category]||'#00CED1',
-        isKey:KEY_CHAINS.includes(b.chain)||KEY_CHAINS.includes(b.name)
-      }
-    }))
-  };
-}
 
-function renderLayer(data){
-  const geojson=buildGeoJSON(data);
+const KEY_CHAINS_SET=new Set(['Whole Foods','Trader Joe\'s','Home Depot','Lowe\'s','Costco','Walmart','Aldi','AMC','Regal','Cinemark','LA Fitness','Equinox','SoulCycle']);
+const CAT_COLOR_EXPR=['match',['get','category'],
+  'Grocery','#4CAF50','Hardware','#FF6B35',
+  'Coffee','#8B6E4E','Cafes','#8B6E4E','Cafe','#8B6E4E','Coffee & Tea','#8B6E4E',
+  'Bakeries','#FF9800',
+  'Ice Cream & Frozen Yogurt','#EC407A','Gelato','#EC407A','Desserts','#EC407A','Shaved Ice','#EC407A','Shaved Snow','#EC407A',
+  'Cinema','#9C27B0','Dental','#00BCD4','MedSpa','#E91E63',
+  'Gym','#F44336','Shoes','#3F51B5','Fashion','#FF4081','Cosmetics','#FF80AB',
+  'FastFood','#FFC107','#00CED1'
+];
 
-  // Remove existing layers/sources
-  ['living-key-circle','living-key-label','living-clusters','living-count','living-points','living-labels'].forEach(id=>{
-    if(map.getLayer(id)) map.removeLayer(id);
-  });
-  if(map.getSource('living')) map.removeSource('living');
+function renderLayer(){
+  if(map.getSource('living')) return; // already added in map.on('load')
 
-  map.addSource('living',{
-    type:'geojson',data:geojson,
-    cluster:true,
-    clusterMaxZoom:15,clusterRadius:50
-  });
+  map.addSource('living',{type:'vector',url:'mapbox://vikjpuri.la-yelp'});
 
-  {
-    // Cluster circles
-    map.addLayer({
-      id:'living-clusters',type:'circle',source:'living',
-      filter:['has','point_count'],
-      paint:{
-        'circle-color':['step',['get','point_count'],'#00CED1',8,'#00A8AA',20,'#007B7D'],
-        'circle-radius':['step',['get','point_count'],20,8,30,20,40],
-        'circle-stroke-width':2,'circle-stroke-color':'rgba(255,255,255,.7)',
-        'circle-pitch-alignment':'map'
-      }
-    });
-    map.addLayer({
-      id:'living-count',type:'symbol',source:'living',
-      filter:['has','point_count'],
-      layout:{
-        'text-field':'{point_count_abbreviated}',
-        'text-font':['DIN Offc Pro Bold','Arial Unicode MS Bold'],
-        'text-size':13
-      },
-      paint:{'text-color':'#fff'}
-    });
-    map.on('click','living-clusters',(e)=>{
-      const features=map.queryRenderedFeatures(e.point,{layers:['living-clusters']});
-      if(!features.length) return;
-      map.getSource('living').getClusterExpansionZoom(features[0].properties.cluster_id,(err,zoom)=>{
-        if(err) return;
-        map.easeTo({center:features[0].geometry.coordinates,zoom,duration:600});
-      });
-    });
-    map.on('mouseenter','living-clusters',()=>map.getCanvas().style.cursor='pointer');
-    map.on('mouseleave','living-clusters',()=>map.getCanvas().style.cursor='');
-  }
-
-  // Individual points
+  // Individual points — color by category
   map.addLayer({
-    id:'living-points',type:'circle',source:'living',
-    filter:['!',['has','point_count']],
+    id:'living-points',type:'circle',source:'living','source-layer':'yelp',
     paint:{
-      'circle-color':['get','color'],
-      'circle-radius':['case',['get','isKey'],11,8],
-      'circle-stroke-width':['case',['get','isKey'],3,1.5],
+      'circle-color':CAT_COLOR_EXPR,
+      'circle-radius':['interpolate',['linear'],['zoom'],10,4,14,8,16,11],
+      'circle-stroke-width':1.5,
       'circle-stroke-color':'rgba(255,255,255,.8)',
       'circle-pitch-alignment':'map'
     }
   });
 
-  // Bold name labels for key chains
+  // Labels for key chains at zoom 14+
   map.addLayer({
-    id:'living-labels',type:'symbol',source:'living',
-    filter:['all',['!',['has','point_count']],['get','isKey']],
+    id:'living-labels',type:'symbol',source:'living','source-layer':'yelp',
+    minzoom:14,
+    filter:['in',['get','chain'],['literal',['Whole Foods','Trader Joe\'s','Home Depot','Lowe\'s','Costco','Walmart','Aldi','AMC','Regal','Cinemark','LA Fitness','Equinox','SoulCycle']]],
     layout:{
       'text-field':['get','name'],
       'text-font':['DIN Offc Pro Bold','Arial Unicode MS Bold'],
       'text-size':11,'text-offset':[0,1.6],'text-anchor':'top','text-max-width':10
     },
-    paint:{
-      'text-color':'#FAF8F4','text-halo-color':'rgba(0,0,0,.75)','text-halo-width':1.2
-    }
+    paint:{'text-color':'#FAF8F4','text-halo-color':'rgba(0,0,0,.75)','text-halo-width':1.2}
   });
 
-  // Popup on individual point click
+  // Popup on point click
   map.on('click','living-points',(e)=>{
     const p=e.features[0].properties;
     const stars='★'.repeat(Math.floor(p.rating||0))+'☆'.repeat(5-Math.floor(p.rating||0));
+    const redfin=p.redfin_url||('https://www.redfin.com/zipcode/'+p.zip);
     new mapboxgl.Popup({offset:14,closeButton:true,maxWidth:'240px'})
-      .setLngLat(e.features[0].geometry.coordinates)
+      .setLngLat(e.lngLat)
       .setHTML(`
         <div class="pop-name">${p.name}</div>
         <div class="pop-meta">${p.category}${p.rating?' · '+parseFloat(p.rating).toFixed(1)+' '+stars:''}</div>
         <div class="pop-meta" style="margin-bottom:8px">${p.address||''}</div>
         <div class="pop-links">
-          <a href="${p.redfin_url}" target="_blank" class="pop-link redfin">Redfin Area</a>
+          <a href="${redfin}" target="_blank" class="pop-link redfin">Redfin Area</a>
           ${p.yelp_url?`<a href="${p.yelp_url}" target="_blank" class="pop-link yelp">Yelp</a>`:''}
           ${p.waymo_url?`<a href="${p.waymo_url}" target="_blank" class="pop-link waymo">🚗 Waymo</a>`:''}
         </div>`)
