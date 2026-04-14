@@ -679,12 +679,7 @@ async function loadDBListings() {
   } catch(e) { console.error('DB load failed',e); dbMarkersLoaded=false; }
 }
 
-function fetchRestaurants(){
-  if(map.getSource('restaurants')){
-    map.setLayoutProperty('restaurants-layer','visibility','visible');
-    map.setLayoutProperty('restaurants-label','visibility','visible');
-  }
-}
+function fetchRestaurants(){} // POI layer always visible via MTS slot
 
 mapboxgl.accessToken='pk.eyJ1IjoidmlranB1cmkiLCJhIjoiY21uYnF0ZW'+'NuMHhnaTJ3bzR5MG5xOTEz'+'bSJ9.vqmEhPHMBQOn4GX3yrbiGw';
 const map=new mapboxgl.Map({container:'map',style:'mapbox://styles/mapbox/standard',pitch:30,bearing:45,attributionControl:false});
@@ -741,10 +736,32 @@ map.on('load',()=>{
     })
     .catch(e=>console.error('POI fetch failed',e));
   });
-  // POI vector layer — hidden until property panel opens for dtla
+  // POI vector layer — MTS, always visible, slotted above buildings
   map.addSource('restaurants',{type:'vector',url:'mapbox://vikjpuri.la-yelp'});
-  map.addLayer({id:'restaurants-layer',type:'symbol',source:'restaurants','source-layer':'yelp',layout:{'visibility':'none','icon-image':['match',['get','category'],'Grocery','grocery','Hardware','hardware','Coffee','cafe','Cafes','cafe','Cafe','cafe','Coffee & Tea','cafe','Bakeries','bakery','Ice Cream & Frozen Yogurt','ice-cream','Gelato','ice-cream','Desserts','ice-cream','Cinema','cinema','Dental','dentist','MedSpa','doctor','Gym','fitness-centre','Shoes','shoe','Fashion','clothing-store','FastFood','fast-food','restaurant'],'icon-size':0.9,'icon-allow-overlap':false}});
-  map.addLayer({id:'restaurants-label',type:'symbol',source:'restaurants','source-layer':'yelp',layout:{'visibility':'none','text-field':['get','name'],'text-size':11,'text-anchor':'top','text-offset':[0,1],'text-font':['Open Sans Italic','Arial Unicode MS Regular']},paint:{'text-color':'#B22234','text-halo-color':'#FAF8F4','text-halo-width':2}});
+  map.addLayer({
+    id:'restaurants-layer',type:'circle',source:'restaurants','source-layer':'yelp',
+    slot:'middle',
+    paint:{
+      'circle-color':['match',['get','category'],
+        'Grocery','#4CAF50','Hardware','#FF6B35',
+        'Coffee','#8B6E4E','Cafes','#8B6E4E','Cafe','#8B6E4E','Coffee & Tea','#8B6E4E',
+        'Bakeries','#FF9800','Ice Cream & Frozen Yogurt','#EC407A','Gelato','#EC407A','Desserts','#EC407A',
+        'Cinema','#9C27B0','Dental','#00BCD4','MedSpa','#E91E63',
+        'Gym','#F44336','Shoes','#3F51B5','Fashion','#FF4081','Cosmetics','#FF80AB',
+        'FastFood','#FFC107','#B22234'
+      ],
+      'circle-radius':['interpolate',['linear'],['zoom'],12,4,15,7,17,10],
+      'circle-stroke-width':1.5,'circle-stroke-color':'rgba(255,255,255,.8)',
+      'circle-pitch-alignment':'map'
+    }
+  });
+  map.addLayer({
+    id:'restaurants-label',type:'symbol',source:'restaurants','source-layer':'yelp',
+    slot:'top',minzoom:15,
+    filter:['in',['get','chain'],['literal',['Whole Foods','Trader Joe\'s','Home Depot','Lowe\'s','Costco','Walmart','Aldi','AMC','Regal','Cinemark','LA Fitness','Equinox','SoulCycle']]],
+    layout:{'text-field':['get','name'],'text-size':11,'text-anchor':'top','text-offset':[0,1.2],'text-font':['Open Sans Italic','Arial Unicode MS Regular']},
+    paint:{'text-color':'#B22234','text-halo-color':'#FAF8F4','text-halo-width':2}
+  });
   map.on('click','restaurants-layer',(e)=>{
     if(!e.features.length) return;
     const p=e.features[0].properties;
