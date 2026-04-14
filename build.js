@@ -21,8 +21,7 @@ if (fs.existsSync('.env')) {
 const SB_KEY = process.env.SUPABASE_KEY;
 
 if (!SB_KEY) {
-  console.error('ERROR: SUPABASE_KEY must be set (Netlify env var or local .env file)');
-  process.exit(1);
+  console.warn('WARN: SUPABASE_KEY not set — key already embedded in source files, continuing build');
 }
 
 // ── Helpers ───────────────────────────────────────────────────────
