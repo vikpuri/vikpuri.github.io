@@ -2,7 +2,8 @@
   "name": "requation",
   "version": "1.0.0",
   "scripts": {
-    "dev": "npx serve . --listen 3000"
+    "build": "node build.js",
+    "dev": "node build.js && npx serve dist -l 3000"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.101.1",

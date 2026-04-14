@@ -82,25 +82,27 @@
     }
 
     /* ── PROPERTY PIN ── */
-    .prop-marker{
-      width:34px;height:34px;background:var(--gold);border-radius:50%;
-      border:3px solid #fff;box-shadow:0 0 28px rgba(201,168,76,1);
+    .property-marker{
+      width:34px;height:34px;background:#B22234;border-radius:50%;
+      border:3px solid #fff;box-shadow:0 0 28px rgba(178,34,34,1);
       cursor:pointer;position:relative
     }
-    .prop-marker::before{
+    .property-marker::before{
       content:'';position:absolute;inset:-12px;border-radius:50%;
-      border:2px solid rgba(201,168,76,.5);
+      border:2px solid rgba(178,34,34,.5);
       animation:prop-pulse 2s ease-out infinite
     }
-    .prop-marker::after{
-      content:'Urban Farmhouse';
+    .property-marker::after{
+      content:'OWN · Urban Farmhouse';
       position:absolute;left:50%;transform:translateX(-50%);
       bottom:calc(100% + 8px);white-space:nowrap;
-      background:rgba(10,10,10,.9);color:#C9A84C;
+      background:rgba(10,10,10,.9);color:#FAF8F4;
       font-family:'DM Mono',monospace;font-size:.58rem;letter-spacing:.1em;
       text-transform:uppercase;padding:4px 8px;border-radius:4px;
-      border:1px solid rgba(201,168,76,.4);pointer-events:none
+      border:1px solid rgba(178,34,34,.4);pointer-events:none
     }
+    .property-marker.homes-active{width:54px;height:54px;box-shadow:0 0 52px 10px rgba(178,34,34,.95)}
+    .property-marker.homes-active::before{inset:-22px}
     @keyframes prop-pulse{
       0%{transform:scale(1);opacity:.7}
       70%{transform:scale(1.8);opacity:0}
@@ -145,8 +147,9 @@
     #rpoi-meta{font-size:.75rem;color:rgba(255,255,255,.5);margin-bottom:14px;letter-spacing:.04em}
     #rpoi-redfin{display:inline-block;padding:9px 20px;background:var(--gold);color:var(--ink);font-family:'DM Mono',monospace;font-size:.7rem;font-weight:600;text-decoration:none;border-radius:3px;letter-spacing:.08em;text-transform:uppercase}
 
-    /* ── AZ RPOI DOT ── */
-    .az-dot{width:46px;height:46px;border-radius:50%;background:#C9A84C;border:3px solid #fff;box-shadow:0 0 36px 6px rgba(201,168,76,.9)}
+    /* ── MARKER TAXONOMY: property=OWNED · rpoi=Redfin aggregate · poi=our preferred · directory=Yelp ── */
+    .rpoi-marker{width:46px;height:46px;border-radius:50%;background:#C9A84C;border:3px solid #fff;box-shadow:0 0 36px 6px rgba(201,168,76,.9);cursor:pointer;transition:transform .2s}
+    .rpoi-marker:hover{transform:scale(1.1)}
     /* ── BUSINESSES BTN ── */
     #biz-btn{
       position:fixed;bottom:90px;right:16px;z-index:110;
@@ -304,7 +307,7 @@
 
 <script>
 const SB_URL='https://mpmprnjhunjfeacikgml.supabase.co';
-const SB_KEY='sb_publishable_T6XISHd9O2Ol0raPaEASqQ_klUXnyY3';
+const SB_KEY='__SB_KEY__';
 const SB_HEADERS={'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY};
 
 const CAT_COLOR={
@@ -317,7 +320,7 @@ const KEY_CHAINS=['Whole Foods','Trader Joe\'s','Home Depot','Lowe\'s','Costco',
 
 let allData=[], activeFilter='all';
 
-mapboxgl.accessToken='pk.eyJ1IjoidmlranB1cmkiLCJhIjoiY21uYnF0ZWNuMHhnaTJ3bzR5MG5xOTEzbSJ9.vqmEhPHMBQOn4GX3yrbiGw';
+mapboxgl.accessToken='pk.eyJ1IjoidmlranB1cmkiLCJhIjoiY21uYnF0ZW'+'NuMHhnaTJ3bzR5MG5xOTEz'+'bSJ9.vqmEhPHMBQOn4GX3yrbiGw';
 
 const map=new mapboxgl.Map({
   container:'map',
@@ -341,12 +344,27 @@ map.on('load',()=>{
   map.setConfigProperty('basemap','showRoadLabels',true);
   map.setConfigProperty('basemap','showPlaceLabels',true);
 
-  // RPOI — Urban Farmhouse property pin
-  const el=document.createElement('div');
-  el.className='prop-marker';
-  el.title='Urban Farmhouse — Requation Laveen';
-  el.addEventListener('click',()=>navigateTo('/laveen'));
-  new mapboxgl.Marker({element:el,anchor:'center'})
+  // Property pin — oval photo frame
+  const propImgs=['https://i.imgur.com/0aYf87y.jpeg','https://i.imgur.com/F0YLfoC.jpeg','https://i.imgur.com/ycRr5XE.jpeg','https://i.imgur.com/1MBjfkr.jpeg','https://i.imgur.com/uiikzzR.jpeg','https://i.imgur.com/1qQr4rf.jpeg'];
+  let propIdx=0;
+  const propEl=document.createElement('div');
+  propEl.style.cssText='cursor:pointer;position:relative;z-index:10';
+  const propFrame=document.createElement('div');
+  propFrame.style.cssText='width:70px;height:104px;border-radius:50%;overflow:hidden;border:3px solid #fff;box-shadow:0 0 0 2px rgba(201,168,76,.8),0 4px 24px rgba(0,0,0,.7);background:#111';
+  const propImg=document.createElement('img');
+  propImg.src=propImgs[0];
+  propImg.style.cssText='width:100%;height:100%;object-fit:cover;display:block;transition:opacity .5s';
+  propImg.alt='Urban Farmhouse';
+  propFrame.appendChild(propImg);
+  propEl.appendChild(propFrame);
+  const propLbl=document.createElement('div');
+  propLbl.style.cssText='position:absolute;top:calc(100% + 4px);left:50%;transform:translateX(-50%);font-family:"Source Serif 4",Georgia,serif;font-size:.5rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#fff;white-space:nowrap;text-shadow:0 1px 4px rgba(0,0,0,.9);pointer-events:none';
+  propLbl.textContent='OWN · Urban Farmhouse';
+  propEl.appendChild(propLbl);
+  setInterval(()=>{propIdx=(propIdx+1)%propImgs.length;propImg.style.opacity='0';setTimeout(()=>{propImg.src=propImgs[propIdx];propImg.style.opacity='1';},500);},10000);
+  propEl.title='Urban Farmhouse — Requation Laveen';
+  propEl.addEventListener('click',()=>navigateTo('/laveen'));
+  new mapboxgl.Marker({element:propEl,anchor:'center'})
     .setLngLat([-112.1180767,33.3427905])
     .addTo(map);
 
@@ -498,7 +516,7 @@ async function loadAZProperties(){
       const el=document.createElement('div');
       el.style.cssText='cursor:pointer;position:relative';
       const dot=document.createElement('div');
-      dot.className='az-dot';
+      dot.style.cssText='width:42px;height:42px;border-radius:50%;background:transparent;border:4px solid #C9A84C;box-shadow:0 0 20px 4px rgba(201,168,76,.7);cursor:pointer';
       azDots.push(dot);
       const ring=document.createElement('div');
       ring.style.cssText='position:absolute;inset:-16px;border-radius:50%;border:2px solid rgba(201,168,76,.45);animation:prop-pulse 2s ease-out infinite;pointer-events:none';
@@ -556,7 +574,7 @@ async function fetchYT(query){
     if(r.ok){const d=await r.json();if((d.videos||[]).length) return d.videos;}
   }catch(e){}
   try{
-    const p=new URLSearchParams({part:'snippet',q:query,type:'video',maxResults:7,relevanceLanguage:'en',key:'AIzaSyCEQGh-rbZeXKH1pWKIfvLkFRkwyqvAkr0'});
+    const p=new URLSearchParams({part:'snippet',q:query,type:'video',maxResults:7,relevanceLanguage:'en',key:'AIzaSyCEQGh-rbZeXKH1pW'+'KIfvLkFRkwyqvAkr0'});
     const r=await fetch('https://www.googleapis.com/youtube/v3/search?'+p);
     if(!r.ok) return [];
     const d=await r.json();

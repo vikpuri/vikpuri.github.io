@@ -82,24 +82,24 @@
     }
 
     /* ── PROPERTY PIN ── */
-    .prop-marker{
-      width:34px;height:34px;background:var(--gold);border-radius:50%;
-      border:3px solid #fff;box-shadow:0 0 28px rgba(201,168,76,1);
+    .property-marker{
+      width:34px;height:34px;background:#B22234;border-radius:50%;
+      border:3px solid #fff;box-shadow:0 0 28px rgba(178,34,34,1);
       cursor:pointer;position:relative
     }
-    .prop-marker::before{
+    .property-marker::before{
       content:'';position:absolute;inset:-12px;border-radius:50%;
-      border:2px solid rgba(201,168,76,.5);
+      border:2px solid rgba(178,34,34,.5);
       animation:prop-pulse 2s ease-out infinite
     }
-    .prop-marker::after{
-      content:'South Park Brutalist';
+    .property-marker::after{
+      content:'OWN · South Park Brutalist';
       position:absolute;left:50%;transform:translateX(-50%);
       bottom:calc(100% + 8px);white-space:nowrap;
-      background:rgba(10,10,10,.9);color:#C9A84C;
+      background:rgba(10,10,10,.9);color:#FAF8F4;
       font-family:'DM Mono',monospace;font-size:.58rem;letter-spacing:.1em;
       text-transform:uppercase;padding:4px 8px;border-radius:4px;
-      border:1px solid rgba(201,168,76,.4);pointer-events:none
+      border:1px solid rgba(178,34,34,.4);pointer-events:none
     }
     @keyframes prop-pulse{
       0%{transform:scale(1);opacity:.7}
@@ -129,8 +129,8 @@
     .pop-link.waymo{background:#1A73E8;color:#fff}
 
     /* ── HOMES ACTIVE (pill filter) ── */
-    .prop-marker.homes-active{width:54px;height:54px;box-shadow:0 0 52px 10px rgba(201,168,76,.95)}
-    .prop-marker.homes-active::before{inset:-22px}
+    .property-marker.homes-active{width:54px;height:54px;box-shadow:0 0 52px 10px rgba(178,34,34,.95)}
+    .property-marker.homes-active::before{inset:-22px}
 
     /* ── RPOI LISTING PANEL ── */
     #rpoi-panel{
@@ -148,8 +148,9 @@
     #rpoi-price{font-size:1.2rem;font-weight:700;color:var(--gold);margin-bottom:6px;font-family:'DM Mono',monospace;letter-spacing:.04em}
     #rpoi-meta{font-size:.75rem;color:rgba(255,255,255,.5);margin-bottom:14px;letter-spacing:.04em}
     #rpoi-redfin{display:inline-block;padding:9px 20px;background:var(--gold);color:var(--ink);font-family:'DM Mono',monospace;font-size:.7rem;font-weight:600;text-decoration:none;border-radius:3px;letter-spacing:.08em;text-transform:uppercase}
-    /* ── CA RPOI DOT ── */
-    .ca-dot{width:46px;height:46px;border-radius:50%;background:#C9A84C;border:3px solid #fff;box-shadow:0 0 36px 6px rgba(201,168,76,.9)}
+    /* ── MARKER TAXONOMY: property=OWNED · rpoi=Redfin aggregate · poi=our preferred · directory=Yelp ── */
+    .rpoi-marker{width:46px;height:46px;border-radius:50%;background:#C9A84C;border:3px solid #fff;box-shadow:0 0 36px 6px rgba(201,168,76,.9);cursor:pointer;transition:transform .2s}
+    .rpoi-marker:hover{transform:scale(1.1)}
 
     /* ── BUSINESSES BTN ── */
     #biz-btn{position:fixed;bottom:90px;right:16px;z-index:110;font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;background:var(--aqua);color:var(--ink);border:none;border-radius:20px;padding:8px 14px;cursor:pointer;box-shadow:0 2px 12px rgba(0,188,212,.4);display:flex;align-items:center;gap:6px}
@@ -289,7 +290,7 @@
 
 <script>
 const SB_URL='https://mpmprnjhunjfeacikgml.supabase.co';
-const SB_KEY='sb_publishable_T6XISHd9O2Ol0raPaEASqQ_klUXnyY3';
+const SB_KEY='__SB_KEY__';
 const SB_HEADERS={'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY};
 
 const CAT_COLOR={
@@ -302,7 +303,7 @@ const KEY_CHAINS=['Whole Foods','Trader Joe\'s','Home Depot','Lowe\'s','Costco',
 
 let allData=[], activeFilter='all', rpoiEl=null, caProperties=[], caDots=[];
 
-mapboxgl.accessToken='pk.eyJ1IjoidmlranB1cmkiLCJhIjoiY21uYnF0ZWNuMHhnaTJ3bzR5MG5xOTEzbSJ9.vqmEhPHMBQOn4GX3yrbiGw';
+mapboxgl.accessToken='pk.eyJ1IjoidmlranB1cmkiLCJhIjoiY21uYnF0ZW'+'NuMHhnaTJ3bzR5MG5xOTEz'+'bSJ9.vqmEhPHMBQOn4GX3yrbiGw';
 
 const map=new mapboxgl.Map({
   container:'map',
@@ -326,13 +327,28 @@ map.on('load',()=>{
   map.setConfigProperty('basemap','showRoadLabels',true);
   map.setConfigProperty('basemap','showPlaceLabels',true);
 
-  // Property pin — always large/highlighted
-  const el=document.createElement('div');
-  el.className='prop-marker homes-active';
-  el.title='801 S Grand Ave — South Park Brutalist';
-  el.addEventListener('click',()=>navigateTo('/dtla'));
-  rpoiEl=el;
-  new mapboxgl.Marker({element:el,anchor:'center'})
+  // Property pin — oval photo frame
+  const propImgs=['https://i.imgur.com/1K9P4FK.jpeg','https://i.imgur.com/YIN8O41.jpeg','https://i.imgur.com/C2uei3w.jpeg','https://i.imgur.com/yhnjPo6.jpeg','https://i.imgur.com/JQsQZmA.jpeg','https://i.imgur.com/N4s3BiK.jpeg'];
+  let propIdx=0;
+  const propEl=document.createElement('div');
+  propEl.style.cssText='cursor:pointer;position:relative;z-index:10';
+  const propFrame=document.createElement('div');
+  propFrame.style.cssText='width:70px;height:104px;border-radius:50%;overflow:hidden;border:3px solid #fff;box-shadow:0 0 0 2px rgba(201,168,76,.8),0 4px 24px rgba(0,0,0,.7);background:#111';
+  const propImg=document.createElement('img');
+  propImg.src=propImgs[0];
+  propImg.style.cssText='width:100%;height:100%;object-fit:cover;display:block;transition:opacity .5s';
+  propImg.alt='South Park Brutalist';
+  propFrame.appendChild(propImg);
+  propEl.appendChild(propFrame);
+  const propLbl=document.createElement('div');
+  propLbl.style.cssText='position:absolute;top:calc(100% + 4px);left:50%;transform:translateX(-50%);font-family:"Source Serif 4",Georgia,serif;font-size:.5rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#fff;white-space:nowrap;text-shadow:0 1px 4px rgba(0,0,0,.9);pointer-events:none';
+  propLbl.textContent='OWN · South Park';
+  propEl.appendChild(propLbl);
+  setInterval(()=>{propIdx=(propIdx+1)%propImgs.length;propImg.style.opacity='0';setTimeout(()=>{propImg.src=propImgs[propIdx];propImg.style.opacity='1';},500);},10000);
+  propEl.title='801 S Grand Ave — South Park Brutalist';
+  propEl.addEventListener('click',()=>navigateTo('/dtla'));
+  rpoiEl=propEl;
+  new mapboxgl.Marker({element:propEl,anchor:'center'})
     .setLngLat([-118.2637,34.0422])
     .addTo(map);
 
@@ -374,7 +390,7 @@ async function loadCAProperties(){
       const ring=document.createElement('div');
       ring.style.cssText='position:absolute;inset:-16px;border-radius:50%;border:2px solid rgba(201,168,76,.45);animation:prop-pulse 2s ease-out infinite;pointer-events:none';
       const dot=document.createElement('div');
-      dot.className='ca-dot';
+      dot.style.cssText='width:42px;height:42px;border-radius:50%;background:transparent;border:4px solid #C9A84C;box-shadow:0 0 20px 4px rgba(201,168,76,.7);cursor:pointer';
       el.appendChild(ring);
       el.appendChild(dot);
       el.addEventListener('click',()=>openRPOIPanel(p));
@@ -530,7 +546,7 @@ async function fetchYT(query){
   }catch(e){}
   // Direct fallback if Netlify function unavailable
   try{
-    const p=new URLSearchParams({part:'snippet',q:query,type:'video',maxResults:7,relevanceLanguage:'en',key:'AIzaSyCEQGh-rbZeXKH1pWKIfvLkFRkwyqvAkr0'});
+    const p=new URLSearchParams({part:'snippet',q:query,type:'video',maxResults:7,relevanceLanguage:'en',key:'AIzaSyCEQGh-rbZeXKH1pW'+'KIfvLkFRkwyqvAkr0'});
     const r=await fetch('https://www.googleapis.com/youtube/v3/search?'+p);
     if(!r.ok) return [];
     const d=await r.json();

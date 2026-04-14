@@ -34,10 +34,12 @@
     nav a::after{content:'';position:absolute;bottom:-4px;left:0;right:0;height:1px;background:var(--ink);transform:scaleX(0);transition:transform .3s}
     nav a:hover{color:var(--ink)} nav a:hover::after{transform:scaleX(1)}
     #map{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0}
-    .req-marker{cursor:pointer;width:42px;height:42px;display:flex;align-items:center;justify-content:center;position:relative;will-change:transform}
-    .req-marker .pulse-ring{position:absolute;width:42px;height:42px;border:2px solid var(--gold);border-radius:50%;animation:none;opacity:0;transform-origin:center center}
-    .req-marker .dot{width:14px;height:14px;background:var(--gold);border-radius:50%;border:2px solid #fff;box-shadow:0 0 12px rgba(184,146,42,.8);z-index:1;transition:transform .2s}
-    .req-marker:hover .dot{transform:scale(1.3)}
+    /* ── MARKER TAXONOMY: property=OWNED · rpoi=Redfin aggregate · poi=our preferred · directory=Yelp ── */
+    .property-marker{width:46px;height:46px;border-radius:50%;background:#B22234;border:3px solid #fff;box-shadow:0 0 36px 6px rgba(178,34,34,.9);cursor:pointer;transition:transform .2s}
+    .property-marker:hover{transform:scale(1.15)}
+    .rpoi-marker{width:46px;height:46px;border-radius:50%;background:#C9A84C;border:3px solid #fff;box-shadow:0 0 36px 6px rgba(201,168,76,.9);cursor:pointer;transition:transform .2s}
+    .rpoi-marker:hover{transform:scale(1.1)}
+    @keyframes prop-pulse{0%{transform:scale(1);opacity:.7}70%{transform:scale(1.8);opacity:0}100%{transform:scale(1.8);opacity:0}}
     .req-marker .label{position:absolute;bottom:-22px;left:50%;transform:translateX(-50%);font-family:'Source Serif 4',serif;font-size:.55rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#fff;white-space:nowrap;text-shadow:0 1px 4px rgba(0,0,0,.9)}
     .poi-marker{cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px}
     .poi-dot{width:9px;height:9px;border-radius:50%;border:1.5px solid rgba(255,255,255,.8);box-shadow:0 0 5px rgba(0,0,0,.7)}
@@ -559,7 +561,7 @@ const properties=[
 ];
 
 const SB_URL='https://mpmprnjhunjfeacikgml.supabase.co';
-const SB_KEY='sb_publishable_T6XISHd9O2Ol0raPaEASqQ_klUXnyY3';
+const SB_KEY='__SB_KEY__';
 const SB_HEADERS={'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY};
 let dbPoiMarkers=[], dbMarkers=[], dbMarkersLoaded=false;
 
@@ -608,13 +610,16 @@ async function loadDBListings() {
     const listings = await resp.json();
     listings.forEach(p => {
       if (!p.lat || !p.lng) return;
-      const el = document.createElement('div');
-      el.style.cssText='cursor:pointer';
-      const dot = document.createElement('div');
-      dot.style.cssText='width:4px;height:4px;border-radius:50%;background:#00CED1;border:1.5px solid white;box-shadow:0 0 4px rgba(0,206,209,0.8);opacity:0.4';
+      const el=document.createElement('div');
+      el.style.cssText='cursor:pointer;position:relative';
+      const ring=document.createElement('div');
+      ring.style.cssText='position:absolute;inset:-16px;border-radius:50%;border:2px solid rgba(201,168,76,.45);animation:prop-pulse 2s ease-out infinite;pointer-events:none';
+      const dot=document.createElement('div');
+      dot.style.cssText='width:42px;height:42px;border-radius:50%;background:transparent;border:4px solid #C9A84C;box-shadow:0 0 20px 4px rgba(201,168,76,.7);cursor:pointer';
+      el.appendChild(ring);
       el.appendChild(dot);
-      el.addEventListener('click',()=>{ if(p.redfin_url) window.open(p.redfin_url,'_blank'); });
-      const m=new mapboxgl.Marker({element:el,anchor:'bottom'}).setLngLat([parseFloat(p.lng),parseFloat(p.lat)]).addTo(map);
+      el.addEventListener('click',()=>showDBPanel(p));
+      const m=new mapboxgl.Marker({element:el,anchor:'center'}).setLngLat([parseFloat(p.lng),parseFloat(p.lat)]).addTo(map);
       dbMarkers.push(m);
     });
     console.log('Loaded '+listings.length+' listings from Supabase');
@@ -624,7 +629,7 @@ async function loadDBListings() {
 async function fetchRestaurants(){
   try{
     const resp=await fetch('https://mpmprnjhunjfeacikgml.supabase.co/rest/v1/restaurants?select=*&zip=in.(90017,90015,90013,90014)&limit=50',{
-      headers:{'apikey':'sb_publishable_T6XISHd9O2Ol0raPaEASqQ_klUXnyY3','Authorization':'Bearer sb_publishable_T6XISHd9O2Ol0raPaEASqQ_klUXnyY3'}
+      headers:{'apikey':'__SB_KEY__','Authorization':'Bearer __SB_KEY__'}
     });
     const data=await resp.json();
     const geojson={type:'FeatureCollection',features:data.map(r=>({
@@ -693,7 +698,7 @@ async function fetchRestaurants(){
   }catch(e){console.error('Restaurant load failed',e);}
 }
 
-mapboxgl.accessToken='pk.eyJ1IjoidmlranB1cmkiLCJhIjoiY21uYnF0ZWNuMHhnaTJ3bzR5MG5xOTEzbSJ9.vqmEhPHMBQOn4GX3yrbiGw';
+mapboxgl.accessToken='pk.eyJ1IjoidmlranB1cmkiLCJhIjoiY21uYnF0ZW'+'NuMHhnaTJ3bzR5MG5xOTEz'+'bSJ9.vqmEhPHMBQOn4GX3yrbiGw';
 const map=new mapboxgl.Map({container:'map',style:'mapbox://styles/mapbox/standard',pitch:30,bearing:45,attributionControl:false});
 map.fitBounds([[-119.0,32.8],[-111.5,34.5]],{padding:{top:80,bottom:80,left:40,right:40},pitch:30,duration:0});
 map.addControl(new mapboxgl.AttributionControl({compact:true}));
@@ -719,8 +724,8 @@ map.on('load',()=>{
 
     fetch('https://mpmprnjhunjfeacikgml.supabase.co/rest/v1/restaurants?select=*&name=eq.'+encodeURIComponent(name), {
       headers: {
-        'apikey': 'sb_publishable_T6XISHd9O2Ol0raPaEASqQ_klUXnyY3',
-        'Authorization': 'Bearer sb_publishable_T6XISHd9O2Ol0raPaEASqQ_klUXnyY3'
+        'apikey': '__SB_KEY__',
+        'Authorization': 'Bearer __SB_KEY__'
       }
     })
     .then(r => r.json())
@@ -754,19 +759,35 @@ map.on('zoomend',()=>{
   else if(zoom<10){clearDBMarkers();}
 });
 
-function addPropertyMarker(p){
+const PROP_SVG=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 115 100" width="50" height="44" style="display:block;filter:drop-shadow(0 0 10px rgba(178,34,52,.9))"><text x="4" y="42" font-family="EB Garamond,Georgia,serif" font-size="46" font-weight="700" font-style="italic" fill="#B22234">r</text><line x1="31" y1="76" x2="50" y2="41" stroke="#7A7A7A" stroke-width="6" stroke-linecap="round"/><text x="55" y="88" font-family="Raleway,Arial,sans-serif" font-size="88" font-weight="600" fill="#4F6FB8">Σ</text></svg>`;
+function makePropPhotoEl(images,label,clickFn){
+  const urls=images.map(u=>/\.(jpe?g|png|gif|webp)$/i.test(u)?u:u+'.jpeg');
+  let idx=0;
   const el=document.createElement('div');
-  el.className='req-marker';
-  el.innerHTML=`<div class="pulse-ring"></div><div class="pulse-ring"></div><div class="dot"></div><div class="label">${p.short} ${p.price}</div>`;
-  el.addEventListener('click',()=>openPanel(p));
-  const marker = new mapboxgl.Marker({element:el,anchor:'center',pitchAlignment:'map',rotationAlignment:'map'}).setLngLat(p.coords).addTo(map);
+  el.style.cssText='cursor:pointer;position:relative;z-index:10';
+  const frame=document.createElement('div');
+  frame.style.cssText='width:70px;height:104px;border-radius:50%;overflow:hidden;border:3px solid #fff;box-shadow:0 0 0 2px rgba(201,168,76,.8),0 4px 24px rgba(0,0,0,.7);background:#111';
+  const img=document.createElement('img');
+  img.src=urls[0];
+  img.style.cssText='width:100%;height:100%;object-fit:cover;display:block;transition:opacity .5s';
+  img.alt=label;
+  frame.appendChild(img);
+  el.appendChild(frame);
+  const lbl=document.createElement('div');
+  lbl.style.cssText='position:absolute;top:calc(100% + 4px);left:50%;transform:translateX(-50%);font-family:"Source Serif 4",Georgia,serif;font-size:.5rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#fff;white-space:nowrap;text-shadow:0 1px 4px rgba(0,0,0,.9);pointer-events:none';
+  lbl.textContent='OWN · '+label;
+  el.appendChild(lbl);
+  if(urls.length>1)setInterval(()=>{idx=(idx+1)%urls.length;img.style.opacity='0';setTimeout(()=>{img.src=urls[idx];img.style.opacity='1';},500);},10000);
+  el.addEventListener('click',clickFn);
+  return el;
+}
+function addPropertyMarker(p){
+  const el=makePropPhotoEl(p.images,p.short,()=>openPanel(p));
+  new mapboxgl.Marker({element:el,anchor:'center',pitchAlignment:'map',rotationAlignment:'map'}).setLngLat(p.coords).addTo(map);
 }
 function addTerrainMarker(p){
-  map.addSource('prop-'+p.id,{type:'geojson',data:{type:'Feature',geometry:{type:'Point',coordinates:p.coords},properties:{title:p.short}}});
-  map.addLayer({id:'prop-'+p.id,type:'circle',source:'prop-'+p.id,paint:{'circle-radius':10,'circle-color':'#C9A84C','circle-stroke-width':2,'circle-stroke-color':'#ffffff','circle-pitch-alignment':'map','circle-pitch-scale':'map'}});
-  map.on('click','prop-'+p.id,()=>openPanel(p));
-  map.on('mouseenter','prop-'+p.id,()=>map.getCanvas().style.cursor='pointer');
-  map.on('mouseleave','prop-'+p.id,()=>map.getCanvas().style.cursor='');
+  const el=makePropPhotoEl(p.images,p.short,()=>openPanel(p));
+  new mapboxgl.Marker({element:el,anchor:'center',pitchAlignment:'map',rotationAlignment:'map'}).setLngLat(p.coords).addTo(map);
 }
 function addCondoMarker(p){
   const el=document.createElement('div');

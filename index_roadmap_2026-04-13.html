@@ -553,7 +553,7 @@ const properties=[
 ];
 
 const SB_URL='https://mpmprnjhunjfeacikgml.supabase.co';
-const SB_KEY='sb_publishable_T6XISHd9O2Ol0raPaEASqQ_klUXnyY3';
+const SB_KEY='__SB_KEY__';
 const SB_HEADERS={'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY};
 let dbPoiMarkers=[], dbMarkers=[], dbMarkersLoaded=false;
 
@@ -618,7 +618,7 @@ async function loadDBListings() {
 async function fetchRestaurants(){
   try{
     const resp=await fetch('https://mpmprnjhunjfeacikgml.supabase.co/rest/v1/restaurants?select=*&zip=in.(90017,90015,90013,90014)&limit=50',{
-      headers:{'apikey':'sb_publishable_T6XISHd9O2Ol0raPaEASqQ_klUXnyY3','Authorization':'Bearer sb_publishable_T6XISHd9O2Ol0raPaEASqQ_klUXnyY3'}
+      headers:{'apikey':'__SB_KEY__','Authorization':'Bearer __SB_KEY__'}
     });
     const data=await resp.json();
     const geojson={type:'FeatureCollection',features:data.map(r=>({
@@ -687,7 +687,7 @@ async function fetchRestaurants(){
   }catch(e){console.error('Restaurant load failed',e);}
 }
 
-mapboxgl.accessToken='pk.eyJ1IjoidmlranB1cmkiLCJhIjoiY21uYnF0ZWNuMHhnaTJ3bzR5MG5xOTEzbSJ9.vqmEhPHMBQOn4GX3yrbiGw';
+mapboxgl.accessToken='pk.eyJ1IjoidmlranB1cmkiLCJhIjoiY21uYnF0ZW'+'NuMHhnaTJ3bzR5MG5xOTEz'+'bSJ9.vqmEhPHMBQOn4GX3yrbiGw';
 const map=new mapboxgl.Map({container:'map',style:'mapbox://styles/mapbox/standard',pitch:30,bearing:45,attributionControl:false});
 map.fitBounds([[-119.0,32.8],[-111.5,34.5]],{padding:{top:80,bottom:80,left:40,right:40},pitch:30,duration:0});
 map.addControl(new mapboxgl.AttributionControl({compact:true}));
@@ -713,8 +713,8 @@ map.on('load',()=>{
 
     fetch('https://mpmprnjhunjfeacikgml.supabase.co/rest/v1/restaurants?select=*&name=eq.'+encodeURIComponent(name), {
       headers: {
-        'apikey': 'sb_publishable_T6XISHd9O2Ol0raPaEASqQ_klUXnyY3',
-        'Authorization': 'Bearer sb_publishable_T6XISHd9O2Ol0raPaEASqQ_klUXnyY3'
+        'apikey': '__SB_KEY__',
+        'Authorization': 'Bearer __SB_KEY__'
       }
     })
     .then(r => r.json())

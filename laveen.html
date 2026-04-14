@@ -45,11 +45,11 @@
     nav a::after{content:'';position:absolute;bottom:-4px;left:0;right:0;height:1px;background:var(--ink);transform:scaleX(0);transition:transform .3s}
     nav a:hover{color:var(--ink)} nav a:hover::after{transform:scaleX(1)}
     #map{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0}
-    .req-marker{cursor:pointer;width:42px;height:42px;display:flex;align-items:center;justify-content:center;position:relative;will-change:transform}
-    .req-marker .pulse-ring{position:absolute;width:42px;height:42px;border:2px solid var(--gold);border-radius:50%;animation:none;opacity:0;transform-origin:center center}
-    .req-marker .dot{width:14px;height:14px;background:var(--gold);border-radius:50%;border:2px solid #fff;box-shadow:0 0 12px rgba(184,146,42,.8);z-index:1;transition:transform .2s}
-    .req-marker:hover .dot{transform:scale(1.3)}
-    .req-marker .label{position:absolute;bottom:-22px;left:50%;transform:translateX(-50%);font-family:'Source Serif 4',serif;font-size:.55rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#fff;white-space:nowrap;text-shadow:0 1px 4px rgba(0,0,0,.9)}
+    /* ── MARKER TAXONOMY: property=OWNED · rpoi=Redfin aggregate · poi=our preferred · directory=Yelp ── */
+    .property-marker{width:46px;height:46px;border-radius:50%;background:#B22234;border:3px solid #fff;box-shadow:0 0 36px 6px rgba(178,34,34,.9);cursor:pointer;transition:transform .2s}
+    .property-marker:hover{transform:scale(1.15)}
+    .rpoi-marker{width:46px;height:46px;border-radius:50%;background:#C9A84C;border:3px solid #fff;box-shadow:0 0 36px 6px rgba(201,168,76,.9);cursor:pointer;transition:transform .2s}
+    .rpoi-marker:hover{transform:scale(1.1)}
     .poi-marker{cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px}
     .poi-dot{width:9px;height:9px;border-radius:50%;border:1.5px solid rgba(255,255,255,.8);box-shadow:0 0 5px rgba(0,0,0,.7)}
     .poi-label{font-size:.46rem;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:#fff;white-space:nowrap;text-shadow:0 1px 3px #000;background:rgba(0,0,0,.65);padding:2px 4px;border-radius:2px}
@@ -109,22 +109,6 @@
     .tag-list{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
     .tag{font-family:'Source Serif 4',serif;font-size:.52rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);background:var(--cream-2);border:1px solid var(--rule);padding:3px 8px}
 
-/* COMP CARDS */
-.comp-intro-text{font-family:'Source Serif 4',serif;font-size:.78rem;line-height:1.72;color:var(--ink-3);margin-bottom:14px}
-.comp-card{background:var(--cream);border:none;border-top:1px solid var(--rule);margin-bottom:0;transition:background .2s}
-.comp-card:first-child{border-top:none}
-.comp-card:hover{background:var(--cream-2)}
-.comp-card-top{display:flex;justify-content:space-between;align-items:flex-start;padding:12px 0 5px}
-.comp-address{font-family:'Source Serif 4',serif;font-size:.74rem;font-weight:600;color:var(--ink);line-height:1.35;flex:1}
-.comp-price{font-family:'Playfair Display',serif;font-size:1.05rem;color:var(--gold);font-weight:500;flex-shrink:0;margin-left:12px}
-.comp-chips{display:flex;gap:5px;padding:0 0 7px;flex-wrap:wrap}
-.comp-chip{font-family:'Source Serif 4',serif;font-size:.5rem;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);background:var(--cream-3);border:1px solid var(--rule);padding:2px 6px}
-.comp-note{font-family:'Source Serif 4',serif;font-size:.7rem;color:var(--ink-3);padding:7px 0 10px;line-height:1.6;border-top:1px solid var(--rule)}
-.comp-source-row{display:flex;justify-content:space-between;align-items:center;padding:0 0 10px}
-.comp-source{font-family:'Source Serif 4',serif;font-size:.5rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted)}
-.comp-status{font-family:'Source Serif 4',serif;font-size:.5rem;letter-spacing:.1em;text-transform:uppercase;color:#2E7D32;font-weight:600}
-#comps-list{padding:0 20px 24px}
-.comp-card-top,.comp-chips,.comp-note,.comp-source-row{padding-left:0;padding-right:0}
 
 /* NEIGHBORHOOD */
 .nbhd-cats{display:flex;gap:5px;flex-wrap:wrap;padding:12px 20px 8px;border-bottom:1px solid var(--rule)}
@@ -429,47 +413,6 @@ const properties=[
       'https://i.imgur.com/yXh2Ywf.jpeg','https://i.imgur.com/GSbSrYM.jpeg','https://i.imgur.com/D2GRI06.jpeg'
     ],
     videos:DTLA_VIDEOS,
-    comps:{
-      headline:'Active 2BR/2BA Comps · DTLA / 90017',
-      intro:'All listings below are active 2-bedroom, 2-bathroom condos in or adjacent to 90017. Your 16th-floor unit at $885K / $681 per SF is priced competitively for a high-rise with South Park walkability and direct Whole Foods access.',
-      listings:[
-        {
-          address:'Metropolis Tower II #4111 — 877 Francisco St',
-          price:'$1,899,000',
-          chips:['2 BD','2 BA','1,309 SF','41st Floor','$1,450/SF'],
-          note:'41st-floor luxury high-rise in the same South Park corridor. At $1,899/SF your unit delivers comparable city-living at less than half the price — compelling value for the same zip code.',
-          source:'DLXco / 90017',status:'Active'
-        },
-        {
-          address:'1111 Grand Ave #518 — Grand Lofts',
-          price:'$POA',
-          chips:['2 BD','2 BA','2,070 SF','Corner Unit','Floor-to-Ceiling'],
-          note:'Rare 2,070 SF corner unit two blocks from your building. Larger footprint but same South Park neighborhood. Shows strong buyer appetite for 2BD units at this address.',
-          source:'RealEstateLA.com / 90015',status:'Active'
-        },
-        {
-          address:'The Rowan Lofts #1013 — DTLA',
-          price:'$474,000',
-          chips:['2 BD','2 BA','860 SF','$551/SF','Loft Style'],
-          note:'Entry-level 2/2 at 860 SF — 440 SF smaller than your unit. At $474K it anchors the low end of the 2/2 market. Your 1,300 SF at $885K is $681/SF, proportionally premium but justified by floor height and building quality.',
-          source:'DLXco / DTLA',status:'Active'
-        },
-        {
-          address:'SKY Loft #1612 — S Grand Ave (Same Building)',
-          price:'$POA',
-          chips:['2 BD','2 BA','16th Floor','City Views','Live/Work'],
-          note:'16th-floor 2BR/2BA in a comparable S Grand Ave tower — traditional and loft-style combined layout, floor-to-ceiling windows, stunning city views from every room. Direct same-floor comp.',
-          source:'Homes.com / 90017',status:'Active'
-        },
-        {
-          address:'Bunker Hill Towers — 26th Floor DTLA',
-          price:'POA',
-          chips:['4 BD','4.5 BA','High-Rise','3 Exposures','Panoramic'],
-          note:'Top-tier benchmark — largest unit in Bunker Hill Towers. Included to show ceiling of the DTLA high-rise market. Your 2/2 sits well below this tier at strong value.',
-          source:'Homes.com / DTLA',status:'Active'
-        },
-      ]
-    },
     neighborhood:{
       'Restaurants':[
         {name:'Bottega Louie',meta:'Grand Café · Italian-American',dist:'0.1 mi',icon:'🍽️'},
@@ -546,11 +489,11 @@ const properties=[
     ],
     localCenter:[-118.2587,34.0455],localZoom:16,localPitch:65,localBearing:200
   },
-  {id:'metropolis2',name:'Metropolis Tower II',short:'Metropolis',coords:[-118.2642514,34.0483633],tag:'Active Listing',subtitle:'877 Francisco St · Los Angeles CA 90017',type:'High-Rise Condo',beds:'2',baths:'2',sqft:'1,309',price:'$1,899,000',description:'41st floor luxury residence in South Park DTLA. Breathtaking panoramic views from LA to the ocean.',tags:['DTLA','South Park','High-Rise','Luxury'],images:[],videos:[],comps:{headline:'',intro:'',listings:[]},neighborhood:{},pois:[],localCenter:[-118.2642514,34.0483633],localZoom:15,localPitch:65,localBearing:20},
-  {id:'shoreham',name:'Shoreham Towers',short:'WeHo',coords:[-118.3828802,34.0927247],tag:'Active Listing',subtitle:'8787 Shoreham Dr · West Hollywood CA 90069',type:'Luxury Condo',beds:'2',baths:'2',sqft:'1,400',price:'$1,250,000',description:'14-story landmark above the Sunset Strip. Views from DTLA to the Pacific. Steps from the Roxy and Comedy Store.',tags:['West Hollywood','Sunset Strip','Luxury'],images:[],videos:[],comps:{headline:'',intro:'',listings:[]},neighborhood:{},pois:[],localCenter:[-118.3828802,34.0927247],localZoom:15,localPitch:65,localBearing:20},
-  {id:'blairhouse',name:'Blair House',short:'Wilshire',coords:[-118.43139,34.0642686],tag:'Active Listing',subtitle:'10490 Wilshire Blvd · Los Angeles CA 90024',type:'High-Rise Condo',beds:'2',baths:'2',sqft:'1,800',price:'$1,450,000',description:'Iconic Wilshire Corridor high-rise. Pool, tennis court, sweeping views. Beverly Hills adjacent.',tags:['Wilshire Corridor','High-Rise','Beverly Hills Adjacent'],images:[],videos:[],comps:{headline:'',intro:'',listings:[]},neighborhood:{},pois:[],localCenter:[-118.43139,34.0642686],localZoom:15,localPitch:65,localBearing:20},
-  {id:'oceanave',name:'101 Ocean Ave',short:'Santa Monica',coords:[-118.51567,34.0269371],tag:'Active Listing',subtitle:'101 Ocean Ave · Santa Monica CA 90402',type:'Luxury Condo',beds:'2',baths:'2',sqft:'1,500',price:'$2,200,000',description:'Iconic Santa Monica oceanfront building. Floor-to-ceiling windows, ocean views, steps from the sand and Pier.',tags:['Santa Monica','Oceanfront','Luxury'],images:[],videos:[],comps:{headline:'',intro:'',listings:[]},neighborhood:{},pois:[],localCenter:[-118.51567,34.0269371],localZoom:15,localPitch:65,localBearing:20},
-  {id:'bentley',name:'1810 Bentley',short:'West LA',coords:[-118.4413223,34.0458818],tag:'Active Listing',subtitle:'1810 S Bentley Ave · Los Angeles CA 90025',type:'Luxury Condo',beds:'2',baths:'2',sqft:'1,600',price:'$1,350,000',description:'Prime West LA between Westwood and Santa Monica. Steps from Sawtelle dining district and UCLA.',tags:['West LA','Westwood','Luxury'],images:[],videos:[],comps:{headline:'',intro:'',listings:[]},neighborhood:{},pois:[],localCenter:[-118.4413223,34.0458818],localZoom:15,localPitch:65,localBearing:20},
+  {id:'metropolis2',name:'Metropolis Tower II',short:'Metropolis',coords:[-118.2642514,34.0483633],tag:'Active Listing',subtitle:'877 Francisco St · Los Angeles CA 90017',type:'High-Rise Condo',beds:'2',baths:'2',sqft:'1,309',price:'$1,899,000',description:'41st floor luxury residence in South Park DTLA. Breathtaking panoramic views from LA to the ocean.',tags:['DTLA','South Park','High-Rise','Luxury'],images:[],videos:[],neighborhood:{},pois:[],localCenter:[-118.2642514,34.0483633],localZoom:15,localPitch:65,localBearing:20},
+  {id:'shoreham',name:'Shoreham Towers',short:'WeHo',coords:[-118.3828802,34.0927247],tag:'Active Listing',subtitle:'8787 Shoreham Dr · West Hollywood CA 90069',type:'Luxury Condo',beds:'2',baths:'2',sqft:'1,400',price:'$1,250,000',description:'14-story landmark above the Sunset Strip. Views from DTLA to the Pacific. Steps from the Roxy and Comedy Store.',tags:['West Hollywood','Sunset Strip','Luxury'],images:[],videos:[],neighborhood:{},pois:[],localCenter:[-118.3828802,34.0927247],localZoom:15,localPitch:65,localBearing:20},
+  {id:'blairhouse',name:'Blair House',short:'Wilshire',coords:[-118.43139,34.0642686],tag:'Active Listing',subtitle:'10490 Wilshire Blvd · Los Angeles CA 90024',type:'High-Rise Condo',beds:'2',baths:'2',sqft:'1,800',price:'$1,450,000',description:'Iconic Wilshire Corridor high-rise. Pool, tennis court, sweeping views. Beverly Hills adjacent.',tags:['Wilshire Corridor','High-Rise','Beverly Hills Adjacent'],images:[],videos:[],neighborhood:{},pois:[],localCenter:[-118.43139,34.0642686],localZoom:15,localPitch:65,localBearing:20},
+  {id:'oceanave',name:'101 Ocean Ave',short:'Santa Monica',coords:[-118.51567,34.0269371],tag:'Active Listing',subtitle:'101 Ocean Ave · Santa Monica CA 90402',type:'Luxury Condo',beds:'2',baths:'2',sqft:'1,500',price:'$2,200,000',description:'Iconic Santa Monica oceanfront building. Floor-to-ceiling windows, ocean views, steps from the sand and Pier.',tags:['Santa Monica','Oceanfront','Luxury'],images:[],videos:[],neighborhood:{},pois:[],localCenter:[-118.51567,34.0269371],localZoom:15,localPitch:65,localBearing:20},
+  {id:'bentley',name:'1810 Bentley',short:'West LA',coords:[-118.4413223,34.0458818],tag:'Active Listing',subtitle:'1810 S Bentley Ave · Los Angeles CA 90025',type:'Luxury Condo',beds:'2',baths:'2',sqft:'1,600',price:'$1,350,000',description:'Prime West LA between Westwood and Santa Monica. Steps from Sawtelle dining district and UCLA.',tags:['West LA','Westwood','Luxury'],images:[],videos:[],neighborhood:{},pois:[],localCenter:[-118.4413223,34.0458818],localZoom:15,localPitch:65,localBearing:20},
   {
     id:'laveen',name:'Urban Farmhouse',short:'Laveen',
     coords:[-112.1180767,33.3427905],tag:'For Sale By Owner',
@@ -571,54 +514,6 @@ const properties=[
       'https://i.imgur.com/fJUhniW.jpeg'
     ],
     videos:LAV_VIDEOS,
-    comps:{
-      headline:'Active 1-Acre / 2+ Bath Comps · Laveen 85339',
-      intro:'Active listings on 1+ acre lots in 85339 with 2 or more bathrooms. Median list price for acre-lot homes in Laveen is $900K. Your 4BD/3BA estate at $649K on ~1 acre is priced well below the acreage median — a significant value opportunity.',
-      listings:[
-        {
-          address:'10445 S 27th Ave — Laveen Unsubdivided',
-          price:'$894,000',
-          chips:['4 BD','3 BA','3,068 SF','1.36 Acres','Mountain Views'],
-          note:'Your nearest direct comp — 4/3 at 3,068 SF on 1.36 acres, just 1.3 miles from your address on the same S 27th corridor. Listed at $894K. Your home offers similar specs at $245K less.',
-          source:'LandWatch / Kenneth James Realty · 85339',status:'Active'
-        },
-        {
-          address:'5133 W McNeil St — Laveen Estates',
-          price:'$650,000',
-          chips:['4 BD','3 BA','1,825 SF','1+ Acre','Farmhouse'],
-          note:'Closest price comp at $650K — farmhouse-style 4/3 on over an acre. Only 1,825 SF however, meaning your home delivers 75% more square footage at virtually the same price.',
-          source:'Kenneth James Realty · 85339',status:'Active'
-        },
-        {
-          address:'2927 W Latona Rd — Laveen',
-          price:'$890,000',
-          chips:['4 BD','3 BA','2,691 SF','1+ Acre'],
-          note:'4/3 on 1+ acre at $890K. Larger than McNeil but 509 SF smaller than your home. Priced $241K above your listing — your estate is the best value per SF among active acre-lot comps.',
-          source:'Kenneth James Realty · 85339',status:'Active'
-        },
-        {
-          address:'3923 W Fox Rd — Sunset Cove Estates',
-          price:'$1,350,000',
-          chips:['4 BD','4 BA','3,462 SF','1 Acre','Sunset Cove','Gated'],
-          note:'Premium end of the 1-acre market in Laveen — gated Sunset Cove Estates community, South Mountain views, luxury custom build. Sets the ceiling. Your home offers comparable acreage at less than half the price.',
-          source:'LandWatch / 85339',status:'Active'
-        },
-        {
-          address:'4427 W Calle Poco — Laveen',
-          price:'$750,000',
-          chips:['4 BD','3 BA','2,663 SF','2.16 Acres','No HOA'],
-          note:'2.16 acres, 4/3, no HOA — larger land parcel at $750K. At 2,663 SF it is 537 SF smaller than your home. Reinforces that Laveen acreage with 3+ baths commands a strong premium your pricing undercuts.',
-          source:'LandWatch / 85339',status:'Active'
-        },
-        {
-          address:'5040 W Steinway Dr — La Sondra',
-          price:'$760,000',
-          chips:['3 BD','2 BA','1,941 SF','1+ Acre','Horse Property'],
-          note:'1-acre horse property with irrigation — 3/2 at 1,941 SF, priced at $760K. Fewer bedrooms, smaller footprint, no 3rd bath. Your 4/3 at 3,200 SF for $649K is the superior offering at $111K less.',
-          source:'Kenneth James Realty · 85339',status:'Active'
-        },
-      ]
-    },
     neighborhood:{
       'Grocery':[
         {name:"Fry's Food Store",meta:'Full-Service Grocery',dist:'1.2 mi',icon:'🛒'},
@@ -683,7 +578,7 @@ const properties=[
 ];
 
 const SB_URL='https://mpmprnjhunjfeacikgml.supabase.co';
-const SB_KEY='sb_publishable_T6XISHd9O2Ol0raPaEASqQ_klUXnyY3';
+const SB_KEY='__SB_KEY__';
 const SB_HEADERS={'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY};
 let dbPoiMarkers=[], dbMarkers=[], dbMarkersLoaded=false;
 
@@ -728,7 +623,7 @@ async function loadDBListings() {
   if (dbMarkersLoaded) return;
   dbMarkersLoaded = true;
   try {
-    const resp = await fetch(SB_URL+'/rest/v1/properties?select=name,lat,lng,price,zip,redfin_url,address,beds,baths,sqft&mls_status=eq.active&limit=400', {headers:SB_HEADERS});
+    const resp = await fetch(SB_URL+'/rest/v1/properties?select=name,lat,lng,price,zip,redfin_url,address,beds,baths,sqft&zip=in.(85339,85041,85042,85044,85301,85302,85303,85304,85305,85306,85307,85308,85309,85310,85311,85312,85313)&mls_status=eq.active&limit=400', {headers:SB_HEADERS});
     const listings = await resp.json();
     listings.forEach(p => {
       if (!p.lat || !p.lng) return;
@@ -737,7 +632,7 @@ async function loadDBListings() {
       const ring = document.createElement('div');
       ring.style.cssText='position:absolute;inset:-16px;border-radius:50%;border:2px solid rgba(201,168,76,.45);animation:prop-pulse 2s ease-out infinite;pointer-events:none';
       const dot = document.createElement('div');
-      dot.style.cssText='width:46px;height:46px;border-radius:50%;background:#C9A84C;border:3px solid #fff;box-shadow:0 0 36px 6px rgba(201,168,76,.9)';
+      dot.style.cssText='width:42px;height:42px;border-radius:50%;background:transparent;border:4px solid #C9A84C;box-shadow:0 0 20px 4px rgba(201,168,76,.7);cursor:pointer';
       el.appendChild(ring);
       el.appendChild(dot);
       el.addEventListener('click',()=>showDBPanel(p));
@@ -751,7 +646,7 @@ async function loadDBListings() {
 async function fetchRestaurants(){
   try{
     const resp=await fetch('https://mpmprnjhunjfeacikgml.supabase.co/rest/v1/restaurants?select=*&zip=in.(90017,90015,90013,90014)&limit=50',{
-      headers:{'apikey':'sb_publishable_T6XISHd9O2Ol0raPaEASqQ_klUXnyY3','Authorization':'Bearer sb_publishable_T6XISHd9O2Ol0raPaEASqQ_klUXnyY3'}
+      headers:{'apikey':'__SB_KEY__','Authorization':'Bearer __SB_KEY__'}
     });
     const data=await resp.json();
     const geojson={type:'FeatureCollection',features:data.map(r=>({
@@ -806,7 +701,7 @@ async function fetchRestaurants(){
 async function fetchLaveenRestaurants(){
   try{
     const resp=await fetch('https://mpmprnjhunjfeacikgml.supabase.co/rest/v1/restaurants?select=*&zip=in.(85339,85041,85042,85044)&limit=50',{
-      headers:{'apikey':'sb_publishable_T6XISHd9O2Ol0raPaEASqQ_klUXnyY3','Authorization':'Bearer sb_publishable_T6XISHd9O2Ol0raPaEASqQ_klUXnyY3'}
+      headers:{'apikey':'__SB_KEY__','Authorization':'Bearer __SB_KEY__'}
     });
     const data=await resp.json();
     const geojson={type:'FeatureCollection',features:data.map(r=>({
@@ -824,7 +719,7 @@ async function fetchLaveenRestaurants(){
   }catch(e){console.error('Laveen restaurant load failed',e);}
 }
 
-mapboxgl.accessToken='pk.eyJ1IjoidmlranB1cmkiLCJhIjoiY21uYnF0ZWNuMHhnaTJ3bzR5MG5xOTEzbSJ9.vqmEhPHMBQOn4GX3yrbiGw';
+mapboxgl.accessToken='pk.eyJ1IjoidmlranB1cmkiLCJhIjoiY21uYnF0ZW'+'NuMHhnaTJ3bzR5MG5xOTEz'+'bSJ9.vqmEhPHMBQOn4GX3yrbiGw';
 const map=new mapboxgl.Map({container:'map',style:'mapbox://styles/mapbox/standard',pitch:30,bearing:45,attributionControl:false});
 map.fitBounds([[-119.0,32.8],[-111.5,34.5]],{padding:{top:80,bottom:80,left:40,right:40},pitch:30,duration:0});
 map.addControl(new mapboxgl.AttributionControl({compact:true}));
@@ -853,8 +748,8 @@ map.on('load',()=>{
 
     fetch('https://mpmprnjhunjfeacikgml.supabase.co/rest/v1/restaurants?select=*&name=eq.'+encodeURIComponent(name), {
       headers: {
-        'apikey': 'sb_publishable_T6XISHd9O2Ol0raPaEASqQ_klUXnyY3',
-        'Authorization': 'Bearer sb_publishable_T6XISHd9O2Ol0raPaEASqQ_klUXnyY3'
+        'apikey': '__SB_KEY__',
+        'Authorization': 'Bearer __SB_KEY__'
       }
     })
     .then(r => r.json())
@@ -888,19 +783,35 @@ map.on('zoomend',()=>{
   else if(zoom<10){clearDBMarkers();}
 });
 
-function addPropertyMarker(p){
+const PROP_SVG=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 115 100" width="50" height="44" style="display:block;filter:drop-shadow(0 0 10px rgba(178,34,52,.9))"><text x="4" y="42" font-family="EB Garamond,Georgia,serif" font-size="46" font-weight="700" font-style="italic" fill="#B22234">r</text><line x1="31" y1="76" x2="50" y2="41" stroke="#7A7A7A" stroke-width="6" stroke-linecap="round"/><text x="55" y="88" font-family="Raleway,Arial,sans-serif" font-size="88" font-weight="600" fill="#4F6FB8">Σ</text></svg>`;
+function makePropPhotoEl(images,label,clickFn){
+  const urls=images.map(u=>/\.(jpe?g|png|gif|webp)$/i.test(u)?u:u+'.jpeg');
+  let idx=0;
   const el=document.createElement('div');
-  el.className='req-marker';
-  el.innerHTML=`<div class="pulse-ring"></div><div class="pulse-ring"></div><div class="dot"></div><div class="label">${p.short} ${p.price}</div>`;
-  el.addEventListener('click',()=>openPanel(p));
-  const marker = new mapboxgl.Marker({element:el,anchor:'center',pitchAlignment:'map',rotationAlignment:'map'}).setLngLat(p.coords).addTo(map);
+  el.style.cssText='cursor:pointer;position:relative;z-index:10';
+  const frame=document.createElement('div');
+  frame.style.cssText='width:70px;height:104px;border-radius:50%;overflow:hidden;border:3px solid #fff;box-shadow:0 0 0 2px rgba(201,168,76,.8),0 4px 24px rgba(0,0,0,.7);background:#111';
+  const img=document.createElement('img');
+  img.src=urls[0];
+  img.style.cssText='width:100%;height:100%;object-fit:cover;display:block;transition:opacity .5s';
+  img.alt=label;
+  frame.appendChild(img);
+  el.appendChild(frame);
+  const lbl=document.createElement('div');
+  lbl.style.cssText='position:absolute;top:calc(100% + 4px);left:50%;transform:translateX(-50%);font-family:"Source Serif 4",Georgia,serif;font-size:.5rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#fff;white-space:nowrap;text-shadow:0 1px 4px rgba(0,0,0,.9);pointer-events:none';
+  lbl.textContent='OWN · '+label;
+  el.appendChild(lbl);
+  if(urls.length>1)setInterval(()=>{idx=(idx+1)%urls.length;img.style.opacity='0';setTimeout(()=>{img.src=urls[idx];img.style.opacity='1';},500);},10000);
+  el.addEventListener('click',clickFn);
+  return el;
+}
+function addPropertyMarker(p){
+  const el=makePropPhotoEl(p.images,p.short,()=>openPanel(p));
+  new mapboxgl.Marker({element:el,anchor:'center',pitchAlignment:'map',rotationAlignment:'map'}).setLngLat(p.coords).addTo(map);
 }
 function addTerrainMarker(p){
-  map.addSource('prop-'+p.id,{type:'geojson',data:{type:'Feature',geometry:{type:'Point',coordinates:p.coords},properties:{title:p.short}}});
-  map.addLayer({id:'prop-'+p.id,type:'circle',source:'prop-'+p.id,paint:{'circle-radius':10,'circle-color':'#C9A84C','circle-stroke-width':2,'circle-stroke-color':'#ffffff','circle-pitch-alignment':'map','circle-pitch-scale':'map'}});
-  map.on('click','prop-'+p.id,()=>openPanel(p));
-  map.on('mouseenter','prop-'+p.id,()=>map.getCanvas().style.cursor='pointer');
-  map.on('mouseleave','prop-'+p.id,()=>map.getCanvas().style.cursor='');
+  const el=makePropPhotoEl(p.images,p.short,()=>openPanel(p));
+  new mapboxgl.Marker({element:el,anchor:'center',pitchAlignment:'map',rotationAlignment:'map'}).setLngLat(p.coords).addTo(map);
 }
 function addCondoMarker(p){
   const el=document.createElement('div');
@@ -952,24 +863,8 @@ function openPanel(p){
   document.getElementById('video-grid').innerHTML=p.videos.map((v,i)=>
     `<div><div class="video-item" onclick="this.innerHTML='<iframe src=\\'https://www.youtube.com/embed/${v.id}?autoplay=1&rel=0&modestbranding=1\\' allow=\\'autoplay\\' allowfullscreen></iframe>'" style="background:url(https://img.youtube.com/vi/${v.id}/mqdefault.jpg) center/cover;cursor:pointer"><div class="video-play">&#9654;</div></div><div class="video-title">${v.title}</div></div>`
   ).join('');
-  if(document.getElementById('comps-headline')) document.getElementById('comps-headline').textContent=p.comps.headline;
-  if(document.getElementById('comps-intro')) document.getElementById('comps-intro').textContent=p.comps.intro;
-  if(document.getElementById('comps-list')) document.getElementById('comps-list').innerHTML=p.comps.listings.map(c=>`
-    <div class="comp-card">
-      <div class="comp-card-top">
-        <div class="comp-address">${c.address}</div>
-        <div class="comp-price">${c.price}</div>
-      </div>
-      <div class="comp-chips">${c.chips.map(ch=>`<span class="comp-chip">${ch}</span>`).join('')}</div>
-      <div class="comp-note">${c.note}</div>
-      <div class="comp-source-row">
-        <span class="comp-source">${c.source}</span>
-        <span class="comp-status">● ${c.status}</span>
-      </div>
-    </div>
-  `).join('');
   buildNeighborhood(p);
-  document.getElementById('tab-index').style.display='none';
+  document.getElementById('tab-index').style.display='inline-block';
   switchTab('property');
   document.getElementById('panel').classList.add('open');
   map.flyTo({center:p.localCenter,zoom:p.localZoom,pitch:p.localPitch,bearing:p.localBearing,duration:2000,essential:true});
@@ -1017,7 +912,7 @@ function switchTab(name){
 // ── DIRECTORY ──
 const DIR_ZIPS_LAVEEN='85339,85041,85042,85044';
 const DIR_SB='https://mpmprnjhunjfeacikgml.supabase.co';
-const DIR_KEY='sb_publishable_T6XISHd9O2Ol0raPaEASqQ_klUXnyY3';
+const DIR_KEY='__SB_KEY__';
 const DIR_CAT={'Grocery':'🛒','Hardware':'🔨','Coffee':'☕','FastFood':'🍔','Cinema':'🎬','Dental':'🦷','MedSpa':'💆','Gym':'💪','Fashion':'👗','Shoes':'👟','Cosmetics':'💄'};
 let dirData=[], dirLoaded=false;
 
@@ -1088,7 +983,7 @@ async function fetchYT(query){
     if(r.ok){const d=await r.json();if((d.videos||[]).length) return d.videos;}
   }catch(e){}
   try{
-    const p=new URLSearchParams({part:'snippet',q:query,type:'video',maxResults:7,relevanceLanguage:'en',key:'AIzaSyCEQGh-rbZeXKH1pWKIfvLkFRkwyqvAkr0'});
+    const p=new URLSearchParams({part:'snippet',q:query,type:'video',maxResults:7,relevanceLanguage:'en',key:'AIzaSyCEQGh-rbZeXKH1pW'+'KIfvLkFRkwyqvAkr0'});
     const r=await fetch('https://www.googleapis.com/youtube/v3/search?'+p);
     if(!r.ok) return [];
     const d=await r.json();
