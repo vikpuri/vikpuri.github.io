@@ -422,7 +422,7 @@ const properties=[
     tags:['South Park DTLA','High-Rise','Brutalist','Walk Score 98','FSBO','Waymo Corridor'],
     agentLink:'https://www.zillow.com/homes/for_sale/',
     images:[
-      'https://i.imgur.com/1K9P4FK',
+      'https://i.imgur.com/1K9P4FK.jpeg',
       'https://i.imgur.com/YIN8O41.jpeg','https://i.imgur.com/C2uei3w.jpeg','https://i.imgur.com/yhnjPo6.jpeg',
       'https://i.imgur.com/JQsQZmA.jpeg','https://i.imgur.com/N4s3BiK.jpeg','https://i.imgur.com/NKGvYiS.jpeg',
       'https://i.imgur.com/uSjnr0A.jpeg','https://i.imgur.com/F71ADpi.jpeg','https://i.imgur.com/HBNlkj8.jpeg',
@@ -980,7 +980,11 @@ async function fetchYT(q){
   try{const r=await fetch(`/.netlify/functions/youtube?q=${encodeURIComponent(q)}&maxResults=7`);if(r.ok){const d=await r.json();if((d.videos||[]).length)return d.videos;}}catch(e){}
   try{const p=new URLSearchParams({part:'snippet',q,type:'video',maxResults:7,relevanceLanguage:'en',key:'AIzaSyCEQGh-rbZeXKH1pW'+'KIfvLkFRkwyqvAkr0'});const r=await fetch('https://www.googleapis.com/youtube/v3/search?'+p);if(!r.ok)return[];const d=await r.json();return(d.items||[]).map(x=>({id:x.id.videoId,title:x.snippet.title,channel:x.snippet.channelTitle,thumb:x.snippet.thumbnails.high?.url||x.snippet.thumbnails.medium?.url||x.snippet.thumbnails.default?.url}));}catch(e){return[];}
 }
-async function addYTMarkers(){ytVideos=await fetchYT(YT_QUERY_DTLA);if(ytVideos[0])populateBillboard(ytVideos[0]);}
+async function addYTMarkers(){
+  ytVideos=await fetchYT(YT_QUERY_DTLA);
+  if(ytVideos[0]){populateBillboard(ytVideos[0]);}
+  else{const bb=document.getElementById('yt-billboard');bb.innerHTML='<div class="bb-thumb" style="background:linear-gradient(135deg,#1a0505,#3d0000)"><div class="bb-play-wrap"><div class="bb-play-btn">▶</div></div><div class="bb-live"><div class="bb-live-dot"></div>VIDEO</div></div><div class="bb-info"><div class="bb-label">▶ Featured</div><div class="bb-title">Another Brick in the Wall</div><div class="bb-channel">Pink Floyd</div></div>';bb.style.display='block';}
+}
 function openYT(i){ytIdx=i;renderYT();document.getElementById('yt-popup').classList.add('open');}
 function renderYT(){const v=ytVideos[ytIdx];if(!v)return;document.getElementById('yt-title').textContent=v.title;document.getElementById('yt-frame').src=`https://www.youtube.com/embed/${v.id}?autoplay=1&rel=0&modestbranding=1`;document.getElementById('yt-counter').textContent=(ytIdx+1)+' / '+ytVideos.length;}
 function ytStep(dir){document.getElementById('yt-frame').src='';ytIdx=(ytIdx+dir+ytVideos.length)%ytVideos.length;renderYT();}
