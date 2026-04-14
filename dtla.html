@@ -689,7 +689,21 @@ async function fetchRestaurants(){
       }
     });
 
-    map.on('click','restaurants-layer',()=>{ navigateTo('/lalife'); });
+    map.on('click','restaurants-layer',(e)=>{
+      if(!e.features.length) return;
+      const p=e.features[0].properties;
+      const stars='★'.repeat(Math.floor(p.rating||0))+'☆'.repeat(5-Math.floor(p.rating||0));
+      new mapboxgl.Popup({offset:14,closeButton:true,maxWidth:'240px'})
+        .setLngLat(e.features[0].geometry.coordinates)
+        .setHTML(`<div style="font-family:Raleway,sans-serif;padding:6px">
+          <div style="font-size:.9rem;font-weight:700;color:#1A1810;margin-bottom:2px">${p.name}</div>
+          <div style="font-size:.72rem;color:#888;margin-bottom:8px">${p.rating?parseFloat(p.rating).toFixed(1)+' '+stars+' · ':''}${p.address||''}</div>
+          <div style="display:flex;gap:7px;flex-wrap:wrap">
+            ${p.yelp_url?`<a href="${p.yelp_url}" target="_blank" style="font-size:.68rem;background:#B22234;color:#fff;padding:5px 10px;border-radius:3px;text-decoration:none;font-weight:600">🍽 Order / View</a>`:''}
+            ${p.waymo_url?`<a href="${p.waymo_url}" target="_blank" style="font-size:.68rem;background:#1A73E8;color:#fff;padding:5px 10px;border-radius:3px;text-decoration:none;font-weight:600">🚗 Waymo</a>`:''}
+          </div></div>`)
+        .addTo(map);
+    });
 
     map.on('mouseenter','restaurants-layer',()=>map.getCanvas().style.cursor='pointer');
     map.on('mouseleave','restaurants-layer',()=>map.getCanvas().style.cursor='');
@@ -884,7 +898,7 @@ async function loadDirectory(){
   if(dirLoaded) return;
   document.getElementById('dir-list').innerHTML='<div class="dir-empty">Loading…</div>';
   try{
-    const r=await fetch(`${DIR_SB}/rest/v1/restaurants?select=name,category,address,zip&zip=in.(${DIR_ZIPS_DTLA})&limit=1000&order=name.asc`,
+    const r=await fetch(`${DIR_SB}/rest/v1/restaurants?select=name,category,address,zip,yelp_url,waymo_url&zip=in.(${DIR_ZIPS_DTLA})&limit=1000&order=name.asc`,
       {headers:{'apikey':DIR_KEY,'Authorization':'Bearer '+DIR_KEY}});
     if(!r.ok) throw new Error(r.status);
     const raw=await r.json();
@@ -899,7 +913,7 @@ async function loadDirectory(){
 function renderDir(data){
   const el=document.getElementById('dir-list');
   if(!data.length){el.innerHTML='<div class="dir-empty">No results</div>';return;}
-  el.innerHTML=data.map(b=>`<div class="dir-card"><div class="dir-icon">${DIR_CAT[b.category]||'🏢'}</div><div><div class="dir-name">${b.name||'—'}</div><div class="dir-cat">${b.category||''}</div><div class="dir-addr">${b.address||b.zip||''}</div></div></div>`).join('');
+  el.innerHTML=data.map(b=>`<div class="dir-card"><div class="dir-icon">${DIR_CAT[b.category]||'🏢'}</div><div style="flex:1;min-width:0"><div class="dir-name">${b.name||'—'}</div><div class="dir-cat">${b.category||''}</div><div class="dir-addr">${b.address||b.zip||''}</div>${b.yelp_url||b.waymo_url?`<div style="display:flex;gap:6px;margin-top:5px">${b.yelp_url?`<a href="${b.yelp_url}" target="_blank" onclick="event.stopPropagation()" style="font-size:.58rem;background:#B22234;color:#fff;padding:3px 8px;border-radius:2px;text-decoration:none;font-weight:600">🍽 Order</a>`:''}${b.waymo_url?`<a href="${b.waymo_url}" target="_blank" onclick="event.stopPropagation()" style="font-size:.58rem;background:#1A73E8;color:#fff;padding:3px 8px;border-radius:2px;text-decoration:none;font-weight:600">🚗 Waymo</a>`:''}</div>`:''}</div></div>`).join('');
 }
 function filterDir(){
   const q=document.getElementById('dir-search').value.toLowerCase().trim();
