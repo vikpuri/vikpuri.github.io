@@ -189,6 +189,9 @@
       .bb-thumb{height:90px}
       .bb-channel{display:none}
     }
+    @media(max-width:640px) and (orientation:portrait){
+      #yt-billboard{display:none!important}
+    }
     /* ── MEDIA COLUMN ── */
     #media-col{position:fixed;top:calc(var(--h) + env(safe-area-inset-top,0px) + 8px);left:16px;width:280px;z-index:90;display:flex;flex-direction:column;gap:8px}
     /* ── RADIO PLAYER ── */
