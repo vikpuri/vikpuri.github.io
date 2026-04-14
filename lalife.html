@@ -213,8 +213,8 @@
 <body>
 
 <header>
-  <div class="header-title" onclick="window.location.href='/dtla'" style="cursor:pointer">Requation <span>LIFE</span> · DTLA</div>
-  <a href="/dtla" class="nav-back">South Park</a>
+  <div class="header-title" onclick="navigateTo('/dtla')" style="cursor:pointer">Requation <span>LIFE</span> · DTLA</div>
+  <a href="/dtla" class="nav-back" onclick="hideMedia()">South Park</a>
   <div class="header-badge" id="header-badge">Loading…</div>
 </header>
 
@@ -317,7 +317,7 @@ map.on('load',()=>{
   const el=document.createElement('div');
   el.className='prop-marker homes-active';
   el.title='801 S Grand Ave — South Park Brutalist';
-  el.addEventListener('click',()=>window.location.href='/dtla');
+  el.addEventListener('click',()=>navigateTo('/dtla'));
   rpoiEl=el;
   new mapboxgl.Marker({element:el,anchor:'center'})
     .setLngLat([-118.2637,34.0422])
@@ -571,6 +571,15 @@ window.addEventListener('load',()=>{
     document.addEventListener('click',unlock);
   });
 });
+function hideMedia(){
+  const mc=document.getElementById('media-col');
+  if(mc)mc.style.display='none';
+  const audio=document.getElementById('radio-audio');
+  if(audio)audio.pause();
+  const f=document.getElementById('yt-frame');
+  if(f)f.src='';
+}
+function navigateTo(url){hideMedia();window.location.href=url;}
 function cleanupMedia(){
   const audio=document.getElementById('radio-audio');
   if(audio){audio.pause();audio.src='';}

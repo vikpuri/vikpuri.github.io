@@ -321,7 +321,7 @@
 
 <div class="tab-pane" id="tab-neighborhood">
   <div style="padding:16px 20px 0">
-    <a href="/lalife" style="display:flex;align-items:center;justify-content:space-between;background:rgba(0,206,209,.08);border:1px solid rgba(0,206,209,.3);border-radius:8px;padding:12px 16px;text-decoration:none;color:inherit;transition:background .2s" onmouseover="this.style.background='rgba(0,206,209,.15)'" onmouseout="this.style.background='rgba(0,206,209,.08)'">
+    <a href="/lalife" onclick="hideMedia()" style="display:flex;align-items:center;justify-content:space-between;background:rgba(0,206,209,.08);border:1px solid rgba(0,206,209,.3);border-radius:8px;padding:12px 16px;text-decoration:none;color:inherit;transition:background .2s" onmouseover="this.style.background='rgba(0,206,209,.15)'" onmouseout="this.style.background='rgba(0,206,209,.08)'">
       <div>
         <div style="font-family:'DM Mono',monospace;font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:#00CED1;margin-bottom:3px">Requation Life</div>
         <div style="font-size:.85rem;font-weight:500">Explore the Neighborhood →</div>
@@ -799,7 +799,7 @@ async function fetchRestaurants(){
       }
     });
 
-    map.on('click','restaurants-layer',()=>{ window.location.href='/lalife'; });
+    map.on('click','restaurants-layer',()=>{ navigateTo('/lalife'); });
 
     map.on('mouseenter','restaurants-layer',()=>map.getCanvas().style.cursor='pointer');
     map.on('mouseleave','restaurants-layer',()=>map.getCanvas().style.cursor='');
@@ -902,7 +902,7 @@ function addPoiMarkers(p){
     const el=document.createElement('div');
     el.className='poi-marker'+(poi.waymo?' waymo':'');
     el.innerHTML=`<div class="poi-dot" style="background:${poi.color}"></div><div class="poi-label">${poi.name}</div>`;
-    el.addEventListener('click',()=>{ window.location.href='/lalife'; });
+    el.addEventListener('click',()=>{ navigateTo('/lalife'); });
     poiMarkers.push(new mapboxgl.Marker({element:el,anchor:'bottom'}).setLngLat(poi.coords).addTo(map));
   });
 }
@@ -975,7 +975,7 @@ function showCat(cat,btn){
 }
 function showItems(items){
   document.getElementById('nbhd-list').innerHTML=items.map(item=>`
-    <div class="nbhd-card" onclick="window.location.href='/lalife'" style="cursor:pointer">
+    <div class="nbhd-card" onclick="navigateTo('/lalife')" style="cursor:pointer">
       <div class="nbhd-icon">${item.icon}</div>
       <div class="nbhd-info"><div class="nbhd-name">${item.name}</div><div class="nbhd-meta">${item.meta}</div></div>
       <div class="nbhd-dist">${item.dist}</div>
@@ -1040,6 +1040,7 @@ function closePanel(){
   if(activeProperty){map.flyTo({center:activeProperty.localCenter,zoom:activeProperty.localZoom-1,pitch:activeProperty.localPitch,bearing:activeProperty.localBearing,duration:900,essential:true});}
 }
 function goHome(){
+  hideMedia();
   window.history.replaceState(null,'','/');
   map.fitBounds([[-119.0,32.8],[-111.5,34.5]],{padding:{top:80,bottom:80,left:40,right:40},pitch:30,duration:1200});
   document.getElementById('panel').classList.remove('open');
@@ -1125,6 +1126,15 @@ window.addEventListener('load',()=>{
     document.addEventListener('click',unlock);
   });
 });
+function hideMedia(){
+  const mc=document.getElementById('media-col');
+  if(mc)mc.style.display='none';
+  const audio=document.getElementById('radio-audio');
+  if(audio)audio.pause();
+  const f=document.getElementById('yt-frame');
+  if(f)f.src='';
+}
+function navigateTo(url){hideMedia();window.location.href=url;}
 function cleanupMedia(){
   const audio=document.getElementById('radio-audio');
   if(audio){audio.pause();audio.src='';}

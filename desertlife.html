@@ -246,8 +246,8 @@
 <body>
 
 <header>
-  <div class="header-title" onclick="window.location.href='/laveen'" style="cursor:pointer">Requation <span>LIFE</span> · Laveen</div>
-  <a href="/laveen" class="nav-back">Urban Farmhouse</a>
+  <div class="header-title" onclick="navigateTo('/laveen')" style="cursor:pointer">Requation <span>LIFE</span> · Laveen</div>
+  <a href="/laveen" class="nav-back" onclick="hideMedia()">Urban Farmhouse</a>
   <div class="header-badge" id="header-badge">Loading…</div>
 </header>
 
@@ -359,7 +359,7 @@ map.on('load',()=>{
   const el=document.createElement('div');
   el.className='prop-marker';
   el.title='Urban Farmhouse — Requation Laveen';
-  el.addEventListener('click',()=>window.location.href='/laveen');
+  el.addEventListener('click',()=>navigateTo('/laveen'));
   new mapboxgl.Marker({element:el,anchor:'center'})
     .setLngLat([-112.1180767,33.3427905])
     .addTo(map);
@@ -660,6 +660,15 @@ window.addEventListener('load',()=>{
     document.addEventListener('click',unlock);
   });
 });
+function hideMedia(){
+  const mc=document.getElementById('media-col');
+  if(mc)mc.style.display='none';
+  const audio=document.getElementById('radio-audio');
+  if(audio)audio.pause();
+  const f=document.getElementById('yt-frame');
+  if(f)f.src='';
+}
+function navigateTo(url){hideMedia();window.location.href=url;}
 function cleanupMedia(){
   const audio=document.getElementById('radio-audio');
   if(audio){audio.pause();audio.src='';}
