@@ -632,7 +632,7 @@ async function loadDBListings() {
       const ring = document.createElement('div');
       ring.style.cssText='position:absolute;inset:-16px;border-radius:50%;border:2px solid rgba(201,168,76,.45);animation:prop-pulse 2s ease-out infinite;pointer-events:none';
       const dot = document.createElement('div');
-      dot.style.cssText='width:42px;height:42px;border-radius:50%;background:transparent;border:4px solid #C9A84C;box-shadow:0 0 20px 4px rgba(201,168,76,.7);cursor:pointer';
+      dot.style.cssText='width:46px;height:46px;border-radius:50%;background:#C9A84C;border:3px solid #fff;box-shadow:0 0 36px 6px rgba(201,168,76,.9);cursor:pointer';
       el.appendChild(ring);
       el.appendChild(dot);
       el.addEventListener('click',()=>showDBPanel(p));
@@ -886,7 +886,9 @@ async function loadDirectory(){
     const r=await fetch(`${DIR_SB}/rest/v1/restaurants?select=name,category,address,zip&zip=in.(${DIR_ZIPS_DTLA})&limit=200&order=name.asc`,
       {headers:{'apikey':DIR_KEY,'Authorization':'Bearer '+DIR_KEY}});
     if(!r.ok) throw new Error(r.status);
-    dirData=await r.json();
+    const raw=await r.json();
+    const seen=new Set();
+    dirData=raw.filter(b=>{const k=(b.name||'')+'|'+(b.address||'');if(seen.has(k))return false;seen.add(k);return true;});
     dirLoaded=true;
     renderDir(dirData);
   }catch(e){
