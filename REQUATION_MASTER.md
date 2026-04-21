@@ -524,4 +524,48 @@ Current logo design (work in progress — slash angle being refined):
 
 ---
 
-*Document maintained by Requation development team. Last updated: 2026-04-13 (session 2 — logo + iPhone safe area).*
+---
+
+## 14. WhatIsMedigap.com — Separate Product
+
+> ⚠️ Completely separate from Requation. Different GitHub repo, different Netlify site, different domain. No shared code, keys, or infrastructure.
+
+### Product Description
+A standalone public-service publication helping American seniors understand Medicare Supplement Insurance (Medigap) and why it may protect them better than Medicare Advantage. Written in a plain-English, folksy voice (Charlie Munger-style) — no insurance company affiliation, nothing sold, free public resource. A MartinsWay.org initiative.
+
+**Tagline:** *"For about 5 bucks a day — less than a cup of coffee — you could avoid going broke because of surgery or getting sick."*
+
+### Infrastructure
+| Item | Value |
+|------|-------|
+| Domain | whatismedigap.com |
+| GitHub | github.com/vikpuri/whatismedigap |
+| Netlify | whatismedigap.netlify.app |
+| Branch | master |
+| Build command | *(none — single static HTML file)* |
+| Publish directory | *(root)* |
+| Sponsor | martinsway.org — "A Good Life for All" |
+
+### Design
+- WSJ-style broadsheet layout: Playfair Display masthead, Source Serif 4 body
+- Single file: `index.html` (no build pipeline, no secrets, no dependencies)
+- Three newspaper columns: In Plain English / What It Costs / What To Do
+- Two pull quotes, cost comparison table (9 procedures), MartinsWay footer strip
+- Built with Claude Sonnet
+
+### Key Facts in the Page (current data)
+- 93% of non-pediatric physicians accept Medicare (any doctor, anywhere)
+- ~14 million Americans enrolled in Medigap
+- Plan G: $130–$200/month at age 65 in most states
+- Medicare Advantage OOP max: up to $9,350/year in-network (2026)
+- ~1 in 8 prior authorization requests initially denied (MA plans)
+- Open enrollment: 6-month window starting at age 65 + Part B enrollment
+- 47 states allow medical underwriting after open enrollment closes
+- Protected states (year-round): CT, MA, NY, ME
+
+### Deployment
+Push to `master` on GitHub → Netlify auto-deploys → live at whatismedigap.com
+
+---
+
+*Document maintained by Requation development team. Last updated: 2026-04-20 (session — WhatIsMedigap launched as separate product).*
