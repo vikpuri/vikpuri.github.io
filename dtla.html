@@ -218,24 +218,6 @@
     #yt-counter{font-family:'DM Mono',monospace;font-size:.6rem;color:rgba(255,255,255,.4);letter-spacing:.08em}
     #yt-close{position:absolute;top:20px;right:20px;background:none;border:none;color:rgba(255,255,255,.5);font-size:1.4rem;cursor:pointer}
     #yt-close:hover{color:#fff}
-    /* ── MONUMENT STRIP ── */
-    #monument-strip{position:fixed;top:calc(var(--header-h) + env(safe-area-inset-top,0px));left:0;right:0;width:100%;height:clamp(80px,calc(100vw * 9 / 32),120px);z-index:112;overflow:hidden;animation:monument-breathe 4s ease-in-out infinite}
-    @keyframes monument-breathe{0%,100%{box-shadow:0 0 0 0 rgba(0,191,255,0)}50%{box-shadow:0 6px 40px rgba(0,191,255,.25),0 0 0 1px rgba(0,191,255,.12)}}
-    #monument-strip::after{content:'';position:absolute;bottom:0;left:0;right:0;height:48px;background:linear-gradient(transparent,rgba(0,0,0,.6));z-index:2;pointer-events:none}
-    .monument-scroll{display:flex;width:100%;height:100%;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;-ms-overflow-style:none}
-    .monument-scroll::-webkit-scrollbar{display:none}
-    .monument-card{flex:0 0 100%;scroll-snap-align:start;position:relative;height:100%;overflow:hidden;cursor:pointer;background:#0d1117}
-    .monument-thumb{width:100%;height:100%;object-fit:cover;display:block;filter:brightness(.85);transition:filter .4s}
-    .monument-card:hover .monument-thumb{filter:brightness(1)}
-    .monument-play{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.12);z-index:1;transition:background .3s}
-    .monument-card:hover .monument-play{background:rgba(0,0,0,.05)}
-    .monument-play-btn{width:44px;height:44px;border-radius:50%;background:rgba(0,0,0,.5);border:2px solid rgba(255,255,255,.7);display:flex;align-items:center;justify-content:center}
-    .monument-label{position:absolute;bottom:52px;left:14px;z-index:3;display:flex;flex-direction:column;gap:3px}
-    .monument-tier{font-family:'DM Mono',monospace;font-size:.46rem;letter-spacing:.22em;text-transform:uppercase;color:rgba(0,191,255,.8);text-shadow:0 0 8px rgba(0,191,255,.5)}
-    .monument-name{font-family:'DM Mono',monospace;font-size:.64rem;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.95);text-shadow:0 1px 6px rgba(0,0,0,.9)}
-    .monument-dots{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);display:flex;gap:5px;z-index:4}
-    .monument-dot{width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,.35);cursor:pointer;transition:background .3s,transform .3s}
-    .monument-dot.active{background:rgba(0,191,255,.9);transform:scale(1.3);box-shadow:0 0 6px rgba(0,191,255,.7)}
   </style>
 </head>
 <body>
@@ -280,16 +262,6 @@
     </svg>
   </div>
 </header>
-
-<div id="monument-strip">
-  <div class="monument-scroll" id="monument-scroll">
-    <div class="monument-card" onclick="monumentPlay(this)" data-vid=""><img class="monument-thumb" src="" alt="LA Live"><div class="monument-play"><div class="monument-play-btn"><svg width="16" height="16" viewBox="0 0 16 16"><polygon points="4,2 14,8 4,14" fill="white"/></svg></div></div><div class="monument-label"><span class="monument-tier">MONUMENT</span><span class="monument-name">LA Live</span></div></div>
-    <div class="monument-card" onclick="monumentPlay(this)" data-vid=""><img class="monument-thumb" src="" alt="LA Convention Center"><div class="monument-play"><div class="monument-play-btn"><svg width="16" height="16" viewBox="0 0 16 16"><polygon points="4,2 14,8 4,14" fill="white"/></svg></div></div><div class="monument-label"><span class="monument-tier">MONUMENT</span><span class="monument-name">LA Convention Center</span></div></div>
-    <div class="monument-card" onclick="monumentPlay(this)" data-vid=""><img class="monument-thumb" src="" alt="The Broad"><div class="monument-play"><div class="monument-play-btn"><svg width="16" height="16" viewBox="0 0 16 16"><polygon points="4,2 14,8 4,14" fill="white"/></svg></div></div><div class="monument-label"><span class="monument-tier">MONUMENT</span><span class="monument-name">The Broad</span></div></div>
-    <div class="monument-card" onclick="monumentPlay(this)" data-vid=""><img class="monument-thumb" src="" alt="MOCA"><div class="monument-play"><div class="monument-play-btn"><svg width="16" height="16" viewBox="0 0 16 16"><polygon points="4,2 14,8 4,14" fill="white"/></svg></div></div><div class="monument-label"><span class="monument-tier">MONUMENT</span><span class="monument-name">MOCA</span></div></div>
-  </div>
-  <div class="monument-dots" id="monument-dots"><div class="monument-dot active" onclick="monumentGoTo(0)"></div><div class="monument-dot" onclick="monumentGoTo(1)"></div><div class="monument-dot" onclick="monumentGoTo(2)"></div><div class="monument-dot" onclick="monumentGoTo(3)"></div></div>
-</div>
 
 <div id="db-listing-panel" style="position:fixed;bottom:0;left:0;right:0;z-index:85;background:var(--cream);border-top:2px solid var(--ink);border-radius:16px 16px 0 0;padding:16px 20px 24px;max-width:420px;margin:0 auto;transform:translateY(100%);transition:transform .45s cubic-bezier(.22,1,.36,1);box-shadow:0 -4px 24px rgba(0,0,0,.12)">
   <button onclick="document.getElementById('db-listing-panel').style.transform='translateY(100%)';clearDBPois();" style="position:absolute;top:12px;right:14px;background:none;border:1px solid var(--rule-heavy);width:26px;height:26px;cursor:pointer;font-size:.8rem;color:var(--ink-3)">✕</button>
@@ -1030,40 +1002,6 @@ function navigateTo(url){hideMedia();window.location.href=url;}
 function cleanupMedia(){const audio=document.getElementById('radio-audio');if(audio){audio.pause();audio.src='';}const f=document.getElementById('yt-frame');if(f)f.src='';const bb=document.getElementById('yt-billboard');if(bb){const fi=bb.querySelector('iframe');if(fi)fi.src='';}}
 window.addEventListener('pagehide',cleanupMedia);
 window.addEventListener('beforeunload',cleanupMedia);
-/* ── MONUMENT ── */
-(function(){
-  var VENUES=[
-    {q:'LA Live Los Angeles events',idx:0},
-    {q:'LA Convention Center Los Angeles events',idx:1},
-    {q:'The Broad museum Los Angeles exhibitions',idx:2},
-    {q:'MOCA Los Angeles Museum Contemporary Art',idx:3}
-  ];
-  var cards=document.querySelectorAll('.monument-card');
-  var scroll=document.getElementById('monument-scroll');
-  var dots=document.querySelectorAll('.monument-dot');
-  if(!scroll)return;
-  VENUES.forEach(function(v){
-    fetch('/.netlify/functions/youtube?q='+encodeURIComponent(v.q)+'&maxResults=1')
-    .then(function(r){return r.json()})
-    .then(function(d){
-      if(d.videos&&d.videos[0]&&cards[v.idx]){
-        var vid=d.videos[0].id;
-        var url='https://www.youtube.com/watch?v='+vid;
-        cards[v.idx].querySelector('.monument-thumb').src=d.videos[0].thumb;
-        cards[v.idx].querySelector('.monument-play').onclick=function(e){e.stopPropagation();window.open(url,'_blank');};
-        cards[v.idx].onclick=function(){window.open(url,'_blank');};
-      }
-    })
-    .catch(function(){});
-  });
-  scroll.addEventListener('scroll',function(){
-    var i=Math.round(scroll.scrollLeft/scroll.offsetWidth);
-    dots.forEach(function(d,idx){d.classList.toggle('active',idx===i);});
-  });
-  var cur=0,total=VENUES.length;
-  setInterval(function(){cur=(cur+1)%total;scroll.scrollTo({left:scroll.offsetWidth*cur,behavior:'smooth'});},7000);
-})();
-function monumentGoTo(i){var s=document.getElementById('monument-scroll');if(s)s.scrollTo({left:s.offsetWidth*i,behavior:'smooth'});}
 </script>
 
 </body>
