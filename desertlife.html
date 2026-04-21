@@ -225,7 +225,7 @@
     .radio-waves span:nth-child(3){animation:wave .7s ease-in-out infinite .3s}
     .radio-waves span:nth-child(4){animation:wave .7s ease-in-out infinite .45s}
     /* ── MONUMENT STRIP ── */
-    #monument-strip{position:fixed;top:calc(var(--h) + env(safe-area-inset-top,0px));left:0;right:0;width:100%;height:clamp(160px,calc(100vw * 9 / 16),240px);z-index:112;overflow:hidden;animation:monument-breathe 4s ease-in-out infinite}
+    #monument-strip{position:fixed;top:calc(var(--h) + env(safe-area-inset-top,0px));left:0;right:0;width:100%;height:clamp(80px,calc(100vw * 9 / 32),120px);z-index:112;overflow:hidden;animation:monument-breathe 4s ease-in-out infinite}
     @keyframes monument-breathe{0%,100%{box-shadow:0 0 0 0 rgba(0,191,255,0)}50%{box-shadow:0 6px 40px rgba(0,191,255,.25),0 0 0 1px rgba(0,191,255,.12)}}
     #monument-strip::after{content:'';position:absolute;bottom:0;left:0;right:0;height:48px;background:linear-gradient(transparent,rgba(0,0,0,.6));z-index:2;pointer-events:none}
     .monument-scroll{display:flex;width:100%;height:100%;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;-ms-overflow-style:none}
@@ -635,7 +635,15 @@ window.addEventListener('beforeunload',cleanupMedia);
   VENUES.forEach(function(v){
     fetch('/.netlify/functions/youtube?q='+encodeURIComponent(v.q)+'&maxResults=1')
     .then(function(r){return r.json()})
-    .then(function(d){if(d.videos&&d.videos[0]&&cards[v.idx]){cards[v.idx].querySelector('.monument-thumb').src=d.videos[0].thumb;cards[v.idx].dataset.vid=d.videos[0].id;}})
+    .then(function(d){
+      if(d.videos&&d.videos[0]&&cards[v.idx]){
+        var vid=d.videos[0].id;
+        var url='https://www.youtube.com/watch?v='+vid;
+        cards[v.idx].querySelector('.monument-thumb').src=d.videos[0].thumb;
+        cards[v.idx].querySelector('.monument-play').onclick=function(e){e.stopPropagation();window.open(url,'_blank');};
+        cards[v.idx].onclick=function(){window.open(url,'_blank');};
+      }
+    })
     .catch(function(){});
   });
   scroll.addEventListener('scroll',function(){
@@ -646,7 +654,6 @@ window.addEventListener('beforeunload',cleanupMedia);
   setInterval(function(){cur=(cur+1)%total;scroll.scrollTo({left:scroll.offsetWidth*cur,behavior:'smooth'});},7000);
 })();
 function monumentGoTo(i){var s=document.getElementById('monument-scroll');if(s)s.scrollTo({left:s.offsetWidth*i,behavior:'smooth'});}
-function monumentPlay(card){var v=card.dataset.vid;if(v)window.open('https://www.youtube.com/watch?v='+v,'_blank');}
 </script>
 </body>
 </html>
