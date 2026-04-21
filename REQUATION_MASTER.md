@@ -579,4 +579,96 @@ Push to `master` on GitHub → Netlify auto-deploys → live at whatismedigap.co
 
 ---
 
-*Document maintained by Requation development team. Last updated: 2026-04-20 (session — WhatIsMedigap launched as separate product).*
+---
+
+## 15. NEON MAPS — Visual Tier System (PLANNED — not yet built)
+
+> Build rule: HTML visual model approved before any code committed. No new YT thumbnails added until YT/radio placement is resolved across all 4 pages.
+
+### The Three Tiers
+
+| Tier | Size | Grid ref | Border | Cost | Content |
+|------|------|----------|--------|------|---------|
+| **MONUMENT** | 280×158px | Map-pinned at venue | None | Free → BILLBOARD | YT API auto-query by venue name |
+| **BILLBOARD** | 210×118px | A3–A4 map-pinned | 2px neon (#00BFFF) | Paid | Advertiser YT or image |
+| **SOAPBOX** | 140×79px | Map-pinned at event | 2px green/red | Free/low | Eventbrite + YT match |
+
+### MONUMENT Assignments
+| Page | Venue | Location |
+|------|-------|----------|
+| /dtla + /lalife | LA Live | Downtown LA — map-pinned |
+| /laveen + /desertlife | South Mountain Park Preserve | Laveen/Phoenix — map-pinned |
+
+### BILLBOARD Assignments (Free for now)
+Grocery/retail anchor stores — map-pinned at real coordinates, closer detail on life pages:
+
+| Store | /dtla + /laveen | /lalife + /desertlife |
+|-------|----------------|----------------------|
+| Trader Joe's | Map pin (BILLBOARD) | Closer detail + popup |
+| Whole Foods | Map pin (BILLBOARD) | Closer detail + popup |
+| Target | Map pin (BILLBOARD) | Closer detail + popup |
+| Costco | Map pin (BILLBOARD) | Closer detail + popup |
+
+### Revenue Path
+SOAPBOX (free) → venue sees traffic → upgrades to BILLBOARD (paid)
+MONUMENT (free civic anchor) → venue pays → becomes BILLBOARD
+
+---
+
+## 16. Map Grid System — Thomas Bros Reference
+
+Viewport divided into 5×5 grid (A–E columns, 1–5 rows). Header = Row 0, not part of map canvas.
+
+```
+        A          B          C          D          E
+  1  top-left              top-ctr              top-right   ← below header
+  2
+  3                         CENTER                          ← visual midpoint
+  4
+  5  bot-left              bot-ctr              bot-right   ← above OS chrome
+```
+
+**Current placements:**
+- media-col on dtla/laveen: **A5** (`bottom:20px; left:16px`)
+- media-col on lalife/desertlife: **A1** (`top:calc(--h + safeArea + 8px); left:16px`)
+- Property panel: **E1→E5** (right-side slide-in)
+
+---
+
+## 17. YT + Radio Placement — PENDING RESOLUTION
+
+**Do not add new YT thumbnails until this is resolved.**
+
+| Page | Header var | Header px | media-col anchor | Grid |
+|------|-----------|-----------|-----------------|------|
+| /dtla | `--header-h` | 68px | bottom | A5 |
+| /laveen | `--header-h` | 68px | bottom | A5 |
+| /lalife | `--h` | 52px | top | A1 |
+| /desertlife | `--h` | 52px | top | A1 |
+
+**Bugs:** Different header height variables (`--header-h` vs `--h`), different px values (68 vs 52), different anchoring (bottom vs top). Must unify before NEON MAPS build.
+
+**Completion checklist:**
+- [ ] All 4 pages use `--header-h` with same value
+- [ ] YT billboard at correct grid position on all 4 pages
+- [ ] Radio at correct grid position on all 4 pages
+- [ ] No layout jump when YT loads
+- [ ] iPhone + desktop tested
+- [ ] HTML model approved before commit
+
+---
+
+## 18. Design Laws
+
+| Rule | Detail |
+|------|--------|
+| Logo identical on all pages | Same SVG, same colors, same size — no per-page variations |
+| Header identical on all pages | Same height, same variable name (`--header-h`), same HTML |
+| Template before code | Draft layout + state purpose — get sign-off before writing code |
+| HTML model before commit | Build standalone preview, get approval, then git push |
+| Thomas Bros grid for placement | All UI positions specified by grid ref (e.g. "A5, fixed, z-index:90") |
+| One change at a time | Never two features in one commit |
+
+---
+
+*Document maintained by Requation development team. Last updated: 2026-04-21 (session — NEON MAPS spec, grid system, YT placement status, design laws).*
