@@ -3,518 +3,479 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="What is Medigap? A plain-language guide to Medicare Supplement Insurance — and why it may protect you better than Medicare Advantage.">
-<title>What is Medigap? | A Public Service Publication</title>
+<title>WHATISMEDIGAP — A Plain-English Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Source+Serif+4:ital,wght@0,300;0,400;0,600;1,300&display=swap" rel="stylesheet">
 <style>
-/* ── Reset ── */
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-/* ── Typography ── */
+:root {
+  --black: #111111;
+  --navy: #1B3A5C;
+  --cream: #F9F6F0;
+  --rule: #CCCCCC;
+  --red: #8B0000;
+}
+
 body {
-  font-family: Georgia, 'Times New Roman', serif;
-  font-size: 17px;
-  line-height: 1.65;
-  color: #111;
-  background: #faf8f4;
-}
-h1, h2, h3, h4 {
-  font-family: Georgia, 'Times New Roman', serif;
-  font-weight: bold;
-  line-height: 1.2;
+  background: var(--cream);
+  color: var(--black);
+  font-family: 'Source Serif 4', Georgia, serif;
+  font-size: 18px;
+  line-height: 1.6;
 }
 
-/* ── Page wrapper ── */
-.page { max-width: 1080px; margin: 0 auto; background: #fff; }
-
-/* ══════════════════════════════════════════
-   MASTHEAD
-══════════════════════════════════════════ */
 .masthead {
-  padding: 24px 36px 0;
-  border-bottom: 3px double #111;
-}
-.masthead-topline {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 0.75em;
-  font-family: Arial, Helvetica, sans-serif;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: #444;
-  padding-bottom: 8px;
-  border-bottom: 1px solid #aaa;
-  margin-bottom: 14px;
-}
-.masthead-center { text-align: center; padding-bottom: 12px; }
-.masthead-eyebrow {
-  font-size: 1em;
-  font-style: italic;
-  color: #555;
-  letter-spacing: 0.12em;
-  display: block;
-  margin-bottom: 2px;
-}
-.masthead-title {
-  font-size: 5.6em;
-  font-weight: 900;
-  letter-spacing: -0.01em;
-  line-height: 1;
-  color: #0a0a0a;
-  display: block;
-  font-family: Georgia, 'Times New Roman', serif;
-}
-.masthead-rule {
-  height: 4px;
-  background: #b22234;
-  margin: 10px 0 8px;
-  border: none;
-}
-.masthead-tagline {
-  font-size: 0.82em;
-  font-family: Arial, Helvetica, sans-serif;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: #444;
+  border-bottom: 3px solid var(--black);
+  padding: 32px 40px 24px;
   text-align: center;
+}
+
+.masthead-label {
+  font-family: 'Source Serif 4', serif;
+  font-style: italic;
+  font-size: 16px;
+  color: #666;
+  letter-spacing: .05em;
+  margin-bottom: 4px;
+}
+
+.masthead-title {
+  font-family: 'Playfair Display', serif;
+  font-weight: 900;
+  font-size: clamp(52px, 8vw, 96px);
+  letter-spacing: .04em;
+  line-height: 1;
+  color: var(--black);
+  text-transform: uppercase;
+}
+
+.masthead-date {
+  font-size: 13px;
+  color: #888;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  border-top: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
+  padding: 6px 0;
+  margin-top: 16px;
+}
+
+.quote-hero {
+  max-width: 760px;
+  margin: 40px auto;
+  padding: 32px 40px;
+  border-left: 5px solid var(--navy);
+  border-right: 5px solid var(--navy);
+  background: white;
+  text-align: center;
+}
+
+.quote-hero blockquote {
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  font-size: clamp(22px, 3vw, 32px);
+  line-height: 1.4;
+  color: var(--black);
+}
+
+.quote-hero cite {
+  display: block;
+  margin-top: 16px;
+  font-style: normal;
+  font-size: 13px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--navy);
+}
+
+.quote-secondary {
+  max-width: 580px;
+  margin: 0 auto 40px;
+  padding: 20px 32px;
+  border-top: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
+  text-align: center;
+}
+
+.quote-secondary blockquote {
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  font-size: clamp(17px, 2vw, 21px);
+  line-height: 1.5;
+  color: #444;
+}
+
+.section-rule {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 0 40px;
+  margin: 32px 0 24px;
+}
+.section-rule::before, .section-rule::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--black);
+}
+.section-rule span {
+  font-size: 11px;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  font-family: 'Source Serif 4', serif;
+  white-space: nowrap;
+  color: var(--navy);
+  font-weight: 600;
+}
+
+.columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 0;
+  padding: 0 40px;
+  border-top: 3px solid var(--black);
+}
+
+.col {
+  padding: 28px 24px;
+  border-right: 1px solid var(--rule);
+}
+.col:last-child { border-right: none; }
+
+.col-headline {
+  font-family: 'Playfair Display', serif;
+  font-weight: 700;
+  font-size: 22px;
+  line-height: 1.2;
+  margin-bottom: 12px;
+  color: var(--black);
+}
+
+.col-deck {
+  font-size: 14px;
+  color: #555;
+  font-style: italic;
+  margin-bottom: 16px;
+  border-bottom: 1px solid var(--rule);
   padding-bottom: 12px;
 }
 
-/* ══════════════════════════════════════════
-   DECK (sub-headline below masthead)
-══════════════════════════════════════════ */
-.deck {
-  padding: 14px 36px;
-  border-bottom: 1px solid #ccc;
-  text-align: center;
-  font-size: 1.05em;
-  font-style: italic;
+.col-body {
+  font-size: 16px;
+  line-height: 1.7;
   color: #333;
-  background: #fdfbf7;
 }
 
-/* ══════════════════════════════════════════
-   THREE-COLUMN BODY
-══════════════════════════════════════════ */
-.columns {
-  display: grid;
-  grid-template-columns: 1fr 1.55fr 1fr;
-  gap: 0;
-  padding: 0 36px;
-  border-bottom: 2px solid #111;
-}
-.col {
-  padding: 24px 18px;
-}
-.col:not(:last-child) {
-  border-right: 1px solid #ccc;
-}
-.col-head {
-  font-size: 1.25em;
-  font-weight: bold;
-  border-top: 3px solid #111;
-  padding-top: 10px;
-  margin-bottom: 12px;
-}
-.col p { margin-bottom: 10px; font-size: 0.96em; }
-.col ul { padding-left: 18px; margin-bottom: 10px; }
-.col li { margin-bottom: 6px; font-size: 0.95em; }
+.col-body p { margin-bottom: 14px; }
 
-/* ── Pull quote ── */
-.pullquote {
-  border-top: 2px solid #111;
-  border-bottom: 2px solid #111;
-  margin: 18px 0;
-  padding: 14px 4px;
-  text-align: center;
+.col-body a {
+  color: var(--navy);
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
-.pullquote p {
-  font-size: 1.12em;
-  font-style: italic;
-  line-height: 1.45;
-  color: #222;
-  margin: 0 !important;
+
+.large-callout {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(24px, 3.5vw, 42px);
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--navy);
+  margin: 20px 0 16px;
+  padding: 16px 0;
+  border-top: 2px solid var(--navy);
+  border-bottom: 2px solid var(--navy);
 }
-.pullquote cite {
+
+.resource-link {
   display: block;
-  font-size: 0.78em;
-  font-style: normal;
-  font-family: Arial, Helvetica, sans-serif;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: #666;
-  margin-top: 8px;
-}
-
-/* ── Byline / dateline ── */
-.byline {
-  font-size: 0.78em;
-  font-family: Arial, Helvetica, sans-serif;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: #666;
-  border-bottom: 1px solid #ccc;
-  padding-bottom: 8px;
-  margin-bottom: 12px;
-}
-
-/* ── Plan badges ── */
-.plan-badge {
-  display: inline-block;
-  background: #0a3060;
-  color: #fff;
-  font-size: 0.7em;
-  font-family: Arial, sans-serif;
-  font-weight: bold;
-  padding: 2px 7px;
-  border-radius: 3px;
-  letter-spacing: 0.05em;
-  vertical-align: middle;
-  margin-right: 4px;
-}
-.col h4 {
-  font-size: 1em;
-  margin: 14px 0 5px;
-  color: #0a3060;
-}
-
-/* ── CTA inline ── */
-.cta-inline {
-  display: inline-block;
-  background: #b22234;
-  color: #fff;
-  font-family: Arial, sans-serif;
-  font-size: 0.82em;
-  font-weight: bold;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  padding: 8px 16px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--rule);
+  font-size: 15px;
+  color: var(--navy);
   text-decoration: none;
-  border-radius: 3px;
-  margin-top: 10px;
+  font-weight: 600;
 }
-.cta-inline:hover { background: #8b1a27; }
-
-/* ══════════════════════════════════════════
-   COMPARISON TABLE SECTION
-══════════════════════════════════════════ */
-.table-section {
-  padding: 28px 36px 32px;
-  border-bottom: 2px solid #111;
-}
-.section-head {
-  font-size: 1.5em;
-  font-weight: bold;
-  border-top: 3px solid #111;
-  padding-top: 10px;
-  margin-bottom: 6px;
-}
-.section-deck {
-  font-size: 0.92em;
+.resource-link:hover { color: var(--black); }
+.resource-link span {
+  font-weight: 300;
   font-style: italic;
-  color: #444;
-  margin-bottom: 18px;
+  font-size: 13px;
+  color: #888;
+  margin-left: 8px;
 }
-.compare-wrap { overflow-x: auto; }
+
+.table-intro {
+  max-width: 820px;
+  margin: 0 auto 28px;
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  font-size: clamp(17px, 2vw, 22px);
+  line-height: 1.5;
+  color: var(--navy);
+  text-align: center;
+  padding: 20px 0;
+  border-top: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
+}
+
+.comparison-section {
+  padding: 40px 40px;
+  border-top: 3px solid var(--black);
+}
+
+.comparison-section h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.comparison-section .deck {
+  font-style: italic;
+  color: #666;
+  font-size: 16px;
+  margin-bottom: 24px;
+}
+
 table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.9em;
-  font-family: Arial, Helvetica, sans-serif;
-  min-width: 560px;
+  font-size: 15px;
 }
-thead tr { background: #0a3060; color: #fff; }
-thead th { padding: 10px 14px; text-align: left; font-weight: bold; }
-thead th:first-child { width: 30%; }
-tbody tr:nth-child(even) { background: #f5f3ee; }
-tbody td { padding: 10px 14px; border-bottom: 1px solid #ddd; vertical-align: top; }
-.yes { color: #1a6b1a; font-weight: bold; }
-.no  { color: #b22234; font-weight: bold; }
-.mid { color: #8a5f00; font-weight: bold; }
 
-/* ══════════════════════════════════════════
-   ENROLLMENT CALLOUT
-══════════════════════════════════════════ */
-.callout-strip {
-  background: #0a3060;
-  color: #fff;
-  padding: 20px 36px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 20px;
-  flex-wrap: wrap;
-  border-bottom: 2px solid #111;
+thead tr { background: var(--navy); color: white; }
+
+thead th {
+  padding: 12px 16px;
+  text-align: left;
+  font-family: 'Source Serif 4', serif;
+  font-weight: 600;
+  letter-spacing: .05em;
+  font-size: 13px;
+  text-transform: uppercase;
 }
-.callout-strip p {
-  font-size: 1em;
+
+tbody tr:nth-child(even) { background: white; }
+tbody tr:nth-child(odd) { background: var(--cream); }
+
+tbody td {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--rule);
+  vertical-align: top;
   line-height: 1.5;
-  max-width: 760px;
-}
-.callout-strip strong { color: #f0d080; }
-.callout-strip a {
-  display: inline-block;
-  background: #b22234;
-  color: #fff;
-  font-family: Arial, sans-serif;
-  font-weight: bold;
-  font-size: 0.88em;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  padding: 10px 22px;
-  text-decoration: none;
-  border-radius: 3px;
-  white-space: nowrap;
-  flex-shrink: 0;
 }
 
-/* ══════════════════════════════════════════
-   MARTINSWAY FOOTER STRIP
-══════════════════════════════════════════ */
-.martinsway-strip {
-  background: #1a1a1a;
-  color: #ccc;
-  padding: 18px 36px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  flex-wrap: wrap;
-}
-.martinsway-strip .brand {
-  font-size: 1em;
-  font-style: italic;
-  color: #fff;
-}
-.martinsway-strip .brand a {
-  color: #f0d080;
-  text-decoration: none;
-  font-weight: bold;
-}
-.martinsway-strip .brand a:hover { text-decoration: underline; }
-.martinsway-strip .motto {
-  font-size: 0.82em;
-  font-family: Arial, sans-serif;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+tbody td:first-child { font-weight: 600; color: var(--black); }
+
+.cost-high { color: var(--red); font-weight: 600; }
+.cost-low { color: #2E7D32; font-weight: 600; }
+
+.table-footnote {
+  margin-top: 16px;
+  font-size: 13px;
   color: #888;
+  font-style: italic;
+  line-height: 1.6;
 }
 
-/* ── Footer ── */
-footer {
-  background: #111;
-  color: #777;
+.important-note {
+  margin-top: 20px;
+  padding: 14px 20px;
+  background: white;
+  border-left: 4px solid var(--navy);
+  font-size: 15px;
+  color: #333;
+  line-height: 1.6;
+}
+
+.important-note strong {
+  color: var(--navy);
+  display: block;
+  margin-bottom: 4px;
+  font-size: 13px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+
+.martinsway-strip {
+  background: #F0EDE6;
+  border-top: 1px solid var(--rule);
+  padding: 16px 40px;
   text-align: center;
-  padding: 14px 36px;
-  font-size: 0.78em;
-  font-family: Arial, Helvetica, sans-serif;
-  letter-spacing: 0.04em;
+  font-size: 13px;
+  color: #888;
+  font-style: italic;
 }
-footer a { color: #aaa; }
 
-/* ══════════════════════════════════════════
-   RESPONSIVE
-══════════════════════════════════════════ */
-@media (max-width: 800px) {
-  .masthead { padding: 18px 20px 0; }
-  .masthead-title { font-size: 3.8em; }
-  .masthead-topline { flex-direction: column; gap: 4px; text-align: center; }
-  .deck { padding: 12px 20px; }
-  .columns {
-    grid-template-columns: 1fr;
-    padding: 0 20px;
-  }
-  .col:not(:last-child) { border-right: none; border-bottom: 1px solid #ccc; }
-  .table-section { padding: 20px; }
-  .callout-strip { padding: 18px 20px; }
-  .martinsway-strip { padding: 16px 20px; }
-  footer { padding: 14px 20px; }
+.martinsway-strip a {
+  color: var(--navy);
+  text-decoration: none;
 }
-@media (max-width: 480px) {
-  .masthead-title { font-size: 2.8em; }
-  .masthead-eyebrow { font-size: 0.88em; }
-  .section-head { font-size: 1.25em; }
+
+footer {
+  border-top: 3px solid var(--black);
+  padding: 20px 40px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+  color: #888;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+footer a { color: var(--navy); }
+
+@media (max-width: 768px) {
+  .masthead, .comparison-section, footer { padding: 24px 20px; }
+  .columns { grid-template-columns: 1fr; padding: 0 20px; }
+  .col { border-right: none; border-bottom: 1px solid var(--rule); padding: 24px 0; }
+  .quote-hero, .quote-secondary { padding: 24px 20px; margin: 24px 20px; }
+  .section-rule { padding: 0 20px; }
+  .martinsway-strip { padding: 14px 20px; }
+  table { font-size: 13px; }
+  thead th, tbody td { padding: 8px 10px; }
 }
 </style>
 </head>
 <body>
-<div class="page">
 
-  <!-- ══ MASTHEAD ══ -->
-  <div class="masthead">
-    <div class="masthead-topline">
-      <span>Medicare Supplement Insurance</span>
-      <span>Public Service Edition &nbsp;·&nbsp; Spring 2025</span>
-      <span>WhatIsMedigap.com</span>
-    </div>
-    <div class="masthead-center">
-      <span class="masthead-eyebrow">What is</span>
-      <span class="masthead-title">MEDIGAP</span>
-      <hr class="masthead-rule">
-      <div class="masthead-tagline">A Plain-Language Guide for American Seniors</div>
-    </div>
-  </div>
+<header class="masthead">
+  <div class="masthead-label">What is</div>
+  <div class="masthead-title">Medigap</div>
+  <div class="masthead-date">A plain-English guide for Americans on Medicare &nbsp;·&nbsp; Updated April 2026</div>
+</header>
 
-  <!-- ══ DECK ══ -->
-  <div class="deck">
-    Original Medicare covers 80% of your costs. Medigap covers most of the rest — with no networks, no referrals, and no surprise bills.
-  </div>
+<div class="quote-hero">
+  <blockquote>
+    "For about 5 bucks a day — less than a cup of coffee — you could avoid going broke because of surgery or getting sick."
+  </blockquote>
+  <cite>The whole idea behind Medigap, explained simply</cite>
+</div>
 
-  <!-- ══ THREE COLUMNS ══ -->
-  <div class="columns">
+<div class="quote-secondary">
+  <blockquote>
+    "Medicare is not health insurance. It's a head start. Medigap is what finishes the job."
+  </blockquote>
+</div>
 
-    <!-- LEFT COLUMN -->
-    <div class="col">
-      <div class="byline">The Basics</div>
-      <div class="col-head">Medicare Doesn't Cover Everything</div>
-      <p>When Congress created Medicare in 1965, it was designed as a foundation — not a complete solution. Original Medicare (Parts A &amp; B) pays roughly 80 cents of every approved dollar. The remaining 20% is yours.</p>
-      <p>For a routine doctor visit, that's manageable. For a hospital stay, surgery, or cancer treatment, 20% of a $50,000 bill is $10,000 out of your pocket.</p>
-      <p><strong>Medigap</strong> — also called Medicare Supplement Insurance — is private insurance sold specifically to fill those gaps. It doesn't replace Medicare. It works alongside it, paying what Medicare leaves behind.</p>
+<div class="section-rule"><span>The Three Things You Need To Know</span></div>
 
-      <div class="pullquote">
-        <p>"Any doctor. Any hospital. Anywhere in America. No network. No referral. No permission slip."</p>
-        <cite>The Medigap Promise</cite>
-      </div>
+<div class="columns">
 
-      <p>Unlike Medicare Advantage, Medigap does not create a private network. If your doctor accepts Medicare — and the vast majority do — they accept your Medigap coverage automatically. You never need to ask whether you're "in network."</p>
-      <p>Your coverage travels with you. See a specialist in another state. Get treated at Mayo Clinic. Visit a teaching hospital. Medigap follows you everywhere Medicare does.</p>
-    </div>
-
-    <!-- CENTER COLUMN -->
-    <div class="col">
-      <div class="byline">The Case for Medigap</div>
-      <div class="col-head">Why Seniors Are Choosing Supplement Over Advantage</div>
-      <p>Every fall, during Medicare's Annual Enrollment Period, millions of seniors are bombarded with advertising for Medicare Advantage — the private alternative to Original Medicare. The ads emphasize $0 premiums, dental benefits, gym memberships, and vision coverage.</p>
-      <p>What they don't emphasize: prior authorization. Network restrictions. Annual plan changes. Out-of-pocket maximums that can reach $8,000 or more. And the quiet reality that when you're seriously ill, a low premium can turn into a very high bill.</p>
-
-      <div class="pullquote">
-        <p>"When the diagnosis is serious, you want to choose your doctor — not be assigned one. That's the difference between Medigap and Medicare Advantage."</p>
-        <cite>Licensed Medicare Counselor</cite>
-      </div>
-
-      <p>Medigap's higher monthly premium buys something Medicare Advantage cannot guarantee: <strong>predictability</strong>. You know your costs before you need care. You choose your doctors before you get sick. Your plan doesn't change its benefits every January.</p>
-      <p>For seniors with chronic conditions, frequent doctor visits, or strong relationships with specific physicians, Medigap consistently offers better overall value — even when the premium is higher.</p>
-      <p><strong>The math matters.</strong> A senior paying $150/month more for Medigap than Medicare Advantage pays $1,800/year extra in premiums. One hospital stay — one MRI, one specialist visit requiring prior authorization — can exceed that difference immediately.</p>
-      <a href="#get-quote" class="cta-inline">Get a Free Quote &rarr;</a>
-    </div>
-
-    <!-- RIGHT COLUMN -->
-    <div class="col">
-      <div class="byline">Your Options</div>
-      <div class="col-head">The Plans That Matter Most</div>
-      <p>Medigap plans are standardized by federal law. Plan G from one insurer covers exactly the same benefits as Plan G from another. Only the price and the company differ.</p>
-
-      <h4><span class="plan-badge">Plan G</span> Most Popular</h4>
-      <p>Covers nearly all Medicare cost-sharing: Part A deductible, coinsurance, hospital days, skilled nursing, and foreign travel emergencies. You pay only the Part B deductible ($257 in 2025). Best for people who want maximum coverage.</p>
-
-      <h4><span class="plan-badge">Plan N</span> Best Value</h4>
-      <p>Same broad coverage as Plan G, with small copays (up to $20 for office visits, $50 for ER). Lower monthly premium. Best for healthier seniors comfortable with modest cost-sharing.</p>
-
-      <h4><span class="plan-badge">HD Plan G</span> Low Premium</h4>
-      <p>Identical benefits to Plan G but you cover the first ~$2,870 yourself before Medigap pays. Premiums can be as low as $40–$60/month. Best as a catastrophic safety net.</p>
-
-      <p style="margin-top:14px; font-size:0.88em; color:#555; font-style:italic;">Note: Plan F is no longer available to those newly eligible for Medicare after Jan. 1, 2020. Existing holders keep their coverage.</p>
-
-      <div style="border-top:1px solid #ccc; margin-top:16px; padding-top:14px;">
-        <div class="byline">Enrollment</div>
-        <p style="font-size:0.92em;"><strong>Best time to enroll:</strong> Your 6-month Open Enrollment window, starting the month you turn 65 and enroll in Part B. During this window, insurers must accept you at standard rates — no medical underwriting.</p>
-        <p style="font-size:0.92em;">Miss the window and most states allow insurers to charge more or deny coverage based on health history. <em>Timing is everything.</em></p>
-      </div>
-    </div>
-
-  </div><!-- /columns -->
-
-  <!-- ══ COMPARISON TABLE ══ -->
-  <div class="table-section">
-    <div class="section-head">Medigap vs. Medicare Advantage: Side by Side</div>
-    <div class="section-deck">Both programs serve Medicare beneficiaries. Their structure, costs, and trade-offs are fundamentally different.</div>
-    <div class="compare-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>Feature</th>
-            <th>Medigap (Medicare Supplement)</th>
-            <th>Medicare Advantage (Part C)</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td><strong>Choose any Medicare doctor</strong></td>
-            <td class="yes">&#10003; Yes — nationwide</td>
-            <td class="no">&#10007; Network only</td>
-          </tr>
-          <tr>
-            <td><strong>Referrals to see a specialist</strong></td>
-            <td class="yes">&#10003; Never required</td>
-            <td class="mid">Often required (HMO plans)</td>
-          </tr>
-          <tr>
-            <td><strong>Prior authorization for procedures</strong></td>
-            <td class="yes">&#10003; Rarely needed</td>
-            <td class="no">&#10007; Frequently required</td>
-          </tr>
-          <tr>
-            <td><strong>Predictable out-of-pocket costs</strong></td>
-            <td class="yes">&#10003; Very predictable</td>
-            <td class="mid">Variable — can be high</td>
-          </tr>
-          <tr>
-            <td><strong>Coverage when traveling</strong></td>
-            <td class="yes">&#10003; All 50 states</td>
-            <td class="no">&#10007; Local service area only</td>
-          </tr>
-          <tr>
-            <td><strong>Plan stability year to year</strong></td>
-            <td class="yes">&#10003; Guaranteed renewable</td>
-            <td class="mid">Benefits &amp; networks change annually</td>
-          </tr>
-          <tr>
-            <td><strong>Monthly premium</strong></td>
-            <td class="mid">Higher ($80–$200+/mo typical)</td>
-            <td class="yes">&#10003; Often $0 or low</td>
-          </tr>
-          <tr>
-            <td><strong>Dental / vision / gym extras</strong></td>
-            <td class="no">&#10007; Not included</td>
-            <td class="yes">&#10003; Often included</td>
-          </tr>
-          <tr>
-            <td><strong>Prescription drug coverage</strong></td>
-            <td class="mid">Separate Part D plan needed</td>
-            <td class="yes">&#10003; Usually bundled</td>
-          </tr>
-          <tr>
-            <td><strong>Out-of-pocket maximum</strong></td>
-            <td class="yes">&#10003; Near zero (Plan G)</td>
-            <td class="mid">Up to $8,850 in-network (2025)</td>
-          </tr>
-        </tbody>
-      </table>
+  <div class="col">
+    <div class="col-headline">In Plain English</div>
+    <div class="col-deck">Medicare pays most of your bills. Not all of them.</div>
+    <div class="col-body">
+      <p>Original Medicare covers about 80% of your medical costs. The other 20% — deductibles, copays, hospital stays — comes out of your pocket. No cap. No ceiling. Just bills.</p>
+      <p><a href="https://www.medicare.gov/health-drug-plans/medigap" target="_blank">Medigap</a> — officially called Medicare Supplement Insurance — is a private insurance policy that pays most or all of that remaining 20%. It fills the gap. That's where the name comes from.</p>
+      <div class="large-callout">80¢ covered.<br>You pay the rest.<br>Medigap fixes that.</div>
+      <p>Plans are standardized by the federal government — <a href="https://www.medicare.gov/health-drug-plans/medigap/basics" target="_blank">Plan G in California is identical to Plan G in Florida</a>. You're choosing the price, not the coverage.</p>
     </div>
   </div>
 
-  <!-- ══ CALLOUT STRIP ══ -->
-  <div class="callout-strip" id="get-quote">
-    <p>A free quote carries <strong>no obligation</strong>. A licensed Medicare agent can show you every Medigap plan available in your state, compare real premiums side by side, and answer your questions — at no cost to you. Agents are paid by the insurer, never by you.</p>
-    <a href="mailto:info@whatismedigap.com">Request a Free Quote</a>
-  </div>
-
-  <!-- ══ MARTINSWAY FOOTER STRIP ══ -->
-  <div class="martinsway-strip">
-    <div class="brand">
-      A public service message by <a href="https://martinsway.org" target="_blank" rel="noopener">martinsway.org</a>
+  <div class="col">
+    <div class="col-headline">What It Costs</div>
+    <div class="col-deck">Usually between $150 and $450 a month — depending on where you live.</div>
+    <div class="col-body">
+      <p>Plan G — the most popular — runs about $150–$225/month at age 65 in most states. In higher-cost states like Florida and New York, the same plan can run $300–$450/month.</p>
+      <p>That's roughly $5 to $15 a day. In exchange: no surprise hospital bills. No 20% due at discharge. No limit on how much care you can receive in a year.</p>
+      <div class="large-callout">$150–$450/mo.<br>No surprise bills.<br>Ever.</div>
+      <p>The coverage is identical across companies. The price is not. A broker costs you nothing and does the comparing for you.</p>
     </div>
-    <div class="motto">&ldquo;A Good Life for All&rdquo;</div>
   </div>
 
-  <!-- ══ FOOTER ══ -->
-  <footer>
-    &copy; 2025 WhatIsMedigap.com &nbsp;&middot;&nbsp;
-    For educational purposes only &nbsp;&middot;&nbsp;
-    Not affiliated with Medicare, Medicaid, or any government agency &nbsp;&middot;&nbsp;
-    Built with <a href="https://claude.ai" target="_blank" rel="noopener">Claude Sonnet</a>
-  </footer>
+  <div class="col">
+    <div class="col-headline">What To Do</div>
+    <div class="col-deck">Three steps. Takes about 20 minutes.</div>
+    <div class="col-body">
+      <p>The best time to enroll is during your 6-month Medigap Open Enrollment Period — it starts the month you turn 65 and enroll in Medicare Part B. During this window, no company can deny you or charge more due to health conditions.</p>
+      <p>After that window closes, your options narrow considerably. Don't wait.</p>
 
-</div><!-- /page -->
+      <a href="https://www.medicare.gov/health-drug-plans/medigap" class="resource-link">Official Medigap Definition — Medicare.gov<span>what it is, how it works</span></a>
+      <a href="https://www.medicare.gov/plan-compare" class="resource-link">Medicare Plan Finder<span>compare plans in your area</span></a>
+      <a href="https://www.aarp.org/health/medicare-insurance/" class="resource-link">AARP Medicare Resources<span>guides &amp; advisors</span></a>
+      <a href="https://www.medicare.gov" class="resource-link">Medicare.gov<span>official enrollment</span></a>
+      <a href="https://www.medicaid.gov" class="resource-link">Medicaid.gov<span>lower-income assistance</span></a>
+
+      <p style="margin-top:16px; font-size:14px; color:#888; font-style:italic;">Not sure where to start? Call 1-800-MEDICARE. Free. Real people. Available 24/7.</p>
+    </div>
+  </div>
+
+</div>
+
+<div class="section-rule"><span>The Real Cost of Getting Sick</span></div>
+
+<div class="comparison-section">
+  <div class="table-intro">
+    "The difference between Medigap and Medicare Advantage isn't coverage. It's the bill you get when something goes wrong."
+  </div>
+
+  <h2>What You'd Actually Pay</h2>
+  <p class="deck">Out-of-pocket costs for common procedures — with Medigap Plan G vs. Medicare Advantage vs. no supplement. Based on 2026 Medicare rates.</p>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Procedure</th>
+        <th>Medicare-Approved Cost</th>
+        <th>No Supplement<br><small>You pay 20%</small></th>
+        <th>Medicare Advantage<br><small>Varies — up to $9,250 max</small></th>
+        <th>Medigap Plan G<br><small>$283 deductible, then $0</small></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Knee Replacement</td>
+        <td>~$20,000</td>
+        <td class="cost-high">$2,100 – $4,000</td>
+        <td class="cost-high">$500 – $3,500</td>
+        <td class="cost-low">$283</td>
+      </tr>
+      <tr>
+        <td>Shoulder Replacement</td>
+        <td>~$22,000</td>
+        <td class="cost-high">$2,500 – $4,400</td>
+        <td class="cost-high">$500 – $4,000</td>
+        <td class="cost-low">$283</td>
+      </tr>
+      <tr>
+        <td>Hernia Surgery</td>
+        <td>~$8,000</td>
+        <td class="cost-high">$1,000 – $1,600</td>
+        <td class="cost-high">$300 – $1,500</td>
+        <td class="cost-low">$283</td>
+      </tr>
+      <tr>
+        <td>Heart Surgery (bypass)</td>
+        <td>~$100,000+</td>
+        <td class="cost-high">$10,000 – $20,000+</td>
+        <td class="cost-high">Up to $9,250</td>
+        <td class="cost-low">$283</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="important-note">
+    <strong>Important — You Cannot Have Both</strong>
+    Medigap and Medicare Advantage are mutually exclusive. You can choose one or the other, but not both. If you're currently in a Medicare Advantage plan and want to switch to Medigap, you'll need to return to Original Medicare first. <a href="https://www.medicare.gov/health-drug-plans/medigap/basics/how-medigap-works" target="_blank">Learn more at Medicare.gov →</a>
+  </div>
+
+  <p class="table-footnote">Sources: Medicare.gov, GoodRx, NCOA 2026. Estimates vary by location, provider, and plan. Medigap Plan G requires meeting the annual Part B deductible of $283 before coverage begins.</p>
+</div>
+
+<div class="martinsway-strip">
+  A public service for America, by <a href="https://www.martinsway.org">MartinsWay.org</a> &nbsp;·&nbsp; "A Good Life for All"
+</div>
+
+<footer>
+  <span>Whatismedigap.com — Free public service. Not affiliated with any insurance company. Nothing is sold here.</span>
+  <span>
+    <a href="https://www.medicare.gov">Medicare.gov</a> &nbsp;·&nbsp;
+    <a href="https://www.medicaid.gov">Medicaid.gov</a> &nbsp;·&nbsp;
+    Built with Claude Sonnet
+  </span>
+</footer>
+
 </body>
 </html>
