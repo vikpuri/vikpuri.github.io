@@ -143,6 +143,17 @@ Requation (requation.com) is a living maps real estate intelligence platform bui
 | API Key | Re_Pvrj1guK_54ZAFg6pZdsD1xVSs58WNYms |
 | Dashboard | https://resend.com/dashboard |
 
+### Eventbrite
+| Key | Value |
+|-----|-------|
+| Private Token | HKLI2WYMB7AYJX6B7UWW |
+| Account | vikpuri@live.com (verified) |
+| Account ID | 161837776509 |
+| Base URL | https://www.eventbriteapi.com/v3/ |
+| Dashboard | https://www.eventbrite.com/account-settings/apps |
+| Status | Token verified ✓ — not yet integrated |
+| Planned use | Event markers on map, Twilio SMS notifications |
+
 ### Stripe (Payments)
 | Key | Value |
 |-----|-------|
