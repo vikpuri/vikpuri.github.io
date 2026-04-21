@@ -161,6 +161,17 @@ Requation (requation.com) is a living maps real estate intelligence platform bui
 | Dashboard | https://dashboard.stripe.com |
 | Notes | Switch to live key before production launch |
 
+### Twilio (Voice / SMS)
+| Key | Value |
+|-----|-------|
+| Account SID | stored as env var `TWILIO_ACCOUNT_SID` |
+| Auth Token | stored as env var `TWILIO_AUTH_TOKEN` |
+| Phone Number | +1 (213) 215-8870 — same as Requation contact number |
+| Dashboard | https://console.twilio.com |
+| Use case | User-initiated contact bridge: buyer → listing agent, customer → store |
+| Trigger | User taps contact button on listing card or business POI |
+| Netlify env vars | `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_PHONE` |
+
 ---
 
 ## 4. Database — Supabase Tables
@@ -500,25 +511,7 @@ Current logo design (work in progress — slash angle being refined):
 </svg>
 ```
 
-**Logo design intent (for future Claude sessions):**
-- Brand reads as `r/Σquation` = `r/Equation` = RE/Equation = Requation
-- `r` — red (#B22234), EB Garamond bold italic (math/finance serif), top-left, aligned with slash top
-- `/` — grey SVG line (not a font glyph), forward slash at ~110° obtuse angle (between r and Σ, not touching either)
-- `Σ` — blue (#4F6FB8), Raleway, large (font-size 92), baseline-anchored — Σ IS the E in Equation
-- `quation` — gold (#D4A843), Raleway italic small (font-size 24), soft glow filter, sits right of Σ
-- Colors: red/blue/gold = real estate + equation symbolism
-- Slash must NOT touch r or Σ
-- Slash angle: **work in progress** — target ~110° obtuse (more vertical than 61° current, user still confirming)
-
-**Fonts in use:**
-- EB Garamond 700 italic — for `r` (classic math/LaTeX heritage font)
-- Raleway 600 — for Σ and quation
-- Google Fonts `<link>` updated on all 3 pages to include `&family=EB+Garamond:ital,wght@1,700`
-
-**Next session logo tasks:**
-- [ ] Finalize slash angle (user wants ~110° obtuse, to be confirmed visually)
-- [ ] Ensure slash aligns between top of r and full extent of Σ
-- [ ] Replicate finalized logo to panel-close mini buttons (dtla, laveen, index)
+**→ See Section 19 for the complete Official Logo Master Spec.**
 
 ---
 
@@ -671,4 +664,96 @@ Viewport divided into 5×5 grid (A–E columns, 1–5 rows). Header = Row 0, not
 
 ---
 
-*Document maintained by Requation development team. Last updated: 2026-04-21 (session — NEON MAPS spec, grid system, YT placement status, design laws).*
+---
+
+## 19. Official Logo Master Spec
+
+> ⚠️ This is the locked official logo. Do not alter font, color, size, or SVG coordinates without explicit approval.
+> **Sole reference: iPhone screenshot IMG_1971.jpeg (2026-04-21) — this is the final version until a new logo is commissioned.**
+> The template file (`dtla-template.html`) has an older, different logo — it is NOT authoritative. Ignore it for logo decisions.
+
+### Brand Reading
+`r / Σ quation` → `r/Equation` → `RE/Equation` → **Requation**
+
+### SVG Container
+| Property | Value |
+|----------|-------|
+| viewBox | `0 0 440 100` |
+| height | `60px` |
+| width | `100%` |
+| preserveAspectRatio | `xMinYMid meet` |
+| max-height | `60px` |
+| overflow | `visible` |
+| Implementation | **Inline SVG** — NOT `<img src="data:image/svg+xml...">` (sandboxed SVG breaks font loading) |
+
+### Element 1 — `r`
+| Property | Value |
+|----------|-------|
+| Element | `<text>` |
+| x | `6` |
+| y | `42` (baseline) |
+| font-family | `EB Garamond, Georgia, serif` |
+| font-size | `46` |
+| font-weight | `700` |
+| font-style | `italic` |
+| fill | `#B22234` (deep red) |
+| Google Font | `EB+Garamond:ital,wght@1,700` |
+
+### Element 2 — `/` (slash)
+| Property | Value |
+|----------|-------|
+| Element | `<line>` |
+| x1, y1 | `31, 76` (bottom of stroke) |
+| x2, y2 | `50, 41` (top of stroke) |
+| stroke | `#7A7A7A` (mid grey) |
+| stroke-width | `5` |
+| stroke-linecap | `round` |
+
+> ⚠️ **ESSENTIAL DETAIL:** The `/` top endpoint (x2=50, y2=41) is locked to these exact coordinates — this is the approved position as seen in IMG_1971. Do not adjust.
+
+### Element 3 — `Σ` (Sigma = the E in Equation)
+| Property | Value |
+|----------|-------|
+| Element | `<text>` |
+| x | `56` |
+| y | `88` (baseline) |
+| font-family | `Raleway, Arial, sans-serif` |
+| font-size | `92` |
+| font-weight | `600` |
+| fill | `#4F6FB8` (steel blue) |
+
+### Element 4 — `quation`
+| Property | Value |
+|----------|-------|
+| Element | `<text>` |
+| x | `122` |
+| y | `88` (baseline, aligned with Σ) |
+| font-family | `Raleway, Arial, sans-serif` |
+| font-size | `24` |
+| font-weight | `600` |
+| font-style | `italic` |
+| fill | `#D4A843` (gold) |
+| opacity | `0.8` |
+| letter-spacing | `2` |
+| filter | `url(#gb)` — soft gaussian glow (stdDeviation 1.2) |
+
+### Color Palette
+| Token | Hex | Used for |
+|-------|-----|---------|
+| Red | `#B22234` | `r` — American red, real estate urgency |
+| Grey | `#7A7A7A` | `/` slash — neutral divider |
+| Blue | `#4F6FB8` | `Σ` — equation/finance authority |
+| Gold | `#D4A843` | `quation` — value/premium |
+
+### Google Fonts Required
+```html
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@1,700&family=Raleway:wght@600&display=swap" rel="stylesheet">
+```
+Both fonts must be loaded on the page **before** the SVG renders. Inline SVG inherits page fonts; sandboxed `<img>` SVG does not.
+
+### Replication Rule
+Logo must be **pixel-identical** on all pages: `index.html`, `dtla.html`, `laveen.html`, `lalife.html`, `desertlife.html`. The mini version in panel-close buttons uses a cropped viewBox (`0 0 115 100`) with the same elements minus `quation`.
+
+---
+
+*Document maintained by Requation development team. Last updated: 2026-04-21 (logo master spec added — font, color, size locked from iPhone screenshot IMG_1971).*
