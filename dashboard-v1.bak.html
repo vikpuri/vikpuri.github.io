@@ -1,0 +1,1184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Requation · Management Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Playfair+Display:wght@400;600&family=Raleway:ital,wght@0,300;0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+/* ── RESET ── */
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#09090f;
+  --s1:#111119;
+  --s2:#16161f;
+  --s3:#1c1c27;
+  --s4:#22222f;
+  --rule:rgba(255,255,255,.07);
+  --rule2:rgba(255,255,255,.13);
+  --text:#f5f3ee;
+  --t2:rgba(245,243,238,.62);
+  --t3:rgba(245,243,238,.35);
+  --t4:rgba(245,243,238,.18);
+  --gold:#C9A84C;
+  --gold-d:rgba(201,168,76,.15);
+  --green:#22c55e;
+  --red:#ef4444;
+  --blue:#3b82f6;
+  --violet:#a855f7;
+  --cyan:#06b6d4;
+  --sidebar:220px;
+  --top:58px
+}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Raleway',sans-serif;overflow:hidden}
+a{color:inherit;text-decoration:none}
+
+/* ── LAYOUT ── */
+.shell{display:grid;grid-template-columns:var(--sidebar) 1fr;grid-template-rows:var(--top) 1fr;height:100vh}
+.topbar{grid-column:1/3;background:var(--s1);border-bottom:1px solid var(--rule);display:flex;align-items:center;gap:14px;padding:0 22px;z-index:20}
+.sidebar{grid-row:2;background:var(--s1);border-right:1px solid var(--rule);display:flex;flex-direction:column;padding:20px 0 12px;overflow-y:auto}
+.main{grid-row:2;overflow-y:auto;padding:22px 26px 40px}
+
+/* ── TOPBAR ── */
+.tl{font-family:'Playfair Display',serif;font-size:1.05rem;color:var(--gold);letter-spacing:.03em}
+.tl sub{font-family:'DM Mono',monospace;font-size:.52rem;color:var(--t3);letter-spacing:.12em;margin-left:10px;vertical-align:middle;text-transform:uppercase}
+.tsep{flex:1}
+.tlive{font-family:'DM Mono',monospace;font-size:.52rem;letter-spacing:.12em;color:var(--green);border:1px solid rgba(34,197,94,.3);padding:3px 9px;border-radius:3px;display:flex;align-items:center;gap:5px}
+.tlive::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green);animation:pulse-dot 2s ease-in-out infinite}
+@keyframes pulse-dot{0%,100%{opacity:.6}50%{opacity:1}}
+.ttime{font-family:'DM Mono',monospace;font-size:.52rem;color:var(--t3);margin-right:4px}
+.tversion{font-family:'DM Mono',monospace;font-size:.48rem;color:var(--t4);padding:3px 8px;border:1px solid var(--rule2);border-radius:2px}
+
+/* ── SIDEBAR ── */
+.sb-section{padding:0 14px 5px;font-family:'DM Mono',monospace;font-size:.44rem;letter-spacing:.16em;text-transform:uppercase;color:var(--t4);margin-top:14px}
+.sb-item{display:flex;align-items:center;gap:9px;padding:8px 18px;cursor:pointer;font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:.04em;color:var(--t2);transition:all .15s;border-left:2px solid transparent;border-radius:0 4px 4px 0;margin:1px 0}
+.sb-item:hover{color:var(--text);background:rgba(255,255,255,.04)}
+.sb-item.on{color:var(--gold);border-left-color:var(--gold);background:var(--gold-d)}
+.sb-dot{width:5px;height:5px;border-radius:50%;background:currentColor;flex-shrink:0}
+.sb-rule{height:1px;background:var(--rule);margin:12px 16px}
+.sb-foot{padding:10px 18px;font-family:'DM Mono',monospace;font-size:.48rem;color:var(--t4);line-height:1.7;margin-top:auto;border-top:1px solid var(--rule);padding-top:14px}
+
+/* ── SECTION HEADING ── */
+.sh{font-family:'DM Mono',monospace;font-size:.54rem;letter-spacing:.2em;text-transform:uppercase;color:var(--t3);margin-bottom:14px;display:flex;align-items:center;gap:10px}
+.sh::after{content:'';flex:1;height:1px;background:var(--rule)}
+.section{margin-bottom:28px}
+
+/* ── KPI CARDS ── */
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.kpi{background:var(--s2);border:1px solid var(--rule);border-radius:8px;padding:16px 18px;transition:border-color .2s}
+.kpi:hover{border-color:var(--rule2)}
+.kpi-l{font-family:'DM Mono',monospace;font-size:.48rem;letter-spacing:.14em;text-transform:uppercase;color:var(--t3);margin-bottom:10px}
+.kpi-n{font-family:'Playfair Display',serif;font-size:2.1rem;line-height:1;margin-bottom:4px;color:var(--text)}
+.kpi-n.gold{color:var(--gold)}
+.kpi-n.green{color:var(--green)}
+.kpi-n.blue{color:var(--blue)}
+.kpi-n.violet{color:var(--violet)}
+.kpi-s{font-family:'DM Mono',monospace;font-size:.48rem;color:var(--t3)}
+.kpi-bar{height:2px;background:var(--rule);border-radius:1px;margin-top:10px;overflow:hidden}
+.kpi-bar-fill{height:100%;border-radius:1px;transition:width .8s cubic-bezier(.22,1,.36,1)}
+
+/* ── TWO-COL GRID ── */
+.col2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.col3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+
+/* ── CARD ── */
+.card{background:var(--s2);border:1px solid var(--rule);border-radius:8px;padding:16px 18px}
+.card-h{font-family:'DM Mono',monospace;font-size:.52rem;letter-spacing:.12em;text-transform:uppercase;color:var(--t3);margin-bottom:13px;display:flex;align-items:center;gap:8px}
+.card-h-icon{opacity:.7}
+
+/* ── TABLE ── */
+.dt{width:100%;border-collapse:collapse}
+.dt th{font-family:'DM Mono',monospace;font-size:.46rem;letter-spacing:.1em;text-transform:uppercase;color:var(--t3);padding:5px 8px;border-bottom:1px solid var(--rule);text-align:left;font-weight:400}
+.dt td{font-family:'DM Mono',monospace;font-size:.58rem;padding:8px 8px;border-bottom:1px solid rgba(255,255,255,.03);color:var(--t2);vertical-align:middle}
+.dt tr:last-child td{border-bottom:none}
+.dt td.n{color:var(--gold);font-size:.74rem;font-weight:500}
+.dt td.ok::before{content:'●';color:var(--green);margin-right:5px;font-size:.5rem}
+.dt td.warn::before{content:'●';color:#f59e0b;margin-right:5px;font-size:.5rem}
+.dt td.tot{color:var(--text);border-top:1px solid var(--rule2)}
+.dt td.tot.n{color:var(--gold)}
+
+/* ── MARKET BADGE ── */
+.mb{display:inline-block;font-family:'DM Mono',monospace;font-size:.42rem;letter-spacing:.1em;padding:2px 7px;border-radius:2px;text-transform:uppercase}
+.mb-ca{background:rgba(59,130,246,.13);color:#60a5fa;border:1px solid rgba(59,130,246,.22)}
+.mb-az{background:rgba(201,168,76,.11);color:var(--gold);border:1px solid rgba(201,168,76,.2)}
+.mb-admin{background:rgba(168,85,247,.11);color:#c084fc;border:1px solid rgba(168,85,247,.2)}
+
+/* ── ARCHITECTURE SVG CARD ── */
+.arch-card{background:var(--s2);border:1px solid var(--rule);border-radius:8px;padding:20px;margin-bottom:28px}
+.arch-svg{width:100%;height:auto;display:block}
+
+/* ── PAGES ── */
+.page-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}
+.pg{display:flex;align-items:center;gap:12px;padding:13px 15px;background:var(--s2);border:1px solid var(--rule);border-radius:8px;text-decoration:none;color:inherit;transition:all .18s}
+.pg:hover{border-color:var(--gold);background:var(--gold-d);transform:translateX(2px)}
+.pg-dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 7px var(--green);flex-shrink:0}
+.pg-info{flex:1;min-width:0}
+.pg-url{font-family:'DM Mono',monospace;font-size:.6rem;color:var(--text);letter-spacing:.04em}
+.pg-desc{font-family:'DM Mono',monospace;font-size:.48rem;color:var(--t3);margin-top:2px}
+.pg-tags{display:flex;gap:5px;margin-top:5px}
+.pg-type{font-family:'DM Mono',monospace;font-size:.44rem;padding:2px 6px;border-radius:2px;border:1px solid var(--rule2);color:var(--t3)}
+.pg-lines{font-family:'DM Mono',monospace;font-size:.44rem;color:var(--t4)}
+
+/* ── API CARDS ── */
+.api-card{background:var(--s2);border:1px solid var(--rule);border-radius:8px;padding:12px 14px;display:flex;align-items:center;gap:11px}
+.api-icon{width:34px;height:34px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:.95rem;flex-shrink:0}
+.api-name{font-family:'DM Mono',monospace;font-size:.6rem;color:var(--text)}
+.api-note{font-family:'DM Mono',monospace;font-size:.46rem;color:var(--t3);margin-top:2px;line-height:1.4}
+.api-dot{width:8px;height:8px;border-radius:50%;margin-left:auto;flex-shrink:0;transition:all .3s}
+.api-dot.ok{background:var(--green);box-shadow:0 0 7px var(--green)}
+.api-dot.warn{background:#f59e0b;box-shadow:0 0 7px #f59e0b}
+.api-dot.err{background:var(--red);box-shadow:0 0 7px var(--red)}
+.api-dot.chk{background:var(--t4);animation:pulse-dot 1s ease-in-out infinite}
+
+/* ── DEPLOY ROWS ── */
+.drow{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.03)}
+.drow:last-child{border-bottom:none}
+.dk{font-family:'DM Mono',monospace;font-size:.52rem;color:var(--t3);flex:0 0 130px}
+.dv{font-family:'DM Mono',monospace;font-size:.55rem;color:var(--t2)}
+.dv.ok{color:var(--green)}
+.dv.warn{color:#f59e0b}
+.dv.crit{color:var(--red)}
+
+/* ── TECH STACK ── */
+.stack-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.stack-item{background:var(--s2);border:1px solid var(--rule);border-radius:8px;padding:14px 12px;text-align:center;transition:border-color .2s}
+.stack-item:hover{border-color:var(--rule2)}
+.stack-icon{font-size:1.4rem;margin-bottom:7px}
+.stack-name{font-family:'DM Mono',monospace;font-size:.54rem;color:var(--text)}
+.stack-role{font-family:'DM Mono',monospace;font-size:.44rem;color:var(--t3);margin-top:2px}
+
+/* ── ACTIONS ── */
+.action-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.action-btn{display:flex;flex-direction:column;align-items:center;gap:7px;padding:14px 10px;background:var(--s2);border:1px solid var(--rule);border-radius:8px;cursor:pointer;transition:all .18s;text-decoration:none;color:inherit}
+.action-btn:hover{border-color:var(--gold);background:var(--gold-d)}
+.action-icon{font-size:1.3rem}
+.action-label{font-family:'DM Mono',monospace;font-size:.5rem;color:var(--t2);text-align:center;line-height:1.4}
+
+/* ── MARKET EXPANSION ── */
+.mkt-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.mkt-card{background:var(--s2);border:1px solid var(--rule);border-radius:8px;padding:16px 18px}
+.mkt-card.live{border-color:rgba(34,197,94,.2)}
+.mkt-card.soon{border-color:rgba(201,168,76,.15);opacity:.7}
+.mkt-card.future{opacity:.45}
+.mkt-badge{display:inline-block;font-family:'DM Mono',monospace;font-size:.44rem;letter-spacing:.12em;text-transform:uppercase;padding:3px 8px;border-radius:3px;margin-bottom:10px}
+.mkt-badge.live{background:rgba(34,197,94,.12);color:var(--green);border:1px solid rgba(34,197,94,.25)}
+.mkt-badge.soon{background:rgba(201,168,76,.1);color:var(--gold);border:1px solid rgba(201,168,76,.2)}
+.mkt-badge.future{background:rgba(255,255,255,.05);color:var(--t3);border:1px solid var(--rule)}
+.mkt-name{font-family:'Playfair Display',serif;font-size:1rem;color:var(--text);margin-bottom:4px}
+.mkt-sub{font-family:'DM Mono',monospace;font-size:.48rem;color:var(--t3);line-height:1.5}
+.mkt-stat{font-family:'DM Mono',monospace;font-size:.52rem;color:var(--gold);margin-top:10px}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar{width:3px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--rule2);border-radius:2px}
+
+/* ── RESPONSIVE ── */
+@media(max-width:920px){
+  .shell{grid-template-columns:1fr;grid-template-rows:var(--top) 1fr}
+  .topbar{grid-column:1}
+  .sidebar{display:none}
+  .main{grid-column:1;grid-row:2}
+  .kpi-row,.col3,.stack-grid,.action-grid,.mkt-grid{grid-template-columns:repeat(2,1fr)}
+  .col2,.page-grid{grid-template-columns:1fr}
+}
+
+/* ── EDITOR ── */
+.ed-tabs{display:flex;gap:6px;margin-bottom:16px}
+.ed-tab{font-family:'DM Mono',monospace;font-size:.55rem;letter-spacing:.1em;text-transform:uppercase;padding:6px 16px;border-radius:5px;border:1px solid var(--rule2);cursor:pointer;color:var(--t3);background:transparent;transition:all .15s}
+.ed-tab.on{color:var(--gold);border-color:rgba(201,168,76,.35);background:var(--gold-d)}
+.ed-toolbar{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.ed-search{flex:1;background:var(--s2);border:1px solid var(--rule2);border-radius:6px;padding:7px 12px;color:var(--text);font-family:'DM Mono',monospace;font-size:.6rem;outline:none}
+.ed-search:focus{border-color:rgba(201,168,76,.4)}
+.ed-btn{font-family:'DM Mono',monospace;font-size:.52rem;letter-spacing:.08em;padding:7px 16px;border-radius:5px;cursor:pointer;border:1px solid;transition:all .15s;white-space:nowrap}
+.ed-btn-add{color:var(--green);border-color:rgba(34,197,94,.35);background:rgba(34,197,94,.08)}
+.ed-btn-add:hover{background:rgba(34,197,94,.16)}
+.ed-btn-reload{color:var(--t3);border-color:var(--rule2);background:transparent}
+.ed-btn-reload:hover{color:var(--text);background:rgba(255,255,255,.04)}
+.ed-count{font-family:'DM Mono',monospace;font-size:.48rem;color:var(--t4);margin-left:4px}
+.ed-tbl{width:100%;border-collapse:collapse;font-family:'DM Mono',monospace;font-size:.55rem}
+.ed-tbl th{padding:6px 10px;border-bottom:1px solid var(--rule);color:var(--t3);font-weight:400;font-size:.46rem;letter-spacing:.1em;text-transform:uppercase;text-align:left;cursor:pointer;user-select:none;white-space:nowrap}
+.ed-tbl th:hover{color:var(--t2)}
+.ed-tbl td{padding:8px 10px;border-bottom:1px solid rgba(255,255,255,.03);color:var(--t2);vertical-align:middle;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ed-tbl tr:hover td{background:rgba(255,255,255,.025);cursor:pointer}
+.ed-tbl tr.selected td{background:var(--gold-d)}
+.ed-tbl td.id-col{color:var(--t4);font-size:.46rem}
+.ed-tbl td.num{color:var(--gold)}
+.ed-tbl td.status{padding:2px 7px;border-radius:2px;background:rgba(34,197,94,.1);color:var(--green);font-size:.46rem;border:1px solid rgba(34,197,94,.2);display:inline-block;line-height:1.6}
+.ed-wrap{background:var(--s2);border:1px solid var(--rule);border-radius:8px;padding:0;overflow:hidden}
+.ed-wrap-head{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--rule);background:var(--s3)}
+.ed-wrap-title{font-family:'DM Mono',monospace;font-size:.52rem;color:var(--t3);letter-spacing:.1em}
+.ed-pager{display:flex;align-items:center;gap:8px;padding:8px 14px;border-top:1px solid var(--rule);background:var(--s3)}
+.ed-pager button{font-family:'DM Mono',monospace;font-size:.5rem;padding:4px 10px;border-radius:4px;border:1px solid var(--rule2);color:var(--t2);background:transparent;cursor:pointer}
+.ed-pager button:disabled{opacity:.3;cursor:default}
+.ed-pager button:not(:disabled):hover{border-color:var(--gold);color:var(--gold)}
+.ed-pager span{font-family:'DM Mono',monospace;font-size:.48rem;color:var(--t4)}
+/* Record Drawer */
+.ed-drawer{position:fixed;top:0;right:-480px;width:460px;height:100vh;background:var(--s1);border-left:1px solid var(--rule2);z-index:200;display:flex;flex-direction:column;transition:right .28s cubic-bezier(.22,1,.36,1);overflow:hidden;box-shadow:-8px 0 40px rgba(0,0,0,.4)}
+.ed-drawer.open{right:0}
+.ed-drawer-head{padding:18px 20px 14px;border-bottom:1px solid var(--rule);display:flex;align-items:center;gap:12px;flex-shrink:0}
+.ed-drawer-title{font-family:'Playfair Display',serif;font-size:.95rem;color:var(--gold);flex:1}
+.ed-drawer-close{background:none;border:none;color:var(--t3);cursor:pointer;font-size:1rem;padding:4px;line-height:1;transition:color .15s}
+.ed-drawer-close:hover{color:var(--text)}
+.ed-drawer-body{flex:1;overflow-y:auto;padding:16px 20px}
+.ed-field{margin-bottom:14px}
+.ed-label{font-family:'DM Mono',monospace;font-size:.46rem;letter-spacing:.12em;text-transform:uppercase;color:var(--t3);margin-bottom:5px;display:flex;align-items:center;gap:8px}
+.ed-label span{font-weight:400}
+.ed-input{width:100%;background:var(--s3);border:1px solid var(--rule2);border-radius:5px;padding:8px 11px;color:var(--text);font-family:'DM Mono',monospace;font-size:.58rem;outline:none;transition:border-color .15s}
+.ed-input:focus{border-color:rgba(201,168,76,.4)}
+.ed-input[readonly]{opacity:.4;cursor:not-allowed}
+.ed-input.changed{border-color:rgba(59,130,246,.5);background:rgba(59,130,246,.04)}
+.ed-drawer-foot{padding:14px 20px;border-top:1px solid var(--rule);display:flex;gap:8px;flex-shrink:0}
+.ed-save{flex:1;padding:9px;border-radius:5px;border:1px solid rgba(201,168,76,.4);background:var(--gold-d);color:var(--gold);font-family:'DM Mono',monospace;font-size:.55rem;letter-spacing:.1em;cursor:pointer;transition:all .15s}
+.ed-save:hover{background:rgba(201,168,76,.25)}
+.ed-save:disabled{opacity:.4;cursor:default}
+.ed-del{padding:9px 16px;border-radius:5px;border:1px solid rgba(239,68,68,.3);background:rgba(239,68,68,.08);color:var(--red);font-family:'DM Mono',monospace;font-size:.55rem;cursor:pointer;transition:all .15s}
+.ed-del:hover{background:rgba(239,68,68,.18)}
+.ed-toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--s2);border:1px solid var(--rule2);border-radius:8px;padding:10px 20px;font-family:'DM Mono',monospace;font-size:.58rem;color:var(--text);z-index:300;transition:opacity .3s;opacity:0;pointer-events:none}
+.ed-toast.show{opacity:1}
+.ed-overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:190;opacity:0;pointer-events:none;transition:opacity .28s}
+.ed-overlay.show{opacity:1;pointer-events:all}
+</style>
+</head>
+<body>
+
+<!-- ── LOGIN OVERLAY ── -->
+<div id="login-overlay" style="position:fixed;inset:0;z-index:9999;background:rgba(9,9,15,.97);display:flex;align-items:center;justify-content:center;backdrop-filter:blur(12px)">
+  <div id="login-card" style="background:#111119;border:1px solid rgba(201,168,76,.25);border-radius:14px;padding:44px 40px 38px;width:360px;max-width:90vw;display:flex;flex-direction:column;align-items:center;gap:0;box-shadow:0 0 60px rgba(0,0,0,.6)">
+    <div style="font-family:'Playfair Display',serif;font-size:1.55rem;color:#C9A84C;letter-spacing:.04em;margin-bottom:4px">Requation</div>
+    <div style="font-family:'DM Mono',monospace;font-size:.5rem;color:rgba(245,243,238,.28);letter-spacing:.22em;text-transform:uppercase;margin-bottom:32px">Management Dashboard</div>
+    <input id="pw-input" type="password" placeholder="Enter access code"
+      style="width:100%;background:#16161f;border:1px solid rgba(255,255,255,.1);border-radius:7px;padding:12px 16px;color:#f5f3ee;font-family:'DM Mono',monospace;font-size:.85rem;outline:none;margin-bottom:14px;letter-spacing:.08em"
+      onkeydown="if(event.key==='Enter')tryLogin()"
+    >
+    <button onclick="tryLogin()"
+      style="width:100%;background:rgba(201,168,76,.18);border:1px solid rgba(201,168,76,.4);border-radius:7px;padding:12px;color:#C9A84C;font-family:'Raleway',sans-serif;font-size:.82rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;transition:background .2s"
+      onmouseover="this.style.background='rgba(201,168,76,.3)'" onmouseout="this.style.background='rgba(201,168,76,.18)'"
+    >Unlock</button>
+    <div id="pw-err" style="font-family:'DM Mono',monospace;font-size:.55rem;color:#ef4444;letter-spacing:.1em;margin-top:12px;opacity:0;transition:opacity .2s">Incorrect access code</div>
+  </div>
+</div>
+<style>
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-8px)}40%{transform:translateX(8px)}60%{transform:translateX(-5px)}80%{transform:translateX(5px)}}
+#login-card.shake{animation:shake .4s ease}
+#login-overlay.fade-out{animation:fadeOut .35s ease forwards}
+@keyframes fadeOut{to{opacity:0;pointer-events:none}}
+</style>
+<script>
+// ── AUTH HELPERS (global so change-password panel can use them) ──
+function rqHash(s){let r=0;for(let i=0;i<s.length;i++){const c=s.charCodeAt(i);r=((r<<5)-r)+c;r|=0;}return Math.abs(r).toString(16)}
+function rqGetHash(){return localStorage.getItem('rq_pw_hash')||rqHash('Requation26!')}
+function rqCheck(pw){return rqHash(pw)===rqGetHash()}
+
+(function(){
+  if(sessionStorage.getItem('rq_auth')==='1'){
+    document.getElementById('login-overlay').style.display='none';
+  }
+  window.tryLogin=function(){
+    const v=document.getElementById('pw-input').value;
+    if(rqCheck(v)){
+      sessionStorage.setItem('rq_auth','1');
+      const o=document.getElementById('login-overlay');
+      o.classList.add('fade-out');
+      setTimeout(()=>o.style.display='none',360);
+    } else {
+      const card=document.getElementById('login-card');
+      const err=document.getElementById('pw-err');
+      card.classList.remove('shake');
+      void card.offsetWidth;
+      card.classList.add('shake');
+      err.style.opacity='1';
+      setTimeout(()=>err.style.opacity='0',2200);
+      document.getElementById('pw-input').value='';
+      document.getElementById('pw-input').focus();
+    }
+  };
+})();
+</script>
+<div class="shell">
+
+<!-- ── TOPBAR ── -->
+<header class="topbar">
+  <div class="tl">r/Σ requation <sub>Management Dashboard</sub></div>
+  <div class="tsep"></div>
+  <div class="ttime" id="ts">—</div>
+  <div class="tversion">v1.0.0</div>
+  <div class="tlive">LIVE</div>
+  <button onclick="openChangePw()" title="Change Password"
+    style="background:none;border:1px solid var(--rule2);border-radius:5px;color:var(--t3);cursor:pointer;padding:4px 9px;font-size:.72rem;margin-left:6px;transition:all .15s"
+    onmouseover="this.style.borderColor='rgba(201,168,76,.4)';this.style.color='var(--gold)'"
+    onmouseout="this.style.borderColor='var(--rule2)';this.style.color='var(--t3)'"
+    >🔑</button>
+</header>
+
+<!-- ── SIDEBAR ── -->
+<nav class="sidebar">
+  <div class="sb-section">Platform</div>
+  <div class="sb-item on" onclick="goto('overview')"><div class="sb-dot"></div>Overview</div>
+  <div class="sb-item" onclick="goto('markets')"><div class="sb-dot"></div>Markets</div>
+  <div class="sb-item" onclick="goto('data')"><div class="sb-dot"></div>Live Database</div>
+  <div class="sb-rule"></div>
+  <div class="sb-section">Architecture</div>
+  <div class="sb-item" onclick="goto('arch')"><div class="sb-dot"></div>System Diagram</div>
+  <div class="sb-item" onclick="goto('stack')"><div class="sb-dot"></div>Tech Stack</div>
+  <div class="sb-rule"></div>
+  <div class="sb-section">Operations</div>
+  <div class="sb-item" onclick="goto('pages')"><div class="sb-dot"></div>Pages</div>
+  <div class="sb-item" onclick="goto('apis')"><div class="sb-dot"></div>API Status</div>
+  <div class="sb-item" onclick="goto('deploy')"><div class="sb-dot"></div>Deployment</div>
+  <div class="sb-rule"></div>
+  <div class="sb-section">Edit Data</div>
+  <div class="sb-item" onclick="openEditor('properties')"><div class="sb-dot" style="background:var(--gold)"></div>Edit Properties</div>
+  <div class="sb-item" onclick="openEditor('restaurants')"><div class="sb-dot" style="background:var(--cyan)"></div>Edit Restaurants</div>
+  <div class="sb-rule"></div>
+  <div class="sb-section">External</div>
+  <div class="sb-item" onclick="open('https://app.netlify.com','_blank')"><div class="sb-dot"></div>Netlify Console ↗</div>
+  <div class="sb-item" onclick="open('https://supabase.com/dashboard','_blank')"><div class="sb-dot"></div>Supabase Studio ↗</div>
+  <div class="sb-item" onclick="open('https://github.com/vikpuri/vikpuri.github.io','_blank')"><div class="sb-dot"></div>GitHub Repo ↗</div>
+  <div class="sb-foot">
+    requation.com<br>
+    Netlify · Supabase · Mapbox<br>
+    © 2026 Requation
+  </div>
+</nav>
+
+<!-- ── MAIN ── -->
+<main class="main">
+
+  <!-- OVERVIEW -->
+  <div class="section" id="overview">
+    <div class="sh">Platform Overview</div>
+    <div class="kpi-row">
+      <div class="kpi">
+        <div class="kpi-l">Total POIs</div>
+        <div class="kpi-n gold" id="kpi-total">—</div>
+        <div class="kpi-s">restaurants + properties</div>
+        <div class="kpi-bar"><div class="kpi-bar-fill" id="bar-total" style="width:0%;background:var(--gold)"></div></div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-l">Markets Live</div>
+        <div class="kpi-n green">2</div>
+        <div class="kpi-s">DTLA · Laveen AZ</div>
+        <div class="kpi-bar"><div class="kpi-bar-fill" style="width:100%;background:var(--green)"></div></div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-l">Pages Deployed</div>
+        <div class="kpi-n blue">6</div>
+        <div class="kpi-s">5 market + 1 dashboard</div>
+        <div class="kpi-bar"><div class="kpi-bar-fill" style="width:100%;background:var(--blue)"></div></div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-l">API Integrations</div>
+        <div class="kpi-n violet">7</div>
+        <div class="kpi-s">Mapbox · YT · Yelp · Supabase · Resend · Stripe · Radio</div>
+        <div class="kpi-bar"><div class="kpi-bar-fill" style="width:100%;background:var(--violet)"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MARKETS -->
+  <div class="section" id="markets">
+    <div class="sh">Market Footprint</div>
+    <div class="mkt-grid">
+      <div class="mkt-card live">
+        <div class="mkt-badge live">● Live</div>
+        <div class="mkt-name">South Park · DTLA</div>
+        <div class="mkt-sub">Los Angeles, CA<br>Brutalist condo · Mixed-use district<br>KLOS 99.5 FM radio</div>
+        <div class="mkt-stat" id="mkt-dtla-stat">Loading…</div>
+      </div>
+      <div class="mkt-card live">
+        <div class="mkt-badge live">● Live</div>
+        <div class="mkt-name">Urban Farmhouse · Laveen</div>
+        <div class="mkt-sub">Phoenix Metro, AZ<br>Single-family residential · Desert life<br>99.5 The Mountain radio</div>
+        <div class="mkt-stat" id="mkt-az-stat">Loading…</div>
+      </div>
+      <div class="mkt-card future">
+        <div class="mkt-badge future">Future</div>
+        <div class="mkt-name">+ Add Market</div>
+        <div class="mkt-sub">Platform designed for<br>multi-market expansion.<br>Drop in new HTML page + DB rows.</div>
+        <div class="mkt-stat" style="color:var(--t3)">Plug-and-play architecture</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LIVE DATABASE -->
+  <div class="section" id="data">
+    <div class="sh">Live Database · Supabase PostgreSQL</div>
+    <div class="col2">
+      <div class="card">
+        <div class="card-h"><span class="card-h-icon">🍽</span> restaurants</div>
+        <table class="dt">
+          <thead><tr><th>Market</th><th>City</th><th>Records</th><th>Status</th></tr></thead>
+          <tbody id="tb-rest"><tr><td colspan="4" style="color:var(--t4);font-size:.52rem">Querying Supabase…</td></tr></tbody>
+        </table>
+      </div>
+      <div class="card">
+        <div class="card-h"><span class="card-h-icon">🏠</span> properties</div>
+        <table class="dt">
+          <thead><tr><th>Market</th><th>City</th><th>Records</th><th>Status</th></tr></thead>
+          <tbody id="tb-prop"><tr><td colspan="4" style="color:var(--t4);font-size:.52rem">Querying Supabase…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ARCHITECTURE DIAGRAM -->
+  <div id="arch">
+    <div class="sh">System Architecture</div>
+    <div class="arch-card">
+      <svg class="arch-svg" viewBox="0 0 1000 480" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <marker id="ar" markerWidth="7" markerHeight="5" refX="5" refY="2.5" orient="auto">
+            <polygon points="0 0,7 2.5,0 5" fill="rgba(245,243,238,.2)"/>
+          </marker>
+          <marker id="ar-g" markerWidth="7" markerHeight="5" refX="5" refY="2.5" orient="auto">
+            <polygon points="0 0,7 2.5,0 5" fill="rgba(34,197,94,.5)"/>
+          </marker>
+          <marker id="ar-gold" markerWidth="7" markerHeight="5" refX="5" refY="2.5" orient="auto">
+            <polygon points="0 0,7 2.5,0 5" fill="rgba(201,168,76,.6)"/>
+          </marker>
+          <filter id="glow">
+            <feGaussianBlur stdDeviation="2" result="b"/>
+            <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+        </defs>
+
+        <!-- bg -->
+        <rect width="1000" height="480" fill="#16161f" rx="6"/>
+
+        <!-- LAYER LABELS -->
+        <text x="12" y="72" font-family="DM Mono,monospace" font-size="8" fill="rgba(245,243,238,.15)" letter-spacing="2">CLIENT</text>
+        <text x="12" y="172" font-family="DM Mono,monospace" font-size="8" fill="rgba(245,243,238,.15)" letter-spacing="2">EDGE CDN</text>
+        <text x="12" y="292" font-family="DM Mono,monospace" font-size="8" fill="rgba(245,243,238,.15)" letter-spacing="2">SERVICES</text>
+        <text x="12" y="420" font-family="DM Mono,monospace" font-size="8" fill="rgba(245,243,238,.15)" letter-spacing="2">MEDIA</text>
+
+        <!-- BROWSER -->
+        <rect x="390" y="22" width="220" height="50" rx="6" fill="rgba(59,130,246,.12)" stroke="rgba(59,130,246,.28)" stroke-width="1" filter="url(#glow)"/>
+        <text x="500" y="40" text-anchor="middle" font-family="DM Mono,monospace" font-size="10" fill="#60a5fa" letter-spacing="1.8">BROWSER</text>
+        <text x="500" y="58" text-anchor="middle" font-family="DM Mono,monospace" font-size="8" fill="rgba(96,165,250,.45)">requation.com · HTTPS / TLS 1.3</text>
+        <!-- arrow -->
+        <line x1="500" y1="72" x2="500" y2="104" stroke="rgba(34,197,94,.4)" stroke-width="1.5" marker-end="url(#ar-g)"/>
+
+        <!-- NETLIFY CDN -->
+        <rect x="140" y="106" width="720" height="78" rx="6" fill="rgba(34,197,94,.06)" stroke="rgba(34,197,94,.2)" stroke-width="1"/>
+        <text x="500" y="124" text-anchor="middle" font-family="DM Mono,monospace" font-size="10" fill="#22c55e" letter-spacing="2">NETLIFY CDN · requation.com · Global Edge</text>
+        <!-- Page pills -->
+        <rect x="156" y="132" width="56" height="18" rx="3" fill="rgba(34,197,94,.1)"/><text x="184" y="144" text-anchor="middle" font-family="DM Mono,monospace" font-size="8" fill="rgba(34,197,94,.7)">/index</text>
+        <rect x="220" y="132" width="48" height="18" rx="3" fill="rgba(34,197,94,.1)"/><text x="244" y="144" text-anchor="middle" font-family="DM Mono,monospace" font-size="8" fill="rgba(34,197,94,.7)">/dtla</text>
+        <rect x="276" y="132" width="56" height="18" rx="3" fill="rgba(34,197,94,.1)"/><text x="304" y="144" text-anchor="middle" font-family="DM Mono,monospace" font-size="8" fill="rgba(34,197,94,.7)">/lalife</text>
+        <rect x="340" y="132" width="60" height="18" rx="3" fill="rgba(34,197,94,.1)"/><text x="370" y="144" text-anchor="middle" font-family="DM Mono,monospace" font-size="8" fill="rgba(34,197,94,.7)">/laveen</text>
+        <rect x="408" y="132" width="78" height="18" rx="3" fill="rgba(34,197,94,.1)"/><text x="447" y="144" text-anchor="middle" font-family="DM Mono,monospace" font-size="8" fill="rgba(34,197,94,.7)">/desertlife</text>
+        <rect x="494" y="132" width="74" height="18" rx="3" fill="rgba(201,168,76,.1)"/><text x="531" y="144" text-anchor="middle" font-family="DM Mono,monospace" font-size="8" fill="rgba(201,168,76,.7)">/dashboard</text>
+        <text x="500" y="174" text-anchor="middle" font-family="DM Mono,monospace" font-size="8" fill="rgba(34,197,94,.3)">Serverless Functions: /.netlify/functions/youtube  ·  /.netlify/functions/yelp  ·  netlify.toml redirects</text>
+
+        <!-- Arrows down -->
+        <line x1="300" y1="184" x2="220" y2="224" stroke="rgba(245,243,238,.18)" stroke-width="1.5" marker-end="url(#ar)"/>
+        <line x1="450" y1="184" x2="450" y2="224" stroke="rgba(245,243,238,.18)" stroke-width="1.5" marker-end="url(#ar)"/>
+        <line x1="650" y1="184" x2="750" y2="224" stroke="rgba(245,243,238,.18)" stroke-width="1.5" marker-end="url(#ar)"/>
+
+        <!-- NETLIFY FUNCTIONS box -->
+        <rect x="100" y="226" width="240" height="74" rx="6" fill="rgba(168,85,247,.08)" stroke="rgba(168,85,247,.25)" stroke-width="1"/>
+        <text x="220" y="242" text-anchor="middle" font-family="DM Mono,monospace" font-size="9" fill="#a855f7" letter-spacing="1.5">NETLIFY FUNCTIONS</text>
+        <rect x="116" y="250" width="96" height="36" rx="4" fill="rgba(168,85,247,.12)"/>
+        <text x="164" y="264" text-anchor="middle" font-family="DM Mono,monospace" font-size="9" fill="rgba(168,85,247,.85)">youtube.js</text>
+        <text x="164" y="277" text-anchor="middle" font-family="DM Mono,monospace" font-size="7.5" fill="rgba(168,85,247,.45)">YT Data v3 proxy</text>
+        <rect x="220" y="250" width="96" height="36" rx="4" fill="rgba(168,85,247,.12)"/>
+        <text x="268" y="264" text-anchor="middle" font-family="DM Mono,monospace" font-size="9" fill="rgba(168,85,247,.85)">yelp.js</text>
+        <text x="268" y="277" text-anchor="middle" font-family="DM Mono,monospace" font-size="7.5" fill="rgba(168,85,247,.45)">Yelp Fusion proxy</text>
+
+        <!-- SUPABASE box -->
+        <rect x="368" y="226" width="256" height="100" rx="6" fill="rgba(59,130,246,.08)" stroke="rgba(59,130,246,.25)" stroke-width="1"/>
+        <text x="496" y="242" text-anchor="middle" font-family="DM Mono,monospace" font-size="9" fill="#60a5fa" letter-spacing="1.5">SUPABASE POSTGRESQL</text>
+        <rect x="384" y="250" width="106" height="36" rx="4" fill="rgba(59,130,246,.12)"/>
+        <text x="437" y="264" text-anchor="middle" font-family="DM Mono,monospace" font-size="9" fill="rgba(96,165,250,.85)">restaurants</text>
+        <text x="437" y="276" text-anchor="middle" font-family="DM Mono,monospace" font-size="7.5" fill="rgba(96,165,250,.4)" id="svg-r">— records</text>
+        <rect x="498" y="250" width="110" height="36" rx="4" fill="rgba(59,130,246,.12)"/>
+        <text x="553" y="264" text-anchor="middle" font-family="DM Mono,monospace" font-size="9" fill="rgba(96,165,250,.85)">properties</text>
+        <text x="553" y="276" text-anchor="middle" font-family="DM Mono,monospace" font-size="7.5" fill="rgba(96,165,250,.4)" id="svg-p">— records</text>
+        <text x="496" y="312" text-anchor="middle" font-family="DM Mono,monospace" font-size="7.5" fill="rgba(96,165,250,.28)">PostgREST REST API · Row-Level Security · publishable key</text>
+
+        <!-- MAPBOX box -->
+        <rect x="652" y="226" width="208" height="74" rx="6" fill="rgba(201,168,76,.07)" stroke="rgba(201,168,76,.22)" stroke-width="1"/>
+        <text x="756" y="242" text-anchor="middle" font-family="DM Mono,monospace" font-size="9" fill="#C9A84C" letter-spacing="1.5">MAPBOX GL JS</text>
+        <text x="756" y="258" text-anchor="middle" font-family="DM Mono,monospace" font-size="8" fill="rgba(201,168,76,.5)">v3.3.0 · Standard Style</text>
+        <text x="756" y="271" text-anchor="middle" font-family="DM Mono,monospace" font-size="8" fill="rgba(201,168,76,.5)">3D Buildings · Fog · Cinematic Reveal</text>
+        <text x="756" y="284" text-anchor="middle" font-family="DM Mono,monospace" font-size="8" fill="rgba(201,168,76,.5)">Custom HTML Markers · YT Billboard</text>
+
+        <!-- Bottom row services -->
+        <!-- YouTube -->
+        <rect x="56" y="358" width="120" height="54" rx="5" fill="rgba(239,68,68,.08)" stroke="rgba(239,68,68,.2)" stroke-width="1"/>
+        <text x="116" y="376" text-anchor="middle" font-family="DM Mono,monospace" font-size="9" fill="#f87171">YOUTUBE</text>
+        <text x="116" y="390" text-anchor="middle" font-family="DM Mono,monospace" font-size="7.5" fill="rgba(248,113,113,.45)">Data API v3</text>
+        <text x="116" y="402" text-anchor="middle" font-family="DM Mono,monospace" font-size="7.5" fill="rgba(248,113,113,.45)">Video markers + Billboard</text>
+        <line x1="198" y1="286" x2="145" y2="358" stroke="rgba(245,243,238,.12)" stroke-width="1" stroke-dasharray="3,3" marker-end="url(#ar)"/>
+
+        <!-- Yelp -->
+        <rect x="190" y="358" width="120" height="54" rx="5" fill="rgba(239,68,68,.06)" stroke="rgba(239,68,68,.15)" stroke-width="1"/>
+        <text x="250" y="376" text-anchor="middle" font-family="DM Mono,monospace" font-size="9" fill="#f87171">YELP FUSION</text>
+        <text x="250" y="390" text-anchor="middle" font-family="DM Mono,monospace" font-size="7.5" fill="rgba(248,113,113,.4)">Business Search</text>
+        <text x="250" y="402" text-anchor="middle" font-family="DM Mono,monospace" font-size="7.5" fill="rgba(248,113,113,.4)">POI data enrichment</text>
+        <line x1="240" y1="286" x2="240" y2="358" stroke="rgba(245,243,238,.12)" stroke-width="1" stroke-dasharray="3,3" marker-end="url(#ar)"/>
+
+        <!-- Resend -->
+        <rect x="328" y="358" width="120" height="54" rx="5" fill="rgba(34,197,94,.06)" stroke="rgba(34,197,94,.15)" stroke-width="1"/>
+        <text x="388" y="376" text-anchor="middle" font-family="DM Mono,monospace" font-size="9" fill="#4ade80">RESEND</text>
+        <text x="388" y="390" text-anchor="middle" font-family="DM Mono,monospace" font-size="7.5" fill="rgba(74,222,128,.4)">Email · Notifications</text>
+        <text x="388" y="402" text-anchor="middle" font-family="DM Mono,monospace" font-size="7.5" fill="rgba(74,222,128,.4)">Lead capture forms</text>
+
+        <!-- Stripe -->
+        <rect x="464" y="358" width="120" height="54" rx="5" fill="rgba(99,102,241,.08)" stroke="rgba(99,102,241,.2)" stroke-width="1"/>
+        <text x="524" y="376" text-anchor="middle" font-family="DM Mono,monospace" font-size="9" fill="#818cf8">STRIPE</text>
+        <text x="524" y="390" text-anchor="middle" font-family="DM Mono,monospace" font-size="7.5" fill="rgba(129,140,248,.4)">Payment Processing</text>
+        <text x="524" y="402" text-anchor="middle" font-family="DM Mono,monospace" font-size="7.5" fill="rgba(129,140,248,.35)">⚠ Test mode</text>
+
+        <!-- Radio -->
+        <rect x="598" y="358" width="140" height="54" rx="5" fill="rgba(168,85,247,.07)" stroke="rgba(168,85,247,.18)" stroke-width="1"/>
+        <text x="668" y="376" text-anchor="middle" font-family="DM Mono,monospace" font-size="9" fill="#c084fc">STREAMTHEWORLD</text>
+        <text x="668" y="390" text-anchor="middle" font-family="DM Mono,monospace" font-size="7.5" fill="rgba(192,132,252,.4)">KLOS 99.5 · The Mountain</text>
+        <text x="668" y="402" text-anchor="middle" font-family="DM Mono,monospace" font-size="7.5" fill="rgba(192,132,252,.4)">AAC Live Radio CDN</text>
+
+        <!-- Mapbox geocoding arrow -->
+        <rect x="756" y="358" width="140" height="54" rx="5" fill="rgba(201,168,76,.07)" stroke="rgba(201,168,76,.2)" stroke-width="1"/>
+        <text x="826" y="376" text-anchor="middle" font-family="DM Mono,monospace" font-size="9" fill="#C9A84C">MAPBOX TILES</text>
+        <text x="826" y="390" text-anchor="middle" font-family="DM Mono,monospace" font-size="7.5" fill="rgba(201,168,76,.4)">Vector + Raster tiles</text>
+        <text x="826" y="402" text-anchor="middle" font-family="DM Mono,monospace" font-size="7.5" fill="rgba(201,168,76,.4)">Streets · Satellite · 3D</text>
+        <line x1="756" y1="286" x2="826" y2="358" stroke="rgba(245,243,238,.12)" stroke-width="1" stroke-dasharray="3,3" marker-end="url(#ar)"/>
+
+        <!-- Footer legend -->
+        <text x="18" y="466" font-family="DM Mono,monospace" font-size="7.5" fill="rgba(245,243,238,.18)">Stack: Vanilla HTML/CSS/JS · Mapbox GL JS v3.3 · Supabase PostgreSQL · Netlify Serverless · YouTube Data v3 · Yelp Fusion · Resend · Stripe · StreamTheWorld · requation.com</text>
+      </svg>
+    </div>
+  </div>
+
+  <!-- TECH STACK -->
+  <div class="section" id="stack">
+    <div class="sh">Tech Stack</div>
+    <div class="stack-grid">
+      <div class="stack-item"><div class="stack-icon">🗺</div><div class="stack-name">Mapbox GL JS</div><div class="stack-role">v3.3.0 · 3D Maps · Standard Style</div></div>
+      <div class="stack-item"><div class="stack-icon">🗄</div><div class="stack-name">Supabase</div><div class="stack-role">PostgreSQL · PostgREST API</div></div>
+      <div class="stack-item"><div class="stack-icon">⚡</div><div class="stack-name">Netlify</div><div class="stack-role">CDN + Serverless Functions</div></div>
+      <div class="stack-item"><div class="stack-icon">▶</div><div class="stack-name">YouTube Data v3</div><div class="stack-role">Video markers · Billboard</div></div>
+      <div class="stack-item"><div class="stack-icon">⭐</div><div class="stack-name">Yelp Fusion</div><div class="stack-role">Business data · POI enrichment</div></div>
+      <div class="stack-item"><div class="stack-icon">✉</div><div class="stack-name">Resend</div><div class="stack-role">Transactional email</div></div>
+      <div class="stack-item"><div class="stack-icon">💳</div><div class="stack-name">Stripe</div><div class="stack-role">Payment processing</div></div>
+      <div class="stack-item"><div class="stack-icon">📻</div><div class="stack-name">StreamTheWorld</div><div class="stack-role">Live radio · AAC CDN stream</div></div>
+    </div>
+  </div>
+
+  <!-- PAGES -->
+  <div class="section" id="pages">
+    <div class="sh">Pages Status</div>
+    <div class="page-grid">
+      <a class="pg" href="/" target="_blank">
+        <div class="pg-dot"></div>
+        <div class="pg-info">
+          <div class="pg-url">requation.com /</div>
+          <div class="pg-desc">Home · Market Selector · Animated hero</div>
+          <div class="pg-tags"><span class="mb mb-ca">CA</span><span class="mb mb-az">AZ</span><span class="pg-type">INDEX</span><span class="pg-lines">893 lines</span></div>
+        </div>
+      </a>
+      <a class="pg" href="/dtla" target="_blank">
+        <div class="pg-dot"></div>
+        <div class="pg-info">
+          <div class="pg-url">requation.com /dtla</div>
+          <div class="pg-desc">DTLA South Park · Brutalist condo · Property panel</div>
+          <div class="pg-tags"><span class="mb mb-ca">CA · DTLA</span><span class="pg-type">PROPERTY</span><span class="pg-lines">1116 lines</span></div>
+        </div>
+      </a>
+      <a class="pg" href="/lalife" target="_blank">
+        <div class="pg-dot"></div>
+        <div class="pg-info">
+          <div class="pg-url">requation.com /lalife</div>
+          <div class="pg-desc">DTLA neighbourhood life · Businesses · KLOS radio</div>
+          <div class="pg-tags"><span class="mb mb-ca">CA · DTLA</span><span class="pg-type">LIFE MAP</span><span class="pg-lines">541 lines</span></div>
+        </div>
+      </a>
+      <a class="pg" href="/laveen" target="_blank">
+        <div class="pg-dot"></div>
+        <div class="pg-info">
+          <div class="pg-url">requation.com /laveen</div>
+          <div class="pg-desc">Laveen AZ · Urban Farmhouse · Property panel</div>
+          <div class="pg-tags"><span class="mb mb-az">AZ · Laveen</span><span class="pg-type">PROPERTY</span><span class="pg-lines">1133 lines</span></div>
+        </div>
+      </a>
+      <a class="pg" href="/desertlife" target="_blank">
+        <div class="pg-dot"></div>
+        <div class="pg-info">
+          <div class="pg-url">requation.com /desertlife</div>
+          <div class="pg-desc">Laveen desert life · Businesses · The Mountain radio</div>
+          <div class="pg-tags"><span class="mb mb-az">AZ · Laveen</span><span class="pg-type">LIFE MAP</span><span class="pg-lines">668 lines</span></div>
+        </div>
+      </a>
+      <a class="pg" href="/dashboard" target="_blank">
+        <div class="pg-dot"></div>
+        <div class="pg-info">
+          <div class="pg-url">requation.com /dashboard</div>
+          <div class="pg-desc">This page · Platform management · Investor view</div>
+          <div class="pg-tags"><span class="mb mb-admin">ADMIN</span><span class="pg-type">DASHBOARD</span></div>
+        </div>
+      </a>
+    </div>
+  </div>
+
+  <!-- API STATUS -->
+  <div class="section" id="apis">
+    <div class="sh">API Health</div>
+    <div class="col3">
+      <div class="api-card">
+        <div class="api-icon" style="background:rgba(201,168,76,.12)">🗺</div>
+        <div style="flex:1"><div class="api-name">Mapbox GL JS</div><div class="api-note">v3.3.0 · Standard style · Token domain-restricted</div></div>
+        <div class="api-dot ok" id="d-mb"></div>
+      </div>
+      <div class="api-card">
+        <div class="api-icon" style="background:rgba(239,68,68,.1)">▶</div>
+        <div style="flex:1"><div class="api-name">YouTube Data v3</div><div class="api-note">Netlify proxy + browser fallback</div></div>
+        <div class="api-dot chk" id="d-yt"></div>
+      </div>
+      <div class="api-card">
+        <div class="api-icon" style="background:rgba(59,130,246,.1)">🗄</div>
+        <div style="flex:1"><div class="api-name">Supabase DB</div><div class="api-note">PostgreSQL · PostgREST · publishable key</div></div>
+        <div class="api-dot chk" id="d-sb"></div>
+      </div>
+      <div class="api-card">
+        <div class="api-icon" style="background:rgba(239,68,68,.08)">⭐</div>
+        <div style="flex:1"><div class="api-name">Yelp Fusion</div><div class="api-note">Business POI data · Netlify proxy</div></div>
+        <div class="api-dot ok" id="d-yelp"></div>
+      </div>
+      <div class="api-card">
+        <div class="api-icon" style="background:rgba(168,85,247,.1)">📻</div>
+        <div style="flex:1"><div class="api-name">Radio · StreamTheWorld</div><div class="api-note">KLOS 99.5 FM · 99.5 The Mountain · AAC</div></div>
+        <div class="api-dot ok" id="d-radio"></div>
+      </div>
+      <div class="api-card">
+        <div class="api-icon" style="background:rgba(34,197,94,.08)">✉</div>
+        <div style="flex:1"><div class="api-name">Resend Email</div><div class="api-note">Notifications · Lead capture</div></div>
+        <div class="api-dot ok" id="d-resend"></div>
+      </div>
+      <div class="api-card" style="grid-column:1/3">
+        <div class="api-icon" style="background:rgba(99,102,241,.1)">💳</div>
+        <div style="flex:1"><div class="api-name">Stripe Payments</div><div class="api-note">Payment processing · Currently in test mode — rotate to pk_live_* before launch</div></div>
+        <div class="api-dot warn" id="d-stripe"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DEPLOYMENT -->
+  <div class="section" id="deploy">
+    <div class="sh">Deployment & Infrastructure</div>
+    <div class="col2">
+      <div class="card">
+        <div class="card-h">⚡ Netlify</div>
+        <div class="drow"><div class="dk">Domain</div><div class="dv ok">requation.com · CNAME</div></div>
+        <div class="drow"><div class="dk">Hosting</div><div class="dv ok">Static HTML · no build step</div></div>
+        <div class="drow"><div class="dk">Functions</div><div class="dv ok">youtube.js · yelp.js · esbuild</div></div>
+        <div class="drow"><div class="dk">Redirects</div><div class="dv ok">netlify.toml · 5 rules</div></div>
+        <div class="drow"><div class="dk">HTTPS</div><div class="dv ok">Let's Encrypt · Auto-renew</div></div>
+        <div class="drow"><div class="dk">CDN</div><div class="dv ok">Netlify Global Edge Network</div></div>
+        <div class="drow"><div class="dk">Env vars</div><div class="dv warn">Set in Netlify UI — not in git</div></div>
+        <div class="drow"><div class="dk">Stripe mode</div><div class="dv warn">⚠ Test key — rotate before launch</div></div>
+      </div>
+      <div class="card">
+        <div class="card-h">📦 GitHub</div>
+        <div class="drow"><div class="dk">Repository</div><div class="dv">vikpuri/vikpuri.github.io</div></div>
+        <div class="drow"><div class="dk">Branch</div><div class="dv ok">master</div></div>
+        <div class="drow"><div class="dk">Last commit</div><div class="dv">Install YouTube Data API v3</div></div>
+        <div class="drow"><div class="dk">Untracked</div><div class="dv warn">9 files pending commit</div></div>
+        <div class="drow"><div class="dk">Modified</div><div class="dv warn">4 HTML files (radio player)</div></div>
+        <div class="drow"><div class="dk">node_modules</div><div class="dv ok">In .gitignore ✓</div></div>
+        <div class="drow"><div class="dk">.env</div><div class="dv ok">In .gitignore ✓ — never committed</div></div>
+        <div class="drow"><div class="dk">PAT auth</div><div class="dv crit">⚠ Rotate GitHub token in git config</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- QUICK ACTIONS -->
+  <div class="section">
+    <div class="sh">Quick Access</div>
+    <div class="action-grid">
+      <a class="action-btn" href="/" target="_blank"><div class="action-icon">🏠</div><div class="action-label">Home</div></a>
+      <a class="action-btn" href="/dtla" target="_blank"><div class="action-icon">🏙</div><div class="action-label">DTLA</div></a>
+      <a class="action-btn" href="/lalife" target="_blank"><div class="action-icon">🌆</div><div class="action-label">LA Life</div></a>
+      <a class="action-btn" href="/laveen" target="_blank"><div class="action-icon">🏜</div><div class="action-label">Laveen</div></a>
+      <a class="action-btn" href="/desertlife" target="_blank"><div class="action-icon">🌵</div><div class="action-label">Desert Life</div></a>
+      <a class="action-btn" href="https://app.netlify.com" target="_blank"><div class="action-icon">⚡</div><div class="action-label">Netlify</div></a>
+      <a class="action-btn" href="https://supabase.com/dashboard/project/mpmprnjhunjfeacikgml" target="_blank"><div class="action-icon">🗄</div><div class="action-label">Supabase</div></a>
+      <a class="action-btn" href="https://github.com/vikpuri/vikpuri.github.io" target="_blank"><div class="action-icon">📦</div><div class="action-label">GitHub</div></a>
+    </div>
+  </div>
+
+  <!-- EDIT DATA -->
+  <div class="section" id="edit-data" style="display:none">
+    <div class="sh">Edit Data <span id="ed-table-label" style="color:var(--gold);margin-left:8px"></span></div>
+    <div class="ed-tabs">
+      <button class="ed-tab on" id="tab-properties" onclick="openEditor('properties')">🏠 Properties</button>
+      <button class="ed-tab" id="tab-restaurants" onclick="openEditor('restaurants')">🍽 Restaurants</button>
+    </div>
+    <div class="ed-toolbar">
+      <input class="ed-search" id="ed-search" placeholder="Search…" oninput="edFilter()" />
+      <button class="ed-btn ed-btn-reload" onclick="edLoad(edTable,edPage)">↺ Refresh</button>
+      <button class="ed-btn ed-btn-add" onclick="openRecord(null)">+ Add Record</button>
+      <span class="ed-count" id="ed-count-label"></span>
+    </div>
+    <div class="ed-wrap">
+      <div class="ed-wrap-head">
+        <div class="ed-wrap-title" id="ed-wrap-title">—</div>
+      </div>
+      <div style="overflow-x:auto">
+        <table class="ed-tbl" id="ed-tbl">
+          <thead id="ed-thead"></thead>
+          <tbody id="ed-tbody"><tr><td colspan="20" style="text-align:center;padding:24px;color:var(--t4)">Select a table to begin editing</td></tr></tbody>
+        </table>
+      </div>
+      <div class="ed-pager">
+        <button onclick="edPageStep(-1)" id="ed-prev">← Prev</button>
+        <span id="ed-pager-info">—</span>
+        <button onclick="edPageStep(1)" id="ed-next">Next →</button>
+      </div>
+    </div>
+  </div>
+
+</main>
+</div>
+
+<!-- EDITOR OVERLAY + DRAWER -->
+<div class="ed-overlay" id="ed-overlay" onclick="closeDrawer()"></div>
+<aside class="ed-drawer" id="ed-drawer">
+  <div class="ed-drawer-head">
+    <div class="ed-drawer-title" id="drawer-title">Edit Record</div>
+    <button class="ed-drawer-close" onclick="closeDrawer()">✕</button>
+  </div>
+  <div class="ed-drawer-body" id="drawer-body"></div>
+  <div class="ed-drawer-foot">
+    <button class="ed-save" id="drawer-save" onclick="saveRecord()">Save Changes</button>
+    <button class="ed-del" id="drawer-del" onclick="deleteRecord()">Delete</button>
+  </div>
+</aside>
+<div class="ed-toast" id="ed-toast"></div>
+
+<!-- ── CHANGE PASSWORD MODAL ── -->
+<div id="cpw-backdrop" onclick="closeChangePw()"
+  style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:500;backdrop-filter:blur(4px)"></div>
+<div id="cpw-modal"
+  style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:510;
+         background:#111119;border:1px solid rgba(201,168,76,.25);border-radius:14px;
+         padding:32px 30px 26px;width:340px;max-width:92vw;box-shadow:0 0 60px rgba(0,0,0,.7)">
+  <div style="font-family:'Playfair Display',serif;font-size:1rem;color:var(--gold);margin-bottom:4px">Change Password</div>
+  <div style="font-family:'DM Mono',monospace;font-size:.46rem;color:var(--t4);letter-spacing:.16em;text-transform:uppercase;margin-bottom:22px">Dashboard Access Code</div>
+
+  <div style="margin-bottom:12px">
+    <div style="font-family:'DM Mono',monospace;font-size:.46rem;letter-spacing:.12em;text-transform:uppercase;color:var(--t3);margin-bottom:5px">Current Password</div>
+    <input id="cpw-current" type="password" placeholder="Current password"
+      style="width:100%;background:var(--s3);border:1px solid var(--rule2);border-radius:5px;padding:9px 12px;color:var(--text);font-family:'DM Mono',monospace;font-size:.75rem;outline:none"
+      oninput="cpwClearErr()">
+  </div>
+  <div style="margin-bottom:12px">
+    <div style="font-family:'DM Mono',monospace;font-size:.46rem;letter-spacing:.12em;text-transform:uppercase;color:var(--t3);margin-bottom:5px">New Password</div>
+    <input id="cpw-new" type="password" placeholder="New password (min 6 chars)"
+      style="width:100%;background:var(--s3);border:1px solid var(--rule2);border-radius:5px;padding:9px 12px;color:var(--text);font-family:'DM Mono',monospace;font-size:.75rem;outline:none"
+      oninput="cpwClearErr()">
+  </div>
+  <div style="margin-bottom:18px">
+    <div style="font-family:'DM Mono',monospace;font-size:.46rem;letter-spacing:.12em;text-transform:uppercase;color:var(--t3);margin-bottom:5px">Confirm New Password</div>
+    <input id="cpw-confirm" type="password" placeholder="Confirm new password"
+      style="width:100%;background:var(--s3);border:1px solid var(--rule2);border-radius:5px;padding:9px 12px;color:var(--text);font-family:'DM Mono',monospace;font-size:.75rem;outline:none"
+      onkeydown="if(event.key==='Enter')savePw()" oninput="cpwClearErr()">
+  </div>
+
+  <div id="cpw-err" style="font-family:'DM Mono',monospace;font-size:.52rem;color:var(--red);margin-bottom:12px;min-height:18px"></div>
+
+  <div style="display:flex;gap:8px">
+    <button onclick="savePw()"
+      style="flex:1;padding:9px;border-radius:5px;border:1px solid rgba(201,168,76,.4);background:var(--gold-d);color:var(--gold);font-family:'DM Mono',monospace;font-size:.55rem;letter-spacing:.1em;cursor:pointer;transition:background .15s"
+      onmouseover="this.style.background='rgba(201,168,76,.25)'" onmouseout="this.style.background='var(--gold-d)'"
+    >Save Password</button>
+    <button onclick="closeChangePw()"
+      style="padding:9px 16px;border-radius:5px;border:1px solid var(--rule2);background:none;color:var(--t3);font-family:'DM Mono',monospace;font-size:.55rem;cursor:pointer"
+    >Cancel</button>
+  </div>
+</div>
+
+<script>
+function openChangePw(){
+  document.getElementById('cpw-current').value='';
+  document.getElementById('cpw-new').value='';
+  document.getElementById('cpw-confirm').value='';
+  document.getElementById('cpw-err').textContent='';
+  document.getElementById('cpw-modal').style.display='block';
+  document.getElementById('cpw-backdrop').style.display='block';
+  setTimeout(()=>document.getElementById('cpw-current').focus(),50);
+}
+function closeChangePw(){
+  document.getElementById('cpw-modal').style.display='none';
+  document.getElementById('cpw-backdrop').style.display='none';
+}
+function cpwClearErr(){document.getElementById('cpw-err').textContent='';}
+function savePw(){
+  const cur=document.getElementById('cpw-current').value;
+  const nw=document.getElementById('cpw-new').value;
+  const cf=document.getElementById('cpw-confirm').value;
+  const err=document.getElementById('cpw-err');
+
+  if(!rqCheck(cur)){err.textContent='Current password is incorrect.';return;}
+  if(nw.length<6){err.textContent='New password must be at least 6 characters.';return;}
+  if(nw!==cf){err.textContent='Passwords do not match.';return;}
+
+  localStorage.setItem('rq_pw_hash',rqHash(nw));
+  closeChangePw();
+  toast('Password updated ✓','ok');
+}
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'&&document.getElementById('cpw-modal').style.display==='block')closeChangePw();
+});
+</script>
+
+<script>
+// ── CONFIG ──
+const SB='https://mpmprnjhunjfeacikgml.supabase.co';
+const KEY='sb_publishable_T6XISHd9O2Ol0raPaEASqQ_klUXnyY3';
+const H={'apikey':KEY,'Authorization':'Bearer '+KEY,'Prefer':'count=exact','Range':'0-0'};
+
+// ── CLOCK ──
+function tick(){
+  const n=new Date();
+  document.getElementById('ts').textContent=
+    n.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})+
+    ' '+n.toLocaleTimeString('en-US',{hour12:false});
+}
+tick();setInterval(tick,1000);
+
+// ── SUPABASE COUNT ──
+async function count(table,filter=''){
+  try{
+    const r=await fetch(`${SB}/rest/v1/${table}?select=id${filter}&limit=1`,{headers:H});
+    if(!r.ok)return null;
+    const cr=r.headers.get('content-range');
+    if(cr){const m=cr.match(/\/(\d+)/);if(m)return parseInt(m[1]);}
+    return null;
+  }catch{return null;}
+}
+
+// ── LOAD DATA ──
+async function load(){
+  // Supabase counts
+  const[rt,pt]=await Promise.all([count('restaurants'),count('properties')]);
+
+  if(rt!==null||pt!==null){
+    document.getElementById('d-sb').className='api-dot ok';
+  }
+
+  // Market breakdowns — try common market field names
+  const[rCA,rAZ,pCA,pAZ]=await Promise.all([
+    count('restaurants','&market=eq.DTLA'),
+    count('restaurants','&market=eq.Laveen'),
+    count('properties','&market=eq.DTLA'),
+    count('properties','&market=eq.Laveen')
+  ]);
+
+  // Restaurants table
+  const rtb=document.getElementById('tb-rest');
+  const caR=rCA??'—', azR=rAZ??'—', totR=rt??'—';
+  rtb.innerHTML=`
+    <tr><td><span class="mb mb-ca">CA</span></td><td>Los Angeles · DTLA</td><td class="n">${caR}</td><td class="ok">Live</td></tr>
+    <tr><td><span class="mb mb-az">AZ</span></td><td>Phoenix · Laveen</td><td class="n">${azR}</td><td class="ok">Live</td></tr>
+    <tr><td colspan="2" class="tot">Total</td><td class="n tot">${totR}</td><td class="tot"></td></tr>`;
+
+  // Properties table
+  const ptb=document.getElementById('tb-prop');
+  const caP=pCA??'—', azP=pAZ??'—', totP=pt??'—';
+  ptb.innerHTML=`
+    <tr><td><span class="mb mb-ca">CA</span></td><td>Los Angeles · DTLA</td><td class="n">${caP}</td><td class="ok">Live</td></tr>
+    <tr><td><span class="mb mb-az">AZ</span></td><td>Phoenix · Laveen</td><td class="n">${azP}</td><td class="ok">Live</td></tr>
+    <tr><td colspan="2" class="tot">Total</td><td class="n tot">${totP}</td><td class="tot"></td></tr>`;
+
+  // KPI total
+  if(rt!==null&&pt!==null){
+    const total=(rt+pt).toLocaleString();
+    document.getElementById('kpi-total').textContent=total;
+    document.getElementById('bar-total').style.width='100%';
+  }
+
+  // Market stats
+  document.getElementById('mkt-dtla-stat').textContent=
+    `${caR} businesses · ${caP||'—'} properties`;
+  document.getElementById('mkt-az-stat').textContent=
+    `${azR} businesses · ${azP||'—'} properties`;
+
+  // SVG labels
+  const svgR=document.getElementById('svg-r');
+  const svgP=document.getElementById('svg-p');
+  if(svgR&&rt!==null)svgR.textContent=rt.toLocaleString()+' records';
+  if(svgP&&pt!==null)svgP.textContent=pt.toLocaleString()+' records';
+
+  // YouTube health
+  try{
+    const yr=await fetch('/.netlify/functions/youtube?q=DTLA+Los+Angeles&maxResults=1');
+    document.getElementById('d-yt').className='api-dot '+(yr.ok?'ok':'warn');
+  }catch{
+    document.getElementById('d-yt').className='api-dot warn';
+  }
+
+  // Supabase final status
+  document.getElementById('d-sb').className='api-dot '+(rt!==null?'ok':'err');
+}
+
+// ── SIDEBAR NAVIGATION ──
+function goto(id){
+  const el=document.getElementById(id);
+  if(el)el.scrollIntoView({behavior:'smooth',block:'start'});
+  document.querySelectorAll('.sb-item').forEach(i=>{
+    i.classList.toggle('on',i.getAttribute('onclick')==='goto(\''+id+'\')');
+  });
+}
+
+// ── INTERSECTION OBSERVER for active nav ──
+const obs=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      const id=e.target.id;
+      document.querySelectorAll('.sb-item').forEach(i=>{
+        i.classList.toggle('on',i.getAttribute('onclick')==='goto(\''+id+'\')');
+      });
+    }
+  });
+},{threshold:.4,rootMargin:'-50px 0px -50% 0px'});
+['overview','markets','data','arch','stack','pages','apis','deploy'].forEach(id=>{
+  const el=document.getElementById(id);
+  if(el)obs.observe(el);
+});
+
+load();
+
+// ════════════════════════════════════════════════
+//  DATA EDITOR
+// ════════════════════════════════════════════════
+const ED_PAGE_SIZE=20;
+let edTable='',edPage=0,edRows=[],edFiltered=[],edColumns=[],edRecord=null,edIsNew=false;
+
+// Headers that support writes (PATCH/POST/DELETE)
+const WH={
+  'apikey':KEY,
+  'Authorization':'Bearer '+KEY,
+  'Content-Type':'application/json',
+  'Prefer':'return=representation'
+};
+
+// Open a table in the editor
+function openEditor(table){
+  edTable=table;
+  edPage=0;
+  document.getElementById('edit-data').style.display='';
+  document.getElementById('edit-data').scrollIntoView({behavior:'smooth',block:'start'});
+  document.getElementById('tab-properties').classList.toggle('on',table==='properties');
+  document.getElementById('tab-restaurants').classList.toggle('on',table==='restaurants');
+  document.getElementById('ed-table-label').textContent=table;
+  document.getElementById('ed-search').value='';
+  edLoad(table,0);
+  // update sidebar active
+  document.querySelectorAll('.sb-item').forEach(i=>{
+    const oc=i.getAttribute('onclick')||'';
+    i.classList.toggle('on',oc.includes(table));
+  });
+}
+
+// Load a page of records
+async function edLoad(table,page){
+  if(!table)return;
+  const offset=page*ED_PAGE_SIZE;
+  document.getElementById('ed-tbody').innerHTML=
+    '<tr><td colspan="20" style="text-align:center;padding:20px;color:var(--t4)">Loading…</td></tr>';
+  document.getElementById('ed-wrap-title').textContent=`${table} — page ${page+1}`;
+
+  try{
+    const r=await fetch(
+      `${SB}/rest/v1/${table}?select=*&limit=${ED_PAGE_SIZE}&offset=${offset}&order=id.asc`,
+      {headers:{...H,'Range':`${offset}-${offset+ED_PAGE_SIZE-1}`}}
+    );
+    if(!r.ok){toast('Error: '+r.status+' '+r.statusText,'err');return;}
+    const rows=await r.json();
+    edRows=rows;
+    edFiltered=rows;
+
+    // Build columns from first row
+    if(rows.length>0){
+      edColumns=Object.keys(rows[0]);
+    }
+
+    // Count
+    const cr=r.headers.get('content-range');
+    let total='?';
+    if(cr){const m=cr.match(/\/(\d+)/);if(m)total=m[1];}
+    document.getElementById('ed-count-label').textContent=`${total} total records`;
+
+    renderTable(edFiltered);
+
+    // Pager
+    const hasPrev=page>0;
+    const hasNext=rows.length===ED_PAGE_SIZE;
+    document.getElementById('ed-prev').disabled=!hasPrev;
+    document.getElementById('ed-next').disabled=!hasNext;
+    document.getElementById('ed-pager-info').textContent=`Showing ${offset+1}–${offset+rows.length}`;
+    edPage=page;
+  }catch(e){toast('Fetch error: '+e.message,'err');}
+}
+
+function edPageStep(d){edLoad(edTable,edPage+d);}
+
+// Filter rows client-side
+function edFilter(){
+  const q=document.getElementById('ed-search').value.toLowerCase().trim();
+  if(!q){edFiltered=edRows;}
+  else{
+    edFiltered=edRows.filter(r=>
+      Object.values(r).some(v=>v!==null&&String(v).toLowerCase().includes(q))
+    );
+  }
+  renderTable(edFiltered);
+}
+
+// Render the table with actual data
+function renderTable(rows){
+  if(!rows.length){
+    document.getElementById('ed-tbody').innerHTML=
+      '<tr><td colspan="20" style="text-align:center;padding:20px;color:var(--t4)">No records found</td></tr>';
+    document.getElementById('ed-thead').innerHTML='';
+    return;
+  }
+  const cols=edColumns;
+
+  // Priority columns first
+  const priority=['id','name','address','zip','price','beds','baths','sqft','mls_status','market','lat','lng'];
+  const sorted=priority.filter(c=>cols.includes(c)).concat(cols.filter(c=>!priority.includes(c)));
+
+  // Show max 8 columns in the table (drawer shows all)
+  const display=sorted.slice(0,8);
+
+  // thead
+  document.getElementById('ed-thead').innerHTML=
+    '<tr>'+display.map(c=>`<th>${c}</th>`).join('')+'<th></th></tr>';
+
+  // tbody
+  document.getElementById('ed-tbody').innerHTML=rows.map((r,i)=>{
+    const cells=display.map(c=>{
+      const v=r[c];
+      if(v===null||v===undefined)return'<td style="color:var(--t4)">—</td>';
+      if(c==='id')return`<td class="id-col">${v}</td>`;
+      if(c==='price')return`<td class="num">$${Number(v).toLocaleString()}</td>`;
+      if(c==='mls_status'||c==='status')return`<td><span class="status">${v}</span></td>`;
+      if(c==='lat'||c==='lng')return`<td style="color:var(--t3)">${parseFloat(v).toFixed(5)}</td>`;
+      const sv=String(v);
+      return`<td title="${sv}">${sv.length>28?sv.slice(0,26)+'…':sv}</td>`;
+    }).join('');
+    return`<tr onclick="openRecord(${i})">${cells}<td style="color:var(--t4);font-size:.5rem;text-align:right">edit →</td></tr>`;
+  }).join('');
+}
+
+// Open drawer for a record (null = new)
+function openRecord(idx){
+  edIsNew=(idx===null);
+  edRecord=edIsNew?{}:{...edFiltered[idx]};
+
+  document.getElementById('drawer-title').textContent=
+    edIsNew?`New ${edTable} record`:`Edit ${edTable} #${edRecord.id||''}`;
+  document.getElementById('drawer-del').style.display=edIsNew?'none':'';
+
+  buildForm(edRecord,edColumns);
+  document.getElementById('ed-drawer').classList.add('open');
+  document.getElementById('ed-overlay').classList.add('show');
+}
+
+function closeDrawer(){
+  document.getElementById('ed-drawer').classList.remove('open');
+  document.getElementById('ed-overlay').classList.remove('show');
+}
+
+// Build the edit form dynamically from record fields
+function buildForm(rec,cols){
+  const priority=['name','address','zip','price','beds','baths','sqft','mls_status','market','lat','lng','redfin_url','url','category'];
+  const sorted=[...priority.filter(c=>cols.includes(c)||edIsNew),...cols.filter(c=>!priority.includes(c))];
+  const allCols=edIsNew?priority.filter(c=>['name','address','zip','price','beds','baths','sqft','mls_status','market','lat','lng'].includes(c)):sorted;
+
+  const html=allCols.map(col=>{
+    const val=rec[col]!==undefined&&rec[col]!==null?rec[col]:'';
+    const readonly=(col==='id'&&!edIsNew)?'readonly':'';
+    return`<div class="ed-field">
+      <div class="ed-label">${col}</div>
+      <input class="ed-input" id="field-${col}" data-field="${col}" value="${String(val).replace(/"/g,'&quot;')}" ${readonly}
+        oninput="this.classList.add('changed')" placeholder="${col}">
+    </div>`;
+  }).join('');
+
+  document.getElementById('drawer-body').innerHTML=html;
+  document.getElementById('drawer-save').disabled=false;
+}
+
+// Save (PATCH existing / POST new)
+async function saveRecord(){
+  const btn=document.getElementById('drawer-save');
+  btn.disabled=true;
+  btn.textContent='Saving…';
+
+  const fields={};
+  document.querySelectorAll('#drawer-body .ed-input').forEach(inp=>{
+    const f=inp.getAttribute('data-field');
+    if(f==='id'&&!edIsNew)return; // don't patch id
+    if(inp.readOnly)return;
+    fields[f]=inp.value===''?null:inp.value;
+  });
+
+  try{
+    let r;
+    if(edIsNew){
+      r=await fetch(`${SB}/rest/v1/${edTable}`,{
+        method:'POST',headers:WH,body:JSON.stringify(fields)
+      });
+    }else{
+      r=await fetch(`${SB}/rest/v1/${edTable}?id=eq.${edRecord.id}`,{
+        method:'PATCH',headers:WH,body:JSON.stringify(fields)
+      });
+    }
+    if(r.ok||r.status===201){
+      toast(edIsNew?'Record created ✓':'Saved ✓','ok');
+      closeDrawer();
+      edLoad(edTable,edPage);
+    }else{
+      const e=await r.text();
+      toast('Error '+r.status+': '+(JSON.parse(e||'{}').message||e),'err');
+    }
+  }catch(e){toast('Error: '+e.message,'err');}
+
+  btn.disabled=false;btn.textContent='Save Changes';
+}
+
+// Delete record
+async function deleteRecord(){
+  if(!confirm(`Delete ${edTable} record #${edRecord.id}? This cannot be undone.`))return;
+  try{
+    const r=await fetch(`${SB}/rest/v1/${edTable}?id=eq.${edRecord.id}`,{
+      method:'DELETE',headers:{...WH}
+    });
+    if(r.ok){
+      toast('Deleted','ok');
+      closeDrawer();
+      edLoad(edTable,edPage);
+    }else{
+      toast('Delete failed: '+r.status,'err');
+    }
+  }catch(e){toast('Error: '+e.message,'err');}
+}
+
+// Toast notification
+function toast(msg,type='ok'){
+  const t=document.getElementById('ed-toast');
+  t.textContent=msg;
+  t.style.borderColor=type==='ok'?'rgba(34,197,94,.4)':'rgba(239,68,68,.4)';
+  t.style.color=type==='ok'?'var(--green)':'var(--red)';
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2800);
+}
+
+// Keyboard shortcut: Esc to close drawer
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeDrawer();});
+</script>
+</body>
+</html>
