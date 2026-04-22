@@ -16,7 +16,7 @@ exports.handler = async (event) => {
   let name, phone, message, subject;
   try {
     ({ name, phone, message, subject } = JSON.parse(event.body));
-  } catch {
+  } catch (e) {
     return { statusCode: 400, headers: CORS, body: JSON.stringify({ error: 'Invalid request body' }) };
   }
 
@@ -28,38 +28,35 @@ exports.handler = async (event) => {
   const authToken  = process.env.TWILIO_AUTH_TOKEN;
   const from       = process.env.TWILIO_PHONE;
   const to         = process.env.ADMIN_PHONE || from;
+  const bodyText   = `Requation lead${subject ? ' - ' + subject : ''}\nFrom: ${name} (${phone})\n${message}`;
 
-  const auth = Buffer.from(`${accountSid}:${authToken}`).toString('base64');
-  const body = new URLSearchParams({
-    To:   to,
-    From: from,
-    Body: `Requation lead${subject ? ' — ' + subject : ''}\nFrom: ${name} (${phone})\n${message}`
-  });
+  const credentials = accountSid + ':' + authToken;
+  const encoded = btoa(credentials);
 
-  try {
-    const resp = await fetch(
-      `https://api.twilio.com/2010-04-01/Accounts/${accountSid}/Messages.json`,
-      {
-        method: 'POST',
-        headers: {
-          'Authorization': `Basic ${auth}`,
-          'Content-Type': 'application/x-www-form-urlencoded'
-        },
-        body: body.toString()
-      }
-    );
+  const formBody = 'To=' + encodeURIComponent(to)
+    + '&From=' + encodeURIComponent(from)
+    + '&Body=' + encodeURIComponent(bodyText);
 
-    if (!resp.ok) {
-      const err = await resp.text();
-      return { statusCode: resp.status, headers: CORS, body: JSON.stringify({ error: err }) };
+  const resp = await fetch(
+    'https://api.twilio.com/2010-04-01/Accounts/' + accountSid + '/Messages.json',
+    {
+      method: 'POST',
+      headers: {
+        'Authorization': 'Basic ' + encoded,
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      body: formBody
     }
+  );
 
-    return {
-      statusCode: 200,
-      headers: { ...CORS, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ok: true })
-    };
-  } catch (err) {
-    return { statusCode: 500, headers: CORS, body: JSON.stringify({ error: err.message }) };
+  if (!resp.ok) {
+    const errText = await resp.text();
+    return { statusCode: resp.status, headers: CORS, body: JSON.stringify({ error: errText }) };
   }
+
+  return {
+    statusCode: 200,
+    headers: { ...CORS, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ ok: true })
+  };
 };
