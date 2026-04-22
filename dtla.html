@@ -979,7 +979,7 @@ async function loadEvents(){
   if(eventsLoaded) return;
   document.getElementById('evt-list').innerHTML='<div class="dir-empty">Loading events…</div>';
   try{
-    const r=await fetch('/.netlify/functions/eventbrite?lat=34.0455&lng=-118.2587&radius=10mi');
+    const r=await fetch('/.netlify/functions/eventbrite?address=Los+Angeles,+CA&radius=10mi');
     if(!r.ok) throw new Error(r.status);
     const d=await r.json();
     eventsData=d.events||[];
