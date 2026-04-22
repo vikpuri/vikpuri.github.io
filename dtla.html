@@ -308,6 +308,7 @@
     <button id="tab-index" class="panel-tab" onclick="switchTab('index')">INDEX</button>
     <button class="panel-tab" onclick="switchTab('neighborhood')">Neighborhood</button>
     <button class="panel-tab" onclick="switchTab('directory')">Directory</button>
+    <button class="panel-tab" onclick="switchTab('events')">Events</button>
     <button class="panel-tab" onclick="switchTab('waymo')">Waymo</button>
   </div>
   <div class="panel-body" id="panel-body">
@@ -358,6 +359,10 @@
 <div class="tab-pane" id="tab-directory">
   <input class="dir-search" id="dir-search" placeholder="Search businesses, categories…" oninput="filterDir()">
   <div id="dir-list"><div class="dir-empty">Click a property pin to load the local directory</div></div>
+</div>
+
+<div class="tab-pane" id="tab-events">
+  <div id="evt-list"><div class="dir-empty">Tap to load events</div></div>
 </div>
 
 <div class="tab-pane" id="tab-waymo">
@@ -920,6 +925,7 @@ function switchTab(name){
   document.querySelectorAll('.tab-pane').forEach(p=>p.classList.toggle('active',p.id==='tab-'+name));
   document.getElementById('panel-body').scrollTop=0;
   if(name==='directory') loadDirectory();
+  if(name==='events') loadEvents();
 }
 
 // ── DIRECTORY ──
@@ -954,6 +960,40 @@ function renderDir(data){
 function filterDir(){
   const q=document.getElementById('dir-search').value.toLowerCase().trim();
   renderDir(q?dirData.filter(b=>(b.name||'').toLowerCase().includes(q)||(b.category||'').toLowerCase().includes(q)||(b.address||'').toLowerCase().includes(q)):dirData);
+}
+
+// ── EVENTS (Eventbrite) ──
+let eventsData=[], eventsLoaded=false;
+async function loadEvents(){
+  if(eventsLoaded) return;
+  document.getElementById('evt-list').innerHTML='<div class="dir-empty">Loading events…</div>';
+  try{
+    const r=await fetch('/.netlify/functions/eventbrite?lat=34.0455&lng=-118.2587&radius=10mi');
+    if(!r.ok) throw new Error(r.status);
+    const d=await r.json();
+    eventsData=d.events||[];
+    eventsLoaded=true;
+    renderEvents();
+  }catch(e){
+    document.getElementById('evt-list').innerHTML='<div class="dir-empty">Could not load events</div>';
+    console.warn('Events tab:',e);
+  }
+}
+function renderEvents(){
+  const el=document.getElementById('evt-list');
+  if(!eventsData.length){el.innerHTML='<div class="dir-empty">No upcoming events found nearby</div>';return;}
+  el.innerHTML=eventsData.map(ev=>{
+    const d=new Date(ev.start_utc);
+    const ds=d.toLocaleDateString('en-US',{month:'short',day:'numeric'})+' · '+d.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+    const badge=ev.is_free
+      ?`<span style="font-size:.56rem;background:#2E7D32;color:#fff;padding:2px 6px;border-radius:2px;font-weight:600">FREE</span>`
+      :`<span style="font-size:.56rem;background:#C62828;color:#fff;padding:2px 6px;border-radius:2px;font-weight:600">TICKETS</span>`;
+    const thumb=ev.thumb
+      ?`<img src="${ev.thumb}" style="width:52px;height:29px;object-fit:cover;border-radius:2px;flex-shrink:0" alt="">`
+      :`<div style="width:52px;height:29px;background:#1a2744;border-radius:2px;flex-shrink:0"></div>`;
+    return `<div class="dir-card">${thumb}<div style="flex:1;min-width:0"><div class="dir-name">${ev.name.replace(/</g,'&lt;')}</div><div class="dir-cat">${ds}</div><div style="display:flex;gap:6px;align-items:center;margin-top:4px">${badge}<a href="${ev.url}" target="_blank" style="font-size:.58rem;color:#4F6FB8;text-decoration:none;font-weight:600">View →</a></div></div></div>`;
+  }).join('')+
+  `<div style="padding:10px 16px 16px;font-size:.58rem;color:var(--text-muted);line-height:1.6;border-top:1px solid var(--rule-heavy);margin-top:6px">Events sourced from Eventbrite. Requation does not create, verify, or manage event listings. Always confirm details directly with the organizer before attending.</div>`;
 }
 
 function carouselMove(d){_ci=(_ci+d+_ct)%_ct;carouselRender();}
@@ -1044,7 +1084,9 @@ function loadSoapbox(lat,lng){
       el.onclick=()=>window.open(ev.url,'_blank');
       soapboxMarkers.push(new mapboxgl.Marker({element:el,anchor:'bottom'}).setLngLat([ev.lng,ev.lat]).addTo(map));
     });
-    console.log(`Soapbox: ${(d.events||[]).length} events loaded`);
+    const all=d.events||[];
+    const withCoords=all.filter(e=>e.lat&&e.lng);
+    console.log(`Soapbox: ${all.length} events total, ${withCoords.length} with map coords`);
   })
   .catch(e=>console.warn('Soapbox load failed:',e));
 }
