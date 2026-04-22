@@ -336,8 +336,19 @@
 </div>
 
 <div class="tab-pane" id="tab-index">
-  <div class="panel-pad">
-    <p style="font-size:.82rem;line-height:1.7;color:var(--text-muted);margin-bottom:14px"><strong style="color:var(--ink)">The Market</strong><br>330 active luxury condos across 15 ZIP codes. Combined asking value exceeding $480 million. Median household income in the corridor: $100,000 — doubled in a decade. The most realistically attainable luxury addresses on earth for 95% of Americans.</p><p style="font-size:.82rem;line-height:1.7;color:var(--text-muted);margin-bottom:14px"><strong style="color:var(--ink)">The Brands</strong><br>Whole Foods. Equinox. Apple. Tesla. Regal Cinemas. Bottega Louie. Philz Coffee. The Grove. LA Live — a $2.5 billion entertainment complex that hosts the Grammys, the NBA Finals and every major touring act on earth.</p><p style="font-size:.82rem;line-height:1.7;color:var(--text-muted);margin-bottom:14px"><strong style="color:var(--ink)">The Institutions</strong><br>USC — 1 mile. UCLA — 30 minutes by Metro. Cedars-Sinai — top 10 hospital in America. LA Convention Center — $190 million in annual economic impact. The Broad. Walt Disney Concert Hall. MOCA.</p><p style="font-size:.82rem;line-height:1.7;color:var(--text-muted);margin-bottom:14px"><strong style="color:var(--ink)">The Infrastructure</strong><br>6 Metro rail lines. Walk Score 98. Waymo operational. FIFA World Cup 2026. Olympics 2028. The infrastructure of a world capital, priced like a regional city.</p><p style="font-size:.82rem;line-height:1.7;color:var(--text-muted);margin-bottom:14px"><strong style="color:var(--ink)">The Address</strong><br>There is no city on earth where $750,000 buys you this. Not New York. Not London. Not Tokyo. In Los Angeles, in 2026, it does.</p><p style="font-size:.82rem;line-height:1.7;color:var(--gold);font-style:italic">Requation mapped it first.</p>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--rule-heavy);border-bottom:1px solid var(--rule-heavy)">
+    <div style="background:var(--cream);padding:12px 14px"><div style="font-family:'DM Mono',monospace;font-size:1rem;font-weight:500;color:var(--ink)">330+</div><div style="font-family:'DM Mono',monospace;font-size:.52rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);margin-top:2px">Active Listings</div></div>
+    <div style="background:var(--cream);padding:12px 14px"><div style="font-family:'DM Mono',monospace;font-size:1rem;font-weight:500;color:var(--ink)">$750K</div><div style="font-family:'DM Mono',monospace;font-size:.52rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);margin-top:2px">Entry Luxury</div></div>
+    <div style="background:var(--cream);padding:12px 14px"><div style="font-family:'DM Mono',monospace;font-size:1rem;font-weight:500;color:var(--ink)">98</div><div style="font-family:'DM Mono',monospace;font-size:.52rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);margin-top:2px">Walk Score</div></div>
+    <div style="background:var(--cream);padding:12px 14px"><div style="font-family:'DM Mono',monospace;font-size:1rem;font-weight:500;color:var(--gold)">2028</div><div style="font-family:'DM Mono',monospace;font-size:.52rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);margin-top:2px">Olympics</div></div>
+  </div>
+  <div class="panel-pad" style="padding-top:16px">
+    <p style="font-size:.82rem;line-height:1.7;color:var(--text-muted);margin-bottom:14px"><strong style="color:var(--ink)">The Market</strong><br>330 active luxury condos across 15 ZIP codes. Combined asking value exceeding $480 million. Median household income in the corridor: $100,000 — doubled in a decade. The most realistically attainable luxury addresses on earth for 95% of Americans.</p>
+    <p style="font-size:.82rem;line-height:1.7;color:var(--text-muted);margin-bottom:14px"><strong style="color:var(--ink)">The Brands</strong><br>Whole Foods. Equinox. Apple. Tesla. Regal Cinemas. Bottega Louie. Philz Coffee. The Grove. LA Live — a $2.5 billion entertainment complex that hosts the Grammys, the NBA Finals, and every major touring act on earth.</p>
+    <p style="font-size:.82rem;line-height:1.7;color:var(--text-muted);margin-bottom:14px"><strong style="color:var(--ink)">The Institutions</strong><br>USC — 1 mile. UCLA — 30 minutes by Metro. Cedars-Sinai — top 10 hospital in America. LA Convention Center — $190 million in annual economic impact. The Broad. Walt Disney Concert Hall. MOCA.</p>
+    <p style="font-size:.82rem;line-height:1.7;color:var(--text-muted);margin-bottom:14px"><strong style="color:var(--ink)">The Infrastructure</strong><br>6 Metro rail lines. Waymo operational. FIFA World Cup 2026. Olympics 2028. The infrastructure of a world capital, priced like a regional city.</p>
+    <p style="font-size:.82rem;line-height:1.7;color:var(--text-muted);margin-bottom:14px"><strong style="color:var(--ink)">The Address</strong><br>There is no city on earth where $750,000 buys you this. Not New York. Not London. Not Tokyo. In Los Angeles, in 2026, it does.</p>
+    <p style="font-size:.82rem;line-height:1.7;color:var(--gold);font-style:italic">Requation mapped it first.</p>
   </div>
 </div>
 
@@ -975,7 +986,7 @@ async function loadEvents(){
     eventsLoaded=true;
     renderEvents();
   }catch(e){
-    document.getElementById('evt-list').innerHTML='<div class="dir-empty">Could not load events</div>';
+    document.getElementById('evt-list').innerHTML=`<div class="dir-empty">Events unavailable (${e.message})</div>`;
     console.warn('Events tab:',e);
   }
 }

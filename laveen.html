@@ -337,8 +337,19 @@
 
 
 <div class="tab-pane" id="tab-index">
-  <div class="panel-pad">
-    <p style="font-size:.82rem;line-height:1.7;color:var(--text-muted);margin-bottom:14px"><strong style="color:var(--ink)">The Market</strong><br>330 active luxury condos across 15 ZIP codes. Combined asking value exceeding $480 million. Median household income in the corridor: $100,000 — doubled in a decade. The most realistically attainable luxury addresses on earth for 95% of Americans.</p><p style="font-size:.82rem;line-height:1.7;color:var(--text-muted);margin-bottom:14px"><strong style="color:var(--ink)">The Brands</strong><br>Whole Foods. Equinox. Apple. Tesla. Regal Cinemas. Bottega Louie. Philz Coffee. The Grove. LA Live — a $2.5 billion entertainment complex that hosts the Grammys, the NBA Finals and every major touring act on earth.</p><p style="font-size:.82rem;line-height:1.7;color:var(--text-muted);margin-bottom:14px"><strong style="color:var(--ink)">The Institutions</strong><br>USC — 1 mile. UCLA — 30 minutes by Metro. Cedars-Sinai — top 10 hospital in America. LA Convention Center — $190 million in annual economic impact. The Broad. Walt Disney Concert Hall. MOCA.</p><p style="font-size:.82rem;line-height:1.7;color:var(--text-muted);margin-bottom:14px"><strong style="color:var(--ink)">The Infrastructure</strong><br>6 Metro rail lines. Walk Score 98. Waymo operational. FIFA World Cup 2026. Olympics 2028. The infrastructure of a world capital, priced like a regional city.</p><p style="font-size:.82rem;line-height:1.7;color:var(--text-muted);margin-bottom:14px"><strong style="color:var(--ink)">The Address</strong><br>There is no city on earth where $750,000 buys you this. Not New York. Not London. Not Tokyo. In Los Angeles, in 2026, it does.</p><p style="font-size:.82rem;line-height:1.7;color:var(--gold);font-style:italic">Requation mapped it first.</p>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--rule-heavy);border-bottom:1px solid var(--rule-heavy)">
+    <div style="background:var(--cream);padding:12px 14px"><div style="font-family:'DM Mono',monospace;font-size:1rem;font-weight:500;color:var(--ink)">#1</div><div style="font-family:'DM Mono',monospace;font-size:.52rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);margin-top:2px">Growth Metro US</div></div>
+    <div style="background:var(--cream);padding:12px 14px"><div style="font-family:'DM Mono',monospace;font-size:1rem;font-weight:500;color:var(--ink)">$400K</div><div style="font-family:'DM Mono',monospace;font-size:.52rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);margin-top:2px">Entry Luxury</div></div>
+    <div style="background:var(--cream);padding:12px 14px"><div style="font-family:'DM Mono',monospace;font-size:1rem;font-weight:500;color:var(--ink)">0%</div><div style="font-family:'DM Mono',monospace;font-size:.52rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);margin-top:2px">State Income Tax</div></div>
+    <div style="background:var(--cream);padding:12px 14px"><div style="font-family:'DM Mono',monospace;font-size:1rem;font-weight:500;color:var(--gold)">8 mi</div><div style="font-family:'DM Mono',monospace;font-size:.52rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);margin-top:2px">Sky Harbor</div></div>
+  </div>
+  <div class="panel-pad" style="padding-top:16px">
+    <p style="font-size:.82rem;line-height:1.7;color:var(--text-muted);margin-bottom:14px"><strong style="color:var(--ink)">The Market</strong><br>Southwest Phoenix's fastest-rising corridor. Master-planned communities with new construction at prices LA buyers haven't seen in a decade. Median household income growing 18% year-over-year as the Loop 202 South Mountain Freeway opened the entire southwest valley. The most accessible luxury market in the American Sun Belt.</p>
+    <p style="font-size:.82rem;line-height:1.7;color:var(--text-muted);margin-bottom:14px"><strong style="color:var(--ink)">The Anchors</strong><br>South Mountain Park Preserve — 16,000 acres, the largest municipal park in the United States. Sky Harbor Airport — 8 miles, top 10 busiest in the nation. TSMC's $40 billion semiconductor campus in north Phoenix. Intel's Chandler fab. The Arizona Biltmore — Frank Lloyd Wright's masterwork, still the address of Arizona power.</p>
+    <p style="font-size:.82rem;line-height:1.7;color:var(--text-muted);margin-bottom:14px"><strong style="color:var(--ink)">The Institutions</strong><br>Arizona State University — 125,000 students, the largest public university in America. Banner Health and Dignity Health anchor a $14 billion healthcare corridor. Desert Botanical Gardens. Old Town Scottsdale — dining and gallery district drawing 12 million visitors a year.</p>
+    <p style="font-size:.82rem;line-height:1.7;color:var(--text-muted);margin-bottom:14px"><strong style="color:var(--ink)">The Infrastructure</strong><br>Loop 202 South Mountain Freeway — opened 2019, the missing link that connected Laveen to the entire metro. Valley Metro Rail expanding south. Sky Harbor Sky Train. 325 days of sunshine annually. No state income tax.</p>
+    <p style="font-size:.82rem;line-height:1.7;color:var(--text-muted);margin-bottom:14px"><strong style="color:var(--ink)">The Address</strong><br>Los Angeles quality of life. 40% of the cost. The fastest-growing major metro in America just built its freeway — and Laveen is the first stop.</p>
+    <p style="font-size:.82rem;line-height:1.7;color:var(--gold);font-style:italic">Requation mapped it first.</p>
   </div>
 </div>
 
@@ -1104,7 +1115,7 @@ async function loadEvents(){
     eventsLoaded=true;
     renderEvents();
   }catch(e){
-    document.getElementById('evt-list').innerHTML='<div class="dir-empty">Could not load events</div>';
+    document.getElementById('evt-list').innerHTML=`<div class="dir-empty">Events unavailable (${e.message})</div>`;
     console.warn('Events tab:',e);
   }
 }
