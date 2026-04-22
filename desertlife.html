@@ -622,7 +622,7 @@ window.addEventListener('beforeunload',cleanupMedia);
 /* ── SOAPBOX ── */
 const soapboxMarkers=[];
 function loadSoapbox(lat,lng){
-  fetch(`/.netlify/functions/eventbrite?lat=${lat}&lng=${lng}&radius=10mi`)
+  fetch(`/.netlify/functions/predicthq?lat=${lat}&lng=${lng}`)
   .then(r=>r.json())
   .then(d=>{
     (d.events||[]).forEach(ev=>{
