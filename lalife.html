@@ -207,6 +207,32 @@
     .radio-waves span:nth-child(2){animation:wave .7s ease-in-out infinite .15s}
     .radio-waves span:nth-child(3){animation:wave .7s ease-in-out infinite .3s}
     .radio-waves span:nth-child(4){animation:wave .7s ease-in-out infinite .45s}
+
+  /* ── SOAPBOX (Eventbrite) ── */
+  .soapbox-card{width:140px;height:79px;border-radius:3px;overflow:hidden;cursor:pointer;position:relative;transition:transform .2s;z-index:110}
+  .soapbox-card:hover{transform:scale(1.05)}
+  .soapbox-free{border:2px solid #2E7D32;animation:sb-free 2.5s ease-in-out infinite}
+  .soapbox-paid{border:2px solid #C62828;animation:sb-paid 2.5s ease-in-out infinite}
+  .soapbox-img{width:100%;height:100%;object-fit:cover;display:block;background:#1a2744}
+  .soapbox-name{position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.75);color:#fff;font-family:'DM Mono',monospace;font-size:.5rem;letter-spacing:.07em;padding:3px 5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .soapbox-badge{position:absolute;top:4px;right:4px;font-family:'DM Mono',monospace;font-size:.42rem;letter-spacing:.1em;padding:2px 5px;border-radius:2px;color:#fff;font-weight:500}
+  .soapbox-free .soapbox-badge{background:rgba(46,125,50,.85)}
+  .soapbox-paid .soapbox-badge{background:rgba(198,40,40,.85)}
+  @keyframes sb-free{0%,100%{box-shadow:0 0 0 0 rgba(46,125,50,0)}50%{box-shadow:0 0 10px 3px rgba(46,125,50,.55)}}
+  @keyframes sb-paid{0%,100%{box-shadow:0 0 0 0 rgba(198,40,40,0)}50%{box-shadow:0 0 10px 3px rgba(198,40,40,.55)}}
+  .pop-link.contact{background:#2E7D32;color:#fff}
+
+  /* ── CONTACT MODAL (Twilio) ── */
+  #contact-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:400;align-items:center;justify-content:center}
+  #contact-modal.open{display:flex}
+  .contact-box{background:#FAF8F4;border-radius:6px;padding:20px;width:290px;max-width:92vw;font-family:Raleway,sans-serif}
+  .contact-box h3{font-size:.78rem;font-weight:700;color:#1A1A1A;margin-bottom:12px;letter-spacing:.08em;text-transform:uppercase}
+  .contact-inp{width:100%;border:1px solid rgba(26,26,26,.2);border-radius:3px;padding:8px 10px;font-family:Raleway,sans-serif;font-size:.75rem;margin-bottom:8px;background:#fff;color:#1A1A1A;outline:none;box-sizing:border-box}
+  .contact-inp:focus{border-color:#4F6FB8}
+  .contact-btns{display:flex;gap:8px;margin-top:4px}
+  .contact-send{flex:1;padding:9px;background:#B22234;color:#fff;border:none;border-radius:3px;font-family:Raleway,sans-serif;font-size:.72rem;font-weight:700;letter-spacing:.08em;cursor:pointer}
+  .contact-cancel{padding:9px 14px;background:transparent;border:1px solid rgba(26,26,26,.25);border-radius:3px;font-family:Raleway,sans-serif;font-size:.72rem;cursor:pointer;color:#1A1A1A}
+  #contact-status{font-size:.68rem;color:#4F6FB8;margin-top:6px;min-height:16px;text-align:center}
   </style>
 </head>
 <body>
@@ -328,6 +354,7 @@ map.on('load',()=>{
   loadLiving();
   loadCAProperties();
   addYTMarkers();
+  loadSoapbox(34.0422,-118.2637);
   map.on('click', ()=>hideMedia());
 });
 
@@ -441,6 +468,7 @@ function renderLayer(){
           <a href="${redfin}" target="_blank" class="pop-link redfin">Redfin Area</a>
           ${p.yelp_url?`<a href="${p.yelp_url}" target="_blank" class="pop-link yelp">Yelp</a>`:''}
           ${p.waymo_url?`<a href="${p.waymo_url}" target="_blank" class="pop-link waymo">🚗 Waymo</a>`:''}
+          <button onclick="openContact('${p.name.replace(/'/g,"\\'")}');document.querySelector('.mapboxgl-popup-close-button')?.click()" class="pop-link contact">📱 Contact</button>
         </div>`)
       .addTo(map);
   });
@@ -560,6 +588,76 @@ function cleanupMedia(){
 }
 window.addEventListener('pagehide',cleanupMedia);
 window.addEventListener('beforeunload',cleanupMedia);
+
+/* ── SOAPBOX ── */
+const soapboxMarkers=[];
+function loadSoapbox(lat,lng){
+  fetch(`/.netlify/functions/eventbrite?lat=${lat}&lng=${lng}&radius=10mi`)
+  .then(r=>r.json())
+  .then(d=>{
+    (d.events||[]).forEach(ev=>{
+      const el=document.createElement('div');
+      el.className='soapbox-card '+(ev.is_free?'soapbox-free':'soapbox-paid');
+      el.innerHTML=(ev.thumb?`<img class="soapbox-img" src="${ev.thumb}" alt="">`:'<div class="soapbox-img"></div>')+
+        `<div class="soapbox-badge">${ev.is_free?'FREE':'TICKETS'}</div>`+
+        `<div class="soapbox-name">${ev.name.replace(/</g,'&lt;')}</div>`;
+      el.onclick=()=>window.open(ev.url,'_blank');
+      soapboxMarkers.push(new mapboxgl.Marker({element:el,anchor:'bottom'}).setLngLat([ev.lng,ev.lat]).addTo(map));
+    });
+    const all=d.events||[];
+    const withCoords=all.filter(e=>e.lat&&e.lng);
+    console.log(`Soapbox: ${all.length} events total, ${withCoords.length} with map coords`);
+  })
+  .catch(e=>console.warn('Soapbox load failed:',e));
+}
+
+/* ── TWILIO CONTACT ── */
+let contactSubject='';
+function openContact(name){
+  contactSubject=name;
+  document.getElementById('contact-modal').classList.add('open');
+  document.getElementById('contact-status').textContent='';
+  document.getElementById('cm-name').value='';
+  document.getElementById('cm-phone').value='';
+  document.getElementById('cm-msg').value='';
+  document.getElementById('cm-title').textContent='Contact re: '+name;
+}
+function closeContact(){document.getElementById('contact-modal').classList.remove('open')}
+function sendContact(){
+  const name=document.getElementById('cm-name').value.trim();
+  const phone=document.getElementById('cm-phone').value.trim();
+  const msg=document.getElementById('cm-msg').value.trim();
+  const status=document.getElementById('contact-status');
+  if(!name||!phone){status.textContent='Name and phone required.';return}
+  status.textContent='Sending…';
+  fetch('/.netlify/functions/twilio',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({name,phone,message:msg||'Interested in this location.',subject:contactSubject})
+  })
+  .then(r=>r.json())
+  .then(d=>{
+    if(d.ok){status.textContent='Sent! We\'ll be in touch.';setTimeout(closeContact,1800)}
+    else{status.textContent='Error — try again.';console.warn(d.error)}
+  })
+  .catch(()=>{status.textContent='Network error. Try again.'});
+}
 </script>
+
+<!-- CONTACT MODAL (Twilio) -->
+<div id="contact-modal">
+  <div class="contact-box">
+    <h3 id="cm-title">Contact</h3>
+    <input id="cm-name" class="contact-inp" placeholder="Your name" type="text">
+    <input id="cm-phone" class="contact-inp" placeholder="Your phone (+1...)" type="tel">
+    <textarea id="cm-msg" class="contact-inp" placeholder="Message (optional)" rows="3" style="resize:none"></textarea>
+    <div class="contact-btns">
+      <button class="contact-send" onclick="sendContact()">Send</button>
+      <button class="contact-cancel" onclick="closeContact()">Cancel</button>
+    </div>
+    <div id="contact-status"></div>
+  </div>
+</div>
+
 </body>
 </html>

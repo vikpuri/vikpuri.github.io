@@ -218,6 +218,31 @@
     #yt-counter{font-family:'DM Mono',monospace;font-size:.6rem;color:rgba(255,255,255,.4);letter-spacing:.08em}
     #yt-close{position:absolute;top:20px;right:20px;background:none;border:none;color:rgba(255,255,255,.5);font-size:1.4rem;cursor:pointer}
     #yt-close:hover{color:#fff}
+
+  /* ── SOAPBOX (Eventbrite) ── */
+  .soapbox-card{width:140px;height:79px;border-radius:3px;overflow:hidden;cursor:pointer;position:relative;transition:transform .2s;z-index:110}
+  .soapbox-card:hover{transform:scale(1.05)}
+  .soapbox-free{border:2px solid #2E7D32;animation:sb-free 2.5s ease-in-out infinite}
+  .soapbox-paid{border:2px solid #C62828;animation:sb-paid 2.5s ease-in-out infinite}
+  .soapbox-img{width:100%;height:100%;object-fit:cover;display:block;background:#1a2744}
+  .soapbox-name{position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.75);color:#fff;font-family:'DM Mono',monospace;font-size:.5rem;letter-spacing:.07em;padding:3px 5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .soapbox-badge{position:absolute;top:4px;right:4px;font-family:'DM Mono',monospace;font-size:.42rem;letter-spacing:.1em;padding:2px 5px;border-radius:2px;color:#fff;font-weight:500}
+  .soapbox-free .soapbox-badge{background:rgba(46,125,50,.85)}
+  .soapbox-paid .soapbox-badge{background:rgba(198,40,40,.85)}
+  @keyframes sb-free{0%,100%{box-shadow:0 0 0 0 rgba(46,125,50,0)}50%{box-shadow:0 0 10px 3px rgba(46,125,50,.55)}}
+  @keyframes sb-paid{0%,100%{box-shadow:0 0 0 0 rgba(198,40,40,0)}50%{box-shadow:0 0 10px 3px rgba(198,40,40,.55)}}
+
+  /* ── CONTACT MODAL (Twilio) ── */
+  #contact-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:400;align-items:center;justify-content:center}
+  #contact-modal.open{display:flex}
+  .contact-box{background:#FAF8F4;border-radius:6px;padding:20px;width:290px;max-width:92vw;font-family:Raleway,sans-serif}
+  .contact-box h3{font-size:.78rem;font-weight:700;color:#1A1A1A;margin-bottom:12px;letter-spacing:.08em;text-transform:uppercase}
+  .contact-inp{width:100%;border:1px solid rgba(26,26,26,.2);border-radius:3px;padding:8px 10px;font-family:Raleway,sans-serif;font-size:.75rem;margin-bottom:8px;background:#fff;color:#1A1A1A;outline:none;box-sizing:border-box}
+  .contact-inp:focus{border-color:#4F6FB8}
+  .contact-btns{display:flex;gap:8px;margin-top:4px}
+  .contact-send{flex:1;padding:9px;background:#B22234;color:#fff;border:none;border-radius:3px;font-family:Raleway,sans-serif;font-size:.72rem;font-weight:700;letter-spacing:.08em;cursor:pointer}
+  .contact-cancel{padding:9px 14px;background:transparent;border:1px solid rgba(26,26,26,.25);border-radius:3px;font-family:Raleway,sans-serif;font-size:.72rem;cursor:pointer;color:#1A1A1A}
+  #contact-status{font-size:.68rem;color:#4F6FB8;margin-top:6px;min-height:16px;text-align:center}
   </style>
 </head>
 <body>
@@ -283,6 +308,7 @@
     <button id="tab-index" class="panel-tab" onclick="switchTab('index')" style="display:none">INDEX</button>
     <button class="panel-tab" onclick="switchTab('neighborhood')">Neighborhood</button>
     <button class="panel-tab" onclick="switchTab('directory')">Directory</button>
+    <button class="panel-tab" onclick="switchTab('events')">Events</button>
     <button class="panel-tab" onclick="switchTab('waymo')">Waymo</button>
   </div>
   <div class="panel-body" id="panel-body">
@@ -334,6 +360,10 @@
 <div class="tab-pane" id="tab-directory">
   <input class="dir-search" id="dir-search" placeholder="Search businesses, categories…" oninput="filterDir()">
   <div id="dir-list"><div class="dir-empty">Click a property pin to load the local directory</div></div>
+</div>
+
+<div class="tab-pane" id="tab-events">
+  <div id="evt-list"><div class="dir-empty">Tap to load events</div></div>
 </div>
 
 <div class="tab-pane" id="tab-waymo">
@@ -763,7 +793,7 @@ map.on('load',()=>{
     const stars='★'.repeat(Math.floor(p.rating||0))+'☆'.repeat(5-Math.floor(p.rating||0));
     new mapboxgl.Popup({offset:14,closeButton:true,maxWidth:'240px'})
       .setLngLat(e.lngLat)
-      .setHTML(`<div style="font-family:Raleway,sans-serif;padding:6px"><div style="font-size:.9rem;font-weight:700;color:#1A1810;margin-bottom:2px">${p.name}</div><div style="font-size:.72rem;color:#888;margin-bottom:8px">${p.rating?parseFloat(p.rating).toFixed(1)+' '+stars+' · ':''}${p.address||''}</div><div style="display:flex;gap:7px;flex-wrap:wrap">${p.yelp_url?`<a href="${p.yelp_url}" target="_blank" style="font-size:.68rem;background:#B22234;color:#fff;padding:5px 10px;border-radius:3px;text-decoration:none;font-weight:600">🍽 Order / View</a>`:''}${p.waymo_url?`<a href="${p.waymo_url}" target="_blank" style="font-size:.68rem;background:#1A73E8;color:#fff;padding:5px 10px;border-radius:3px;text-decoration:none;font-weight:600">🚗 Waymo</a>`:''}</div></div>`)
+      .setHTML(`<div style="font-family:Raleway,sans-serif;padding:6px"><div style="font-size:.9rem;font-weight:700;color:#1A1810;margin-bottom:2px">${p.name}</div><div style="font-size:.72rem;color:#888;margin-bottom:8px">${p.rating?parseFloat(p.rating).toFixed(1)+' '+stars+' · ':''}${p.address||''}</div><div style="display:flex;gap:7px;flex-wrap:wrap">${p.yelp_url?`<a href="${p.yelp_url}" target="_blank" style="font-size:.68rem;background:#B22234;color:#fff;padding:5px 10px;border-radius:3px;text-decoration:none;font-weight:600">🍽 Order / View</a>`:''}${p.waymo_url?`<a href="${p.waymo_url}" target="_blank" style="font-size:.68rem;background:#1A73E8;color:#fff;padding:5px 10px;border-radius:3px;text-decoration:none;font-weight:600">🚗 Waymo</a>`:''}<button onclick="openContact('${p.name.replace(/'/g,"\\'")}');this.closest('.mapboxgl-popup').querySelector('.mapboxgl-popup-close-button').click()" style="font-size:.68rem;background:#2E7D32;color:#fff;padding:5px 10px;border-radius:3px;border:none;cursor:pointer;font-weight:600">📱 Contact</button></div></div>`)
       .addTo(map);
   });
   map.on('mouseenter','restaurants-layer',()=>map.getCanvas().style.cursor='pointer');
@@ -794,12 +824,13 @@ map.on('load',()=>{
     const stars='★'.repeat(Math.floor(p.rating||0))+'☆'.repeat(5-Math.floor(p.rating||0));
     new mapboxgl.Popup({offset:14,closeButton:true,maxWidth:'240px'})
       .setLngLat(e.lngLat)
-      .setHTML(`<div style="font-family:Raleway,sans-serif;padding:6px"><div style="font-size:.9rem;font-weight:700;color:#1A1810;margin-bottom:2px">${p.name}</div><div style="font-size:.72rem;color:#888;margin-bottom:8px">${p.rating?parseFloat(p.rating).toFixed(1)+' '+stars+' · ':''}${p.address||''}</div><div style="display:flex;gap:7px;flex-wrap:wrap">${p.yelp_url?`<a href="${p.yelp_url}" target="_blank" style="font-size:.68rem;background:#B22234;color:#fff;padding:5px 10px;border-radius:3px;text-decoration:none;font-weight:600">🍽 Order / View</a>`:''}${p.waymo_url?`<a href="${p.waymo_url}" target="_blank" style="font-size:.68rem;background:#1A73E8;color:#fff;padding:5px 10px;border-radius:3px;text-decoration:none;font-weight:600">🚗 Waymo</a>`:''}</div></div>`)
+      .setHTML(`<div style="font-family:Raleway,sans-serif;padding:6px"><div style="font-size:.9rem;font-weight:700;color:#1A1810;margin-bottom:2px">${p.name}</div><div style="font-size:.72rem;color:#888;margin-bottom:8px">${p.rating?parseFloat(p.rating).toFixed(1)+' '+stars+' · ':''}${p.address||''}</div><div style="display:flex;gap:7px;flex-wrap:wrap">${p.yelp_url?`<a href="${p.yelp_url}" target="_blank" style="font-size:.68rem;background:#B22234;color:#fff;padding:5px 10px;border-radius:3px;text-decoration:none;font-weight:600">🍽 Order / View</a>`:''}${p.waymo_url?`<a href="${p.waymo_url}" target="_blank" style="font-size:.68rem;background:#1A73E8;color:#fff;padding:5px 10px;border-radius:3px;text-decoration:none;font-weight:600">🚗 Waymo</a>`:''}<button onclick="openContact('${p.name.replace(/'/g,"\\'")}');this.closest('.mapboxgl-popup').querySelector('.mapboxgl-popup-close-button').click()" style="font-size:.68rem;background:#2E7D32;color:#fff;padding:5px 10px;border-radius:3px;border:none;cursor:pointer;font-weight:600">📱 Contact</button></div></div>`)
       .addTo(map);
   });
   map.on('mouseenter','lav-restaurants-layer',()=>map.getCanvas().style.cursor='pointer');
   map.on('mouseleave','lav-restaurants-layer',()=>map.getCanvas().style.cursor='');
 
+  loadSoapbox(33.3427905,-112.1180767);
   map.flyTo({center:[-112.1180767,33.3427905],zoom:15.5,pitch:65,bearing:45,duration:1500,essential:true});
 });
 
@@ -925,6 +956,7 @@ function switchTab(name){
   document.querySelectorAll('.tab-pane').forEach(p=>p.classList.toggle('active',p.id==='tab-'+name));
   document.getElementById('panel-body').scrollTop=0;
   if(name==='directory') loadDirectory();
+  if(name==='events') loadEvents();
 }
 
 // ── DIRECTORY ──
@@ -1036,7 +1068,110 @@ function navigateTo(url){hideMedia();window.location.href=url;}
 function cleanupMedia(){const audio=document.getElementById('radio-audio');if(audio){audio.pause();audio.src='';}const f=document.getElementById('yt-frame');if(f)f.src='';const bb=document.getElementById('yt-billboard');if(bb){const fi=bb.querySelector('iframe');if(fi)fi.src='';}}
 window.addEventListener('pagehide',cleanupMedia);
 window.addEventListener('beforeunload',cleanupMedia);
+
+/* ── SOAPBOX ── */
+const soapboxMarkers=[];
+function loadSoapbox(lat,lng){
+  fetch(`/.netlify/functions/eventbrite?lat=${lat}&lng=${lng}&radius=10mi`)
+  .then(r=>r.json())
+  .then(d=>{
+    (d.events||[]).forEach(ev=>{
+      const el=document.createElement('div');
+      el.className='soapbox-card '+(ev.is_free?'soapbox-free':'soapbox-paid');
+      el.innerHTML=(ev.thumb?`<img class="soapbox-img" src="${ev.thumb}" alt="">`:'<div class="soapbox-img"></div>')+
+        `<div class="soapbox-badge">${ev.is_free?'FREE':'TICKETS'}</div>`+
+        `<div class="soapbox-name">${ev.name.replace(/</g,'&lt;')}</div>`;
+      el.onclick=()=>window.open(ev.url,'_blank');
+      soapboxMarkers.push(new mapboxgl.Marker({element:el,anchor:'bottom'}).setLngLat([ev.lng,ev.lat]).addTo(map));
+    });
+    const all=d.events||[];
+    const withCoords=all.filter(e=>e.lat&&e.lng);
+    console.log(`Soapbox: ${all.length} events total, ${withCoords.length} with map coords`);
+  })
+  .catch(e=>console.warn('Soapbox load failed:',e));
+}
+
+/* ── EVENTS TAB ── */
+let eventsData=[], eventsLoaded=false;
+async function loadEvents(){
+  if(eventsLoaded) return;
+  document.getElementById('evt-list').innerHTML='<div class="dir-empty">Loading events…</div>';
+  try{
+    const r=await fetch('/.netlify/functions/eventbrite?lat=33.3427905&lng=-112.1180767&radius=10mi');
+    if(!r.ok) throw new Error(r.status);
+    const d=await r.json();
+    eventsData=d.events||[];
+    eventsLoaded=true;
+    renderEvents();
+  }catch(e){
+    document.getElementById('evt-list').innerHTML='<div class="dir-empty">Could not load events</div>';
+    console.warn('Events tab:',e);
+  }
+}
+function renderEvents(){
+  const el=document.getElementById('evt-list');
+  if(!eventsData.length){el.innerHTML='<div class="dir-empty">No upcoming events found nearby</div>';return;}
+  el.innerHTML=eventsData.map(ev=>{
+    const d=new Date(ev.start_utc);
+    const ds=d.toLocaleDateString('en-US',{month:'short',day:'numeric'})+' · '+d.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+    const badge=ev.is_free
+      ?`<span style="font-size:.56rem;background:#2E7D32;color:#fff;padding:2px 6px;border-radius:2px;font-weight:600">FREE</span>`
+      :`<span style="font-size:.56rem;background:#C62828;color:#fff;padding:2px 6px;border-radius:2px;font-weight:600">TICKETS</span>`;
+    const thumb=ev.thumb
+      ?`<img src="${ev.thumb}" style="width:52px;height:29px;object-fit:cover;border-radius:2px;flex-shrink:0" alt="">`
+      :`<div style="width:52px;height:29px;background:#1a2744;border-radius:2px;flex-shrink:0"></div>`;
+    return `<div class="dir-card">${thumb}<div style="flex:1;min-width:0"><div class="dir-name">${ev.name.replace(/</g,'&lt;')}</div><div class="dir-cat">${ds}</div><div style="display:flex;gap:6px;align-items:center;margin-top:4px">${badge}<a href="${ev.url}" target="_blank" style="font-size:.58rem;color:#4F6FB8;text-decoration:none;font-weight:600">View →</a></div></div></div>`;
+  }).join('')+
+  `<div style="padding:10px 16px 16px;font-size:.58rem;color:var(--text-muted);line-height:1.6;border-top:1px solid var(--rule-heavy);margin-top:6px">Events sourced from Eventbrite. Requation does not create, verify, or manage event listings. Always confirm details directly with the organizer before attending.</div>`;
+}
+
+/* ── TWILIO CONTACT ── */
+let contactSubject='';
+function openContact(name){
+  contactSubject=name;
+  document.getElementById('contact-modal').classList.add('open');
+  document.getElementById('contact-status').textContent='';
+  document.getElementById('cm-name').value='';
+  document.getElementById('cm-phone').value='';
+  document.getElementById('cm-msg').value='';
+  document.getElementById('cm-title').textContent='Contact re: '+name;
+}
+function closeContact(){document.getElementById('contact-modal').classList.remove('open')}
+function sendContact(){
+  const name=document.getElementById('cm-name').value.trim();
+  const phone=document.getElementById('cm-phone').value.trim();
+  const msg=document.getElementById('cm-msg').value.trim();
+  const status=document.getElementById('contact-status');
+  if(!name||!phone){status.textContent='Name and phone required.';return}
+  status.textContent='Sending…';
+  fetch('/.netlify/functions/twilio',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({name,phone,message:msg||'Interested in this location.',subject:contactSubject})
+  })
+  .then(r=>r.json())
+  .then(d=>{
+    if(d.ok){status.textContent='Sent! We\'ll be in touch.';setTimeout(closeContact,1800)}
+    else{status.textContent='Error — try again.';console.warn(d.error)}
+  })
+  .catch(()=>{status.textContent='Network error. Try again.'});
+}
 </script>
+
+<!-- CONTACT MODAL (Twilio) -->
+<div id="contact-modal">
+  <div class="contact-box">
+    <h3 id="cm-title">Contact</h3>
+    <input id="cm-name" class="contact-inp" placeholder="Your name" type="text">
+    <input id="cm-phone" class="contact-inp" placeholder="Your phone (+1...)" type="tel">
+    <textarea id="cm-msg" class="contact-inp" placeholder="Message (optional)" rows="3" style="resize:none"></textarea>
+    <div class="contact-btns">
+      <button class="contact-send" onclick="sendContact()">Send</button>
+      <button class="contact-cancel" onclick="closeContact()">Cancel</button>
+    </div>
+    <div id="contact-status"></div>
+  </div>
+</div>
 
 </body>
 </html>
