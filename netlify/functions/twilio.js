@@ -1,17 +1,27 @@
+const CORS = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'Content-Type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS'
+};
+
 exports.handler = async (event) => {
+  if (event.httpMethod === 'OPTIONS') {
+    return { statusCode: 204, headers: CORS, body: '' };
+  }
+
   if (event.httpMethod !== 'POST') {
-    return { statusCode: 405, body: 'Method Not Allowed' };
+    return { statusCode: 405, headers: CORS, body: 'Method Not Allowed' };
   }
 
   let name, phone, message, subject;
   try {
     ({ name, phone, message, subject } = JSON.parse(event.body));
   } catch {
-    return { statusCode: 400, body: JSON.stringify({ error: 'Invalid request body' }) };
+    return { statusCode: 400, headers: CORS, body: JSON.stringify({ error: 'Invalid request body' }) };
   }
 
   if (!name || !phone || !message) {
-    return { statusCode: 400, body: JSON.stringify({ error: 'name, phone, and message required' }) };
+    return { statusCode: 400, headers: CORS, body: JSON.stringify({ error: 'name, phone, and message required' }) };
   }
 
   const accountSid = process.env.TWILIO_ACCOUNT_SID;
@@ -41,15 +51,15 @@ exports.handler = async (event) => {
 
     if (!resp.ok) {
       const err = await resp.text();
-      return { statusCode: resp.status, body: JSON.stringify({ error: err }) };
+      return { statusCode: resp.status, headers: CORS, body: JSON.stringify({ error: err }) };
     }
 
     return {
       statusCode: 200,
-      headers: { 'Access-Control-Allow-Origin': '*', 'Content-Type': 'application/json' },
+      headers: { ...CORS, 'Content-Type': 'application/json' },
       body: JSON.stringify({ ok: true })
     };
   } catch (err) {
-    return { statusCode: 500, body: JSON.stringify({ error: err.message }) };
+    return { statusCode: 500, headers: CORS, body: JSON.stringify({ error: err.message }) };
   }
 };
