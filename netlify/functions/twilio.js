@@ -54,9 +54,10 @@ exports.handler = async (event) => {
     return { statusCode: resp.status, headers: CORS, body: JSON.stringify({ error: errText }) };
   }
 
+  const twilioData = await resp.json();
   return {
     statusCode: 200,
     headers: { ...CORS, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ ok: true })
+    body: JSON.stringify({ ok: true, sid: twilioData.sid, status: twilioData.status, error_code: twilioData.error_code, error_message: twilioData.error_message })
   };
 };
