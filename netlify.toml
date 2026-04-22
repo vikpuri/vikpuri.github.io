@@ -1,12 +1,12 @@
 [build]
   publish = "dist"
   command = "node build.js"
-  functions = "netlify/functions"
 
 [build.environment]
   SECRETS_SCAN_SMART_DETECTION_ENABLED = "false"
 
 [functions]
+  directory = "netlify/functions"
   node_bundler = "esbuild"
 
 [[redirects]]
