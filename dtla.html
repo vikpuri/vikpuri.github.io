@@ -251,6 +251,34 @@
     #hint { position:fixed; bottom:36px; left:50%; transform:translateX(-50%); background:rgba(250,248,244,.95); border:1px solid var(--rule-heavy); padding:11px 22px; font-family:'Source Serif 4',serif; font-size:.66rem; letter-spacing:.12em; color:var(--text-muted); backdrop-filter:blur(8px); z-index:80; transition:opacity .5s; pointer-events:none; white-space:nowrap; }
     #hint span { color:var(--gold); font-weight:600; }
 
+    /* Places toggle — bottom right */
+    #places-toggle {
+      position:fixed; bottom:24px; right:20px; z-index:80;
+      width:44px; height:44px; border-radius:50%;
+      background:var(--cream); border:1.5px solid var(--sand);
+      box-shadow:0 2px 12px rgba(0,0,0,0.13);
+      cursor:pointer; display:flex; align-items:center; justify-content:center;
+      font-size:1.1rem; transition:background .2s, box-shadow .2s;
+    }
+    #places-toggle:hover { background:#fff; box-shadow:0 4px 18px rgba(0,0,0,0.18); }
+    #places-toggle.active { background:var(--gold); border-color:var(--gold); }
+
+    /* Places dots */
+    .place-dot {
+      width:10px; height:10px; border-radius:50%;
+      border:1.5px solid #fff; position:fixed; z-index:9;
+      cursor:pointer; pointer-events:auto;
+      transform:translate(-50%,-50%);
+    }
+    .place-dot:hover::after {
+      content: attr(data-name);
+      position:absolute; bottom:14px; left:50%; transform:translateX(-50%);
+      background:rgba(44,42,38,.92); color:#fff;
+      font-family:'Source Serif 4',serif; font-size:.55rem;
+      padding:3px 7px; border-radius:3px; white-space:nowrap;
+      pointer-events:none;
+    }
+
     @media(max-width:640px) {
       header { padding:0 14px; }
       .logo-addr { display:none; }
@@ -429,6 +457,7 @@
 </div><!-- /panel -->
 
 <div id="hint">Tap <span>●</span> to explore South Park DTLA</div>
+<button id="places-toggle" title="Toggle nearby places" onclick="togglePlaces()">📍</button>
 
 <!-- About modal -->
 <div class="modal-overlay" id="modal-about">
@@ -897,6 +926,67 @@ async function initCesium() {
 
   loadStripVideos();
   addYTMarkers();
+  loadPlaces(viewer);
+}
+
+/* ── Google Places dot markers ───────────────────────── */
+const PLACE_COLORS = {
+  grocery_or_supermarket:'#4CAF50', cafe:'#795548', restaurant:'#FF5722',
+  gym:'#2196F3', shopping_mall:'#9C27B0', museum:'#FF9800',
+  park:'#8BC34A', movie_theater:'#E91E63', hotel:'#607D8B', library:'#009688'
+};
+let placeDots = [], placesVisible = false, placesLoaded = false;
+let cesiumViewerRef = null;
+
+async function loadPlaces(viewer) {
+  cesiumViewerRef = viewer;
+  try {
+    const r = await fetch(`/api/places?lat=${CENTER.lat}&lng=${CENTER.lng}&radius=900`);
+    const data = await r.json();
+    if (!data.places) return;
+    data.places.forEach(p => {
+      const type = (p.types || [])[0] || 'restaurant';
+      const color = PLACE_COLORS[type] || '#888';
+      const pos3d = Cesium.Cartesian3.fromDegrees(
+        p.location.longitude, p.location.latitude, 0
+      );
+      const el = document.createElement('div');
+      el.className = 'place-dot';
+      el.style.background = color;
+      el.style.display = 'none';
+      el.dataset.name = (p.displayName && p.displayName.text) || p.id;
+      if (p.googleMapsUri) el.addEventListener('click', e => { e.stopPropagation(); window.open(p.googleMapsUri,'_blank'); });
+      document.body.appendChild(el);
+      placeDots.push({ el, pos3d });
+    });
+    placesLoaded = true;
+    if (placesVisible) showPlaceDots();
+  } catch(e) { console.warn('Places load failed', e); }
+}
+
+function showPlaceDots() {
+  placeDots.forEach(d => { d.el.style.display = 'block'; });
+  cesiumViewerRef && cesiumViewerRef.scene.postRender.addEventListener(updatePlaceDots);
+}
+function hidePlaceDots() {
+  placeDots.forEach(d => { d.el.style.display = 'none'; });
+  cesiumViewerRef && cesiumViewerRef.scene.postRender.removeEventListener(updatePlaceDots);
+}
+function updatePlaceDots() {
+  if (!cesiumViewerRef) return;
+  placeDots.forEach(({ el, pos3d }) => {
+    const pos = Cesium.SceneTransforms.worldToWindowCoordinates(cesiumViewerRef.scene, pos3d);
+    if (pos && pos.x > 0 && pos.x < window.innerWidth && pos.y > 0 && pos.y < window.innerHeight) {
+      el.style.left = pos.x + 'px'; el.style.top = pos.y + 'px';
+    } else { el.style.display = 'none'; }
+  });
+}
+function togglePlaces() {
+  const btn = document.getElementById('places-toggle');
+  placesVisible = !placesVisible;
+  btn.classList.toggle('active', placesVisible);
+  if (placesVisible) { if (placesLoaded) showPlaceDots(); }
+  else hidePlaceDots();
 }
 
 initCesium().catch(e => console.error('Cesium init failed:', e));
