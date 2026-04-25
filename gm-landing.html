@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Requation — Real Estate Intelligence</title>
+  <link rel="stylesheet" href="https://cesium.com/downloads/cesiumjs/releases/1.140/Build/Cesium/Widgets/widgets.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@1,700&family=Raleway:wght@600&family=Source+Serif+4:wght@400;600&display=swap" rel="stylesheet">
@@ -24,13 +25,78 @@
       --text-muted: #9E9087;
       --rule-heavy: rgba(0,0,0,0.22);
       --border:     rgba(255,255,255,0.82);
-      --marble:     rgba(240,236,228,0.92);
       --h:          60px;
       --yt:         90px;
     }
 
-    html, body, #map { height: 100%; margin: 0; padding: 0; }
-    body { overflow: hidden; background: var(--linen); }
+    html, body { margin: 0; padding: 0; height: 100%; overflow: hidden; background: #0e0e10; }
+
+    /* ── Cesium globe ─────────────────────────────────── */
+    #cesiumContainer {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      z-index: 0;
+    }
+
+    /* Hide all Cesium chrome */
+    .cesium-viewer-toolbar,
+    .cesium-viewer-animationContainer,
+    .cesium-viewer-timelineContainer,
+    .cesium-viewer-bottom,
+    .cesium-viewer-fullscreenContainer,
+    .cesium-viewer-vrContainer,
+    .cesium-credit-container,
+    .cesium-widget-credits { display: none !important; }
+
+    /* ── Property pins ────────────────────────────────── */
+    .prop-pin {
+      width: 38px; height: 38px; border-radius: 50%;
+      border: 3px solid #fff;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.35);
+      cursor: pointer; position: fixed; z-index: 10;
+      transition: transform .15s;
+      display: none;
+    }
+    .prop-pin:hover { transform: scale(1.15); }
+
+    .prop-pin.dtla-pin {
+      background: #B22234;
+      animation: pulse-dtla 2s ease-out infinite;
+    }
+    @keyframes pulse-dtla {
+      0%   { box-shadow: 0 0 0 0 rgba(178,34,52,0.7), 0 2px 12px rgba(0,0,0,0.35); }
+      70%  { box-shadow: 0 0 0 18px rgba(178,34,52,0), 0 2px 12px rgba(0,0,0,0.35); }
+      100% { box-shadow: 0 0 0 0 rgba(178,34,52,0), 0 2px 12px rgba(0,0,0,0.35); }
+    }
+
+    .prop-pin.laveen-pin {
+      background: #C9A84C;
+      animation: pulse-laveen 2s ease-out infinite;
+    }
+    @keyframes pulse-laveen {
+      0%   { box-shadow: 0 0 0 0 rgba(201,168,76,0.7), 0 2px 12px rgba(0,0,0,0.35); }
+      70%  { box-shadow: 0 0 0 18px rgba(201,168,76,0), 0 2px 12px rgba(0,0,0,0.35); }
+      100% { box-shadow: 0 0 0 0 rgba(201,168,76,0), 0 2px 12px rgba(0,0,0,0.35); }
+    }
+
+    /* ── Pin hover labels ─────────────────────────────── */
+    .pin-label {
+      position: fixed; z-index: 20;
+      background: linear-gradient(155deg, rgba(255,255,255,0.97) 0%, rgba(250,248,244,0.93) 100%);
+      border: 1.5px solid rgba(255,255,255,0.9);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.13), 0 0 0 0.5px rgba(201,168,76,0.25);
+      backdrop-filter: blur(16px);
+      padding: 11px 15px;
+      pointer-events: none;
+      opacity: 0;
+      transform: translateY(-4px);
+      transition: opacity .18s, transform .18s;
+      white-space: nowrap;
+    }
+    .pin-label.visible { opacity: 1; transform: translateY(0); }
+    .pl-state  { font-size: .48rem; letter-spacing: .18em; text-transform: uppercase; color: var(--gold); margin-bottom: 3px; }
+    .pl-name   { font-size: .76rem; font-weight: 600; color: var(--text); font-family: 'Source Serif 4', serif; line-height: 1.3; }
+    .pl-detail { font-size: .58rem; color: var(--text-mid); margin-top: 4px; letter-spacing: .02em; }
 
     /* ── Header ───────────────────────────────────────── */
     header {
@@ -56,7 +122,7 @@
     }
     nav a:hover, nav button:hover { color: var(--text); }
 
-    /* ── YT strip — thinner, white-washed ─────────────── */
+    /* ── YT strip ─────────────────────────────────────── */
     #yt-strip {
       position: fixed;
       top: var(--h); left: 0; right: 0;
@@ -65,25 +131,20 @@
       border-bottom: 1px solid var(--border);
       overflow: hidden;
     }
-
-    /* Gloss sheen over the strip */
     #yt-strip::before {
       content: '';
       position: absolute; inset: 0;
       background: linear-gradient(180deg, rgba(255,255,255,0.28) 0%, transparent 55%);
       pointer-events: none; z-index: 3;
     }
-
     #yt-strip iframe {
       position: absolute;
-      /* Overshoot width slightly to eliminate any side letterbox bars */
       width: 104vw;
       height: calc(104vw * 9 / 16);
       top: 50%; left: -2vw;
       transform: translateY(-50%);
       border: none; pointer-events: none;
     }
-
     #yt-overlay {
       position: absolute; inset: 0;
       background: linear-gradient(
@@ -95,53 +156,12 @@
       );
       cursor: pointer; z-index: 2;
     }
-
     #yt-label {
       position: absolute; bottom: 7px; left: 16px;
       font-family: 'Source Serif 4', serif;
       font-size: .55rem; letter-spacing: .16em; text-transform: uppercase;
       color: var(--text-mid);
     }
-
-    /* ── Map ──────────────────────────────────────────── */
-    /* height:100% on html,body,#map is the confirmed working pattern.
-       header + strip float above the map via position:fixed. */
-
-    /* ── State marker cards — glossy marble ───────────── */
-    .state-card {
-      position: relative; overflow: hidden;
-      background: linear-gradient(155deg, rgba(255,255,255,0.97) 0%, rgba(250,248,244,0.92) 100%);
-      border: 1.5px solid rgba(255,255,255,0.9);
-      box-shadow:
-        0 4px 20px rgba(0,0,0,0.10),
-        0 1px 0 rgba(255,255,255,0.95) inset,   /* top gloss line */
-        0 0 0 0.5px rgba(201,168,76,0.25);
-      backdrop-filter: blur(16px);
-      padding: 12px 16px; min-width: 155px;
-      cursor: pointer;
-      transform: translateY(-100%) translateY(-16px);
-      transition: box-shadow .2s, transform .15s;
-    }
-    /* Gloss highlight */
-    .state-card::before {
-      content: '';
-      position: absolute; top: 0; left: 0; right: 0; height: 45%;
-      background: linear-gradient(180deg, rgba(255,255,255,0.55) 0%, transparent 100%);
-      pointer-events: none;
-    }
-    .state-card:hover {
-      box-shadow:
-        0 10px 32px rgba(0,0,0,0.13),
-        0 1px 0 rgba(255,255,255,0.95) inset,
-        0 0 0 1px rgba(201,168,76,0.45);
-      transform: translateY(-100%) translateY(-21px);
-    }
-    .sc-state   { font-size: .5rem; letter-spacing: .18em; text-transform: uppercase; color: var(--gold); margin-bottom: 4px; }
-    .sc-name    { font-size: .78rem; font-weight: 600; color: var(--text); margin-bottom: 8px; line-height: 1.25; font-family: 'Source Serif 4', serif; }
-    .sc-divider { border: none; border-top: 1px solid var(--sand); margin: 6px 0; }
-    .sc-row     { display: flex; align-items: center; gap: 7px; margin-top: 4px; }
-    .sc-icon    { font-size: .9rem; }
-    .sc-text    { font-size: .58rem; color: var(--text-mid); letter-spacing: .03em; }
 
     /* ── Modals ───────────────────────────────────────── */
     .modal-overlay { display:none; position:fixed; inset:0; background:rgba(28,28,28,.55); z-index:200; align-items:center; justify-content:center; backdrop-filter:blur(3px); }
@@ -169,6 +189,8 @@
 </head>
 <body>
 
+<div id="cesiumContainer"></div>
+
 <!-- Header -->
 <header>
   <div class="logo-wrap" onclick="goHome()">
@@ -189,7 +211,7 @@
   </nav>
 </header>
 
-<!-- YT Monument strip -->
+<!-- YT strip -->
 <div id="yt-strip">
   <iframe id="yt-frame"
     src=""
@@ -199,9 +221,6 @@
   <div id="yt-overlay" onclick="toggleSound()"></div>
   <div id="yt-label">▶ Neighborhood · Click to unmute</div>
 </div>
-
-<!-- Map -->
-<div id="map"></div>
 
 <script>
 /* ── YT strip ─────────────────────────────────────────── */
@@ -263,86 +282,103 @@ document.addEventListener('DOMContentLoaded', () => {
   );
 });
 
-/* ── Locations ────────────────────────────────────────── */
-const LOCATIONS = [
-  { id: 'dtla',   state: 'California', name: 'South Park · DTLA',         lat: 34.0457095, lng: -118.2585553, link: '/dtla',   wttr: 'Los+Angeles', tz: 'America/Los_Angeles' },
-  { id: 'laveen', state: 'Arizona',    name: 'Urban Farmhouse · Laveen',  lat: 33.3427905, lng: -112.1180767, link: '/laveen', wttr: 'Laveen+AZ',   tz: 'America/Phoenix'     }
-];
-
-/* ── Constellation (evening sky, ~34°N) ───────────────── */
-const CONS = { 1:'♉ Taurus',2:'♊ Gemini',3:'♊ Gemini',4:'♌ Leo',5:'♍ Virgo',6:'♏ Scorpius',7:'♐ Sagittarius',8:'♐ Sagittarius',9:'♑ Capricorn',10:'♓ Pisces',11:'♈ Aries',12:'♉ Taurus' };
-
-async function fetchWeather(city) {
-  try {
-    const r = await fetch('https://wttr.in/' + city + '?format=%c+%t', { cache: 'no-store' });
-    const t = (await r.text()).trim();
-    return { icon: t.split(' ')[0] || '🌤', temp: t.split(' ')[1] || '–' };
-  } catch { return { icon: '🌤', temp: '–' }; }
-}
-
-function localTime(tz) {
-  return new Date().toLocaleTimeString('en-US', { timeZone: tz, hour: '2-digit', minute: '2-digit' });
-}
-
-function makeCard(loc, wx) {
-  const con  = CONS[new Date().getMonth() + 1] || '✦ Orion';
-  const time = localTime(loc.tz);
-  const el = document.createElement('div');
-  el.className = 'state-card';
-  el.innerHTML =
-    '<div class="sc-state">' + loc.state + '</div>' +
-    '<div class="sc-name">'  + loc.name  + '</div>' +
-    '<hr class="sc-divider">' +
-    '<div class="sc-row"><span class="sc-icon">🕐</span><span class="sc-text">' + time + ' · Local</span></div>' +
-    '<div class="sc-row"><span class="sc-icon">' + wx.icon + '</span><span class="sc-text">' + wx.temp + ' · Now</span></div>' +
-    '<div class="sc-row"><span class="sc-icon">' + con.split(' ')[0] + '</span><span class="sc-text">' + con.split(' ').slice(1).join(' ') + ' · Tonight</span></div>';
-  el.addEventListener('click', () => location.href = loc.link);
-  return el;
-}
-
-/* ── Map init ─────────────────────────────────────────── */
-function initMap() {
-  const map = new google.maps.Map(document.getElementById('map'), {
-    center:      { lat: 35.8, lng: -114.0 },
-    zoom:        3,
-    mapId:       '96844e6a7bb74a7d5514d3a5',
-    disableDefaultUI:  true,
-    zoomControl:       true,
-    gestureHandling:   'greedy',
-    zoomControlOptions: { position: google.maps.ControlPosition.RIGHT_CENTER }
-  });
-
-  // Globe → US 3-stage cinematic reveal (final zoom keeps both CA + AZ markers in frame)
-  setTimeout(() => map.moveCamera({ center: { lat: 36.8, lng: -113.5 }, zoom: 4.4, tilt: 20, heading: 352 }), 900);
-  setTimeout(() => map.moveCamera({ center: { lat: 35.2, lng: -115.2 }, zoom: 5.4, tilt: 44, heading: 346 }), 2400);
-  setTimeout(() => map.moveCamera({ center: { lat: 33.7, lng: -115.2 }, zoom: 5.9, tilt: 54, heading: 342 }), 4000);
-
-  // Place markers immediately with placeholder, then update with live weather
-  const markers = LOCATIONS.map(loc =>
-    new google.maps.marker.AdvancedMarkerElement({
-      map,
-      position: { lat: loc.lat, lng: loc.lng },
-      content:  makeCard(loc, { icon: '🌤', temp: '…' })
-    })
-  );
-  const wx5s = new Promise(r => setTimeout(() => r(LOCATIONS.map(() => ({ icon: '🌤', temp: '–' }))), 5000));
-  Promise.race([
-    Promise.all(LOCATIONS.map(l => fetchWeather(l.wttr))),
-    wx5s
-  ]).then(weathers => {
-    markers.forEach((mk, i) => { mk.content = makeCard(LOCATIONS[i], weathers[i]); });
-  }).catch(() => {});
-}
-
 function goHome() { location.href = '/'; }
 
-window.initMap = initMap;
+/* ── Properties ───────────────────────────────────────── */
+const PROPS = [
+  { id: 'dtla',   lat: 34.0457095, lng: -118.2585553, link: '/dtla',
+    cls: 'dtla-pin',   state: 'California', name: 'South Park · DTLA',
+    detail: '801 S Grand Ave · $885,000' },
+  { id: 'laveen', lat: 33.3427905, lng: -112.1180767, link: '/laveen',
+    cls: 'laveen-pin', state: 'Arizona',    name: 'Urban Farmhouse · Laveen',
+    detail: '11403 S 27th Dr · $2,000,000' }
+];
 </script>
 
-<script
-  src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD7UMA5ILPXv9QK2_gvxPVth30MavRd2WQ&callback=initMap&v=weekly&libraries=marker&map_ids=96844e6a7bb74a7d5514d3a5"
-  async defer
-></script>
+<script src="https://cesium.com/downloads/cesiumjs/releases/1.140/Build/Cesium/Cesium.js"></script>
+<script>
+Cesium.GoogleMaps.defaultApiKey = 'AIzaSyD7UMA5ILPXv9QK2_gvxPVth30MavRd2WQ';
+
+async function initCesium() {
+  const viewer = new Cesium.Viewer('cesiumContainer', {
+    timeline:             false,
+    animation:            false,
+    baseLayerPicker:      false,
+    geocoder:             false,
+    homeButton:           false,
+    sceneModePicker:      false,
+    navigationHelpButton: false,
+    infoBox:              false,
+    selectionIndicator:   false,
+    fullscreenButton:     false,
+    vrButton:             false
+  });
+
+  viewer.imageryLayers.removeAll();
+
+  const tileset = await Cesium.createGooglePhotorealistic3DTileset();
+  viewer.scene.primitives.add(tileset);
+
+  /* Fly to western US — both properties in frame */
+  viewer.camera.flyTo({
+    destination: Cesium.Cartesian3.fromDegrees(-114.8, 37.5, 1100000),
+    orientation: {
+      heading: Cesium.Math.toRadians(10),
+      pitch:   Cesium.Math.toRadians(-52),
+      roll:    0
+    },
+    duration: 3
+  });
+
+  /* Pins become active after fly completes */
+  let pinsActive = false;
+  setTimeout(() => { pinsActive = true; }, 3500);
+
+  /* Build one DOM pin + hover label per property */
+  const pinData = PROPS.map(p => {
+    const pinEl = document.createElement('div');
+    pinEl.className = 'prop-pin ' + p.cls;
+    document.body.appendChild(pinEl);
+    pinEl.addEventListener('click', () => { location.href = p.link; });
+
+    const labelEl = document.createElement('div');
+    labelEl.className = 'pin-label';
+    labelEl.innerHTML =
+      '<div class="pl-state">' + p.state + '</div>' +
+      '<div class="pl-name">'  + p.name  + '</div>' +
+      '<div class="pl-detail">' + p.detail + '</div>';
+    document.body.appendChild(labelEl);
+
+    pinEl.addEventListener('mouseenter', () => labelEl.classList.add('visible'));
+    pinEl.addEventListener('mouseleave', () => labelEl.classList.remove('visible'));
+
+    return {
+      el: pinEl, label: labelEl,
+      pos3d: Cesium.Cartesian3.fromDegrees(p.lng, p.lat, 0)
+    };
+  });
+
+  /* Project 3D positions to screen each frame */
+  viewer.scene.postRender.addEventListener(() => {
+    pinData.forEach(({ el, label, pos3d }) => {
+      if (!pinsActive) { el.style.display = 'none'; return; }
+      const pos = Cesium.SceneTransforms.worldToWindowCoordinates(viewer.scene, pos3d);
+      if (pos && pos.x > 0 && pos.x < window.innerWidth && pos.y > 0 && pos.y < window.innerHeight) {
+        el.style.left    = (pos.x - 19) + 'px';
+        el.style.top     = (pos.y - 19) + 'px';
+        el.style.display = 'block';
+        label.style.left = (pos.x + 24) + 'px';
+        label.style.top  = (pos.y - 40) + 'px';
+      } else {
+        el.style.display = 'none';
+        label.classList.remove('visible');
+      }
+    });
+  });
+}
+
+initCesium().catch(e => console.error('Cesium init failed:', e));
+</script>
 
 <!-- About modal -->
 <div class="modal-overlay" id="modal-about">

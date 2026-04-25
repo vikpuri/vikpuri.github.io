@@ -817,8 +817,12 @@ async function initCesium() {
   document.body.appendChild(pinEl);
   pinEl.addEventListener('click', openPanel);
 
-  const propPos = Cesium.Cartesian3.fromDegrees(CENTER.lng, CENTER.lat, 30);
+  let pinActive = false;
+  setTimeout(() => { pinActive = true; }, 2500);
+
+  const propPos = Cesium.Cartesian3.fromDegrees(CENTER.lng, CENTER.lat, 0);
   viewer.scene.postRender.addEventListener(() => {
+    if (!pinActive) { pinEl.style.display = 'none'; return; }
     const pos = Cesium.SceneTransforms.worldToWindowCoordinates(viewer.scene, propPos);
     if (pos) { pinEl.style.left=(pos.x-19)+'px'; pinEl.style.top=(pos.y-19)+'px'; pinEl.style.display='block'; }
     else { pinEl.style.display='none'; }
