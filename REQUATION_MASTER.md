@@ -121,7 +121,7 @@ Requation (requation.com) is a living maps real estate intelligence platform bui
 ### YouTube Data API v3
 | Key | Value |
 |-----|-------|
-| API Key | AIzaSyCEQGh-rbZeXKH1pWKIfvLkFRkwyqvAkr0 |
+| API Key | AIzaSyD7UMA5ILPXv9QK2_gvxPVth30MavRd2WQ |
 | Netlify Function | /.netlify/functions/youtube |
 | Function File | netlify/functions/youtube.js |
 | Netlify Env Var | YOUTUBE_API_KEY |
