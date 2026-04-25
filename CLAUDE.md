@@ -106,13 +106,13 @@ map.on('load', () => {
 
 ---
 
-## Map Type Rule — HYBRID Light on All Pages
+## Map Type Rule — Vector Map ID on All Pages
 
-Every map page (landing, parent, child) uses Google Maps `mapTypeId: 'hybrid'` with daytime/light settings.
-- **No dark themes, no dusk preset on Google Maps pages** (dusk was Mapbox only — Mapbox is being phased out)
-- When a Mapbox page is migrated to Google Maps, the constructor must include `mapTypeId: 'hybrid'`
-- Map ID `96844e6a7bb74a7d5514d3a5` is the Requation map ID — use it on every Google Maps page
-- Light preset = satellite imagery (inherently bright/daytime), vector labels in cream/white, no dark color schemes
+Every map page uses Map ID `96844e6a7bb74a7d5514d3a5` (Requation map ID — vector type).
+- **NEVER set `mapTypeId: 'hybrid'` when using a vector Map ID** — hybrid is a raster type and silently breaks the map (blank tiles, nothing renders)
+- The Map ID's cloud style controls visual appearance — photorealistic 3D tiles on tilt
+- No dark themes. No dusk preset. Light/daytime appearance only.
+- `mapId` is required for AdvancedMarkerElement and for 3D photorealistic tile rendering
 
 ---
 
