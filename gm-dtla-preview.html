@@ -164,23 +164,26 @@
 <script>
 function initMap() {
   const map = new google.maps.Map(document.getElementById('map'), {
-    center: { lat: 34.0422, lng: -118.2637 },
-    zoom: 16,
-    mapTypeControl: false,
+    center:            { lat: 34.0422, lng: -118.2637 },
+    zoom:              16,
+    mapTypeId:         'terrain',
+    mapId:             '96844e6a7bb74a7d5514d3a5',
+    mapTypeControl:    false,
     streetViewControl: false,
     fullscreenControl: false,
+    gestureHandling:   'greedy',
   });
   new google.maps.Marker({
-    map: map,
+    map:      map,
     position: { lat: 34.0422, lng: -118.2637 },
-    title: '801 S Grand Ave, Los Angeles CA 90017'
+    title:    '801 S Grand Ave, Los Angeles CA 90017'
   });
 }
 window.initMap = initMap;
 </script>
 
 <script
-  src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCEQGh-rbZeXKH1pWKIfvLkFRkwyqvAkr0&callback=initMap"
+  src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCEQGh-rbZeXKH1pWKIfvLkFRkwyqvAkr0&callback=initMap&v=weekly&libraries=marker&map_ids=96844e6a7bb74a7d5514d3a5"
   async defer>
 </script>
 
