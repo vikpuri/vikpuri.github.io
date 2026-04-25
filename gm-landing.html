@@ -18,8 +18,11 @@
       --gold:       #C9A84C;
       --gold-light: #DFC07A;
       --text:       #2C2A26;
+      --ink:        #2C2A26;
+      --ink-3:      #444;
       --text-mid:   #6B6058;
       --text-muted: #9E9087;
+      --rule-heavy: rgba(0,0,0,0.22);
       --border:     rgba(255,255,255,0.82);
       --marble:     rgba(240,236,228,0.92);
       --h:          60px;
@@ -142,6 +145,22 @@
     .sc-icon    { font-size: .9rem; }
     .sc-text    { font-size: .58rem; color: var(--text-mid); letter-spacing: .03em; }
 
+    /* ── Modals ───────────────────────────────────────── */
+    .modal-overlay { display:none; position:fixed; inset:0; background:rgba(28,28,28,.55); z-index:200; align-items:center; justify-content:center; backdrop-filter:blur(3px); }
+    .modal-overlay.active { display:flex; }
+    .modal { background:var(--cream); border:1px solid var(--rule-heavy); border-top:3px solid var(--ink); width:90%; max-width:520px; padding:40px; position:relative; animation:modalIn .3s ease; overflow-y:auto; max-height:78vh; }
+    @keyframes modalIn { from{opacity:0;transform:translateY(16px) scale(.98)} to{opacity:1;transform:translateY(0) scale(1)} }
+    .modal-close { position:absolute; top:16px; right:18px; background:none; border:none; color:var(--text-muted); font-size:1.2rem; cursor:pointer; transition:color .2s; }
+    .modal-close:hover { color:var(--ink); }
+    .modal-tag { font-family:'Source Serif 4',serif; font-size:.58rem; letter-spacing:.2em; text-transform:uppercase; color:var(--gold); margin-bottom:10px; display:block; }
+    .modal-title { font-family:'EB Garamond',Georgia,serif; font-size:1.9rem; font-style:italic; font-weight:700; color:var(--ink); margin-bottom:14px; }
+    .modal-body { font-family:'Source Serif 4',serif; font-size:.82rem; line-height:1.78; color:var(--ink-3); }
+    .modal-divider { height:1px; background:var(--rule-heavy); margin:20px 0; }
+    .contact-row { display:flex; align-items:center; gap:14px; padding:10px 0; }
+    .contact-icon { font-size:1.2rem; }
+    .contact-info { font-family:'Source Serif 4',serif; font-size:.82rem; color:var(--ink); display:flex; flex-direction:column; gap:2px; }
+    .contact-info strong { font-size:.58rem; letter-spacing:.18em; text-transform:uppercase; color:var(--text-muted); font-weight:600; }
+
     /* ── Mobile ───────────────────────────────────────── */
     @media (max-width: 640px) {
       :root { --yt: 66px; }
@@ -167,14 +186,15 @@
     <button onclick="goHome()">Home</button>
     <a href="/dtla">Los Angeles</a>
     <a href="/laveen">Arizona</a>
-    <a href="#" onclick="openAbout()">About</a>
+    <button onclick="openModal('about')">About</button>
+    <button onclick="openModal('contact')">Contact</button>
   </nav>
 </header>
 
 <!-- YT Monument strip -->
 <div id="yt-strip">
   <iframe id="yt-frame"
-    src="https://www.youtube.com/embed/HrxX9TBj2zY?autoplay=1&mute=1&loop=1&playlist=HrxX9TBj2zY&controls=0&showinfo=0&rel=0&modestbranding=1"
+    src=""
     allow="autoplay; encrypted-media"
     allowfullscreen>
   </iframe>
@@ -186,20 +206,69 @@
 <div id="map"></div>
 
 <script>
-/* ── YT sound toggle ──────────────────────────────────── */
+/* ── YT strip ─────────────────────────────────────────── */
+const LANDING_VIDEOS = [
+  {id:'GFD0WG60c6Q', title:'Urban Light — South Park'},
+  {id:'1mXG5MJ6i1U', title:'City Views — 16th Floor'},
+  {id:'FR8hkxtha9A', title:'DTLA — Night'},
+  {id:'wn9pZDkd6bo', title:'Desert Rain — Monsoon Season'},
+  {id:'hrPKYsoz_0U', title:'Monsoon at South Mountain'},
+  {id:'M7MY9zNWY50', title:'Desert Light — Laveen'}
+];
+
 let muted = true;
+let currentVideoTitle = '';
+
+function initYT() {
+  const v = LANDING_VIDEOS[Math.floor(Math.random() * LANDING_VIDEOS.length)];
+  currentVideoTitle = v.title;
+  document.getElementById('yt-frame').src =
+    `https://www.youtube.com/embed/${v.id}?autoplay=1&mute=1&loop=1&playlist=${v.id}&controls=0&showinfo=0&rel=0&modestbranding=1`;
+  document.getElementById('yt-label').textContent = '▶ ' + v.title + ' · Click to unmute';
+}
+
 function toggleSound() {
   const frame = document.getElementById('yt-frame');
   const label = document.getElementById('yt-label');
   muted = !muted;
   frame.src = frame.src.replace(muted ? 'mute=0' : 'mute=1', muted ? 'mute=1' : 'mute=0');
-  label.textContent = muted ? '▶ Neighborhood · Click to unmute' : '🔊 Playing — Click to mute';
+  label.textContent = muted ? '▶ ' + currentVideoTitle + ' · Click to unmute' : '🔊 ' + currentVideoTitle + ' — Click to mute';
 }
+
+/* ── Modals ───────────────────────────────────────────── */
+function openModal(id) { document.getElementById('modal-' + id).classList.add('active'); }
+function closeModal(id) { document.getElementById('modal-' + id).classList.remove('active'); }
+
+function submitContact(e) {
+  e.preventDefault();
+  const btn = document.getElementById('cf-btn');
+  const status = document.getElementById('cf-status');
+  btn.disabled = true; btn.textContent = 'Sending…';
+  fetch('/api/contact', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      name:    document.getElementById('cf-name').value,
+      email:   document.getElementById('cf-email').value,
+      message: document.getElementById('cf-message').value
+    })
+  })
+  .then(r => r.json())
+  .then(() => { status.textContent = "Message sent. We'll be in touch."; btn.textContent = 'Sent'; })
+  .catch(() => { status.textContent = 'Error — please try again.'; btn.disabled = false; btn.textContent = 'Send Message'; });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  initYT();
+  document.querySelectorAll('.modal-overlay').forEach(el =>
+    el.addEventListener('click', e => { if (e.target === el) el.classList.remove('active'); })
+  );
+});
 
 /* ── Locations ────────────────────────────────────────── */
 const LOCATIONS = [
-  { id: 'dtla',   state: 'California', name: 'South Park · DTLA',             lat: 34.0422,   lng: -118.2637, link: '/dtla',   wttr: 'Los+Angeles' },
-  { id: 'laveen', state: 'Arizona',    name: 'Urban Farmhouse · Laveen',       lat: 33.3428,   lng: -112.1181, link: '/laveen', wttr: 'Laveen+AZ'   }
+  { id: 'dtla',   state: 'California', name: 'South Park · DTLA',         lat: 34.0457095, lng: -118.2585553, link: '/dtla',   wttr: 'Los+Angeles', tz: 'America/Los_Angeles' },
+  { id: 'laveen', state: 'Arizona',    name: 'Urban Farmhouse · Laveen',  lat: 33.3427905, lng: -112.1180767, link: '/laveen', wttr: 'Laveen+AZ',   tz: 'America/Phoenix'     }
 ];
 
 /* ── Constellation (evening sky, ~34°N) ───────────────── */
@@ -213,14 +282,20 @@ async function fetchWeather(city) {
   } catch { return { icon: '🌤', temp: '–' }; }
 }
 
+function localTime(tz) {
+  return new Date().toLocaleTimeString('en-US', { timeZone: tz, hour: '2-digit', minute: '2-digit' });
+}
+
 function makeCard(loc, wx) {
-  const con = CONS[new Date().getMonth() + 1] || '✦ Orion';
+  const con  = CONS[new Date().getMonth() + 1] || '✦ Orion';
+  const time = localTime(loc.tz);
   const el = document.createElement('div');
   el.className = 'state-card';
   el.innerHTML =
     '<div class="sc-state">' + loc.state + '</div>' +
     '<div class="sc-name">'  + loc.name  + '</div>' +
     '<hr class="sc-divider">' +
+    '<div class="sc-row"><span class="sc-icon">🕐</span><span class="sc-text">' + time + ' · Local</span></div>' +
     '<div class="sc-row"><span class="sc-icon">' + wx.icon + '</span><span class="sc-text">' + wx.temp + ' · Now</span></div>' +
     '<div class="sc-row"><span class="sc-icon">' + con.split(' ')[0] + '</span><span class="sc-text">' + con.split(' ').slice(1).join(' ') + ' · Tonight</span></div>';
   el.addEventListener('click', () => location.href = loc.link);
@@ -250,20 +325,13 @@ function initMap() {
       new google.maps.marker.AdvancedMarkerElement({
         map,
         position: { lat: loc.lat, lng: loc.lng },
-        title:    loc.name,
         content:  makeCard(loc, weathers[i])
       });
     });
   });
 }
 
-function goHome() {
-  location.href = '/';
-}
-
-function openAbout() {
-  // placeholder — About modal can be added here
-}
+function goHome() { location.href = '/'; }
 
 window.initMap = initMap;
 </script>
@@ -272,6 +340,46 @@ window.initMap = initMap;
   src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD7UMA5ILPXv9QK2_gvxPVth30MavRd2WQ&callback=initMap&v=weekly&libraries=marker&map_ids=96844e6a7bb74a7d5514d3a5"
   async defer
 ></script>
+
+<!-- About modal -->
+<div class="modal-overlay" id="modal-about">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('about')">&#x2715;</button>
+    <span class="modal-tag">Who We Are</span>
+    <div class="modal-title">Real Estate Intelligence</div>
+    <div class="modal-body">I needed to sell my house. Not because I wanted to. Because I had to.<br><br>The MLS controls 80% of the American real estate market. It is a private, for-profit syndicate — not a public utility, not a cooperative, not a service. A corporation. Far away. Collecting both sides of every transaction through a doctrine called procuring cause, until 2024, when the courts finally said enough.<br><br>I said it sooner.<br><br>Requation is an effort to change the real estate equation — from MegaCorp to every American. Not a listing site. Not a portal. A map. Seen from above, in three dimensions, the way a city actually works. Every property in context. Every neighborhood alive with the intelligence that buyers deserve and sellers have been denied.<br><br>I have done this before. In White Center, Seattle — one of America's most forgotten neighborhoods — I once brought fruit to a food desert. Just showed up with produce where there was none. Nobody paid me. That is not the point. The point is that neighborhoods breathe. They need tending.<br><br>Requation tends them.<br><br>Not to disrupt. Not to raise a Series A. To sell my own properties first — and then to hand every American owner the same map that corporations have kept to themselves.<br><br>r/Σ = Real Estate as an Equation. Finally solved.</div>
+    <div class="modal-divider"></div>
+  </div>
+</div>
+
+<!-- Contact modal -->
+<div class="modal-overlay" id="modal-contact">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('contact')">&#x2715;</button>
+    <span class="modal-tag">Get In Touch</span>
+    <div class="modal-title">Contact Us</div>
+    <div class="modal-divider"></div>
+    <div class="contact-row"><div class="contact-icon">☎</div><div class="contact-info"><strong>Phone</strong>+1 (213) 215-8870</div></div>
+    <div class="modal-divider"></div>
+    <div style="text-align:center;padding:8px 0 16px">
+      <img src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=https://requation.com" alt="requation.com" style="width:160px;height:160px;border:1px solid var(--rule-heavy)">
+      <div style="font-family:'Source Serif 4',serif;font-size:.7rem;color:var(--text-muted);margin-top:8px;letter-spacing:.05em">requation.com</div>
+    </div>
+    <div class="modal-divider"></div>
+    <form id="contact-form" onsubmit="submitContact(event)" style="display:flex;flex-direction:column;gap:12px">
+      <input type="text" id="cf-name" placeholder="Your Name" required style="font-family:'Source Serif 4',serif;font-size:.82rem;color:var(--ink);background:var(--cream);border:1px solid var(--rule-heavy);border-top:2px solid var(--ink);padding:10px 12px;outline:none;width:100%;box-sizing:border-box">
+      <input type="email" id="cf-email" placeholder="Your Email" required style="font-family:'Source Serif 4',serif;font-size:.82rem;color:var(--ink);background:var(--cream);border:1px solid var(--rule-heavy);border-top:2px solid var(--ink);padding:10px 12px;outline:none;width:100%;box-sizing:border-box">
+      <textarea id="cf-message" placeholder="Your message…" required rows="4" style="font-family:'Source Serif 4',serif;font-size:.82rem;color:var(--ink);background:var(--cream);border:1px solid var(--rule-heavy);border-top:2px solid var(--ink);padding:10px 12px;outline:none;resize:vertical;width:100%;box-sizing:border-box"></textarea>
+      <button type="submit" id="cf-btn" style="font-family:'Source Serif 4',serif;font-size:.66rem;font-weight:600;letter-spacing:.18em;text-transform:uppercase;background:var(--ink);color:var(--cream);border:none;padding:12px;cursor:pointer;transition:background .2s">Send Message</button>
+      <div id="cf-status" style="font-family:'Source Serif 4',serif;font-size:.75rem;text-align:center;min-height:1.2em"></div>
+    </form>
+    <div class="modal-divider"></div>
+    <div style="text-align:center">
+      <div style="font-family:'Source Serif 4',serif;font-size:.58rem;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:8px">Advertise on Requation</div>
+      <a href="#" target="_blank" rel="noopener" style="display:block;width:100%;box-sizing:border-box;padding:12px;background:var(--ink);color:var(--cream);font-family:'Source Serif 4',serif;font-size:.66rem;font-weight:600;letter-spacing:.18em;text-transform:uppercase;text-decoration:none;text-align:center;transition:background .2s">Buy a Listing</a>
+    </div>
+  </div>
+</div>
 
 </body>
 </html>

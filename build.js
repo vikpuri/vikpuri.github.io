@@ -47,7 +47,7 @@ fs.mkdirSync('dist');
 
 // ── Inject secrets into HTML files ───────────────────────────────
 const HTML_FILES = [
-  'index.html', 'gm-landing.html', 'gm-dtla-v1.html', 'gm-dtla-preview.html', 'map-test.html', 'dtla.html', 'dtla-template.html', 'laveen.html',
+  'gm-landing.html', 'gm-dtla-v1.html', 'map-test.html', 'dtla.html', 'dtla-template.html', 'laveen.html',
   'lalife.html', 'desertlife.html', 'dashboard.html', 'grid-demo.html',
   'dashboard-v1.bak.html'
 ];

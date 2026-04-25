@@ -14,7 +14,7 @@ Before making ANY edit, state out loud:
 3. What will NOT be touched
 4. Confirm it cannot break map, markers, panels, or console
 
-If a change touches the map, Mapbox constructor, or `map.on('load',...)` — **stop and read the full map init block first.**
+If a change touches the map constructor, `initMap()`, or `map.addListener('load',...)` — **stop and read the full map init block first.**
 
 ---
 
@@ -73,33 +73,49 @@ If a change touches the map, Mapbox constructor, or `map.on('load',...)` — **s
 
 ---
 
-## Map Initialization Rules (HIGH RISK)
+## Map Initialization Rules — Google Maps (HIGH RISK)
 
-**NEVER call `map.flyTo()` before `map.on('load',...)` fires.**
-- Calling `flyTo` right after `new mapboxgl.Map({...})` silently kills the entire map
-- No tiles, no markers, no POIs — only fixed-position elements remain visible
-- This looks like "all data was deleted" but the data is fine
+**NEVER call `map.moveCamera()` or add markers before `initMap()` resolves.**
+- Google Maps JS API calls `initMap` via the `callback=initMap` loader param — everything must live inside that function
+- Markers must be added after the map constructor; they don't require a separate load event
+- `AdvancedMarkerElement` requires `mapId` to be set or it silently fails
 
-**NEVER change the map constructor center/zoom/fitBounds without reading the full `map.on('load',...)` block first.**
-- All markers are added inside `map.on('load',...)` — they load by lat/lng coords regardless of viewport
-- But changing the initial view can make markers appear off-screen, looking like they're gone
+**NEVER change `center`, `zoom`, `tilt`, or `heading` in the constructor without understanding `moveCamera` timing.**
+- The cinematic reveal uses `setTimeout → map.moveCamera(...)` chains at 900ms, 2400ms, 4000ms
+- Changing constructor values shifts the starting frame of the cinematic — check all three stages
 
-**Safe pattern for post-load view changes:**
+**Safe pattern for the cinematic reveal:**
 ```javascript
-map.on('load', () => {
-  // ... all existing code ...
-  // flyTo is safe HERE, at the end, after markers are placed
-  map.flyTo({center:[...], zoom:16, pitch:65, bearing:200, duration:1500});
-});
+function initMap() {
+  const map = new google.maps.Map(el, { center, zoom, mapId, ... });
+  // Cinematic — runs after constructor
+  setTimeout(() => map.moveCamera({ center, zoom: 4.4, tilt: 20, heading: 352 }), 900);
+  setTimeout(() => map.moveCamera({ center, zoom: 5.4, tilt: 44, heading: 346 }), 2400);
+  setTimeout(() => map.moveCamera({ center, zoom: 5.9, tilt: 54, heading: 342 }), 4000);
+  // Markers after weather/data loads
+  Promise.all([...]).then(() => { /* add AdvancedMarkerElements */ });
+}
 ```
 
-**`fitBounds` is safe to call before load.** It is designed for this. Keep it unless you have a specific reason.
+**3D buildings require:** zoom ≥ 17, tilt ≥ 45, and the Requation vector Map ID. Below zoom 17 the buildings disappear — this is a Maps API rule, not a bug.
 
 ---
 
 ## Data Rules
 
 - **AZ and CA data never share.** Laveen → AZ ZIPs (85339, 85041, 85042, 85044). DTLA → CA ZIPs (90017, 90015, 90013, 90014)
+
+## Territory — Requation ZIP Codes
+
+| Market | Purpose | ZIPs |
+|--------|---------|------|
+| **DTLA core** | Directory, Supabase | `90017, 90015, 90013, 90014` |
+| **DTLA territory** | RPOI (Redfin listings), Yelp, Google Places propagation | `90017, 90015, 90013, 90014, 90021, 90012, 90007, 90005, 90006, 90019, 90036, 90025, 90024, 90049, 90069, 90402` |
+| **Laveen core** | Directory, Supabase | `85339, 85041, 85042, 85044` |
+
+**RPOI note:** Redfin listing markers (330+ active listings in DTLA territory) will link to `/lalife` once that page is on Google Maps + CesiumJS. Implement after CesiumJS is live.
+
+**Google Places auto-populate:** The Google Maps basemap always shows its own POI labels (cafes, gyms, etc.) on the tiles — no code needed. Custom colored dot markers require explicit `nearbySearch()` calls — not currently active on dtla/laveen (property pin only, per design). Yelp data requires Yelp API explicitly.
 - Supabase key is embedded directly in source HTML — never use `__SB_KEY__` placeholder
 - **Never delete or modify the properties array, images arrays, or videos arrays without explicit instruction**
 - Backup files before any risky change: `cp dtla.html dtla.html.bak`
@@ -144,37 +160,104 @@ Every named object added to any Requation map must have a corresponding URL slug
 
 ---
 
-## Build Pipeline (Vercel) — migrated 2026-04-25
+## Build Pipeline — Vercel
+
+**Stack:** GitHub → Vercel (build + functions + CDN). Netlify replaced 2026-04-25.
 
 **Why Netlify was replaced:**
-- Static site (GitHub Pages) and serverless functions (Netlify) were on two different systems — `/.netlify/functions/` calls failed in production because requation.com served from GitHub Pages, not Netlify
-- Vercel unifies both under one domain: static files + `/api/*` functions, one deploy, no split
-- Better edge performance for 3D map tile loading; no cold-start issues on function calls
+- Static site (GitHub Pages) and serverless functions (Netlify) were on two different systems — `/.netlify/functions/` calls failed because requation.com served from GitHub Pages, not Netlify
+- Vercel unifies both: static files + `/api/*` functions on one domain, one deploy
 
 **How it works:**
 - Push to `master` on GitHub → Vercel auto-builds in ~10s
-- `node build.js` → outputs HTML to `dist/`
-- `api/*.js` functions → served at `/api/functionname` on same domain
+- `node build.js` → copies HTML to `dist/`
+- `api/*.js` → served at `/api/functionname` on same domain (no cold-start issues)
 - `vercel.json` controls build command, output directory, and clean URL rewrites
 
-**Files changed in migration:**
-- `vercel.json` created (replaces `netlify.toml`)
-- `api/` folder created — 6 functions converted from Netlify to Vercel format
-- All HTML files updated: `/.netlify/functions/` → `/api/`
-- `api/espn.js` added — ESPN public API for sports events (replaces PredictHQ, no key needed)
-- `gm-landing.html` added to `build.js` copy list
+**Serverless functions in `api/`:**
+
+| File | Route | Purpose |
+|------|-------|---------|
+| `aerialview.js` | `/api/aerialview` | Google Aerial View lookupVideo |
+| `contact.js` | `/api/contact` | Resend email + Twilio SMS |
+| `espn.js` | `/api/espn` | ESPN public API — sports events, no key |
+| `places.js` | `/api/places` | Google Places nearbySearch proxy |
+| `yelp.js` | `/api/yelp` | Yelp Fusion business search |
+| `twilio.js` | `/api/twilio` | Voice/SMS verification |
 
 **Environment variables** (set in Vercel dashboard → Settings → Environment Variables):
-- `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_PHONE`, `ADMIN_PHONE`
-- `YOUTUBE_API_KEY` (also used as Google Maps/Places key — same Google Cloud project)
-- `YELP_API_KEY`, `RESEND_API_KEY`, `SUPABASE_KEY`
-- `PREDICTHQ_KEY` and `MAPBOX_TOKEN` — NOT needed, removed
 
-**DNS (as of 2026-04-25):**
-- requation.com → Vercel (A record updated in Netlify DNS panel)
-- www.requation.com → redirects to requation.com
-- Nameservers still: dns1-4.p04.nsone.net (Netlify DNS — manages records only, no longer hosts site)
-- Live and verified: `Server: Vercel`, 200 OK
+| Variable | Used By |
+|----------|---------|
+| `YOUTUBE_API_KEY` | Google Maps JS, Places, Aerial View, YouTube Data v3 — same GCP project key |
+| `TWILIO_ACCOUNT_SID` | Twilio voice + SMS |
+| `TWILIO_AUTH_TOKEN` | Twilio auth |
+| `TWILIO_PHONE` | Sending number |
+| `ADMIN_PHONE` | Notification recipient |
+| `YELP_API_KEY` | Yelp Fusion |
+| `RESEND_API_KEY` | Contact form email delivery |
+| `SUPABASE_KEY` | Supabase POI data |
+
+**Removed:** `PREDICTHQ_KEY`, `MAPBOX_TOKEN` — no longer used.
+
+---
+
+## DNS & CDN — Cloudflare (target) / Netlify DNS (current)
+
+**Current state (as of 2026-04-25):**
+- requation.com → Vercel (A record pointing to Vercel IP, updated in Netlify DNS panel)
+- www.requation.com → redirects to requation.com via Vercel
+- Nameservers: `dns1-4.p04.nsone.net` (Netlify DNS — manages records only, site no longer hosted there)
+- Verified live: `Server: Vercel`, 200 OK
+
+**Target state — Cloudflare migration:**
+- Move nameservers from Netlify DNS to Cloudflare (free plan)
+- Cloudflare provides: DDoS protection, edge caching, SSL/TLS termination, Web Analytics (no tracking script needed), Image Resizing
+- CNAME flatten: `requation.com → cname.vercel-dns.com` (Cloudflare handles root CNAME)
+- Enable Cloudflare proxy (orange cloud) on requation.com and www — Vercel origin stays hidden
+- Cache rules: bypass `/api/*` (serverless must reach Vercel origin); cache `*.html`, fonts, images at edge
+
+**Migration steps (when ready):**
+1. Add requation.com to Cloudflare → copy NS records
+2. Update Netlify DNS nameservers to Cloudflare NS
+3. In Cloudflare: add A/CNAME records pointing to Vercel, enable proxy
+4. Set SSL/TLS → Full (strict); enable HSTS
+5. Verify: `curl -I https://requation.com` shows `Server: cloudflare`
+
+---
+
+## Google Cloud Platform — Active APIs
+
+All APIs share one GCP project. Key stored as `YOUTUBE_API_KEY` in Vercel env and hardcoded in HTML: `AIzaSyD7UMA5ILPXv9QK2_gvxPVth30MavRd2WQ`.
+
+| API | Used In | Notes |
+|-----|---------|-------|
+| **Maps JavaScript API** | All map pages | AdvancedMarkerElement, Map constructor, cinematic `moveCamera` |
+| **Places API** | `dtla.html`, `laveen.html` | `nearbySearch` for grocery/transit/restaurant POIs |
+| **Aerial View API** | `/api/aerialview` → prop card Aerial tab | `lookupVideo` endpoint; auth via `X-Goog-Api-Key` query param; address-only (no lat/lng) |
+| **Street View Static API** | Prop card Street tab | `<img>` tag — `size`, `location`, `fov`, `pitch`, `heading`, `key` params |
+| **Map Tiles API** | Implicit via Map ID | Photorealistic 3D tiles; requires `mapId: '96844e6a7bb74a7d5514d3a5'` + zoom 17+, tilt 45+ |
+| **Map Management API** | Cloud Console | Manages Requation map style; do not change map type from vector |
+| **Street View Publish API** | Planned | Upload interior/exterior 360° photos; not yet wired |
+| **YouTube Data API v3** | YT strip rotation | Search videos by channel/keyword for monument strip; fallback to hardcoded IDs on quota |
+
+**Aerial View API — correct call pattern:**
+```
+GET https://aerialview.googleapis.com/v1/videos:lookupVideo
+  ?X-Goog-Api-Key={key}
+  &address={encodeURIComponent(postalAddress)}
+```
+Returns `state: ACTIVE` with `uris.LANDSCAPE_VIDEO.landscapeVideoUri` when footage exists. Returns 404 when address has no footage.
+
+**Street View Static — correct URL pattern:**
+```
+https://maps.googleapis.com/maps/api/streetview
+  ?size=260x138&location={lat},{lng}&fov=80&pitch=10&heading=0&key={key}
+```
+
+**Map ID rule (repeated here for emphasis):**
+- Map ID `96844e6a7bb74a7d5514d3a5` is a **vector** map — never set `mapTypeId: 'hybrid'`
+- 3D photorealistic tiles require: `mapId` set + `zoom ≥ 17` + `tilt ≥ 45`
 
 ---
 
