@@ -316,6 +316,10 @@ async function initCesium() {
 
   viewer.imageryLayers.removeAll();
 
+  /* Zoom limits — keep both property pins in frame */
+  viewer.scene.screenSpaceCameraController.minimumZoomDistance = 3000000;
+  viewer.scene.screenSpaceCameraController.maximumZoomDistance = 20000000;
+
   const tileset = await Cesium.createGooglePhotorealistic3DTileset();
   viewer.scene.primitives.add(tileset);
 
