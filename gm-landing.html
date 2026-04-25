@@ -319,32 +319,20 @@ async function initCesium() {
   const tileset = await Cesium.createGooglePhotorealistic3DTileset();
   viewer.scene.primitives.add(tileset);
 
-  /* setView instantly drops camera over SW USA — no arc through space.
-     flyTo pulls in slowly from the same axis. */
+  /* Camera above Arctic at 5,000km facing south — globe appears as a sphere
+     in the lower-center of frame with black space above. No flyTo, no arc. */
   viewer.camera.setView({
-    destination: Cesium.Cartesian3.fromDegrees(-115.2, 36.0, 700000),
+    destination: Cesium.Cartesian3.fromDegrees(-115.2, 70, 5000000),
     orientation: {
-      heading: Cesium.Math.toRadians(0),
-      pitch:   Cesium.Math.toRadians(-78),
+      heading: Cesium.Math.toRadians(180),
+      pitch:   Cesium.Math.toRadians(-15),
       roll:    0
     }
   });
 
-  setTimeout(() => {
-    viewer.camera.flyTo({
-      destination: Cesium.Cartesian3.fromDegrees(-115.2, 36.0, 550000),
-      orientation: {
-        heading: Cesium.Math.toRadians(0),
-        pitch:   Cesium.Math.toRadians(-75),
-        roll:    0
-      },
-      duration: 3
-    });
-  }, 600);
-
-  /* Pins active after pull-in completes */
+  /* Pins active after tiles settle */
   let pinsActive = false;
-  setTimeout(() => { pinsActive = true; }, 4200);
+  setTimeout(() => { pinsActive = true; }, 2000);
 
   /* Build one DOM pin + hover label per property */
   const pinData = PROPS.map(p => {
