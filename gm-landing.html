@@ -319,16 +319,21 @@ function initMap() {
   setTimeout(() => map.moveCamera({ center: { lat: 35.2, lng: -115.2 }, zoom: 5.4, tilt: 44, heading: 346 }), 2400);
   setTimeout(() => map.moveCamera({ center: { lat: 33.7, lng: -115.2 }, zoom: 5.9, tilt: 54, heading: 342 }), 4000);
 
-  // Place markers after weather loads
-  Promise.all(LOCATIONS.map(l => fetchWeather(l.wttr))).then(weathers => {
-    LOCATIONS.forEach((loc, i) => {
-      new google.maps.marker.AdvancedMarkerElement({
-        map,
-        position: { lat: loc.lat, lng: loc.lng },
-        content:  makeCard(loc, weathers[i])
-      });
-    });
-  });
+  // Place markers immediately with placeholder, then update with live weather
+  const markers = LOCATIONS.map(loc =>
+    new google.maps.marker.AdvancedMarkerElement({
+      map,
+      position: { lat: loc.lat, lng: loc.lng },
+      content:  makeCard(loc, { icon: '🌤', temp: '…' })
+    })
+  );
+  const wx5s = new Promise(r => setTimeout(() => r(LOCATIONS.map(() => ({ icon: '🌤', temp: '–' }))), 5000));
+  Promise.race([
+    Promise.all(LOCATIONS.map(l => fetchWeather(l.wttr))),
+    wx5s
+  ]).then(weathers => {
+    markers.forEach((mk, i) => { mk.content = makeCard(LOCATIONS[i], weathers[i]); });
+  }).catch(() => {});
 }
 
 function goHome() { location.href = '/'; }

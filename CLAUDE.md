@@ -122,6 +122,52 @@ function initMap() {
 
 ---
 
+## DTLA Directory Seed Data (from Neighborhood tab — use as directory fallback or static layer)
+
+These are the curated businesses from the original Neighborhood tab. Use as seed data for the Directory tab when Supabase/Yelp is unavailable, or as the starting dataset for Google Places POI propagation.
+
+| Category | Businesses |
+|----------|-----------|
+| Restaurants | Bottega Louie (0.1mi), Perch LA (0.2mi), Broken Spanish (0.3mi), Otium (0.4mi), Officine Brera (0.5mi) |
+| Coffee | Philz Coffee (100ft), Groundwork Coffee (0.3mi), Blue Bottle Coffee (0.6mi) |
+| Grocery | Whole Foods Market (25ft), Ralphs DTLA (0.4mi) |
+| Culture | The Broad (0.8mi), MOCA Grand Ave (0.9mi), Walt Disney Concert Hall (0.9mi), Grand Park (1.0mi) |
+| Hotels | InterContinental DTLA (0.1mi), The Westin Bonaventure (0.3mi), Freehand Los Angeles (0.5mi), NoMad Los Angeles (0.6mi) |
+| Hair Salons | Rudy's Barbershop (0.2mi), Headlines Salon DTLA (0.4mi) |
+| Gyms | Equinox DTLA (0.3mi), LA Fitness (0.5mi), Barry's Bootcamp (0.6mi) |
+| Shopping | Apple Store Broadway (0.6mi), Adidas Broadway (0.6mi), West Elm (0.6mi), Grand Central Market (0.7mi), Jewelry District (0.4mi) |
+| Movie Theaters | Regal LA Live (0.8mi), AMC Broadway (0.6mi), Alamo Drafthouse (1.2mi) |
+| Parking | Joe Auto Parks (0.1mi), Pershing Square Garage (0.3mi) |
+| Parks | Pershing Square (0.4mi), Grand Park (1.0mi) |
+| Libraries | LA Central Library (0.5mi) |
+| Credit Unions | Self-Help Federal CU (0.2mi) |
+| Pet | Downtown Dog Lounge (0.4mi), VCA Animal Hospital (0.7mi) |
+
+---
+
+## DTLA Events Data — Monument Strip Sources
+
+Panel tabs: **Property · Index · Directory · Waymo** (4 tabs). Neighborhood tab removed — map tiles show POIs natively. Events are surfaced via the YT Monument Strip (rotates venues every 12s).
+
+| Venue | Strip Query | Events Source | ESPN Team Code |
+|-------|------------|---------------|----------------|
+| Grand Performances | `Grand Performances Los Angeles live concert` | grandperformances.org (May–Oct free) | — |
+| The Broad | `The Broad Los Angeles museum` | thebroad.org/calendar | — |
+| Music Center / LA Phil | `LA Philharmonic Disney Concert Hall live performance` | laphil.com/calendar | — |
+| LA Convention Center | `LA Convention Center event live` | lacclink.com/events | — |
+| LA Live | `LA Live concert live` | lalive.com/events | — |
+| MOCA | `MOCA Los Angeles museum contemporary art` | moca.org/calendar | — |
+| LA Parks | `Los Angeles parks recreation events` | laparks.org/events | — |
+| Dodgers | `Los Angeles Dodgers live game highlights` | — | `mlb/lad` |
+| Lakers | `Los Angeles Lakers NBA live` | — | `nba/lal` |
+| Kings | `LA Kings NHL live hockey` | — | `nhl/la` |
+
+**Sports via ESPN:** `GET /api/espn?sport={sport}&team={team}` — free, no key required.
+**Cultural venues:** Static "View Events →" link to venue website in Monument card.
+**Strip rotation:** 12s per venue, 10 venues total.
+
+---
+
 ## Map Type Rule — Vector Map ID on All Pages
 
 Every map page uses Map ID `96844e6a7bb74a7d5514d3a5` (Requation map ID — vector type).

@@ -2,154 +2,277 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Requation · Urban Farmhouse · Laveen AZ</title>
+  <meta property="og:type"        content="website">
+  <meta property="og:url"         content="https://requation.com/laveen">
+  <meta property="og:title"       content="Urban Farmhouse — Requation Laveen AZ">
+  <meta property="og:description" content="4BD/4.5BA · 5,400 sqft · 4.4 Acres · 11403 S 27th Dr · $2,000,000 · South Mountain views · Solar">
+  <meta property="og:image"       content="https://i.imgur.com/0aYf87y.jpeg">
+
+  <!-- CesiumJS 1.140 -->
+  <link href="https://cesium.com/downloads/cesiumjs/releases/1.140/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
+  <script src="https://cesium.com/downloads/cesiumjs/releases/1.140/Build/Cesium/Cesium.js"></script>
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@1,700&family=Raleway:wght@600&family=Source+Serif+4:wght@400;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@1,700&family=Raleway:wght@600&family=Source+Serif+4:wght@300;400;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
-    html, body, #map { margin: 0; padding: 0; width: 100%; height: 100%; }
-
     :root {
-      --cream: #FAF8F4; --linen: #F5F0E8; --sand: #E8DDD0;
-      --gold: #C9A84C; --text: #2C2A26; --text-muted: #9E9087;
+      --gold:#C9A84C; --gold-dim:rgba(201,168,76,.1); --gold-border:rgba(201,168,76,.3);
+      --cream:#FAF8F4; --cream-2:#F4F1EB; --cream-3:#EDE9E0;
+      --ink:#1C1C1C; --ink-2:#2E2E2E; --ink-3:#444;
+      --rule:rgba(0,0,0,.12); --rule-heavy:rgba(0,0,0,.22);
+      --text-muted:#666; --sand:#E8DDD0;
+      --waymo:#1A73E8; --waymo-dim:rgba(26,115,232,.08); --waymo-border:rgba(26,115,232,.28);
+      --header-h:60px; --yt-h:90px;
     }
+    *,::before,::after { box-sizing:border-box; margin:0; padding:0; }
+    html, body { height:100%; }
+    body { background:var(--cream); color:var(--ink); font-family:'Source Serif 4',Georgia,serif; overflow:hidden; }
+
+    #cesiumContainer { position:fixed; top:0; left:0; width:100%; height:100%; z-index:0; }
+    .cesium-viewer-toolbar,
+    .cesium-viewer-animationContainer,
+    .cesium-viewer-timelineContainer,
+    .cesium-viewer-fullscreenContainer,
+    .cesium-viewer-vrContainer { display:none !important; }
+    .cesium-widget-credits { z-index:2 !important; bottom:4px !important; right:4px !important; }
 
     header {
-      position: fixed; top: 0; left: 0; right: 0; height: 60px; z-index: 100;
-      background: linear-gradient(180deg, #fff 0%, var(--cream) 100%);
-      border-bottom: 1px solid var(--sand); display: flex; align-items: center;
-      justify-content: space-between; padding: 0 24px;
-      box-shadow: 0 2px 16px rgba(0,0,0,0.07);
+      position:fixed; top:0; left:0; right:0; height:var(--header-h); z-index:100;
+      background:linear-gradient(180deg,#fff 0%,var(--cream) 100%);
+      border-bottom:2px solid var(--ink);
+      display:flex; align-items:center; justify-content:space-between; padding:0 24px;
+      box-shadow:0 2px 16px rgba(0,0,0,.07);
     }
-    nav { display: flex; align-items: center; gap: 24px; }
+    .logo-wrap { display:flex; align-items:center; cursor:pointer; gap:12px; }
+    .logo-addr { font-family:'DM Mono',monospace; font-size:.5rem; letter-spacing:.12em; text-transform:uppercase; color:var(--text-muted); border-left:1px solid var(--sand); padding-left:12px; }
+    nav { display:flex; align-items:center; gap:24px; }
     nav a, nav button {
-      font-family: 'Source Serif 4', serif; font-size: .68rem; letter-spacing: .14em;
-      text-transform: uppercase; color: var(--text-muted); text-decoration: none;
-      background: none; border: none; cursor: pointer; transition: color .2s;
+      font-family:'Source Serif 4',serif; font-size:.68rem; letter-spacing:.14em;
+      text-transform:uppercase; color:var(--text-muted);
+      text-decoration:none; background:none; border:none; cursor:pointer; transition:color .2s;
     }
-    nav a:hover, nav button:hover { color: var(--text); }
-
-    #legend {
-      position: fixed; bottom: 20px; right: 20px; z-index: 90;
-      background: rgba(250,248,244,0.94); border: 1px solid rgba(255,255,255,0.9);
-      box-shadow: 0 4px 16px rgba(0,0,0,0.09); backdrop-filter: blur(12px);
-      border-radius: 4px; padding: 10px 13px;
-    }
-    .leg-title { font-family: 'DM Mono', monospace; font-size: .44rem; letter-spacing: .14em; text-transform: uppercase; color: var(--gold); margin-bottom: 7px; }
-    .leg-row   { display: flex; align-items: center; gap: 7px; margin-bottom: 4px; }
-    .leg-dot   { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; border: 1.5px solid rgba(255,255,255,0.8); }
-    .leg-label { font-family: 'DM Mono', monospace; font-size: .46rem; color: var(--text-muted); }
-
-    .prop-pin {
-      width: 38px; height: 38px; border-radius: 50%;
-      background: #B22234; border: 3px solid #fff;
-      box-shadow: 0 0 0 0 rgba(178,34,52,0.7);
-      animation: prop-pulse 2s ease-out infinite; cursor: pointer;
-    }
-    @keyframes prop-pulse {
-      0%   { box-shadow: 0 0 0 0 rgba(178,34,52,0.7); }
-      70%  { box-shadow: 0 0 0 18px rgba(178,34,52,0); }
-      100% { box-shadow: 0 0 0 0 rgba(178,34,52,0); }
-    }
-
-    .poi-dot {
-      width: 11px; height: 11px; border-radius: 50%;
-      border: 2px solid rgba(255,255,255,0.9);
-      box-shadow: 0 1px 5px rgba(0,0,0,0.28);
-      cursor: pointer; transition: transform .15s;
-    }
-    .poi-dot:hover { transform: scale(1.6); }
+    nav a:hover, nav button:hover { color:var(--ink); }
 
     #yt-strip {
-      position: fixed; top: 60px; left: 0; right: 0;
-      height: 90px; z-index: 90;
-      background: #111; overflow: hidden;
-      border-bottom: 1px solid rgba(255,255,255,0.15);
+      position:fixed; top:var(--header-h); left:0; right:0;
+      height:var(--yt-h); z-index:90; background:#111; overflow:hidden;
+      border-bottom:1px solid rgba(255,255,255,.15);
     }
     #yt-strip::before {
-      content: '';
-      position: absolute; inset: 0;
-      background: linear-gradient(180deg, rgba(255,255,255,0.12) 0%, transparent 55%);
-      pointer-events: none; z-index: 3;
+      content:''; position:absolute; inset:0;
+      background:linear-gradient(180deg,rgba(255,255,255,.12) 0%,transparent 55%);
+      pointer-events:none; z-index:3;
     }
     #yt-strip iframe {
-      position: absolute;
-      width: 104vw; height: calc(104vw * 9 / 16);
-      top: 50%; left: -2vw;
-      transform: translateY(-50%);
-      border: none; pointer-events: none;
+      position:absolute; width:104vw; height:calc(104vw * 9/16);
+      top:50%; left:-2vw; transform:translateY(-50%);
+      border:none; pointer-events:none;
     }
-    #yt-overlay {
-      position: absolute; inset: 0;
-      background: linear-gradient(to right, rgba(245,240,232,0.25) 0%, transparent 15%, transparent 85%, rgba(245,240,232,0.25) 100%);
-      cursor: pointer; z-index: 2;
+    #yt-overlay { position:absolute; inset:0; background:linear-gradient(to right,rgba(245,240,232,.25) 0%,transparent 15%,transparent 85%,rgba(245,240,232,.25) 100%); cursor:pointer; z-index:2; }
+    #yt-label { position:absolute; bottom:7px; left:16px; font-family:'DM Mono',monospace; font-size:.44rem; letter-spacing:.14em; text-transform:uppercase; color:rgba(255,255,255,.75); z-index:4; }
+
+    /* ── Media Console (universal: 200px / 140px mobile) ── */
+    #media-col { position:fixed; bottom:20px; top:auto; left:16px; width:200px; z-index:90; display:flex; flex-direction:column; gap:8px; }
+    @media(max-width:640px){ #media-col{width:140px;left:8px} }
+    @keyframes wave { 0%,100%{transform:scaleY(.35)} 50%{transform:scaleY(1)} }
+    #radio-player { width:100%; display:flex; align-items:center; gap:8px; background:rgba(0,40,104,.95); border:1px solid rgba(255,255,255,.22); border-radius:8px; padding:7px 10px; backdrop-filter:blur(14px); box-shadow:0 4px 20px rgba(0,0,0,.55); }
+    .radio-info { flex:1; min-width:0; }
+    .radio-station { font-family:'DM Mono',monospace; font-size:.58rem; letter-spacing:.08em; color:#FAF8F4; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .radio-genre { font-family:'DM Mono',monospace; font-size:.44rem; color:rgba(255,255,255,.48); margin-top:1px; }
+    #radio-btn { width:28px; height:28px; border-radius:50%; background:rgba(255,255,255,.18); border:1px solid rgba(255,255,255,.35); cursor:pointer; color:#fff; font-size:10px; display:flex; align-items:center; justify-content:center; transition:transform .15s,background .15s; flex-shrink:0; }
+    #radio-btn:hover { transform:scale(1.12); background:rgba(255,255,255,.28); }
+    #radio-btn.playing { background:#22c55e; border-color:#22c55e; }
+    .radio-waves { display:none; align-items:flex-end; gap:2px; height:14px; }
+    .radio-waves.active { display:flex; }
+    .radio-waves span { width:3px; border-radius:1.5px; background:rgba(255,255,255,.85); }
+    .radio-waves span:nth-child(1){animation:wave .7s ease-in-out infinite}
+    .radio-waves span:nth-child(2){animation:wave .7s ease-in-out infinite .15s}
+    .radio-waves span:nth-child(3){animation:wave .7s ease-in-out infinite .3s}
+    .radio-waves span:nth-child(4){animation:wave .7s ease-in-out infinite .45s}
+    @keyframes bb-glow{0%,100%{box-shadow:0 6px 28px rgba(0,0,0,.8),0 0 0 0 rgba(255,0,0,0)}50%{box-shadow:0 6px 28px rgba(0,0,0,.8),0 0 24px 4px rgba(255,0,0,.22)}}
+    @keyframes yt-blink{0%,100%{opacity:1}50%{opacity:0}}
+    #yt-billboard { width:100%; border-radius:8px; overflow:hidden; cursor:default; display:none; background:transparent; border:1px solid rgba(255,0,0,.45); animation:bb-glow 4s ease-in-out infinite; backdrop-filter:blur(16px); }
+    .bb-thumb { width:100%; height:112px; background-size:cover; background-position:center; position:relative; }
+    @media(max-width:640px){.bb-thumb{height:70px}}
+    .bb-play-wrap { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(0,0,0,.18); }
+    .bb-play-btn { width:44px; height:44px; background:#FF0000; border-radius:8px; display:flex; align-items:center; justify-content:center; color:#fff; font-size:18px; box-shadow:0 0 24px rgba(255,0,0,.55); }
+    .bb-live { position:absolute; top:8px; left:8px; background:rgba(220,20,20,.92); color:#fff; font-family:'DM Mono',monospace; font-size:.42rem; letter-spacing:.14em; text-transform:uppercase; padding:2px 7px 2px 5px; border-radius:2px; display:flex; align-items:center; gap:4px; }
+    .bb-live-dot { width:5px; height:5px; border-radius:50%; background:#fff; animation:yt-blink 1s ease-in-out infinite; flex-shrink:0; }
+    .bb-info { padding:8px 10px 10px; background:rgba(0,0,0,.75); }
+    .bb-label { font-family:'DM Mono',monospace; font-size:.5rem; letter-spacing:.1em; text-transform:uppercase; color:rgba(255,68,68,.85); margin-bottom:2px; }
+    .bb-title { font-size:.72rem; color:#FAF8F4; line-height:1.3; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+    .bb-channel { font-family:'DM Mono',monospace; font-size:.5rem; color:rgba(255,255,255,.3); margin-top:3px; }
+
+    #yt-popup { position:fixed; inset:0; z-index:400; background:rgba(0,0,0,.93); display:none; flex-direction:column; align-items:center; justify-content:center; backdrop-filter:blur(10px); }
+    #yt-popup.open { display:flex; }
+    #yt-title { font-family:'Source Serif 4',serif; font-size:1rem; color:var(--cream); margin-bottom:12px; text-align:center; padding:0 20px; }
+    #yt-frame-wrap { width:90vw; max-width:640px; aspect-ratio:16/9; background:#000; border-radius:6px; overflow:hidden; }
+    #yt-frame-wrap iframe { width:100%; height:100%; border:none; }
+    #yt-nav { display:flex; align-items:center; gap:16px; margin-top:14px; }
+    .yt-nav-btn { font-family:'DM Mono',monospace; font-size:.65rem; letter-spacing:.1em; text-transform:uppercase; background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.2); color:var(--cream); padding:7px 16px; border-radius:3px; cursor:pointer; }
+    #yt-counter { font-family:'DM Mono',monospace; font-size:.6rem; color:rgba(255,255,255,.4); letter-spacing:.08em; }
+    #yt-close { position:absolute; top:20px; right:20px; background:none; border:none; color:rgba(255,255,255,.5); font-size:1.4rem; cursor:pointer; }
+
+    #panel {
+      position:fixed; bottom:0; right:0; left:0;
+      width:100%; max-width:520px; margin:0 auto;
+      height:80vh; background:var(--cream);
+      border-top:2px solid var(--ink); border-radius:16px 16px 0 0;
+      transform:translateY(100%);
+      transition:transform .55s cubic-bezier(.22,1,.36,1);
+      z-index:95; display:flex; flex-direction:column; overflow:hidden;
     }
-    #yt-label {
-      position: absolute; bottom: 7px; left: 16px;
-      font-family: 'DM Mono', monospace;
-      font-size: .44rem; letter-spacing: .14em; text-transform: uppercase;
-      color: rgba(255,255,255,0.75); z-index: 4;
+    #panel.open { transform:translateY(0); }
+    .panel-header { padding:18px 24px 14px; border-bottom:2px solid var(--ink); position:relative; flex-shrink:0; background:var(--cream); }
+    .panel-tag { font-family:'Source Serif 4',serif; font-size:.58rem; letter-spacing:.2em; text-transform:uppercase; color:var(--gold); margin-bottom:4px; display:flex; align-items:center; gap:8px; }
+    .waymo-badge { background:var(--waymo); color:#fff; font-size:.48rem; letter-spacing:.1em; padding:2px 7px; border-radius:2px; font-weight:600; }
+    .panel-title { font-family:'EB Garamond',Georgia,serif; font-size:1.65rem; font-weight:700; font-style:italic; color:var(--ink); line-height:1.2; cursor:pointer; transition:color .2s; }
+    .panel-title:hover { color:var(--gold); }
+    .panel-subtitle { font-family:'Source Serif 4',serif; font-size:.68rem; color:var(--text-muted); margin-top:4px; letter-spacing:.02em; }
+    #panel-close {
+      position:absolute; top:16px; right:18px; width:36px; height:36px;
+      background:var(--cream); border:1.5px solid var(--rule-heavy); border-radius:4px;
+      padding:0; cursor:pointer; display:flex; align-items:center; justify-content:center;
+      transition:background .2s;
+    }
+    #panel-close:hover { background:var(--cream-3); }
+    .panel-tabs { display:flex; border-bottom:1px solid var(--rule-heavy); flex-shrink:0; background:var(--cream-2); overflow-x:auto; }
+    .panel-tab { flex:1; min-width:fit-content; padding:11px 8px; text-align:center; font-family:'Source Serif 4',serif; font-size:.52rem; letter-spacing:.1em; text-transform:uppercase; color:var(--text-muted); cursor:pointer; border:none; background:none; border-bottom:2px solid transparent; transition:color .2s,border-color .2s; white-space:nowrap; }
+    .panel-tab.active { color:var(--ink); border-bottom-color:var(--ink); }
+    .panel-body { flex:1; overflow-y:auto; scrollbar-width:thin; scrollbar-color:var(--rule-heavy) transparent; background:var(--cream); }
+    .panel-body::-webkit-scrollbar { width:3px; }
+    .panel-body::-webkit-scrollbar-thumb { background:var(--rule-heavy); }
+    .tab-pane { display:none; } .tab-pane.active { display:block; }
+
+    .carousel-wrap { position:relative; width:100%; background:#111; overflow:hidden; }
+    .carousel-track { display:flex; transition:transform .42s cubic-bezier(.22,1,.36,1); }
+    .carousel-slide { flex-shrink:0; width:100%; }
+    .carousel-slide img { width:100%; display:block; object-fit:contain; max-height:380px; background:#000; }
+    .carousel-btn { position:absolute; top:50%; transform:translateY(-50%); width:32px; height:32px; background:rgba(250,248,244,.88); border:1px solid var(--rule-heavy); color:var(--ink); font-size:1rem; cursor:pointer; display:flex; align-items:center; justify-content:center; z-index:5; transition:background .2s; }
+    .carousel-btn:hover { background:rgba(250,248,244,1); }
+    .carousel-btn.prev { left:10px; } .carousel-btn.next { right:10px; }
+    .carousel-counter { position:absolute; bottom:9px; right:12px; font-family:'Source Serif 4',serif; font-size:.5rem; color:rgba(255,255,255,.8); background:rgba(0,0,0,.6); padding:2px 8px; letter-spacing:.08em; }
+    .carousel-dots { display:flex; justify-content:center; flex-wrap:wrap; gap:5px; padding:8px 10px 5px; background:var(--cream-2); border-bottom:1px solid var(--rule); }
+    .carousel-dot { width:5px; height:5px; border-radius:50%; background:var(--rule-heavy); cursor:pointer; transition:background .2s,transform .2s; flex-shrink:0; }
+    .carousel-dot.active { background:var(--ink); transform:scale(1.3); }
+
+    .panel-pad { padding:16px 20px; }
+    .stats-grid { display:grid; grid-template-columns:1fr 1fr; margin-bottom:18px; border:1px solid var(--rule-heavy); border-bottom:none; }
+    .stat-card { padding:10px 14px; border-bottom:1px solid var(--rule-heavy); border-right:1px solid var(--rule); }
+    .stat-card:nth-child(even) { border-right:none; }
+    .stat-label { font-family:'Source Serif 4',serif; font-size:.52rem; letter-spacing:.14em; text-transform:uppercase; color:var(--text-muted); margin-bottom:3px; }
+    .stat-value { font-family:'EB Garamond',Georgia,serif; font-size:1.25rem; font-style:italic; color:var(--ink); font-weight:700; }
+    .section-title { font-family:'Source Serif 4',serif; font-size:.57rem; letter-spacing:.18em; text-transform:uppercase; color:var(--ink-3); margin-bottom:8px; margin-top:18px; padding-bottom:5px; border-bottom:1px solid var(--rule-heavy); }
+    .section-text { font-family:'Source Serif 4',serif; font-size:.82rem; line-height:1.78; color:var(--ink-3); }
+    .tag-list { display:flex; flex-wrap:wrap; gap:5px; margin-top:8px; }
+    .tag { font-family:'Source Serif 4',serif; font-size:.52rem; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-3); background:var(--cream-2); border:1px solid var(--rule); padding:3px 8px; }
+
+    .video-section { padding:16px 20px 10px; }
+    .section-label { font-family:'Source Serif 4',serif; font-size:.57rem; letter-spacing:.18em; text-transform:uppercase; color:var(--ink-3); margin-bottom:10px; padding-bottom:6px; border-bottom:1px solid var(--rule-heavy); }
+    .video-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+    .video-item { position:relative; width:100%; padding-bottom:56.25%; background:#111; overflow:hidden; border:1px solid var(--rule); }
+    .video-item iframe { position:absolute; top:0; left:0; width:100%; height:100%; border:none; }
+    .video-play { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:48px; height:48px; background:rgba(0,0,0,.7); border-radius:50%; display:flex; align-items:center; justify-content:center; color:#fff; font-size:1.2rem; }
+    .video-title { font-family:'Source Serif 4',serif; font-size:.65rem; color:var(--text-muted); padding:4px 0 8px; text-align:center; }
+
+    .dir-search { width:100%; border:none; border-bottom:1px solid var(--rule-heavy); padding:10px 20px; font-family:'Source Serif 4',serif; font-size:.82rem; color:var(--ink); background:var(--cream-2); outline:none; box-sizing:border-box; }
+    .dir-card { display:flex; align-items:center; gap:10px; padding:9px 20px; border-bottom:1px solid var(--rule); transition:background .15s; }
+    .dir-card:hover { background:var(--cream-2); }
+    .dir-icon { font-size:1rem; flex-shrink:0; width:22px; text-align:center; }
+    .dir-name { font-family:'Source Serif 4',serif; font-size:.82rem; color:var(--ink); margin-bottom:1px; }
+    .dir-cat { font-family:'DM Mono',monospace; font-size:.5rem; letter-spacing:.1em; text-transform:uppercase; color:var(--text-muted); }
+    .dir-addr { font-size:.67rem; color:var(--text-muted); margin-top:1px; }
+    .dir-empty { padding:24px 20px; text-align:center; font-size:.75rem; color:var(--text-muted); font-style:italic; }
+
+    .waymo-section { margin:16px 20px; border:1px solid var(--waymo-border); overflow:hidden; background:var(--waymo-dim); }
+    .waymo-header { background:rgba(26,115,232,.1); padding:13px 17px; display:flex; align-items:center; gap:12px; border-bottom:1px solid var(--waymo-border); }
+    .waymo-icon { font-size:1.4rem; }
+    .waymo-title { font-family:'EB Garamond',Georgia,serif; font-size:1.1rem; font-style:italic; color:var(--ink); font-weight:700; }
+    .waymo-subtitle { font-family:'Source Serif 4',serif; font-size:.54rem; letter-spacing:.12em; text-transform:uppercase; color:var(--waymo); margin-top:2px; }
+    .waymo-body { padding:13px 17px; }
+    .waymo-body p { font-family:'Source Serif 4',serif; font-size:.78rem; line-height:1.72; color:var(--ink-3); margin-bottom:10px; }
+    .waymo-body strong { color:var(--ink); }
+    .waymo-stats { display:grid; grid-template-columns:1fr 1fr 1fr; gap:0; margin-top:12px; border:1px solid var(--waymo-border); }
+    .waymo-stat { background:rgba(26,115,232,.06); border-right:1px solid var(--waymo-border); padding:9px; text-align:center; }
+    .waymo-stat:last-child { border-right:none; }
+    .waymo-stat-val { font-family:'EB Garamond',Georgia,serif; font-size:1.2rem; font-style:italic; color:var(--waymo); font-weight:700; }
+    .waymo-stat-lbl { font-family:'Source Serif 4',serif; font-size:.49rem; letter-spacing:.1em; text-transform:uppercase; color:var(--text-muted); margin-top:2px; }
+
+    .panel-cta { padding:13px 20px 18px; display:flex; flex-direction:column; gap:8px; border-top:2px solid var(--ink); flex-shrink:0; background:var(--cream); }
+    .btn-primary { width:100%; padding:12px; background:var(--ink); color:var(--cream); border:none; font-family:'Source Serif 4',serif; font-size:.66rem; font-weight:600; letter-spacing:.18em; text-transform:uppercase; cursor:pointer; transition:background .2s; }
+    .btn-secondary { width:100%; padding:11px; background:transparent; color:var(--ink); border:1px solid var(--rule-heavy); font-family:'Source Serif 4',serif; font-size:.66rem; letter-spacing:.18em; text-transform:uppercase; cursor:pointer; transition:background .2s; }
+
+    .modal-overlay { display:none; position:fixed; inset:0; background:rgba(28,28,28,.55); z-index:200; align-items:center; justify-content:center; backdrop-filter:blur(3px); }
+    .modal-overlay.active { display:flex; }
+    .modal { background:var(--cream); border:1px solid var(--rule-heavy); border-top:3px solid var(--ink); width:90%; max-width:520px; padding:40px; position:relative; animation:modalIn .3s ease; overflow-y:auto; max-height:78vh; }
+    @keyframes modalIn { from{opacity:0;transform:translateY(16px) scale(.98)} to{opacity:1;transform:translateY(0) scale(1)} }
+    .modal-close { position:absolute; top:16px; right:18px; background:none; border:none; color:var(--text-muted); font-size:1.2rem; cursor:pointer; transition:color .2s; }
+    .modal-close:hover { color:var(--ink); }
+    .modal-tag { font-family:'Source Serif 4',serif; font-size:.58rem; letter-spacing:.2em; text-transform:uppercase; color:var(--gold); margin-bottom:10px; display:block; }
+    .modal-title { font-family:'EB Garamond',Georgia,serif; font-size:1.9rem; font-style:italic; font-weight:700; color:var(--ink); margin-bottom:14px; }
+    .modal-body { font-family:'Source Serif 4',serif; font-size:.82rem; line-height:1.78; color:var(--ink-3); }
+    .modal-divider { height:1px; background:var(--rule-heavy); margin:20px 0; }
+    .contact-row { display:flex; align-items:center; gap:12px; margin-bottom:13px; }
+    .contact-icon { width:30px; height:30px; background:var(--cream-2); border:1px solid var(--rule-heavy); display:flex; align-items:center; justify-content:center; font-size:.8rem; flex-shrink:0; }
+    .contact-info { font-family:'Source Serif 4',serif; font-size:.8rem; color:var(--ink-3); }
+    .contact-info strong { display:block; font-size:.58rem; letter-spacing:.12em; text-transform:uppercase; color:var(--ink); margin-bottom:2px; }
+
+    /* Gold pin — Laveen */
+    .prop-pin {
+      width:38px; height:38px; border-radius:50%;
+      background:#C9A84C; border:3px solid #fff;
+      box-shadow:0 0 0 0 rgba(201,168,76,.7);
+      animation:prop-pulse 2s ease-out infinite; cursor:pointer;
+    }
+    @keyframes prop-pulse {
+      0%   { box-shadow:0 0 0 0 rgba(201,168,76,.7); }
+      70%  { box-shadow:0 0 0 18px rgba(201,168,76,0); }
+      100% { box-shadow:0 0 0 0 rgba(201,168,76,0); }
     }
 
-    #prop-card {
-      position: fixed; bottom: 20px; left: 20px; z-index: 85;
-      width: 260px; overflow: hidden; border-radius: 4px;
-      background: linear-gradient(155deg, rgba(255,255,255,0.97) 0%, rgba(250,248,244,0.93) 100%);
-      border: 1.5px solid rgba(255,255,255,0.9);
-      box-shadow: 0 6px 28px rgba(0,0,0,0.13), 0 1px 0 rgba(255,255,255,0.95) inset, 0 0 0 0.5px rgba(201,168,76,0.25);
-      backdrop-filter: blur(16px);
-    }
-    #prop-tabs {
-      display: flex; border-bottom: 1px solid var(--sand);
-      background: rgba(250,248,244,0.6);
-    }
-    .ptab {
-      flex: 1; padding: 6px 4px;
-      font-family: 'DM Mono', monospace; font-size: .38rem; letter-spacing: .1em; text-transform: uppercase;
-      color: var(--text-muted); background: none; border: none; border-bottom: 2px solid transparent;
-      cursor: pointer; transition: color .2s, border-color .2s;
-    }
-    .ptab.active { color: var(--text); border-bottom-color: var(--gold); }
-    .ptab-view { display: none; }
-    .ptab-view.active { display: block; }
-    #prop-photo {
-      width: 100%; height: 138px; overflow: hidden; background: #111;
-      position: relative; cursor: pointer;
-    }
-    #prop-photo img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .3s; }
-    #prop-photo:hover img { transform: scale(1.04); }
-    #prop-photo-nav {
-      position: absolute; bottom: 7px; right: 8px; z-index: 2;
-      background: rgba(0,0,0,0.52); color: #fff;
-      font-family: 'DM Mono', monospace; font-size: .38rem; letter-spacing: .1em;
-      padding: 3px 7px; border-radius: 2px;
-    }
-    #aerial-placeholder {
-      width: 100%; height: 138px; background: #111; display: flex;
-      align-items: center; justify-content: center;
-      font-family: 'DM Mono', monospace; font-size: .42rem; letter-spacing: .1em;
-      color: rgba(255,255,255,0.5); text-align: center; padding: 12px;
-    }
-    #prop-info { padding: 9px 13px 12px; }
-    .pi-tag   { font-size: .38rem; letter-spacing: .16em; text-transform: uppercase; color: var(--gold); margin-bottom: 3px; }
-    .pi-name  { font-family: 'Source Serif 4', serif; font-size: .78rem; font-weight: 600; color: var(--text); line-height: 1.2; margin-bottom: 4px; }
-    .pi-meta  { font-family: 'DM Mono', monospace; font-size: .44rem; color: var(--text-muted); letter-spacing: .04em; line-height: 1.5; }
-    .pi-price { font-family: 'Source Serif 4', serif; font-size: .9rem; font-weight: 600; color: var(--text); margin-top: 5px; }
+    #hint { position:fixed; bottom:36px; left:50%; transform:translateX(-50%); background:rgba(250,248,244,.95); border:1px solid var(--rule-heavy); padding:11px 22px; font-family:'Source Serif 4',serif; font-size:.66rem; letter-spacing:.12em; color:var(--text-muted); backdrop-filter:blur(8px); z-index:80; transition:opacity .5s; pointer-events:none; white-space:nowrap; }
+    #hint span { color:var(--gold); font-weight:600; }
 
-    .gm-popup {
-      background: rgba(250,248,244,0.97); border: 1.5px solid rgba(255,255,255,0.9);
-      box-shadow: 0 4px 20px rgba(0,0,0,0.12); backdrop-filter: blur(14px);
-      border-radius: 4px; padding: 10px 13px; min-width: 150px; max-width: 210px;
+    @media(max-width:640px) {
+      header { padding:0 14px; }
+      .logo-addr { display:none; }
+      .video-grid { grid-template-columns:1fr; }
     }
-    .gm-popup-name { font-family: 'Source Serif 4', serif; font-size: .78rem; font-weight: 600; color: var(--text); margin-bottom: 2px; }
-    .gm-popup-cat  { font-family: 'DM Mono', monospace; font-size: .46rem; letter-spacing: .1em; text-transform: uppercase; color: var(--gold); }
   </style>
 </head>
 <body>
 
+<div id="cesiumContainer"></div>
+
+<div id="media-col">
+  <div id="radio-player">
+    <div class="radio-info">
+      <div class="radio-station">99.5 The Mountain</div>
+      <div class="radio-genre">Adult Alternative · Phoenix</div>
+    </div>
+    <div class="radio-waves"><span></span><span></span><span></span><span></span></div>
+    <button id="radio-btn" onclick="toggleRadio()" aria-label="Toggle radio">▶</button>
+    <audio id="radio-audio" preload="none" src="https://live.amperwave.net/direct/audacy-kqmtfmaac-imc"></audio>
+  </div>
+  <div id="yt-billboard"></div>
+</div>
+
+<div id="yt-popup">
+  <button id="yt-close" onclick="closeYT()">✕</button>
+  <div id="yt-title"></div>
+  <div id="yt-frame-wrap"><iframe id="yt-frame" allowfullscreen allow="autoplay"></iframe></div>
+  <div id="yt-nav">
+    <button class="yt-nav-btn" onclick="ytStep(-1)">← Prev</button>
+    <span id="yt-counter"></span>
+    <button class="yt-nav-btn" onclick="ytStep(1)">Next →</button>
+  </div>
+</div>
+
 <header>
-  <div style="display:flex;align-items:center;cursor:pointer" onclick="location.href='/'">
+  <div class="logo-wrap" onclick="goHome()">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 440 100" height="52" preserveAspectRatio="xMinYMid meet" aria-label="Requation">
       <defs><filter id="gb"><feGaussianBlur stdDeviation="1.2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
       <text x="6" y="42" font-family="EB Garamond,Georgia,serif" font-size="46" font-weight="700" font-style="italic" fill="#B22234">r</text>
@@ -157,249 +280,470 @@
       <text x="56" y="88" font-family="Raleway,Arial,sans-serif" font-size="92" font-weight="600" fill="#4F6FB8">Σ</text>
       <text x="122" y="88" font-family="Raleway,Arial,sans-serif" font-size="24" font-weight="600" font-style="italic" fill="#D4A843" opacity="0.8" filter="url(#gb)" letter-spacing="2">quation</text>
     </svg>
-    <span style="font-family:'DM Mono',monospace;font-size:.52rem;letter-spacing:.14em;text-transform:uppercase;color:var(--text-muted);border-left:1px solid var(--sand);padding-left:12px;margin-left:4px">11403 S 27th Dr · Laveen · Arizona</span>
+    <span class="logo-addr">11403 S 27th Dr · Laveen · Arizona</span>
   </div>
   <nav>
-    <button onclick="location.href='/'">Home</button>
-    <a href="/desertlife">Desert Life</a>
+    <button onclick="goHome()">Home</button>
     <a href="/dtla">Los Angeles</a>
+    <button onclick="openModal('about')">About</button>
+    <button onclick="openModal('contact')">Contact</button>
   </nav>
 </header>
 
 <div id="yt-strip">
-  <iframe id="yt-frame"
-    src="https://www.youtube.com/embed/HrxX9TBj2zY?autoplay=1&mute=1&loop=1&playlist=HrxX9TBj2zY&controls=0&showinfo=0&rel=0&modestbranding=1"
-    allow="autoplay; encrypted-media" allowfullscreen>
-  </iframe>
+  <iframe id="yt-frame-strip" src="" allow="autoplay; encrypted-media" allowfullscreen></iframe>
   <div id="yt-overlay" onclick="toggleStripSound()"></div>
-  <div id="yt-label">▶ Loading monuments...</div>
+  <div id="yt-label">▶ Loading…</div>
 </div>
 
-<div id="map"></div>
-
-<div id="prop-card">
-  <div id="prop-tabs">
-    <button class="ptab active" onclick="setPropTab('photos')">Photos</button>
-    <button class="ptab" onclick="setPropTab('exterior')">Street</button>
-    <button class="ptab" onclick="setPropTab('aerial')">Aerial</button>
+<div id="panel">
+  <div class="panel-header">
+    <div class="panel-tag">
+      <span>For Sale By Owner · Laveen AZ</span>
+      <span class="waymo-badge">⟴ Waymo Ready</span>
+    </div>
+    <div class="panel-title" onclick="goHome()">Urban Farmhouse</div>
+    <div class="panel-subtitle">11403 S 27th Dr · Laveen, AZ 85339</div>
+    <button id="panel-close" onclick="closePanel()" title="Close">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 115 100" width="26" height="26" style="display:block">
+        <text x="4" y="42" font-family="EB Garamond,Georgia,serif" font-size="46" font-weight="700" font-style="italic" fill="#B22234">r</text>
+        <line x1="31" y1="76" x2="50" y2="41" stroke="#7A7A7A" stroke-width="6" stroke-linecap="round"/>
+        <text x="55" y="88" font-family="Raleway,Arial,sans-serif" font-size="88" font-weight="600" fill="#4F6FB8">Σ</text>
+      </svg>
+    </button>
   </div>
-  <div id="ptab-photos" class="ptab-view active">
-    <div id="prop-photo" onclick="nextPhoto()">
-      <img id="prop-img" src="https://i.imgur.com/0aYf87y.jpeg" alt="11403 S 27th Dr · Laveen AZ">
-      <div id="prop-photo-nav">1 / 25 · Tap to browse</div>
+  <div class="panel-tabs">
+    <button class="panel-tab active" onclick="switchTab('property')">Property</button>
+    <button class="panel-tab" onclick="switchTab('index')">Index</button>
+    <button class="panel-tab" onclick="switchTab('directory')">Directory</button>
+    <button class="panel-tab" onclick="switchTab('waymo')">Waymo</button>
+  </div>
+  <div class="panel-body" id="panel-body">
+
+    <div class="tab-pane active" id="tab-property">
+      <div class="carousel-wrap">
+        <div class="carousel-track" id="carousel-track"></div>
+        <button class="carousel-btn prev" onclick="carouselMove(-1)">&#8249;</button>
+        <button class="carousel-btn next" onclick="carouselMove(1)">&#8250;</button>
+        <div class="carousel-counter" id="carousel-counter">1 / 25</div>
+      </div>
+      <div class="carousel-dots" id="carousel-dots"></div>
+      <div class="panel-pad">
+        <div class="stats-grid">
+          <div class="stat-card"><div class="stat-label">Price</div><div class="stat-value">$2,000,000</div></div>
+          <div class="stat-card"><div class="stat-label">Type</div><div class="stat-value" style="font-size:.9rem">Urban Farmhouse</div></div>
+          <div class="stat-card"><div class="stat-label">Beds / Baths</div><div class="stat-value">4BD / 4.5BA</div></div>
+          <div class="stat-card"><div class="stat-label">Size</div><div class="stat-value" style="font-size:1rem">5,400 SF</div></div>
+        </div>
+        <div class="section-title">About This Property</div>
+        <p class="section-text">4.4 acres in Laveen — one of the last large-lot parcels inside a major metro, minutes from South Mountain's 16,000 acres of preserved Sonoran Desert. Solar-powered farmhouse, 5,400 sqft, 4 BD / 4.5 BA. Loop 202 access. Sky Harbor 20 minutes. A property that cannot be replicated.</p>
+        <div class="section-title">Market Tags</div>
+        <div class="tag-list">
+          <span class="tag">Laveen AZ</span><span class="tag">Urban Farmhouse</span><span class="tag">4.4 Acres</span>
+          <span class="tag">Solar</span><span class="tag">South Mountain</span><span class="tag">FSBO</span><span class="tag">Waymo Metro</span>
+        </div>
+      </div>
+      <div class="video-section">
+        <div class="section-label">Documentary — Urban Farmhouse · Laveen</div>
+        <div class="video-grid" id="video-grid"></div>
+      </div>
+      <div style="height:20px"></div>
+    </div>
+
+    <div class="tab-pane" id="tab-index">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--rule-heavy);border-bottom:1px solid var(--rule-heavy)">
+        <div style="background:var(--cream);padding:12px 14px"><div style="font-family:'DM Mono',monospace;font-size:1rem;font-weight:500;color:var(--ink)">4.4 ac</div><div style="font-family:'DM Mono',monospace;font-size:.52rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);margin-top:2px">Lot Size</div></div>
+        <div style="background:var(--cream);padding:12px 14px"><div style="font-family:'DM Mono',monospace;font-size:1rem;font-weight:500;color:var(--ink)">16K ac</div><div style="font-family:'DM Mono',monospace;font-size:.52rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);margin-top:2px">South Mountain</div></div>
+        <div style="background:var(--cream);padding:12px 14px"><div style="font-family:'DM Mono',monospace;font-size:1rem;font-weight:500;color:var(--ink)">20 min</div><div style="font-family:'DM Mono',monospace;font-size:.52rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);margin-top:2px">Sky Harbor</div></div>
+        <div style="background:var(--cream);padding:12px 14px"><div style="font-family:'DM Mono',monospace;font-size:1rem;font-weight:500;color:var(--gold)">Solar</div><div style="font-family:'DM Mono',monospace;font-size:.52rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);margin-top:2px">Powered</div></div>
+      </div>
+      <div class="panel-pad" style="padding-top:16px">
+        <p style="font-size:.82rem;line-height:1.7;color:var(--text-muted);margin-bottom:14px"><strong style="color:var(--ink)">The Land</strong><br>4.4 acres inside the Phoenix metro — an artifact. The city built around it. South Mountain rises behind. The Loop 202 runs ahead. There are no more of these.</p>
+        <p style="font-size:.82rem;line-height:1.7;color:var(--text-muted);margin-bottom:14px"><strong style="color:var(--ink)">The Institutions</strong><br>Banner Health — 10 minutes. Arizona State University — Tempe campus 25 minutes. Chase Field (Diamondbacks). State Farm Stadium (Cardinals). Footprint Center (Suns). Sky Harbor International — 20 minutes.</p>
+        <p style="font-size:.82rem;line-height:1.7;color:var(--text-muted);margin-bottom:14px"><strong style="color:var(--ink)">The Infrastructure</strong><br>Valley Metro Rail — Phoenix light rail, 15 minutes. I-10 · Loop 202 · Loop 101. A city that is building fast. A property that cannot be subdivided. A price that reflects today, not tomorrow.</p>
+        <p style="font-size:.82rem;line-height:1.7;color:var(--text-muted);margin-bottom:14px"><strong style="color:var(--ink)">The Nature</strong><br>South Mountain Park — 16,000 acres of Sonoran Desert. The largest municipal park in the US. Hiking, cycling, desert terrain. A national-park experience, 5 minutes from your front door.</p>
+        <p style="font-size:.82rem;line-height:1.7;color:var(--gold);font-style:italic">Requation mapped it first.</p>
+      </div>
+    </div>
+
+    <div class="tab-pane" id="tab-directory">
+      <input class="dir-search" id="dir-search" placeholder="Search businesses, categories…" oninput="filterDir()">
+      <div id="dir-list"><div class="dir-empty">Loading directory…</div></div>
+    </div>
+
+    <div class="tab-pane" id="tab-waymo">
+      <div class="waymo-section" style="margin-top:16px">
+        <div class="waymo-header">
+          <div class="waymo-icon">🚗</div>
+          <div>
+            <div class="waymo-title">Waymo Last-Mile Hub</div>
+            <div class="waymo-subtitle">Autonomous Vehicle Ready · Requation Network</div>
+          </div>
+        </div>
+        <div class="waymo-body">
+          <p>Requation positions every listing as a <strong>node in the Waymo autonomous vehicle network</strong> — the missing link between where people live and where they want to go.</p>
+          <p>The Phoenix metro is one of Waymo's most active markets. Ridership is expanding across Scottsdale, Tempe, and Chandler. <strong>Laveen's Loop 202 corridor is next.</strong></p>
+          <p>This property sits on a 4.4-acre parcel with direct freeway access. Requation is building the <strong>3D Yellow Pages on Maps</strong> — every home, every business, every stop, discoverable from above.</p>
+          <div class="waymo-stats">
+            <div class="waymo-stat"><div class="waymo-stat-val">202</div><div class="waymo-stat-lbl">Loop Access</div></div>
+            <div class="waymo-stat"><div class="waymo-stat-val">24/7</div><div class="waymo-stat-lbl">AV Coverage</div></div>
+            <div class="waymo-stat"><div class="waymo-stat-val">3D</div><div class="waymo-stat-lbl">Map Ready</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="panel-pad">
+        <div class="section-title">Why This Matters</div>
+        <p class="section-text">The autonomous vehicle era rewrites real estate value. Proximity to Waymo stops becomes the new walkability score — a quantifiable, searchable signal on Google Maps that surfaces your property to buyers who live AV-first.</p>
+        <p class="section-text" style="margin-top:11px">Requation makes this visible — aerial, interactive, and discoverable at the exact moment a buyer is navigating their next neighborhood from above.</p>
+        <div class="section-title" style="margin-top:18px">The Requation Vision</div>
+        <p class="section-text">A living 3D map where every listing, every business, and every Waymo stop is a connected, searchable data point — not a static pin. Real estate intelligence at the speed of Maps.</p>
+      </div>
+      <div style="height:20px"></div>
+    </div>
+
+  </div>
+  <div class="panel-cta">
+    <button class="btn-primary" onclick="openModal('contact')">Contact Owner</button>
+    <button class="btn-secondary" onclick="openModal('about')">r/Σ — Our Mission</button>
+  </div>
+</div>
+
+<div id="hint">Tap <span>●</span> to explore Laveen · South Mountain</div>
+
+<div class="modal-overlay" id="modal-about">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('about')">&#x2715;</button>
+    <span class="modal-tag">Who We Are</span>
+    <div class="modal-title">Real Estate Intelligence</div>
+    <div class="modal-body">I needed to sell my house. Not because I wanted to. Because I had to.<br><br>The MLS controls 80% of the American real estate market. It is a private, for-profit syndicate — not a public utility, not a cooperative, not a service. A corporation. Far away. Collecting both sides of every transaction through a doctrine called procuring cause, until 2024, when the courts finally said enough.<br><br>I said it sooner.<br><br>Requation is an effort to change the real estate equation — from MegaCorp to every American. Not a listing site. Not a portal. A map. Seen from above, in three dimensions, the way a city actually works. Every property in context. Every neighborhood alive with the intelligence that buyers deserve and sellers have been denied.<br><br>I have done this before. In White Center, Seattle — one of America's most forgotten neighborhoods — I once brought fruit to a food desert. Just showed up with produce where there was none. Nobody paid me. That is not the point. The point is that neighborhoods breathe. They need tending.<br><br>Requation tends them.<br><br>Not to disrupt. Not to raise a Series A. To sell my own properties first — and then to hand every American owner the same map that corporations have kept to themselves.<br><br>r/Σ = Real Estate as an Equation. Finally solved.</div>
+    <div class="modal-divider"></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-contact">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('contact')">&#x2715;</button>
+    <span class="modal-tag">Get In Touch</span>
+    <div class="modal-title">Contact Us</div>
+    <div class="modal-divider"></div>
+    <div class="contact-row"><div class="contact-icon">☎</div><div class="contact-info"><strong>Phone</strong>+1 (213) 215-8870</div></div>
+    <div class="modal-divider"></div>
+    <div style="text-align:center;padding:8px 0 16px">
+      <img src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=https://requation.com" alt="requation.com" style="width:160px;height:160px;border:1px solid var(--rule-heavy)">
+      <div style="font-family:'Source Serif 4',serif;font-size:.7rem;color:var(--text-muted);margin-top:8px;letter-spacing:.05em">requation.com</div>
+    </div>
+    <div class="modal-divider"></div>
+    <form id="contact-form" onsubmit="submitContact(event)" style="display:flex;flex-direction:column;gap:12px">
+      <input type="text" id="cf-name" placeholder="Your Name" required style="font-family:'Source Serif 4',serif;font-size:.82rem;color:var(--ink);background:var(--cream);border:1px solid var(--rule-heavy);border-top:2px solid var(--ink);padding:10px 12px;outline:none;width:100%;box-sizing:border-box">
+      <input type="email" id="cf-email" placeholder="Your Email" required style="font-family:'Source Serif 4',serif;font-size:.82rem;color:var(--ink);background:var(--cream);border:1px solid var(--rule-heavy);border-top:2px solid var(--ink);padding:10px 12px;outline:none;width:100%;box-sizing:border-box">
+      <textarea id="cf-message" placeholder="Your message…" required rows="4" style="font-family:'Source Serif 4',serif;font-size:.82rem;color:var(--ink);background:var(--cream);border:1px solid var(--rule-heavy);border-top:2px solid var(--ink);padding:10px 12px;outline:none;resize:vertical;width:100%;box-sizing:border-box"></textarea>
+      <button type="submit" id="cf-btn" style="font-family:'Source Serif 4',serif;font-size:.66rem;font-weight:600;letter-spacing:.18em;text-transform:uppercase;background:var(--ink);color:var(--cream);border:none;padding:12px;cursor:pointer">Send Message</button>
+      <div id="cf-status" style="font-family:'Source Serif 4',serif;font-size:.75rem;text-align:center;min-height:1.2em"></div>
+    </form>
+    <div class="modal-divider"></div>
+    <div style="text-align:center">
+      <div style="font-family:'Source Serif 4',serif;font-size:.58rem;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:8px">Advertise on Requation</div>
+      <a href="#" target="_blank" rel="noopener" style="display:block;width:100%;box-sizing:border-box;padding:12px;background:var(--ink);color:var(--cream);font-family:'Source Serif 4',serif;font-size:.66rem;font-weight:600;letter-spacing:.18em;text-transform:uppercase;text-decoration:none;text-align:center">Buy a Listing</a>
     </div>
   </div>
-  <div id="ptab-exterior" class="ptab-view">
-    <img src="https://maps.googleapis.com/maps/api/streetview?size=260x138&location=33.3428,-112.1181&fov=90&pitch=5&heading=0&key=AIzaSyD7UMA5ILPXv9QK2_gvxPVth30MavRd2WQ"
-      style="width:100%;height:138px;object-fit:cover;display:block" alt="Street View · 11403 S 27th Dr Laveen">
-  </div>
-  <div id="ptab-aerial" class="ptab-view">
-    <div id="aerial-placeholder">Loading aerial view…</div>
-    <video id="aerial-vid" autoplay muted loop playsinline
-      style="width:100%;height:138px;object-fit:cover;display:none"></video>
-  </div>
-  <div id="prop-info">
-    <div class="pi-tag">For Sale By Owner · Laveen AZ</div>
-    <div class="pi-name">11403 S 27th Dr · Laveen, AZ</div>
-    <div class="pi-meta">4 BD · 4.5 BA · 5,400 sqft · 4.4 Acres<br>South Mountain · Loop 202 · Solar</div>
-    <div class="pi-price">$2,000,000</div>
-  </div>
-</div>
-
-<div id="legend">
-  <div class="leg-title">Map Key</div>
-  <div class="leg-row"><div class="leg-dot" style="background:#B22234"></div><span class="leg-label">Your Property</span></div>
-  <div class="leg-row"><div class="leg-dot" style="background:#4CAF50"></div><span class="leg-label">Grocery</span></div>
-  <div class="leg-row"><div class="leg-dot" style="background:#FF6600"></div><span class="leg-label">Home & Hardware</span></div>
-  <div class="leg-row"><div class="leg-dot" style="background:#CC0000"></div><span class="leg-label">Target</span></div>
-  <div class="leg-row"><div class="leg-dot" style="background:#2196F3"></div><span class="leg-label">Credit Union</span></div>
-  <div class="leg-row"><div class="leg-dot" style="background:#6A1B9A"></div><span class="leg-label">Cinema</span></div>
-  <div class="leg-row"><div class="leg-dot" style="background:#9C27B0"></div><span class="leg-label">Museum</span></div>
-  <div class="leg-row"><div class="leg-dot" style="background:#388E3C"></div><span class="leg-label">Park</span></div>
-  <div class="leg-row"><div class="leg-dot" style="background:#F44336"></div><span class="leg-label">Gym</span></div>
 </div>
 
 <script>
-const CENTER = { lat: 33.3428, lng: -112.1181 };
+const CENTER = { lat: 33.3427905, lng: -112.1180767 };
 
-const PROP_PHOTOS = [
-  'https://i.imgur.com/0aYf87y.jpeg','https://i.imgur.com/F0YLfoC.jpeg','https://i.imgur.com/ycRr5XE.jpeg',
-  'https://i.imgur.com/1MBjfkr.jpeg','https://i.imgur.com/uiikzzR.jpeg','https://i.imgur.com/1qQr4rf.jpeg',
-  'https://i.imgur.com/ubOV3jq.jpeg','https://i.imgur.com/DlP9Thj.jpeg','https://i.imgur.com/9Ti4py8.jpeg',
-  'https://i.imgur.com/0jwRIjB.jpeg','https://i.imgur.com/TE7zKJM.jpeg','https://i.imgur.com/ytIcEu5.jpeg',
-  'https://i.imgur.com/SI8gjc2.jpeg','https://i.imgur.com/Th4TUUP.jpeg','https://i.imgur.com/yCjxa3y.jpeg',
-  'https://i.imgur.com/R2qggs3.jpeg','https://i.imgur.com/ruUGtpV.jpeg','https://i.imgur.com/K7eReJW.jpeg',
-  'https://i.imgur.com/yoI9pMA.jpeg','https://i.imgur.com/yJKd4FM.jpeg','https://i.imgur.com/uJq82zM.jpeg',
-  'https://i.imgur.com/0M3jwXx.jpeg','https://i.imgur.com/4oX65PU.jpeg','https://i.imgur.com/UjNsMrN.jpeg',
-  'https://i.imgur.com/fJUhniW.jpeg'
-];
-let photoIdx = 0;
-function nextPhoto() {
-  photoIdx = (photoIdx + 1) % PROP_PHOTOS.length;
-  document.getElementById('prop-img').src = PROP_PHOTOS[photoIdx];
-  document.getElementById('prop-photo-nav').textContent = `${photoIdx + 1} / ${PROP_PHOTOS.length} · Tap to browse`;
-}
+const PROP = {
+  images: [
+    'https://i.imgur.com/0aYf87y.jpeg','https://i.imgur.com/F0YLfoC.jpeg','https://i.imgur.com/ycRr5XE.jpeg',
+    'https://i.imgur.com/1MBjfkr.jpeg','https://i.imgur.com/uiikzzR.jpeg','https://i.imgur.com/1qQr4rf.jpeg',
+    'https://i.imgur.com/ubOV3jq.jpeg','https://i.imgur.com/DlP9Thj.jpeg','https://i.imgur.com/9Ti4py8.jpeg',
+    'https://i.imgur.com/0jwRIjB.jpeg','https://i.imgur.com/TE7zKJM.jpeg','https://i.imgur.com/ytIcEu5.jpeg',
+    'https://i.imgur.com/SI8gjc2.jpeg','https://i.imgur.com/Th4TUUP.jpeg','https://i.imgur.com/yCjxa3y.jpeg',
+    'https://i.imgur.com/R2qggs3.jpeg','https://i.imgur.com/ruUGtpV.jpeg','https://i.imgur.com/K7eReJW.jpeg',
+    'https://i.imgur.com/yoI9pMA.jpeg','https://i.imgur.com/yJKd4FM.jpeg','https://i.imgur.com/uJq82zM.jpeg',
+    'https://i.imgur.com/0M3jwXx.jpeg','https://i.imgur.com/4oX65PU.jpeg','https://i.imgur.com/UjNsMrN.jpeg',
+    'https://i.imgur.com/fJUhniW.jpeg'
+  ],
+  videos: [
+    {id:'wn9pZDkd6bo',title:'South Mountain · Sonoran Desert'},
+    {id:'JmSbKXsZfB0',title:'Phoenix from Above — Aerial'},
+    {id:'vVX-PrBRtTY',title:'Arizona Farmhouse Life'},
+    {id:'Hs8aCPuEXec',title:'Laveen · Loop 202 Corridor'},
+    {id:'5-0KkO9CJPE',title:'South Mountain Sunrise'},
+    {id:'sU1NmE_Bu6I',title:'Desert Living · Requation AZ'}
+  ]
+};
 
-const GROCERY_BRANDS = ["fry's",'frys','walmart','safeway','sprouts','aldi','food city','bashas','winco'];
+const SB_URL  = 'https://mpmprnjhunjfeacikgml.supabase.co';
+const SB_KEY  = 'sb_publishable_T6XISHd9O2Ol0raPaEASqQ_klUXnyY3';
+const SB_HDRS = { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY };
 
 const STRIP_MONUMENTS = [
-  { name:'Sky Harbor Airport',  venue:'Phoenix Sky Harbor',          query:'Phoenix Sky Harbor Airport travel' },
-  { name:'Valley Metro Rail',   venue:'Valley Metro',                query:'Valley Metro Rail Phoenix light rail' },
-  { name:'State Farm Stadium',  venue:'Arizona Cardinals',           query:'Arizona Cardinals football NFL' },
-  { name:'Chase Field',         venue:'Arizona Diamondbacks',        query:'Arizona Diamondbacks baseball MLB' },
-  { name:'Footprint Center',    venue:'Phoenix Suns',                query:'Phoenix Suns basketball NBA' },
-  { name:'South Mountain Park', venue:'City of Phoenix · 16,000 ac', query:'South Mountain Park Phoenix hiking trails' }
+  { name:'South Mountain Park', venue:'City of Phoenix · 16,000 Acres',      query:'South Mountain Park Phoenix hiking trails' },
+  { name:'Sky Harbor Airport',  venue:'Phoenix Sky Harbor International',     query:'Phoenix Sky Harbor Airport travel' },
+  { name:'Chase Field',         venue:'Arizona Diamondbacks · MLB',           query:'Arizona Diamondbacks baseball Chase Field' },
+  { name:'State Farm Stadium',  venue:'Arizona Cardinals · NFL',              query:'Arizona Cardinals football State Farm Stadium' },
+  { name:'Footprint Center',    venue:'Phoenix Suns · NBA',                   query:'Phoenix Suns basketball Footprint Center' },
+  { name:'Arizona Biltmore',    venue:'Historic Resort · Frank Lloyd Wright', query:'Arizona Biltmore resort luxury Phoenix' },
+  { name:'Desert Botanical',    venue:'Desert Botanical Garden · Phoenix',    query:'Desert Botanical Garden Phoenix flowers' }
 ];
 
-function setPropTab(tab) {
-  document.querySelectorAll('.ptab').forEach(b => b.classList.toggle('active', b.textContent.toLowerCase().startsWith(tab === 'photos' ? 'ph' : tab === 'exterior' ? 'st' : 'ae')));
-  document.querySelectorAll('.ptab-view').forEach(v => v.classList.remove('active'));
-  document.getElementById('ptab-' + tab).classList.add('active');
-  if (tab === 'aerial') loadAerialOnce();
+/* ── Carousel ── */
+let _ci = 0, _ct = 0;
+function buildCarousel() {
+  _ct = PROP.images.length;
+  document.getElementById('carousel-track').innerHTML = PROP.images.map((u,i) =>
+    `<div class="carousel-slide"><img src="${u}" alt="Photo ${i+1}" loading="${i<3?'eager':'lazy'}"></div>`
+  ).join('');
+  document.getElementById('carousel-counter').textContent = `1 / ${_ct}`;
+  document.getElementById('carousel-dots').innerHTML = PROP.images.map((_,i) =>
+    `<div class="carousel-dot${i===0?' active':''}" onclick="carouselGoTo(${i})"></div>`
+  ).join('');
+  document.getElementById('video-grid').innerHTML = PROP.videos.map(v =>
+    `<div><div class="video-item" onclick="this.innerHTML='<iframe src=\\'https://www.youtube.com/embed/${v.id}?autoplay=1&rel=0&modestbranding=1\\' allow=\\'autoplay\\' allowfullscreen></iframe>'" style="background:url(https://img.youtube.com/vi/${v.id}/mqdefault.jpg) center/cover;cursor:pointer"><div class="video-play">&#9654;</div></div><div class="video-title">${v.title}</div></div>`
+  ).join('');
 }
-let aerialLoaded = false;
-async function loadAerialOnce() {
-  if (aerialLoaded) return;
-  aerialLoaded = true;
+function carouselMove(d) { _ci = (_ci + d + _ct) % _ct; carouselRender(); }
+function carouselGoTo(i) { _ci = i; carouselRender(); }
+function carouselRender() {
+  const t = document.getElementById('carousel-track');
+  if (t) t.style.transform = `translateX(-${_ci * 100}%)`;
+  const c = document.getElementById('carousel-counter');
+  if (c) c.textContent = `${_ci + 1} / ${_ct}`;
+  document.querySelectorAll('.carousel-dot').forEach((d,i) => d.classList.toggle('active', i === _ci));
+}
+
+/* ── Tabs ── */
+function switchTab(name) {
+  document.querySelectorAll('.panel-tab').forEach(t => {
+    const m = (t.getAttribute('onclick') || '').match(/switchTab\('(\w+)'\)/);
+    t.classList.toggle('active', !!m && m[1] === name);
+  });
+  document.querySelectorAll('.tab-pane').forEach(p => p.classList.toggle('active', p.id === 'tab-' + name));
+  document.getElementById('panel-body').scrollTop = 0;
+  if (name === 'directory') loadDirectory();
+}
+
+/* ── Directory ── */
+const DIR_ICONS = {
+  'Grocery':'🛒','Hardware':'🔨','Coffee':'☕','Cafes':'☕','Cafe':'☕','Coffee & Tea':'☕',
+  'Bakeries':'🥐','Cinema':'🎬','Dental':'🦷','Gym':'💪','Fashion':'👗',
+  'FastFood':'🍔','Ice Cream & Frozen Yogurt':'🍦','Desserts':'🍦',
+  'Restaurants':'🍽️','restaurant':'🍽️','food':'🍴','bars':'🍺',
+  'gyms':'💪','grocery':'🛒','shopping':'🛍️','arts':'🎭',
+  'Museums':'🖼️','Fitness & Instruction':'💪','Juice Bars & Smoothies':'🥤'
+};
+const DIR_ZIPS = '85339,85041,85042,85044';
+let dirData = [], dirLoaded = false;
+
+function normName(s) { return (s||'').toLowerCase().replace(/[^a-z0-9]/g,'').slice(0,22); }
+
+async function loadDirectory() {
+  if (dirLoaded) return;
+  const el = document.getElementById('dir-list');
+  el.innerHTML = '<div class="dir-empty">Loading…</div>';
   try {
-    const r = await fetch('/api/aerialview?address=' + encodeURIComponent('11403 S 27th Dr, Laveen, AZ 85339'));
-    const d = await r.json();
-    const uri = d?.uris?.LANDSCAPE_VIDEO?.landscapeVideoUri;
-    const vid = document.getElementById('aerial-vid');
-    const ph  = document.getElementById('aerial-placeholder');
-    if (uri) {
-      vid.src = uri; vid.style.display = 'block'; ph.style.display = 'none';
-    } else {
-      ph.textContent = 'Aerial footage\nnot available for\nthis address';
-    }
+    const [sbRes, yelpRes] = await Promise.allSettled([
+      fetch(`${SB_URL}/rest/v1/restaurants?select=name,category,address,zip,yelp_url,waymo_url&zip=in.(${DIR_ZIPS})&limit=500&order=name.asc`, { headers: SB_HDRS }).then(r => r.json()),
+      fetch(`/api/yelp?zip=85339&categories=food,shopping,active,arts&rating=3.5`).then(r => r.json())
+    ]);
+    const sbRaw   = (sbRes.status==='fulfilled' && Array.isArray(sbRes.value)) ? sbRes.value : [];
+    const yelpBiz = (yelpRes.status==='fulfilled' && yelpRes.value.businesses) ? yelpRes.value.businesses : [];
+    const seen = new Set();
+    const fromSB = sbRaw
+      .filter(b => { const k=normName(b.name); if(seen.has(k)) return false; seen.add(k); return true; })
+      .map(b => ({ name:b.name, category:b.category||'Business', address:b.address||b.zip||'', yelp_url:b.yelp_url||null, waymo_url:b.waymo_url||null, source:'sb', _norm:normName(b.name) }));
+    const sbSet = new Set(fromSB.map(b=>b._norm));
+    const fromYelp = yelpBiz
+      .filter(b => b.name && !sbSet.has(normName(b.name)))
+      .map(b => ({ name:b.name, category:(b.categories||[{}])[0].title||'Business', address:b.location?b.location.address1||'':'', rating:b.rating, yelp_url:b.url||null, waymo_url:null, source:'yelp', _norm:normName(b.name) }));
+    dirData = [...fromSB, ...fromYelp].sort((a,b) => a.name.localeCompare(b.name));
+    dirLoaded = true;
+    renderDir(dirData);
   } catch(e) {
-    document.getElementById('aerial-placeholder').textContent = 'Aerial view unavailable';
+    document.getElementById('dir-list').innerHTML = '<div class="dir-empty">Could not load directory</div>';
   }
 }
 
-let stripIdx = 0, stripVideos = [], stripMuted = true;
+function renderDir(data) {
+  const el = document.getElementById('dir-list');
+  if (!data.length) { el.innerHTML = '<div class="dir-empty">No results</div>'; return; }
+  el.innerHTML = data.map(b => {
+    const icon = DIR_ICONS[b.category] || '🏢';
+    const ratingBadge = (b.source==='yelp'&&b.rating) ? `<span style="font-size:.52rem;background:#FF6600;color:#fff;padding:2px 6px;border-radius:2px;font-weight:600">★ ${b.rating}</span>` : '';
+    const yelpBtn = b.yelp_url ? `<a href="${b.yelp_url}" target="_blank" onclick="event.stopPropagation()" style="font-size:.58rem;background:#B22234;color:#fff;padding:3px 8px;border-radius:2px;text-decoration:none;font-weight:600">Yelp →</a>` : '';
+    const waymoBtn = b.waymo_url ? `<a href="${b.waymo_url}" target="_blank" onclick="event.stopPropagation()" style="font-size:.58rem;background:#1A73E8;color:#fff;padding:3px 8px;border-radius:2px;text-decoration:none;font-weight:600">🚗 Waymo</a>` : '';
+    const links = (yelpBtn||waymoBtn) ? `<div style="display:flex;gap:6px;margin-top:5px;align-items:center">${ratingBadge}${yelpBtn}${waymoBtn}</div>` : (ratingBadge ? `<div style="margin-top:4px">${ratingBadge}</div>` : '');
+    return `<div class="dir-card"><div class="dir-icon">${icon}</div><div style="flex:1;min-width:0"><div class="dir-name">${b.name}</div><div class="dir-cat">${b.category}</div>${b.address?`<div class="dir-addr">${b.address}</div>`:''}${links}</div></div>`;
+  }).join('');
+}
+function filterDir() {
+  const q = document.getElementById('dir-search').value.toLowerCase().trim();
+  renderDir(q ? dirData.filter(b => b.name.toLowerCase().includes(q)||b.category.toLowerCase().includes(q)) : dirData);
+}
 
+/* ── Panel ── */
+function openPanel() {
+  hideMedia();
+  document.getElementById('hint').style.opacity = '0';
+  buildCarousel();
+  document.getElementById('panel').classList.add('open');
+}
+function closePanel() { document.getElementById('panel').classList.remove('open'); }
+
+/* ── Strip ── */
+let stripIdx = 0, stripVideos = [], stripMuted = true;
 async function fetchYT(query) {
   try {
     const r = await fetch(`/api/youtube?q=${encodeURIComponent(query)}&maxResults=1`);
-    if (r.ok) { const d = await r.json(); return (d.videos || [])[0] || null; }
+    if (r.ok) { const d = await r.json(); return (d.videos||[])[0]||null; }
   } catch(e) {}
   return null;
 }
-
 function showStrip(idx) {
   const m = STRIP_MONUMENTS[idx];
   const v = stripVideos[idx];
-  const frame = document.getElementById('yt-frame');
-  const label = document.getElementById('yt-label');
-  const vid = v ? v.id : 'HrxX9TBj2zY';
-  frame.src = `https://www.youtube.com/embed/${vid}?autoplay=1&mute=1&loop=1&playlist=${vid}&controls=0&showinfo=0&rel=0&modestbranding=1`;
-  label.textContent = `▶ ${m.name} · ${m.venue} · Click to unmute`;
+  const vid = v ? v.id : 'wn9pZDkd6bo';
+  document.getElementById('yt-frame-strip').src = `https://www.youtube.com/embed/${vid}?autoplay=1&mute=1&loop=1&playlist=${vid}&controls=0&showinfo=0&rel=0&modestbranding=1`;
+  document.getElementById('yt-label').textContent = `▶ ${m.name} · ${m.venue} · Click to unmute`;
   stripMuted = true;
 }
-
 function toggleStripSound() {
-  const frame = document.getElementById('yt-frame');
-  const label = document.getElementById('yt-label');
+  const frame = document.getElementById('yt-frame-strip');
   const m = STRIP_MONUMENTS[stripIdx];
   stripMuted = !stripMuted;
-  frame.src = frame.src.replace(stripMuted ? 'mute=0' : 'mute=1', stripMuted ? 'mute=1' : 'mute=0');
-  label.textContent = stripMuted
+  frame.src = frame.src.replace(stripMuted?'mute=0':'mute=1', stripMuted?'mute=1':'mute=0');
+  document.getElementById('yt-label').textContent = stripMuted
     ? `▶ ${m.name} · ${m.venue} · Click to unmute`
     : `🔊 ${m.name} · Playing — Click to mute`;
 }
-
 async function loadStripVideos() {
   stripVideos = await Promise.all(STRIP_MONUMENTS.map(m => fetchYT(m.query)));
   showStrip(0);
-  setInterval(() => { stripIdx = (stripIdx + 1) % STRIP_MONUMENTS.length; showStrip(stripIdx); }, 12000);
+  setInterval(() => { stripIdx = (stripIdx+1) % STRIP_MONUMENTS.length; showStrip(stripIdx); }, 12000);
 }
 
-function initMap() {
-  const map = new google.maps.Map(document.getElementById('map'), {
-    center:            CENTER,
-    zoom:              17,
-    tilt:              50,
-    heading:           180,
-    mapId:             '96844e6a7bb74a7d5514d3a5',
-    mapTypeControl:    false,
-    streetViewControl: false,
-    fullscreenControl: false,
-    gestureHandling:   'greedy',
+/* ── YT Billboard ── */
+let ytVideos = [], ytIdx = 0;
+function populateBillboard(v) {
+  const bb = document.getElementById('yt-billboard');
+  bb.innerHTML = `<div class="bb-thumb" style="background-image:url(${v.thumb});cursor:pointer" onclick="playInline(0)"><div class="bb-play-wrap"><div class="bb-play-btn">▶</div></div><div class="bb-live"><div class="bb-live-dot"></div>VIDEO</div></div><div class="bb-info"><div class="bb-label">▶ Featured</div><div class="bb-title">${v.title}</div><div class="bb-channel">${v.channel}</div></div>`;
+  bb.style.display = 'block';
+}
+async function addYTMarkers() {
+  const result = await fetchYT('South Mountain Park Phoenix hiking trails');
+  if (result) { ytVideos = [result]; populateBillboard(result); }
+  else {
+    const v = { id:'wn9pZDkd6bo', title:'South Mountain · Sonoran Desert', channel:'Requation', thumb:'https://img.youtube.com/vi/wn9pZDkd6bo/hqdefault.jpg' };
+    ytVideos = [v]; populateBillboard(v);
+  }
+}
+function playInline(i) {
+  const v = ytVideos[i]; if (!v) return;
+  document.getElementById('yt-billboard').innerHTML = `<iframe src="https://www.youtube.com/embed/${v.id}?autoplay=1&rel=0&modestbranding=1" style="width:100%;height:112px;border:none;border-radius:8px" allowfullscreen allow="autoplay"></iframe>`;
+}
+function ytStep(dir) { document.getElementById('yt-frame').src=''; ytIdx=(ytIdx+dir+ytVideos.length)%ytVideos.length; renderYT(); }
+function renderYT() {
+  const v = ytVideos[ytIdx]; if (!v) return;
+  document.getElementById('yt-title').textContent = v.title;
+  document.getElementById('yt-frame').src = `https://www.youtube.com/embed/${v.id}?autoplay=1&rel=0&modestbranding=1`;
+  document.getElementById('yt-counter').textContent = (ytIdx+1)+' / '+ytVideos.length;
+}
+function closeYT() { document.getElementById('yt-frame').src=''; document.getElementById('yt-popup').classList.remove('open'); }
+
+/* ── Radio ── */
+let radioPlaying = false;
+function setRadioState(p) {
+  const btn=document.getElementById('radio-btn'), waves=document.querySelector('.radio-waves');
+  radioPlaying=p;
+  if(p){btn.textContent='■';btn.classList.add('playing');if(waves)waves.classList.add('active');}
+  else{btn.textContent='▶';btn.classList.remove('playing');if(waves)waves.classList.remove('active');}
+}
+function toggleRadio() {
+  const audio=document.getElementById('radio-audio');
+  if(radioPlaying){audio.pause();setRadioState(false);}
+  else{audio.play().then(()=>setRadioState(true)).catch(e=>console.warn('Radio:',e));}
+}
+window.addEventListener('load', () => {
+  const audio=document.getElementById('radio-audio');
+  if(!audio) return;
+  audio.play().then(()=>setRadioState(true)).catch(()=>{
+    const unlock=()=>{if(!radioPlaying)toggleRadio();document.removeEventListener('click',unlock);};
+    document.addEventListener('click',unlock);
+  });
+});
+
+/* ── Hide media ── */
+function hideMedia() {
+  const mc=document.getElementById('media-col'); if(mc)mc.style.display='none';
+  const audio=document.getElementById('radio-audio'); if(audio)audio.pause();
+  const f=document.getElementById('yt-frame'); if(f)f.src='';
+}
+window.addEventListener('pagehide', () => {
+  const audio=document.getElementById('radio-audio');
+  if(audio){audio.pause();audio.src='';}
+  const f=document.getElementById('yt-frame'); if(f)f.src='';
+});
+
+/* ── Modals ── */
+function openModal(id){document.getElementById('modal-'+id).classList.add('active');}
+function closeModal(id){document.getElementById('modal-'+id).classList.remove('active');}
+async function submitContact(e) {
+  e.preventDefault();
+  const btn=document.getElementById('cf-btn'),status=document.getElementById('cf-status');
+  btn.disabled=true;btn.textContent='Sending…';status.textContent='';
+  try {
+    const res=await fetch('/api/contact',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:document.getElementById('cf-name').value,email:document.getElementById('cf-email').value,message:document.getElementById('cf-message').value})});
+    if(res.ok){status.style.color='var(--gold)';status.textContent="Message sent. We'll be in touch.";e.target.reset();}
+    else{status.style.color='#b22234';status.textContent='Something went wrong.';}
+  }catch{status.style.color='#b22234';status.textContent='Network error.';}
+  btn.disabled=false;btn.textContent='Send Message';
+}
+document.querySelectorAll('.modal-overlay').forEach(el=>el.addEventListener('click',e=>{if(e.target===el)el.classList.remove('active');}));
+
+function goHome(){hideMedia();location.href='/';}
+
+/* ── CesiumJS ── */
+Cesium.GoogleMaps.defaultApiKey = 'AIzaSyD7UMA5ILPXv9QK2_gvxPVth30MavRd2WQ';
+
+async function initCesium() {
+  const viewer = new Cesium.Viewer('cesiumContainer', {
+    timeline:false, animation:false, baseLayerPicker:false, geocoder:false,
+    homeButton:false, sceneModePicker:false, navigationHelpButton:false,
+    infoBox:false, selectionIndicator:false, fullscreenButton:false, vrButton:false
   });
 
-  const propEl = document.createElement('div');
-  propEl.className = 'prop-pin';
-  new google.maps.marker.AdvancedMarkerElement({ map, position: CENTER, content: propEl });
-  map.addListener('click', e => { if (e.placeId) e.stop(); });
+  viewer.imageryLayers.removeAll();
+  const tileset = await Cesium.createGooglePhotorealistic3DTileset();
+  viewer.scene.primitives.add(tileset);
 
-  const infoWin = new google.maps.InfoWindow();
-  map.addListener('click', () => infoWin.close());
+  viewer.camera.flyTo({
+    destination: Cesium.Cartesian3.fromDegrees(CENTER.lng, CENTER.lat, 500),
+    orientation: { heading:Cesium.Math.toRadians(190), pitch:Cesium.Math.toRadians(-32), roll:0 },
+    duration: 2
+  });
 
-  function addPOI(place, color, category) {
-    const dot = document.createElement('div');
-    dot.className = 'poi-dot';
-    dot.style.background = color;
-    const mk = new google.maps.marker.AdvancedMarkerElement({
-      map, position: place.geometry.location, title: place.name, content: dot
-    });
-    mk.addListener('click', () => {
-      infoWin.setContent(`<div class="gm-popup">
-        <div class="gm-popup-name">${place.name}</div>
-        <div class="gm-popup-cat">${category}</div>
-      </div>`);
-      infoWin.open({ map, anchor: mk });
-    });
-  }
+  /* DOM overlay pin — gold for Laveen */
+  const pinEl = document.createElement('div');
+  pinEl.className = 'prop-pin';
+  pinEl.style.cssText = 'position:fixed;z-index:10;pointer-events:auto;display:none;';
+  document.body.appendChild(pinEl);
+  pinEl.addEventListener('click', openPanel);
 
-  const svc = new google.maps.places.PlacesService(map);
-  function nearby(opts, fn) {
-    svc.nearbySearch({ location: CENTER, ...opts }, (res, status) => {
-      if (status === google.maps.places.PlacesServiceStatus.OK) fn(res || []);
-    });
-  }
+  const propPos = Cesium.Cartesian3.fromDegrees(CENTER.lng, CENTER.lat, 30);
+  viewer.scene.postRender.addEventListener(() => {
+    const pos = Cesium.SceneTransforms.worldToWindowCoordinates(viewer.scene, propPos);
+    if(pos){pinEl.style.left=(pos.x-19)+'px';pinEl.style.top=(pos.y-19)+'px';pinEl.style.display='block';}
+    else{pinEl.style.display='none';}
+  });
 
-  nearby({ radius: 8000, type: 'grocery_or_supermarket' }, res =>
-    res.filter(p => GROCERY_BRANDS.some(b => p.name.toLowerCase().includes(b)))
-       .forEach(p => addPOI(p, '#4CAF50', 'Grocery'))
-  );
-  nearby({ radius: 8000, type: 'department_store', keyword: 'Target' }, res =>
-    res.filter(p => p.name.toLowerCase().includes('target'))
-       .forEach(p => addPOI(p, '#CC0000', 'Target'))
-  );
-  nearby({ radius: 12000, type: 'hardware_store', keyword: 'Home Depot' }, res =>
-    res.filter(p => p.name.toLowerCase().includes('home depot'))
-       .forEach(p => addPOI(p, '#FF6600', 'Home Depot'))
-  );
-  nearby({ radius: 12000, type: 'hardware_store', keyword: "Lowe's" }, res =>
-    res.filter(p => p.name.toLowerCase().includes('lowe'))
-       .forEach(p => addPOI(p, '#004990', "Lowe's"))
-  );
-  nearby({ radius: 8000, type: 'bank', keyword: 'credit union' }, res =>
-    res.filter(p => p.name.toLowerCase().includes('credit union') || p.name.toLowerCase().includes('desert financial') || p.name.toLowerCase().includes('oneaz'))
-       .forEach(p => addPOI(p, '#2196F3', 'Credit Union'))
-  );
-  nearby({ radius: 12000, type: 'movie_theater' }, res =>
-    res.slice(0, 8).forEach(p => addPOI(p, '#6A1B9A', 'Cinema'))
-  );
-  nearby({ radius: 12000, type: 'museum' }, res =>
-    res.slice(0, 10).forEach(p => addPOI(p, '#9C27B0', 'Museum'))
-  );
-  nearby({ radius: 8000, type: 'park' }, res =>
-    res.slice(0, 10).forEach(p => addPOI(p, '#388E3C', 'Park'))
-  );
-  nearby({ radius: 8000, type: 'gym' }, res =>
-    res.slice(0, 8).forEach(p => addPOI(p, '#F44336', 'Gym'))
-  );
+  const handler = new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas);
+  handler.setInputAction(()=>hideMedia(), Cesium.ScreenSpaceEventType.LEFT_CLICK);
 
   loadStripVideos();
+  addYTMarkers();
 }
-window.initMap = initMap;
-</script>
 
-<script
-  src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD7UMA5ILPXv9QK2_gvxPVth30MavRd2WQ&callback=initMap&v=weekly&libraries=marker,places&map_ids=96844e6a7bb74a7d5514d3a5"
-  async defer>
+initCesium().catch(e => console.error('Cesium init failed:', e));
 </script>
 
 </body>

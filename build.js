@@ -48,8 +48,7 @@ fs.mkdirSync('dist');
 // ── Inject secrets into HTML files ───────────────────────────────
 const HTML_FILES = [
   'gm-landing.html', 'gm-dtla-v1.html', 'map-test.html', 'dtla.html', 'dtla-template.html', 'laveen.html',
-  'lalife.html', 'desertlife.html', 'dashboard.html', 'grid-demo.html',
-  'dashboard-v1.bak.html'
+  'dashboard.html', 'grid-demo.html'
 ];
 HTML_FILES.forEach(f => {
   if (!fs.existsSync(f)) return;
@@ -58,7 +57,7 @@ HTML_FILES.forEach(f => {
 });
 
 // ── Copy redirect stubs (no secrets in these) ─────────────────────
-['dtla', 'laveen', 'lalife', 'desertlife'].forEach(dir => {
+['dtla', 'laveen'].forEach(dir => {
   copyItem(path.join(dir, 'index.html'), path.join('dist', dir, 'index.html'));
 });
 
