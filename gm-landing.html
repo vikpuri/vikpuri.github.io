@@ -319,20 +319,32 @@ async function initCesium() {
   const tileset = await Cesium.createGooglePhotorealistic3DTileset();
   viewer.scene.primitives.add(tileset);
 
-  /* Camera above midpoint of DTLA + Laveen — western US fills frame */
-  viewer.camera.flyTo({
-    destination: Cesium.Cartesian3.fromDegrees(-115.2, 35.5, 280000),
+  /* setView instantly places camera over SW USA — no parabolic arc through space.
+     Then flyTo does a gentle pull-in from the same angle. */
+  viewer.camera.setView({
+    destination: Cesium.Cartesian3.fromDegrees(-115.2, 33.7, 420000),
     orientation: {
       heading: Cesium.Math.toRadians(0),
-      pitch:   Cesium.Math.toRadians(-55),
+      pitch:   Cesium.Math.toRadians(-65),
       roll:    0
-    },
-    duration: 3
+    }
   });
 
-  /* Pins become active after fly completes */
+  setTimeout(() => {
+    viewer.camera.flyTo({
+      destination: Cesium.Cartesian3.fromDegrees(-115.2, 33.7, 260000),
+      orientation: {
+        heading: Cesium.Math.toRadians(0),
+        pitch:   Cesium.Math.toRadians(-65),
+        roll:    0
+      },
+      duration: 3
+    });
+  }, 600);
+
+  /* Pins active after pull-in completes */
   let pinsActive = false;
-  setTimeout(() => { pinsActive = true; }, 3500);
+  setTimeout(() => { pinsActive = true; }, 4200);
 
   /* Build one DOM pin + hover label per property */
   const pinData = PROPS.map(p => {
