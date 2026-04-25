@@ -979,7 +979,7 @@ async function loadEvents(){
   if(eventsLoaded) return;
   document.getElementById('evt-list').innerHTML='<div class="dir-empty">Loading events…</div>';
   try{
-    const r=await fetch('/.netlify/functions/predicthq?lat=34.0422&lng=-118.2637');
+    const r=await fetch('/api/predicthq?lat=34.0422&lng=-118.2637');
     if(!r.ok) throw new Error(r.status);
     const d=await r.json();
     eventsData=d.events||[];
@@ -1042,7 +1042,7 @@ async function submitContact(e){
   const message=document.getElementById('cf-message').value.trim();
   btn.disabled=true;btn.textContent='Sending…';status.style.color='var(--ink-3)';status.textContent='';
   try{
-    const res=await fetch('/.netlify/functions/contact',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,email,message})});
+    const res=await fetch('/api/contact',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,email,message})});
     if(res.ok){status.style.color='var(--gold)';status.textContent='Message sent. We\'ll be in touch.';e.target.reset();}
     else{status.style.color='#b22234';status.textContent='Something went wrong. Please try again.';}
   }catch{status.style.color='#b22234';status.textContent='Network error. Please try again.';}
@@ -1058,7 +1058,7 @@ function populateBillboard(v){
   bb.style.display='block';
 }
 async function fetchYT(q){
-  try{const r=await fetch(`/.netlify/functions/youtube?q=${encodeURIComponent(q)}&maxResults=7`);if(r.ok){const d=await r.json();if((d.videos||[]).length)return d.videos;}}catch(e){}
+  try{const r=await fetch(`/api/youtube?q=${encodeURIComponent(q)}&maxResults=7`);if(r.ok){const d=await r.json();if((d.videos||[]).length)return d.videos;}}catch(e){}
   try{const p=new URLSearchParams({part:'snippet',q,type:'video',maxResults:7,relevanceLanguage:'en',key:'AIzaSyCEQGh-rbZeXKH1pW'+'KIfvLkFRkwyqvAkr0'});const r=await fetch('https://www.googleapis.com/youtube/v3/search?'+p);if(!r.ok)return[];const d=await r.json();return(d.items||[]).map(x=>({id:x.id.videoId,title:x.snippet.title,channel:x.snippet.channelTitle,thumb:x.snippet.thumbnails.high?.url||x.snippet.thumbnails.medium?.url||x.snippet.thumbnails.default?.url}));}catch(e){return[];}
 }
 async function addYTMarkers(){
@@ -1084,7 +1084,7 @@ window.addEventListener('beforeunload',cleanupMedia);
 /* ── SOAPBOX ── */
 const soapboxMarkers=[];
 function loadSoapbox(lat,lng){
-  fetch(`/.netlify/functions/predicthq?lat=${lat}&lng=${lng}`)
+  fetch(`/api/predicthq?lat=${lat}&lng=${lng}`)
   .then(r=>r.json())
   .then(d=>{
     (d.events||[]).forEach(ev=>{
@@ -1122,7 +1122,7 @@ function sendContact(){
   const status=document.getElementById('contact-status');
   if(!name||!phone){status.textContent='Name and phone required.';return}
   status.textContent='Sending…';
-  fetch('/.netlify/functions/twilio',{
+  fetch('/api/twilio',{
     method:'POST',
     headers:{'Content-Type':'application/json'},
     body:JSON.stringify({name,phone,message:msg||'Interested in this location.',subject:contactSubject})

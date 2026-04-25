@@ -518,7 +518,7 @@ function populateBillboard(v){
 }
 async function fetchYT(query){
   try{
-    const r=await fetch(`/.netlify/functions/youtube?q=${encodeURIComponent(query)}&maxResults=7`);
+    const r=await fetch(`/api/youtube?q=${encodeURIComponent(query)}&maxResults=7`);
     if(r.ok){const d=await r.json();if((d.videos||[]).length) return d.videos;}
   }catch(e){}
   try{
@@ -622,7 +622,7 @@ window.addEventListener('beforeunload',cleanupMedia);
 /* ── SOAPBOX ── */
 const soapboxMarkers=[];
 function loadSoapbox(lat,lng){
-  fetch(`/.netlify/functions/predicthq?lat=${lat}&lng=${lng}`)
+  fetch(`/api/predicthq?lat=${lat}&lng=${lng}`)
   .then(r=>r.json())
   .then(d=>{
     (d.events||[]).forEach(ev=>{
@@ -660,7 +660,7 @@ function sendContact(){
   const status=document.getElementById('contact-status');
   if(!name||!phone){status.textContent='Name and phone required.';return}
   status.textContent='Sending…';
-  fetch('/.netlify/functions/twilio',{
+  fetch('/api/twilio',{
     method:'POST',
     headers:{'Content-Type':'application/json'},
     body:JSON.stringify({name,phone,message:msg||'Interested in this location.',subject:contactSubject})

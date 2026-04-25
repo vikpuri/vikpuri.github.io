@@ -1,0 +1,10 @@
+{
+  "buildCommand": "node build.js",
+  "outputDirectory": "dist",
+  "rewrites": [
+    { "source": "/dtla",       "destination": "/dtla.html" },
+    { "source": "/laveen",     "destination": "/laveen.html" },
+    { "source": "/lalife",     "destination": "/lalife.html" },
+    { "source": "/desertlife", "destination": "/desertlife.html" }
+  ]
+}

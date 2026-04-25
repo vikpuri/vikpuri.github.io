@@ -26,6 +26,22 @@ If a change touches the map, Mapbox constructor, or `map.on('load',...)` — **s
 | `/dtla` and `/laveen` | Console (radio+YT) + property photos/videos + tabs (Property, Neighborhood, Directory, Waymo) |
 | `/lalife` and `/desertlife` | Yelp, POIs, RPOIs in larger detail. Console top-left. No property panel |
 
+## Monument / Billboard / YT Marker Rule — Populated Maps Only
+
+**Never place Monument signs, Billboard markers, or YT overlay cards on a map unless that map is already populated with real data (POIs, property pins, or listings from Supabase).**
+
+- A sparse map with a YT card floating in empty space looks broken, not impressive
+- Monument markers are contextual anchors — they need surrounding data to have meaning
+- The landing page (`gm-landing.html`) has 2 state markers only; do NOT add Monuments until it has real POI/property density
+- `/dtla` and `/lalife` qualify: they have Supabase POIs, Redfin RPOIs, and property pins loaded
+- `/laveen` and `/desertlife` qualify once Supabase AZ data is loaded
+- When adding a new map page, confirm `allData.length > 0` (or equivalent) before enabling Monuments
+
+**Checklist before adding any YT/Billboard/Monument to a page:**
+1. Does the page load Supabase or equivalent live data? ✓
+2. Are there at least property pins visible on load? ✓
+3. Is the YT content from the official channel for that venue/location? ✓
+
 ---
 
 ## Console (Radio + YT Billboard) Positions
@@ -90,6 +106,36 @@ map.on('load', () => {
 
 ---
 
+## Map Type Rule — HYBRID Light on All Pages
+
+Every map page (landing, parent, child) uses Google Maps `mapTypeId: 'hybrid'` with daytime/light settings.
+- **No dark themes, no dusk preset on Google Maps pages** (dusk was Mapbox only — Mapbox is being phased out)
+- When a Mapbox page is migrated to Google Maps, the constructor must include `mapTypeId: 'hybrid'`
+- Map ID `96844e6a7bb74a7d5514d3a5` is the Requation map ID — use it on every Google Maps page
+- Light preset = satellite imagery (inherently bright/daytime), vector labels in cream/white, no dark color schemes
+
+---
+
+## Hyperlink Rule — Every Map Object Gets a URL
+
+Every named object added to any Requation map must have a corresponding URL slug.
+
+**Format:** `/{page}-{object-slug}` — e.g.:
+- Neighborhood Box in /dtla → `/dtla-neighborhood-box`
+- Whole Foods billboard in /lalife → `/lalife-whole-foods`
+- South Mountain Park in /laveen → `/laveen-south-mountain`
+- Grand Performances in /dtla → `/dtla-grand-performances`
+
+**Implementation:**
+1. When creating a marker/card for any object, add `data-slug` attribute: `el.dataset.slug = 'dtla-neighborhood-box'`
+2. Clicking the object navigates to `/{slug}` — use `window.location.href = '/' + el.dataset.slug`
+3. Create a stub `/{page}-index` page that lists all objects on that page with links
+4. Object URL pages can start as stubs (`<meta http-equiv="refresh">` redirect back to parent + panel open)
+
+**Why this matters:** SEO, shareable links, AR/spatial anchoring (each object needs a canonical URL), and the open-source directory vision depends on every object being addressable.
+
+---
+
 ## Things That Must Never Come Back
 
 - `#cat-bar` / `.cat-pill` CSS and HTML on lalife/desertlife — **removed by design**, do not re-add
@@ -98,12 +144,16 @@ map.on('load', () => {
 
 ---
 
-## Build Pipeline
+## Build Pipeline (Vercel)
 
-- Source: `dtla.html`, `laveen.html`, `lalife.html`, `desertlife.html`, `index.html`
+- Source: `dtla.html`, `laveen.html`, `lalife.html`, `desertlife.html`, `index.html`, `gm-landing.html`
 - Build: `node build.js` → outputs to `dist/`
-- Deploy: Netlify runs `node build.js` automatically on push to `master`
-- The build is a pass-through (key already embedded) — it just copies files
+- API functions: `api/*.js` — served at `/api/functionname` (NOT `/.netlify/functions/`)
+- Deploy: Vercel runs `node build.js` on push to `master`, serves `dist/`, routes `/api/*` to functions
+- Config: `vercel.json` (replaces `netlify.toml`)
+- Environment variables: set in Vercel dashboard → Settings → Environment Variables
+  - TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_PHONE, ADMIN_PHONE
+  - YOUTUBE_API_KEY, PREDICTHQ_KEY, YELP_API_KEY, EVENTBRITE_TOKEN, RESEND_API_KEY
 
 ---
 

@@ -975,7 +975,7 @@ async function submitContact(e){
   const message=document.getElementById('cf-message').value.trim();
   btn.disabled=true;btn.textContent='Sending…';status.style.color='var(--ink-3)';status.textContent='';
   try{
-    const res=await fetch('/.netlify/functions/contact',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,email,message})});
+    const res=await fetch('/api/contact',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,email,message})});
     if(res.ok){status.style.color='var(--gold)';status.textContent='Message sent. We\'ll be in touch.';e.target.reset();}
     else{status.style.color='#b22234';status.textContent='Something went wrong. Please try again.';}
   }catch{status.style.color='#b22234';status.textContent='Network error. Please try again.';}

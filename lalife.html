@@ -113,6 +113,26 @@
     .property-marker.homes-active{width:54px;height:54px;box-shadow:0 0 52px 10px rgba(178,34,34,.95)}
     .property-marker.homes-active::before{inset:-22px}
 
+    /* ── BILLBOARD — 210×118 — white marble gloss ── */
+    .bb-marker{
+      width:210px;height:118px;cursor:pointer;
+      position:relative;overflow:hidden;
+      background:linear-gradient(155deg,rgba(255,255,255,0.97) 0%,rgba(250,248,244,0.93) 100%);
+      border:1.5px solid rgba(255,255,255,0.9);
+      box-shadow:0 4px 24px rgba(0,0,0,0.14),0 1px 0 rgba(255,255,255,0.95) inset,0 0 0 0.5px rgba(201,168,76,0.3);
+      backdrop-filter:blur(16px);
+      transition:transform .2s,box-shadow .2s;
+    }
+    .bb-marker:hover{transform:scale(1.03);box-shadow:0 8px 32px rgba(0,0,0,0.18),0 1px 0 rgba(255,255,255,0.95) inset,0 0 0 1px rgba(201,168,76,0.5)}
+    /* Gloss sheen */
+    .bb-marker::before{content:'';position:absolute;top:0;left:0;right:0;height:44%;background:linear-gradient(180deg,rgba(255,255,255,0.52) 0%,transparent 100%);pointer-events:none;z-index:2}
+    .bb-footer{position:absolute;bottom:0;left:0;right:0;padding:6px 9px;z-index:3}
+    .bb-tag{font-size:.48rem;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin-bottom:2px}
+    .bb-name{font-family:'Playfair Display',serif;font-size:.78rem;font-weight:500;color:#2C2A26;line-height:1.2}
+    .bb-sub{font-size:.56rem;color:#6B6058;margin-top:2px}
+    .bb-yt{position:absolute;top:0;left:0;right:0;height:72px;overflow:hidden}
+    .bb-yt iframe{width:100%;height:100%;border:none;pointer-events:none}
+
     /* ── RPOI LISTING PANEL ── */
     #rpoi-panel{
       position:fixed;bottom:0;left:0;right:0;z-index:200;
@@ -355,6 +375,23 @@ map.on('load',()=>{
   loadCAProperties();
   addYTMarkers();
   loadSoapbox(34.0422,-118.2637);
+
+  // ── BILLBOARD TEST — Whole Foods × 801 S Grand (grid A3) ──
+  (function(){
+    const el = document.createElement('div');
+    el.className = 'bb-marker';
+    el.innerHTML =
+      '<div class="bb-yt"><iframe src="https://www.youtube.com/embed/HrxX9TBj2zY?autoplay=1&mute=1&loop=1&playlist=HrxX9TBj2zY&controls=0&modestbranding=1" allow="autoplay"></iframe></div>' +
+      '<div class="bb-footer">' +
+        '<div class="bb-tag">Billboard · For Sale</div>' +
+        '<div class="bb-name">801 S Grand · Whole Foods Block</div>' +
+        '<div class="bb-sub">25 ft · Walk Score 98 · FSBO</div>' +
+      '</div>';
+    el.addEventListener('click', () => window.location.href = '/dtla');
+    new mapboxgl.Marker({ element: el, anchor: 'bottom' })
+      .setLngLat([-118.2639, 34.0415])
+      .addTo(map);
+  })();
   map.on('click', ()=>hideMedia());
 });
 
@@ -487,7 +524,7 @@ function populateBillboard(v){
 }
 async function fetchYT(query){
   try{
-    const r=await fetch(`/.netlify/functions/youtube?q=${encodeURIComponent(query)}&maxResults=7`);
+    const r=await fetch(`/api/youtube?q=${encodeURIComponent(query)}&maxResults=7`);
     if(r.ok){const d=await r.json();if((d.videos||[]).length) return d.videos;}
   }catch(e){}
   // Direct fallback if Netlify function unavailable
@@ -592,7 +629,7 @@ window.addEventListener('beforeunload',cleanupMedia);
 /* ── SOAPBOX ── */
 const soapboxMarkers=[];
 function loadSoapbox(lat,lng){
-  fetch(`/.netlify/functions/predicthq?lat=${lat}&lng=${lng}`)
+  fetch(`/api/predicthq?lat=${lat}&lng=${lng}`)
   .then(r=>r.json())
   .then(d=>{
     (d.events||[]).forEach(ev=>{
@@ -630,7 +667,7 @@ function sendContact(){
   const status=document.getElementById('contact-status');
   if(!name||!phone){status.textContent='Name and phone required.';return}
   status.textContent='Sending…';
-  fetch('/.netlify/functions/twilio',{
+  fetch('/api/twilio',{
     method:'POST',
     headers:{'Content-Type':'application/json'},
     body:JSON.stringify({name,phone,message:msg||'Interested in this location.',subject:contactSubject})
