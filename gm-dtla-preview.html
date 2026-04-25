@@ -162,35 +162,42 @@
 </div>
 
 <script>
+(g=>{var h,a,k,p="The Google Maps JavaScript API",c="google",l="importLibrary",q="__ib__",m=document,b=window;b=b[c]||(b[c]={});var d=b.maps||(b.maps={}),r=new Set,e=new URLSearchParams,u=()=>h||(h=new Promise(async(f,n)=>{await (a=m.createElement("script"));e.set("libraries",[...r]+"");for(k in g)e.set(k.replace(/[A-Z]/g,t=>"_"+t[0].toLowerCase()),g[k]);e.set("callback",c+".maps."+q);a.src=`https://maps.googleapis.com/maps/api/js?`+e;p in b?f():a.onerror=()=>n(Error(p+" could not load."));a.nonce=m.querySelector("script[nonce]")?.nonce||"";m.head.appendChild(a)}));d[q]?Promise.resolve():new Promise(f=>r.add(f)).then(()=>h||u())})({
+  key: "AIzaSyD7UMA5ILPXv9QK2_gvxPVth30MavRd2WQ",
+  v:   "weekly",
+  mapIds: ["96844e6a7bb74a7d5514d3a5"]
+});
+</script>
+
+<script>
 const PROPERTY = { lat: 34.0422, lng: -118.2637, address: '801 S Grand Ave, DTLA' };
 
 const CAT_COLOR = {
-  grocery_or_supermarket:'#4CAF50', supermarket:'#4CAF50',
-  cafe:'#8B6E4E', bakery:'#FF9800',
-  gym:'#F44336', spa:'#E91E63',
-  restaurant:'#00CED1', food:'#00CED1', bar:'#1976D2',
+  restaurant:'#00CED1', cafe:'#8B6E4E', bakery:'#FF9800',
+  bar:'#1976D2', food_and_drink:'#00CED1',
+  gym:'#F44336', fitness_center:'#F44336', spa:'#E91E63',
+  grocery_store:'#4CAF50', supermarket:'#4CAF50',
   museum:'#9C27B0', art_gallery:'#9C27B0', library:'#7B1FA2',
-  park:'#388E3C', transit_station:'#0288D1',
-  default:'#9E9087'
+  park:'#388E3C', default:'#9E9087'
 };
-function catColor(types){ for(const t of(types||[])) if(CAT_COLOR[t]) return CAT_COLOR[t]; return CAT_COLOR.default; }
-function catLabel(types){
-  const m={grocery_or_supermarket:'Grocery',supermarket:'Grocery',cafe:'Cafe',bakery:'Bakery',
-    restaurant:'Restaurant',gym:'Gym',spa:'Spa',bar:'Bar',food:'Food',
-    museum:'Museum',art_gallery:'Gallery',library:'Library',park:'Park',transit_station:'Transit'};
-  for(const t of(types||[])) if(m[t]) return m[t];
-  return (types||['Place'])[0].replace(/_/g,' ');
+function catColor(t){ return CAT_COLOR[t] || CAT_COLOR.default; }
+function catLabel(t){
+  const m={restaurant:'Restaurant',cafe:'Cafe',bakery:'Bakery',bar:'Bar',
+    gym:'Gym',fitness_center:'Fitness',spa:'Spa',grocery_store:'Grocery',
+    supermarket:'Grocery',museum:'Museum',art_gallery:'Gallery',
+    library:'Library',park:'Park'};
+  return m[t] || (t||'Place').replace(/_/g,' ');
 }
 
 const MONUMENTS = [
-  { name:'LA Convention Center', venue:'LACC',                         lat:34.0403, lng:-118.2696, events:'https://www.lacclink.com/events',              query:'LA Convention Center events' },
-  { name:'LA Live',              venue:'Entertainment District',        lat:34.0430, lng:-118.2673, events:'https://www.lalive.com/events',                query:'LA Live events concerts' },
-  { name:'The Broad',            venue:'Contemporary Art',              lat:34.0545, lng:-118.2503, events:'https://www.thebroad.org/visit',               query:'The Broad museum Los Angeles' },
-  { name:'MOCA Grand Ave',       venue:'Museum of Contemporary Art',    lat:34.0520, lng:-118.2505, events:'https://www.moca.org/visit',                   query:'MOCA Los Angeles museum' },
-  { name:'Central Library',      venue:'LA Public Library',             lat:34.0447, lng:-118.2493, events:'https://www.lapl.org/branches/central-library',query:'Los Angeles Central Library events' },
-  { name:'Union Station',        venue:'Historic Transit Hub',          lat:34.0562, lng:-118.2365, events:'https://www.unionstationla.com',               query:'LA Union Station' },
-  { name:'Olvera Street',        venue:'El Pueblo Historic District',   lat:34.0575, lng:-118.2380, events:'https://olvera-street.com/events',             query:'Olvera Street Los Angeles festivals' },
-  { name:'Grand Performances',   venue:'California Plaza · Free Concerts', lat:34.0525, lng:-118.2517, events:'https://grandperformances.org/calendar',   query:'Grand Performances Los Angeles concerts' }
+  { name:'LA Convention Center', venue:'LACC',                            lat:34.0403, lng:-118.2696, events:'https://www.lacclink.com/events',               query:'LA Convention Center events' },
+  { name:'LA Live',              venue:'Entertainment District',           lat:34.0430, lng:-118.2673, events:'https://www.lalive.com/events',                 query:'LA Live events concerts' },
+  { name:'The Broad',            venue:'Contemporary Art',                 lat:34.0545, lng:-118.2503, events:'https://www.thebroad.org/visit',                query:'The Broad museum Los Angeles' },
+  { name:'MOCA Grand Ave',       venue:'Museum of Contemporary Art',       lat:34.0520, lng:-118.2505, events:'https://www.moca.org/visit',                    query:'MOCA Los Angeles museum' },
+  { name:'Central Library',      venue:'LA Public Library',                lat:34.0447, lng:-118.2493, events:'https://www.lapl.org/branches/central-library', query:'Los Angeles Central Library events' },
+  { name:'Union Station',        venue:'Historic Transit Hub',             lat:34.0562, lng:-118.2365, events:'https://www.unionstationla.com',                query:'LA Union Station' },
+  { name:'Olvera Street',        venue:'El Pueblo Historic District',      lat:34.0575, lng:-118.2380, events:'https://olvera-street.com/events',              query:'Olvera Street Los Angeles festivals' },
+  { name:'Grand Performances',   venue:'California Plaza · Free Concerts', lat:34.0525, lng:-118.2517, events:'https://grandperformances.org/calendar',        query:'Grand Performances Los Angeles concerts' }
 ];
 
 async function fetchYT(query){
@@ -219,14 +226,17 @@ function makeMonument(m, video){
       </div>
     </div>`;
   el.addEventListener('click', () => {
-    const id = video ? video.id : 'HrxX9TBj2zY';
-    window.open('https://www.youtube.com/watch?v='+id, '_blank');
+    window.open('https://www.youtube.com/watch?v='+(video?video.id:'HrxX9TBj2zY'), '_blank');
   });
   return el;
 }
 
-function initMap(){
-  const map = new google.maps.Map(document.getElementById('map'), {
+async function initMap(){
+  const { Map, InfoWindow }        = await google.maps.importLibrary("maps");
+  const { AdvancedMarkerElement }  = await google.maps.importLibrary("marker");
+  const { Place, SearchNearbyRankPreference } = await google.maps.importLibrary("places");
+
+  const map = new Map(document.getElementById('map'), {
     center:            { lat: PROPERTY.lat, lng: PROPERTY.lng },
     zoom:              15,
     tilt:              52,
@@ -241,44 +251,45 @@ function initMap(){
   /* ── Property pin ── */
   const propEl = document.createElement('div');
   propEl.className = 'prop-pin';
-  new google.maps.marker.AdvancedMarkerElement({
+  new AdvancedMarkerElement({
     map, position: { lat: PROPERTY.lat, lng: PROPERTY.lng },
     title: PROPERTY.address, content: propEl
   });
 
-  /* ── Places POI dots ── */
-  const infoWin = new google.maps.InfoWindow();
-  const service = new google.maps.places.PlacesService(map);
-  ['restaurant','cafe','gym','grocery_or_supermarket','museum','bar','bakery','park'].forEach(type => {
-    service.nearbySearch(
-      { location: { lat: PROPERTY.lat, lng: PROPERTY.lng }, radius: 900, type },
-      (results, status) => {
-        if(status !== google.maps.places.PlacesServiceStatus.OK) return;
-        (results||[]).slice(0,12).forEach(p => {
-          const dot = document.createElement('div');
-          dot.className = 'poi-dot';
-          dot.style.background = catColor(p.types);
-          const mk = new google.maps.marker.AdvancedMarkerElement({
-            map, position: p.geometry.location, title: p.name, content: dot
-          });
-          mk.addListener('click', () => {
-            const stars = p.rating ? '★'.repeat(Math.round(p.rating))+' '+p.rating.toFixed(1) : '';
-            infoWin.setContent(`<div class="gm-popup">
-              <div class="gm-popup-name">${p.name}</div>
-              <div class="gm-popup-cat">${catLabel(p.types)}</div>
-              ${stars?`<div class="gm-popup-rating">${stars}</div>`:''}
-            </div>`);
-            infoWin.open({ map, anchor: mk });
-          });
-        });
-      }
-    );
-  });
+  /* ── Places API (New) — nearby POI dots ── */
+  const infoWin = new InfoWindow();
+  try {
+    const { places } = await Place.searchNearby({
+      fields: ['displayName','location','rating','primaryType'],
+      locationRestriction: {
+        center: { lat: PROPERTY.lat, lng: PROPERTY.lng },
+        radius: 900,
+      },
+      includedTypes: ['restaurant','cafe','gym','grocery_store','museum','bar','bakery','park'],
+      maxResultCount: 20,
+      rankPreference: SearchNearbyRankPreference.POPULARITY,
+    });
+    places.forEach(p => {
+      const dot = document.createElement('div');
+      dot.className = 'poi-dot';
+      dot.style.background = catColor(p.primaryType);
+      const mk = new AdvancedMarkerElement({ map, position: p.location, title: p.displayName, content: dot });
+      mk.addListener('click', () => {
+        const stars = p.rating ? '★'.repeat(Math.round(p.rating))+' '+p.rating.toFixed(1) : '';
+        infoWin.setContent(`<div class="gm-popup">
+          <div class="gm-popup-name">${p.displayName}</div>
+          <div class="gm-popup-cat">${catLabel(p.primaryType)}</div>
+          ${stars?`<div class="gm-popup-rating">${stars}</div>`:''}
+        </div>`);
+        infoWin.open({ map, anchor: mk });
+      });
+    });
+  } catch(e){ console.warn('Places:', e); }
 
   /* ── Monument markers ── */
   Promise.all(MONUMENTS.map(m => fetchYT(m.query))).then(videos => {
     MONUMENTS.forEach((m, i) => {
-      new google.maps.marker.AdvancedMarkerElement({
+      new AdvancedMarkerElement({
         map, position: { lat: m.lat, lng: m.lng },
         title: m.name, content: makeMonument(m, videos[i])
       });
@@ -287,12 +298,7 @@ function initMap(){
 
   map.addListener('click', () => infoWin.close());
 }
-window.initMap = initMap;
-</script>
-
-<script
-  src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD7UMA5ILPXv9QK2_gvxPVth30MavRd2WQ&callback=initMap&v=weekly&libraries=marker,places&map_ids=96844e6a7bb74a7d5514d3a5"
-  async defer>
+initMap();
 </script>
 
 </body>
