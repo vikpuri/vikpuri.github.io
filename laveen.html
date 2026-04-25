@@ -280,7 +280,7 @@
       <text x="56" y="88" font-family="Raleway,Arial,sans-serif" font-size="92" font-weight="600" fill="#4F6FB8">Σ</text>
       <text x="122" y="88" font-family="Raleway,Arial,sans-serif" font-size="24" font-weight="600" font-style="italic" fill="#D4A843" opacity="0.8" filter="url(#gb)" letter-spacing="2">quation</text>
     </svg>
-    <span class="logo-addr">11403 S 27th Dr · Laveen · Arizona</span>
+    <span class="logo-addr" onclick="event.stopPropagation();openPanel();" style="cursor:pointer">11403 S 27th Dr · Laveen · Arizona</span>
   </div>
   <nav>
     <button onclick="goHome()">Home</button>
@@ -336,7 +336,8 @@
           <div class="stat-card"><div class="stat-label">Size</div><div class="stat-value" style="font-size:1rem">5,400 SF</div></div>
         </div>
         <div class="section-title">About This Property</div>
-        <p class="section-text">4.4 acres in Laveen — one of the last large-lot parcels inside a major metro, minutes from South Mountain's 16,000 acres of preserved Sonoran Desert. Solar-powered farmhouse, 5,400 sqft, 4 BD / 4.5 BA. Loop 202 access. Sky Harbor 20 minutes. A property that cannot be replicated.</p>
+        <p class="section-text">Four point four acres at the edge of Phoenix — where the saguaro begins and the city grid ends. South Mountain's 16,000-acre Sonoran Desert preserve rises at the back fence. Three minutes to Loop 202. Twenty minutes to Sky Harbor. Twenty-five to Chase Field. Twelve to the nearest Banner Health ER.</p>
+        <p class="section-text" style="margin-top:10px">11403 S 27th Dr — 4 BD / 4.5 BA, 5,400 sqft, fully solar, on 4.4 acres the Phoenix metro cannot replicate. The grid stopped at the fence line. The desert began here. The land remained.</p>
         <div class="section-title">Market Tags</div>
         <div class="tag-list">
           <span class="tag">Laveen AZ</span><span class="tag">Urban Farmhouse</span><span class="tag">4.4 Acres</span>
@@ -465,11 +466,17 @@ const PROP = {
   ],
   videos: [
     {id:'wn9pZDkd6bo',title:'South Mountain · Sonoran Desert'},
-    {id:'JmSbKXsZfB0',title:'Phoenix from Above — Aerial'},
-    {id:'vVX-PrBRtTY',title:'Arizona Farmhouse Life'},
+    {id:'JmSbKXsZfB0',title:'Phoenix Metro — Aerial 4K'},
+    {id:'vVX-PrBRtTY',title:'Arizona Farmhouse · Desert Modern'},
     {id:'Hs8aCPuEXec',title:'Laveen · Loop 202 Corridor'},
-    {id:'5-0KkO9CJPE',title:'South Mountain Sunrise'},
-    {id:'sU1NmE_Bu6I',title:'Desert Living · Requation AZ'}
+    {id:'5-0KkO9CJPE',title:'South Mountain — Golden Hour'},
+    {id:'sU1NmE_Bu6I',title:'Desert Living · Requation AZ'},
+    {id:'8_WJP4lj4BA',title:'Phoenix Skyline — City of Tomorrow'},
+    {id:'k3Th4sELfn0',title:'Arizona Luxury — Desert Estate'},
+    {id:'oH3JefYb6YM',title:'Phoenix Urban Farm'},
+    {id:'Ny_5OMGToC4',title:'Arizona Dream · Open Skies'},
+    {id:'hrPKYsoz_0U',title:'Monsoon at South Mountain'},
+    {id:'M7MY9zNWY50',title:'Desert Light — Laveen'}
   ]
 };
 
