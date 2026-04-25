@@ -63,52 +63,64 @@
     }
     .poi-dot:hover { transform: scale(1.6); }
 
-    /* ── Monument card 280×158 ── */
-    .monument {
-      width: 280px; height: 158px; position: relative; overflow: hidden; cursor: pointer;
+    /* ── YT monument strip — fixed full-width under header ── */
+    #yt-strip {
+      position: fixed; top: 60px; left: 0; right: 0;
+      height: 90px; z-index: 90;
+      background: #111; overflow: hidden;
+      border-bottom: 1px solid rgba(255,255,255,0.15);
+    }
+    #yt-strip::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(180deg, rgba(255,255,255,0.12) 0%, transparent 55%);
+      pointer-events: none; z-index: 3;
+    }
+    #yt-strip iframe {
+      position: absolute;
+      width: 104vw; height: calc(104vw * 9 / 16);
+      top: 50%; left: -2vw;
+      transform: translateY(-50%);
+      border: none; pointer-events: none;
+    }
+    #yt-overlay {
+      position: absolute; inset: 0;
+      background: linear-gradient(to right, rgba(245,240,232,0.25) 0%, transparent 15%, transparent 85%, rgba(245,240,232,0.25) 100%);
+      cursor: pointer; z-index: 2;
+    }
+    #yt-label {
+      position: absolute; bottom: 7px; left: 16px;
+      font-family: 'DM Mono', monospace;
+      font-size: .44rem; letter-spacing: .14em; text-transform: uppercase;
+      color: rgba(255,255,255,0.75); z-index: 4;
+    }
+
+    /* ── Property card — fixed bottom-left ── */
+    #prop-card {
+      position: fixed; bottom: 20px; left: 20px; z-index: 85;
+      width: 260px; overflow: hidden; border-radius: 4px;
       background: linear-gradient(155deg, rgba(255,255,255,0.97) 0%, rgba(250,248,244,0.93) 100%);
-      border: 1.5px solid rgba(255,255,255,0.92);
-      box-shadow: 0 6px 28px rgba(0,0,0,0.13), 0 1px 0 rgba(255,255,255,0.95) inset, 0 0 0 0.5px rgba(201,168,76,0.3);
-      backdrop-filter: blur(18px); border-radius: 4px;
-      transform: translateY(-100%) translateY(-18px);
-      transition: box-shadow .2s, transform .15s;
+      border: 1.5px solid rgba(255,255,255,0.9);
+      box-shadow: 0 6px 28px rgba(0,0,0,0.13), 0 1px 0 rgba(255,255,255,0.95) inset, 0 0 0 0.5px rgba(201,168,76,0.25);
+      backdrop-filter: blur(16px);
     }
-    .monument:hover {
-      box-shadow: 0 12px 40px rgba(0,0,0,0.18), 0 1px 0 rgba(255,255,255,0.95) inset, 0 0 0 1px rgba(201,168,76,0.55);
-      transform: translateY(-100%) translateY(-24px);
+    #prop-photo {
+      width: 100%; height: 138px; overflow: hidden; background: #111;
+      position: relative; cursor: pointer;
     }
-    .monument::before {
-      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 46%;
-      background: linear-gradient(180deg, rgba(255,255,255,0.52) 0%, transparent 100%);
-      pointer-events: none; z-index: 4;
+    #prop-photo img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .3s; }
+    #prop-photo:hover img { transform: scale(1.04); }
+    #prop-photo-nav {
+      position: absolute; bottom: 7px; right: 8px; z-index: 2;
+      background: rgba(0,0,0,0.52); color: #fff;
+      font-family: 'DM Mono', monospace; font-size: .38rem; letter-spacing: .1em;
+      padding: 3px 7px; border-radius: 2px;
     }
-    .mn-yt { position: absolute; top: 0; left: 0; right: 0; height: 100px; overflow: hidden; background: #111; }
-    .mn-yt img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .3s; }
-    .monument:hover .mn-yt img { transform: scale(1.04); }
-    .mn-play {
-      position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
-      background: rgba(0,0,0,0.1); z-index: 2;
-    }
-    .mn-play-btn {
-      width: 30px; height: 30px; background: rgba(255,0,0,0.85); border-radius: 6px;
-      display: flex; align-items: center; justify-content: center;
-      color: #fff; font-size: 12px; box-shadow: 0 2px 10px rgba(255,0,0,0.4);
-    }
-    .mn-badge {
-      position: absolute; top: 7px; left: 8px; z-index: 3;
-      background: rgba(201,168,76,0.9); color: #2C2A26;
-      font-family: 'DM Mono', monospace; font-size: .38rem; letter-spacing: .13em;
-      text-transform: uppercase; padding: 2px 6px; border-radius: 2px;
-    }
-    .mn-info { position: absolute; bottom: 0; left: 0; right: 0; padding: 6px 10px 8px; z-index: 3; }
-    .mn-venue { font-size: .4rem; letter-spacing: .16em; text-transform: uppercase; color: var(--gold); margin-bottom: 2px; }
-    .mn-name  { font-family: 'Source Serif 4', serif; font-size: .73rem; font-weight: 600; color: var(--text); line-height: 1.2; margin-bottom: 4px; }
-    .mn-events-link {
-      font-family: 'DM Mono', monospace; font-size: .44rem; letter-spacing: .1em;
-      text-transform: uppercase; color: var(--text-muted); text-decoration: none;
-      border-bottom: 1px solid var(--sand); padding-bottom: 1px; transition: color .2s;
-    }
-    .mn-events-link:hover { color: var(--gold); }
+    #prop-info { padding: 9px 13px 12px; }
+    .pi-tag   { font-size: .38rem; letter-spacing: .16em; text-transform: uppercase; color: var(--gold); margin-bottom: 3px; }
+    .pi-name  { font-family: 'Source Serif 4', serif; font-size: .78rem; font-weight: 600; color: var(--text); line-height: 1.2; margin-bottom: 4px; }
+    .pi-meta  { font-family: 'DM Mono', monospace; font-size: .44rem; color: var(--text-muted); letter-spacing: .04em; line-height: 1.5; }
+    .pi-price { font-family: 'Source Serif 4', serif; font-size: .9rem; font-weight: 600; color: var(--text); margin-top: 5px; }
 
     /* ── Info popup ── */
     .gm-popup {
@@ -131,7 +143,7 @@
       <text x="56" y="88" font-family="Raleway,Arial,sans-serif" font-size="92" font-weight="600" fill="#4F6FB8">Σ</text>
       <text x="122" y="88" font-family="Raleway,Arial,sans-serif" font-size="24" font-weight="600" font-style="italic" fill="#D4A843" opacity="0.8" filter="url(#gb)" letter-spacing="2">quation</text>
     </svg>
-    <span style="font-family:'DM Mono',monospace;font-size:.52rem;letter-spacing:.14em;text-transform:uppercase;color:var(--text-muted);border-left:1px solid var(--sand);padding-left:12px;margin-left:4px">South Park · DTLA</span>
+    <span style="font-family:'DM Mono',monospace;font-size:.52rem;letter-spacing:.14em;text-transform:uppercase;color:var(--text-muted);border-left:1px solid var(--sand);padding-left:12px;margin-left:4px">801 S Grand Ave · South Park · DTLA</span>
   </div>
   <nav>
     <button onclick="location.href='/'">Home</button>
@@ -140,7 +152,29 @@
   </nav>
 </header>
 
+<div id="yt-strip">
+  <iframe id="yt-frame"
+    src="https://www.youtube.com/embed/HrxX9TBj2zY?autoplay=1&mute=1&loop=1&playlist=HrxX9TBj2zY&controls=0&showinfo=0&rel=0&modestbranding=1"
+    allow="autoplay; encrypted-media" allowfullscreen>
+  </iframe>
+  <div id="yt-overlay" onclick="toggleStripSound()"></div>
+  <div id="yt-label">▶ Loading monuments...</div>
+</div>
+
 <div id="map"></div>
+
+<div id="prop-card">
+  <div id="prop-photo" onclick="nextPhoto()">
+    <img id="prop-img" src="https://i.imgur.com/GSbSrYM.jpeg" alt="801 S Grand Ave, Unit 1612">
+    <div id="prop-photo-nav">1 / 24 · Tap to browse</div>
+  </div>
+  <div id="prop-info">
+    <div class="pi-tag">For Sale By Owner · South Park DTLA</div>
+    <div class="pi-name">801 S Grand Ave, Unit 1612</div>
+    <div class="pi-meta">2 BD · 2 BA · 1,300 sqft · 16th Floor<br>Walk Score 98 · Whole Foods 25 ft</div>
+    <div class="pi-price">$885,000</div>
+  </div>
+</div>
 
 <div id="legend">
   <div class="leg-title">Map Key</div>
@@ -157,21 +191,39 @@
 </div>
 
 <script>
-/* 8th & Grand intersection — confirmed address */
-const CENTER = { lat: 34.0430, lng: -118.2641 };
+const CENTER = { lat: 34.0422, lng: -118.2637 };
+
+const PROP_PHOTOS = [
+  'https://i.imgur.com/GSbSrYM.jpeg',
+  'https://i.imgur.com/YIN8O41.jpeg','https://i.imgur.com/C2uei3w.jpeg','https://i.imgur.com/yhnjPo6.jpeg',
+  'https://i.imgur.com/JQsQZmA.jpeg','https://i.imgur.com/N4s3BiK.jpeg','https://i.imgur.com/NKGvYiS.jpeg',
+  'https://i.imgur.com/uSjnr0A.jpeg','https://i.imgur.com/F71ADpi.jpeg','https://i.imgur.com/HBNlkj8.jpeg',
+  'https://i.imgur.com/PCwZVOS.jpeg','https://i.imgur.com/WpmEw8f.jpeg','https://i.imgur.com/ChMBKSr.jpeg',
+  'https://i.imgur.com/sofwRew.jpeg','https://i.imgur.com/jfOae1A.jpeg','https://i.imgur.com/cLSYiDl.jpeg',
+  'https://i.imgur.com/4idl4U9.jpeg','https://i.imgur.com/fl1ZFd6.jpeg','https://i.imgur.com/tbFhHcl.jpeg',
+  'https://i.imgur.com/UHJ2hM2.jpeg','https://i.imgur.com/3rFddwE.jpeg','https://i.imgur.com/yvAxOaD.jpeg',
+  'https://i.imgur.com/yXh2Ywf.jpeg','https://i.imgur.com/D2GRI06.jpeg'
+];
+let photoIdx = 0;
+function nextPhoto() {
+  photoIdx = (photoIdx + 1) % PROP_PHOTOS.length;
+  document.getElementById('prop-img').src = PROP_PHOTOS[photoIdx];
+  document.getElementById('prop-photo-nav').textContent = `${photoIdx + 1} / ${PROP_PHOTOS.length} · Tap to browse`;
+}
 
 const GROCERY_BRANDS = ['whole foods','trader joe',"ralph's",'ralphs','vons','pavilion','albertson','sprouts','erewhon'];
 
-const MONUMENTS = [
-  { name:'LA Convention Center', venue:'LACC',                            lat:34.0403, lng:-118.2696, events:'https://www.lacclink.com/events',               query:'LA Convention Center events' },
-  { name:'LA Live',              venue:'Entertainment District',           lat:34.0430, lng:-118.2673, events:'https://www.lalive.com/events',                 query:'LA Live events concerts' },
-  { name:'The Broad',            venue:'Contemporary Art',                 lat:34.0545, lng:-118.2503, events:'https://www.thebroad.org/visit',                query:'The Broad museum Los Angeles' },
-  { name:'MOCA Grand Ave',       venue:'Museum of Contemporary Art',       lat:34.0520, lng:-118.2505, events:'https://www.moca.org/visit',                    query:'MOCA Los Angeles museum' },
-  { name:'Central Library',      venue:'LA Public Library',                lat:34.0447, lng:-118.2493, events:'https://www.lapl.org/branches/central-library', query:'Los Angeles Central Library events' },
-  { name:'Union Station',        venue:'Historic Transit Hub',             lat:34.0562, lng:-118.2365, events:'https://www.unionstationla.com',                query:'LA Union Station' },
-  { name:'Olvera Street',        venue:'El Pueblo Historic District',      lat:34.0575, lng:-118.2380, events:'https://olvera-street.com/events',              query:'Olvera Street Los Angeles festivals' },
-  { name:'Grand Performances',   venue:'California Plaza · Free Concerts', lat:34.0525, lng:-118.2517, events:'https://grandperformances.org/calendar',        query:'Grand Performances Los Angeles concerts' }
+const STRIP_MONUMENTS = [
+  { name:'LA Convention Center', venue:'LACC',                             query:'LA Convention Center events' },
+  { name:'LA Live',              venue:'Entertainment District',            query:'LA Live events concerts' },
+  { name:'The Broad',            venue:'Contemporary Art',                  query:'The Broad museum Los Angeles' },
+  { name:'MOCA Grand Ave',       venue:'Museum of Contemporary Art',        query:'MOCA Los Angeles museum' },
+  { name:'Central Library',      venue:'LA Public Library',                 query:'Los Angeles Central Library events' },
+  { name:'Union Station',        venue:'Historic Transit Hub',              query:'LA Union Station' },
+  { name:'Grand Performances',   venue:'California Plaza · Free Concerts',  query:'Grand Performances Los Angeles concerts' }
 ];
+
+let stripIdx = 0, stripVideos = [], stripMuted = true;
 
 async function fetchYT(query) {
   try {
@@ -181,32 +233,40 @@ async function fetchYT(query) {
   return null;
 }
 
-function makeMonument(m, video) {
-  const thumb = video ? video.thumb : `https://img.youtube.com/vi/HrxX9TBj2zY/hqdefault.jpg`;
-  const el = document.createElement('div');
-  el.className = 'monument';
-  el.innerHTML = `
-    <div class="mn-yt">
-      <img src="${thumb}" alt="${m.name}" loading="lazy">
-      <div class="mn-play"><div class="mn-play-btn">▶</div></div>
-      <div class="mn-badge">Monument</div>
-    </div>
-    <div class="mn-info">
-      <div class="mn-venue">${m.venue}</div>
-      <div class="mn-name">${m.name}</div>
-      <a class="mn-events-link" href="${m.events}" target="_blank" onclick="event.stopPropagation()">View Events →</a>
-    </div>`;
-  el.addEventListener('click', () => {
-    window.open('https://www.youtube.com/watch?v=' + (video ? video.id : 'HrxX9TBj2zY'), '_blank');
-  });
-  return el;
+function showStrip(idx) {
+  const m = STRIP_MONUMENTS[idx];
+  const v = stripVideos[idx];
+  const frame = document.getElementById('yt-frame');
+  const label = document.getElementById('yt-label');
+  const vid = v ? v.id : 'HrxX9TBj2zY';
+  frame.src = `https://www.youtube.com/embed/${vid}?autoplay=1&mute=1&loop=1&playlist=${vid}&controls=0&showinfo=0&rel=0&modestbranding=1`;
+  label.textContent = `▶ ${m.name} · ${m.venue} · Click to unmute`;
+  stripMuted = true;
+}
+
+function toggleStripSound() {
+  const frame = document.getElementById('yt-frame');
+  const label = document.getElementById('yt-label');
+  const m = STRIP_MONUMENTS[stripIdx];
+  stripMuted = !stripMuted;
+  frame.src = frame.src.replace(stripMuted ? 'mute=0' : 'mute=1', stripMuted ? 'mute=1' : 'mute=0');
+  label.textContent = stripMuted
+    ? `▶ ${m.name} · ${m.venue} · Click to unmute`
+    : `🔊 ${m.name} · Playing — Click to mute`;
+}
+
+async function loadStripVideos() {
+  stripVideos = await Promise.all(STRIP_MONUMENTS.map(m => fetchYT(m.query)));
+  showStrip(0);
+  setInterval(() => { stripIdx = (stripIdx + 1) % STRIP_MONUMENTS.length; showStrip(stripIdx); }, 12000);
 }
 
 function initMap() {
   const map = new google.maps.Map(document.getElementById('map'), {
     center:            CENTER,
-    zoom:              14,
-    tilt:              45,
+    zoom:              18,
+    tilt:              65,
+    heading:           200,
     mapId:             '96844e6a7bb74a7d5514d3a5',
     mapTypeControl:    false,
     streetViewControl: false,
@@ -217,10 +277,8 @@ function initMap() {
   /* ── Property pin ── */
   const propEl = document.createElement('div');
   propEl.className = 'prop-pin';
-  new google.maps.marker.AdvancedMarkerElement({
-    map, position: CENTER,
-    title: '801 S Grand Ave · 8th & Grand', content: propEl
-  });
+  new google.maps.marker.AdvancedMarkerElement({ map, position: CENTER, content: propEl });
+  map.addListener('click', e => { if (e.placeId) e.stop(); });
 
   /* ── Info window ── */
   const infoWin = new google.maps.InfoWindow();
@@ -282,15 +340,8 @@ function initMap() {
     res.slice(0, 8).forEach(p => addPOI(p, '#F44336', 'Gym'))
   );
 
-  /* ── Monument markers with YT thumbnails ── */
-  Promise.all(MONUMENTS.map(m => fetchYT(m.query))).then(videos => {
-    MONUMENTS.forEach((m, i) => {
-      new google.maps.marker.AdvancedMarkerElement({
-        map, position: { lat: m.lat, lng: m.lng },
-        title: m.name, content: makeMonument(m, videos[i])
-      });
-    });
-  });
+  /* ── Load monument strip ── */
+  loadStripVideos();
 }
 window.initMap = initMap;
 </script>
