@@ -104,6 +104,19 @@
       box-shadow: 0 6px 28px rgba(0,0,0,0.13), 0 1px 0 rgba(255,255,255,0.95) inset, 0 0 0 0.5px rgba(201,168,76,0.25);
       backdrop-filter: blur(16px);
     }
+    #prop-tabs {
+      display: flex; border-bottom: 1px solid var(--sand);
+      background: rgba(250,248,244,0.6);
+    }
+    .ptab {
+      flex: 1; padding: 6px 4px;
+      font-family: 'DM Mono', monospace; font-size: .38rem; letter-spacing: .1em; text-transform: uppercase;
+      color: var(--text-muted); background: none; border: none; border-bottom: 2px solid transparent;
+      cursor: pointer; transition: color .2s, border-color .2s;
+    }
+    .ptab.active { color: var(--text); border-bottom-color: var(--gold); }
+    .ptab-view { display: none; }
+    .ptab-view.active { display: block; }
     #prop-photo {
       width: 100%; height: 138px; overflow: hidden; background: #111;
       position: relative; cursor: pointer;
@@ -115,6 +128,12 @@
       background: rgba(0,0,0,0.52); color: #fff;
       font-family: 'DM Mono', monospace; font-size: .38rem; letter-spacing: .1em;
       padding: 3px 7px; border-radius: 2px;
+    }
+    #aerial-placeholder {
+      width: 100%; height: 138px; background: #111; display: flex;
+      align-items: center; justify-content: center;
+      font-family: 'DM Mono', monospace; font-size: .42rem; letter-spacing: .1em;
+      color: rgba(255,255,255,0.5); text-align: center; padding: 12px;
     }
     #prop-info { padding: 9px 13px 12px; }
     .pi-tag   { font-size: .38rem; letter-spacing: .16em; text-transform: uppercase; color: var(--gold); margin-bottom: 3px; }
@@ -164,9 +183,25 @@
 <div id="map"></div>
 
 <div id="prop-card">
-  <div id="prop-photo" onclick="nextPhoto()">
-    <img id="prop-img" src="https://i.imgur.com/GSbSrYM.jpeg" alt="801 S Grand Ave, Unit 1612">
-    <div id="prop-photo-nav">1 / 24 · Tap to browse</div>
+  <div id="prop-tabs">
+    <button class="ptab active" onclick="setPropTab('photos')">Photos</button>
+    <button class="ptab" onclick="setPropTab('exterior')">Street</button>
+    <button class="ptab" onclick="setPropTab('aerial')">Aerial</button>
+  </div>
+  <div id="ptab-photos" class="ptab-view active">
+    <div id="prop-photo" onclick="nextPhoto()">
+      <img id="prop-img" src="https://i.imgur.com/GSbSrYM.jpeg" alt="801 S Grand Ave, Unit 1612">
+      <div id="prop-photo-nav">1 / 24 · Tap to browse</div>
+    </div>
+  </div>
+  <div id="ptab-exterior" class="ptab-view">
+    <img src="https://maps.googleapis.com/maps/api/streetview?size=260x138&location=34.0422,-118.2637&fov=80&pitch=10&heading=0&key=AIzaSyD7UMA5ILPXv9QK2_gvxPVth30MavRd2WQ"
+      style="width:100%;height:138px;object-fit:cover;display:block" alt="Street View · 801 S Grand Ave">
+  </div>
+  <div id="ptab-aerial" class="ptab-view">
+    <div id="aerial-placeholder">Loading aerial view…</div>
+    <video id="aerial-vid" autoplay muted loop playsinline
+      style="width:100%;height:138px;object-fit:cover;display:none"></video>
   </div>
   <div id="prop-info">
     <div class="pi-tag">For Sale By Owner · South Park DTLA</div>
@@ -222,6 +257,33 @@ const STRIP_MONUMENTS = [
   { name:'Union Station',        venue:'Historic Transit Hub',              query:'LA Union Station' },
   { name:'Grand Performances',   venue:'California Plaza · Free Concerts',  query:'Grand Performances Los Angeles concerts' }
 ];
+
+/* ── Property card tabs ── */
+function setPropTab(tab) {
+  document.querySelectorAll('.ptab').forEach(b => b.classList.toggle('active', b.textContent.toLowerCase().startsWith(tab === 'photos' ? 'ph' : tab === 'exterior' ? 'st' : 'ae')));
+  document.querySelectorAll('.ptab-view').forEach(v => v.classList.remove('active'));
+  document.getElementById('ptab-' + tab).classList.add('active');
+  if (tab === 'aerial') loadAerialOnce();
+}
+let aerialLoaded = false;
+async function loadAerialOnce() {
+  if (aerialLoaded) return;
+  aerialLoaded = true;
+  try {
+    const r = await fetch('/api/aerialview?lat=34.0422&lng=-118.2637');
+    const d = await r.json();
+    const uri = d?.uris?.LANDSCAPE_VIDEO?.landscapeVideoUri;
+    const vid = document.getElementById('aerial-vid');
+    const ph  = document.getElementById('aerial-placeholder');
+    if (uri) {
+      vid.src = uri; vid.style.display = 'block'; ph.style.display = 'none';
+    } else {
+      ph.textContent = 'Aerial footage\nnot available for\nthis address';
+    }
+  } catch(e) {
+    document.getElementById('aerial-placeholder').textContent = 'Aerial view unavailable';
+  }
+}
 
 let stripIdx = 0, stripVideos = [], stripMuted = true;
 
