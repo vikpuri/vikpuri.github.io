@@ -270,7 +270,7 @@ async function loadAerialOnce() {
   if (aerialLoaded) return;
   aerialLoaded = true;
   try {
-    const r = await fetch('/api/aerialview?lat=34.0422&lng=-118.2637');
+    const r = await fetch('/api/aerialview?address=' + encodeURIComponent('801 S Grand Ave, Los Angeles, CA 90017'));
     const d = await r.json();
     const uri = d?.uris?.LANDSCAPE_VIDEO?.landscapeVideoUri;
     const vid = document.getElementById('aerial-vid');

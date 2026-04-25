@@ -262,7 +262,7 @@ async function loadAerialOnce() {
   if (aerialLoaded) return;
   aerialLoaded = true;
   try {
-    const r = await fetch('/api/aerialview?lat=33.3428&lng=-112.1181');
+    const r = await fetch('/api/aerialview?address=' + encodeURIComponent('11403 S 27th Dr, Laveen, AZ 85339'));
     const d = await r.json();
     const uri = d?.uris?.LANDSCAPE_VIDEO?.landscapeVideoUri;
     const vid = document.getElementById('aerial-vid');

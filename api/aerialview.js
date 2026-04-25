@@ -2,22 +2,20 @@ module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Content-Type', 'application/json');
 
-  const { lat, lng, address } = req.query;
-  const key = process.env.YOUTUBE_API_KEY; // same Google Cloud project key
+  const { address } = req.query;
+  const key = process.env.YOUTUBE_API_KEY;
 
-  let url;
-  if (lat && lng) {
-    url = `https://aerialview.googleapis.com/v1/videos:lookupVideo?location.latitude=${lat}&location.longitude=${lng}&key=${key}`;
-  } else if (address) {
-    url = `https://aerialview.googleapis.com/v1/videos:lookupVideo?address=${encodeURIComponent(address)}&key=${key}`;
-  } else {
-    return res.status(400).json({ error: 'lat+lng or address required' });
-  }
+  if (!address) return res.status(400).json({ error: 'address required' });
 
   try {
-    const r = await fetch(url);
-    const data = await r.json();
-    return res.status(r.ok ? 200 : r.status).json(data);
+    const r = await fetch(
+      `https://aerialview.googleapis.com/v1/videos:lookupVideo?X-Goog-Api-Key=${key}&address=${encodeURIComponent(address)}`
+    );
+
+    if (r.status === 404) return res.status(200).json({ state: 'NOT_FOUND' });
+    if (!r.ok) return res.status(r.status).json(await r.json());
+
+    return res.status(200).json(await r.json());
   } catch (e) {
     return res.status(500).json({ error: e.message });
   }
