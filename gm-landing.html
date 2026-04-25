@@ -319,12 +319,12 @@ async function initCesium() {
   const tileset = await Cesium.createGooglePhotorealistic3DTileset();
   viewer.scene.primitives.add(tileset);
 
-  /* Fly to western US — both properties in frame */
+  /* Fly to western US — camera above Nevada facing south, both properties in frame */
   viewer.camera.flyTo({
     destination: Cesium.Cartesian3.fromDegrees(-114.8, 37.5, 1100000),
     orientation: {
-      heading: Cesium.Math.toRadians(10),
-      pitch:   Cesium.Math.toRadians(-52),
+      heading: Cesium.Math.toRadians(180),
+      pitch:   Cesium.Math.toRadians(-40),
       roll:    0
     },
     duration: 3
