@@ -8,7 +8,6 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@1,700&family=Raleway:wght@600&family=Source+Serif+4:wght@400;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
-    /* ── exact layout from working map-test.html ── */
     html, body, #map { margin: 0; padding: 0; width: 100%; height: 100%; }
 
     :root {
@@ -16,7 +15,6 @@
       --gold: #C9A84C; --text: #2C2A26; --text-muted: #9E9087;
     }
 
-    /* header floats over map, same as all map apps */
     header {
       position: fixed; top: 0; left: 0; right: 0; height: 60px; z-index: 100;
       background: linear-gradient(180deg, #fff 0%, var(--cream) 100%);
@@ -39,9 +37,35 @@
       border-radius: 4px; padding: 10px 13px;
     }
     .leg-title { font-family: 'DM Mono', monospace; font-size: .44rem; letter-spacing: .14em; text-transform: uppercase; color: var(--gold); margin-bottom: 7px; }
-    .leg-row { display: flex; align-items: center; gap: 7px; margin-bottom: 4px; }
-    .leg-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; border: 1.5px solid rgba(255,255,255,0.8); }
+    .leg-row   { display: flex; align-items: center; gap: 7px; margin-bottom: 4px; }
+    .leg-dot   { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; border: 1.5px solid rgba(255,255,255,0.8); }
     .leg-label { font-family: 'DM Mono', monospace; font-size: .46rem; color: var(--text-muted); }
+
+    .prop-pin {
+      width: 38px; height: 38px; border-radius: 50%;
+      background: #B22234; border: 3px solid #fff;
+      box-shadow: 0 0 0 0 rgba(178,34,52,0.7);
+      animation: prop-pulse 2s ease-out infinite; cursor: pointer;
+    }
+    @keyframes prop-pulse {
+      0%   { box-shadow: 0 0 0 0 rgba(178,34,52,0.7); }
+      70%  { box-shadow: 0 0 0 18px rgba(178,34,52,0); }
+      100% { box-shadow: 0 0 0 0 rgba(178,34,52,0); }
+    }
+    .poi-dot {
+      width: 11px; height: 11px; border-radius: 50%;
+      border: 2px solid rgba(255,255,255,0.9);
+      box-shadow: 0 1px 5px rgba(0,0,0,0.28);
+      cursor: pointer; transition: transform .15s;
+    }
+    .poi-dot:hover { transform: scale(1.6); }
+    .gm-popup {
+      background: rgba(250,248,244,0.97); border: 1.5px solid rgba(255,255,255,0.9);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.12); backdrop-filter: blur(14px);
+      border-radius: 4px; padding: 10px 13px; min-width: 150px; max-width: 210px;
+    }
+    .gm-popup-name { font-family: 'Source Serif 4', serif; font-size: .78rem; font-weight: 600; color: var(--text); margin-bottom: 2px; }
+    .gm-popup-cat  { font-family: 'DM Mono', monospace; font-size: .46rem; letter-spacing: .1em; text-transform: uppercase; color: var(--gold); }
   </style>
 </head>
 <body>
@@ -70,18 +94,39 @@
   <div class="leg-title">Map Key</div>
   <div class="leg-row"><div class="leg-dot" style="background:#B22234"></div><span class="leg-label">Your Property</span></div>
   <div class="leg-row"><div class="leg-dot" style="background:#4CAF50"></div><span class="leg-label">Grocery</span></div>
-  <div class="leg-row"><div class="leg-dot" style="background:#8B6E4E"></div><span class="leg-label">Coffee & Cafes</span></div>
-  <div class="leg-row"><div class="leg-dot" style="background:#F44336"></div><span class="leg-label">Fitness</span></div>
-  <div class="leg-row"><div class="leg-dot" style="background:#9C27B0"></div><span class="leg-label">Arts & Culture</span></div>
-  <div class="leg-row"><div class="leg-dot" style="background:#00CED1"></div><span class="leg-label">Dining & More</span></div>
-  <div class="leg-row"><div class="leg-dot" style="background:#C9A84C;border:2px solid rgba(201,168,76,0.5)"></div><span class="leg-label">Monument</span></div>
+  <div class="leg-row"><div class="leg-dot" style="background:#FF6600"></div><span class="leg-label">Home & Hardware</span></div>
+  <div class="leg-row"><div class="leg-dot" style="background:#CC0000"></div><span class="leg-label">Target</span></div>
+  <div class="leg-row"><div class="leg-dot" style="background:#2196F3"></div><span class="leg-label">Credit Union</span></div>
+  <div class="leg-row"><div class="leg-dot" style="background:#6A1B9A"></div><span class="leg-label">Cinema</span></div>
+  <div class="leg-row"><div class="leg-dot" style="background:#9C27B0"></div><span class="leg-label">Museum</span></div>
+  <div class="leg-row"><div class="leg-dot" style="background:#388E3C"></div><span class="leg-label">Park</span></div>
+  <div class="leg-row"><div class="leg-dot" style="background:#F44336"></div><span class="leg-label">Gym</span></div>
 </div>
 
 <script>
+const CENTER = { lat: 34.0422, lng: -118.2637 };
+
+/* brand name filters for grocery category */
+const GROCERY_BRANDS = [
+  'whole foods','trader joe','ralph','vons','pavilion','albertson','sprouts','erewhon','smart & final'
+];
+
+function isBrand(name, brands) {
+  const n = name.toLowerCase();
+  return brands.some(b => n.includes(b));
+}
+
+function makeDot(color) {
+  const el = document.createElement('div');
+  el.className = 'poi-dot';
+  el.style.background = color;
+  return el;
+}
+
 function initMap() {
   const map = new google.maps.Map(document.getElementById('map'), {
-    center:            { lat: 34.0422, lng: -118.2637 },
-    zoom:              16,
+    center:            CENTER,
+    zoom:              14,
     tilt:              45,
     mapId:             '96844e6a7bb74a7d5514d3a5',
     mapTypeControl:    false,
@@ -89,17 +134,98 @@ function initMap() {
     fullscreenControl: false,
     gestureHandling:   'greedy',
   });
-  new google.maps.Marker({
-    map:      map,
-    position: { lat: 34.0422, lng: -118.2637 },
-    title:    '801 S Grand Ave, Los Angeles CA 90017'
+
+  /* ── Property pin ── */
+  const propEl = document.createElement('div');
+  propEl.className = 'prop-pin';
+  new google.maps.marker.AdvancedMarkerElement({
+    map, position: CENTER,
+    title: '801 S Grand Ave · Your Property', content: propEl
+  });
+
+  /* ── Info window ── */
+  const infoWin = new google.maps.InfoWindow();
+  map.addListener('click', () => infoWin.close());
+
+  function addMarker(place, color, category) {
+    const dot = makeDot(color);
+    const mk = new google.maps.marker.AdvancedMarkerElement({
+      map, position: place.geometry.location, title: place.name, content: dot
+    });
+    mk.addListener('click', () => {
+      infoWin.setContent(`<div class="gm-popup">
+        <div class="gm-popup-name">${place.name}</div>
+        <div class="gm-popup-cat">${category}</div>
+      </div>`);
+      infoWin.open({ map, anchor: mk });
+    });
+  }
+
+  const svc = new google.maps.places.PlacesService(map);
+
+  /* helper — run a nearbySearch and pass results to callback */
+  function nearby(opts, fn) {
+    svc.nearbySearch({ location: CENTER, ...opts }, (results, status) => {
+      if (status === google.maps.places.PlacesServiceStatus.OK) fn(results || []);
+    });
+  }
+
+  /* ── Grocery — brand-filtered ── */
+  nearby({ radius: 3000, type: 'grocery_or_supermarket' }, results => {
+    results
+      .filter(p => isBrand(p.name, GROCERY_BRANDS))
+      .forEach(p => addMarker(p, '#4CAF50', 'Grocery'));
+  });
+
+  /* ── Target ── */
+  nearby({ radius: 5000, type: 'department_store', keyword: 'Target' }, results => {
+    results.filter(p => p.name.toLowerCase().includes('target'))
+           .forEach(p => addMarker(p, '#CC0000', 'Target'));
+  });
+
+  /* ── Home Depot ── */
+  nearby({ radius: 8000, keyword: 'Home Depot', type: 'hardware_store' }, results => {
+    results.filter(p => p.name.toLowerCase().includes('home depot'))
+           .forEach(p => addMarker(p, '#FF6600', 'Home Depot'));
+  });
+
+  /* ── Lowe's ── */
+  nearby({ radius: 8000, keyword: "Lowe's", type: 'hardware_store' }, results => {
+    results.filter(p => p.name.toLowerCase().includes("lowe"))
+           .forEach(p => addMarker(p, '#004990', "Lowe's"));
+  });
+
+  /* ── Credit unions ── */
+  nearby({ radius: 3000, keyword: 'credit union', type: 'bank' }, results => {
+    results.filter(p => p.name.toLowerCase().includes('credit union'))
+           .forEach(p => addMarker(p, '#2196F3', 'Credit Union'));
+  });
+
+  /* ── Movie theaters ── */
+  nearby({ radius: 5000, type: 'movie_theater' }, results => {
+    results.slice(0, 8).forEach(p => addMarker(p, '#6A1B9A', 'Cinema'));
+  });
+
+  /* ── Museums ── */
+  nearby({ radius: 4000, type: 'museum' }, results => {
+    results.slice(0, 10).forEach(p => addMarker(p, '#9C27B0', 'Museum'));
+  });
+
+  /* ── Parks ── */
+  nearby({ radius: 3000, type: 'park' }, results => {
+    results.slice(0, 10).forEach(p => addMarker(p, '#388E3C', 'Park'));
+  });
+
+  /* ── Gyms ── */
+  nearby({ radius: 3000, type: 'gym' }, results => {
+    results.slice(0, 8).forEach(p => addMarker(p, '#F44336', 'Gym'));
   });
 }
 window.initMap = initMap;
 </script>
 
 <script
-  src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD7UMA5ILPXv9QK2_gvxPVth30MavRd2WQ&callback=initMap&v=weekly&libraries=marker&map_ids=96844e6a7bb74a7d5514d3a5"
+  src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD7UMA5ILPXv9QK2_gvxPVth30MavRd2WQ&callback=initMap&v=weekly&libraries=marker,places&map_ids=96844e6a7bb74a7d5514d3a5"
   async defer>
 </script>
 
