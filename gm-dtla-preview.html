@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Requation DTLA — Monument Template Preview</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@1,700&family=Raleway:wght@600&family=Source+Serif+4:wght@400;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --white:      #FFFFFF;
+      --cream:      #FAF8F4;
+      --linen:      #F5F0E8;
+      --sand:       #E8DDD0;
+      --gold:       #C9A84C;
+      --text:       #2C2A26;
+      --text-mid:   #6B6058;
+      --text-muted: #9E9087;
+      --h:          60px;
+    }
+
+    html, body { height: 100%; overflow: hidden; background: var(--linen); }
+
+    /* ── Header ── */
+    header {
+      position: fixed; top: 0; left: 0; right: 0; height: var(--h); z-index: 100;
+      background: linear-gradient(180deg, #fff 0%, var(--cream) 100%);
+      border-bottom: 1px solid var(--sand);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 24px;
+      box-shadow: 0 2px 16px rgba(0,0,0,0.07), 0 1px 0 rgba(255,255,255,0.9) inset;
+    }
+    .logo-wrap { display: flex; align-items: center; cursor: pointer; }
+    nav { display: flex; align-items: center; gap: 24px; }
+    nav a, nav button {
+      font-family: 'Source Serif 4', serif; font-size: .68rem; letter-spacing: .14em;
+      text-transform: uppercase; color: var(--text-muted);
+      text-decoration: none; background: none; border: none; cursor: pointer; transition: color .2s;
+    }
+    nav a:hover, nav button:hover { color: var(--text); }
+
+    /* ── Map ── */
+    #map { position: fixed; top: var(--h); left: 0; right: 0; bottom: 0; }
+
+    /* ── MONUMENT CARD — 280×158 ── */
+    .monument {
+      width: 280px; height: 158px;
+      position: relative; overflow: hidden; cursor: pointer;
+      background: linear-gradient(155deg, rgba(255,255,255,0.97) 0%, rgba(250,248,244,0.93) 100%);
+      border: 1.5px solid rgba(255,255,255,0.92);
+      box-shadow:
+        0 6px 28px rgba(0,0,0,0.13),
+        0 1px 0 rgba(255,255,255,0.95) inset,
+        0 0 0 0.5px rgba(201,168,76,0.3);
+      backdrop-filter: blur(18px);
+      border-radius: 4px;
+      transform: translateY(-100%) translateY(-18px);
+      transition: box-shadow .2s, transform .15s;
+    }
+    .monument:hover {
+      box-shadow: 0 12px 40px rgba(0,0,0,0.18), 0 1px 0 rgba(255,255,255,0.95) inset, 0 0 0 1px rgba(201,168,76,0.55);
+      transform: translateY(-100%) translateY(-24px);
+    }
+    /* Gloss sheen */
+    .monument::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 46%;
+      background: linear-gradient(180deg, rgba(255,255,255,0.55) 0%, transparent 100%);
+      pointer-events: none; z-index: 4;
+    }
+
+    /* YT thumbnail area — top 100px */
+    .mn-yt {
+      position: absolute; top: 0; left: 0; right: 0; height: 100px;
+      overflow: hidden; background: #1a1a1a;
+    }
+    .mn-yt img {
+      width: 100%; height: 100%; object-fit: cover;
+      transition: transform .3s; display: block;
+    }
+    .monument:hover .mn-yt img { transform: scale(1.04); }
+
+    /* Play button overlay */
+    .mn-play {
+      position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+      background: rgba(0,0,0,0.12); z-index: 2;
+    }
+    .mn-play-btn {
+      width: 32px; height: 32px; background: rgba(255,0,0,0.88); border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      color: #fff; font-size: 13px;
+      box-shadow: 0 2px 12px rgba(255,0,0,0.5);
+    }
+
+    /* LIVE badge */
+    .mn-live {
+      position: absolute; top: 7px; left: 8px; z-index: 3;
+      background: rgba(201,168,76,0.92); color: #2C2A26;
+      font-family: 'DM Mono', monospace; font-size: .38rem; letter-spacing: .14em;
+      text-transform: uppercase; padding: 2px 7px; border-radius: 2px;
+      display: flex; align-items: center; gap: 4px;
+    }
+    .mn-live-dot { width: 5px; height: 5px; border-radius: 50%; background: #2C2A26; animation: blink 1.2s ease-in-out infinite; }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+    /* Info strip — bottom 58px */
+    .mn-info {
+      position: absolute; bottom: 0; left: 0; right: 0; height: 58px;
+      padding: 7px 10px 8px; z-index: 3;
+      background: linear-gradient(180deg, transparent 0%, rgba(250,248,244,0.96) 30%);
+    }
+    .mn-venue {
+      font-size: .42rem; letter-spacing: .16em; text-transform: uppercase;
+      color: var(--gold); margin-bottom: 2px;
+    }
+    .mn-name {
+      font-family: 'Source Serif 4', serif; font-size: .75rem; font-weight: 600;
+      color: var(--text); line-height: 1.2; margin-bottom: 5px;
+    }
+    .mn-row { display: flex; align-items: center; justify-content: space-between; }
+    .mn-events-link {
+      font-family: 'DM Mono', monospace; font-size: .46rem; letter-spacing: .1em;
+      text-transform: uppercase; color: var(--text-mid); text-decoration: none;
+      border-bottom: 1px solid var(--sand); padding-bottom: 1px;
+      transition: color .2s, border-color .2s;
+    }
+    .mn-events-link:hover { color: var(--gold); border-color: var(--gold); }
+    .mn-yt-title {
+      font-size: .52rem; color: var(--text-muted); white-space: nowrap;
+      overflow: hidden; text-overflow: ellipsis; max-width: 160px;
+    }
+
+    /* ── Tier label (debug overlay, remove in prod) ── */
+    #tier-label {
+      position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%);
+      background: rgba(201,168,76,0.15); border: 1px solid rgba(201,168,76,0.4);
+      color: var(--gold); font-family: 'DM Mono', monospace; font-size: .55rem;
+      letter-spacing: .12em; text-transform: uppercase; padding: 6px 16px;
+      border-radius: 20px; backdrop-filter: blur(8px); z-index: 200;
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo-wrap" onclick="location.href='/'">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 440 100" height="52" preserveAspectRatio="xMinYMid meet" aria-label="Requation">
+      <defs><filter id="gb"><feGaussianBlur stdDeviation="1.2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+      <text x="6" y="42" font-family="EB Garamond,Georgia,serif" font-size="46" font-weight="700" font-style="italic" fill="#B22234">r</text>
+      <line x1="31" y1="76" x2="50" y2="41" stroke="#7A7A7A" stroke-width="5" stroke-linecap="round"/>
+      <text x="56" y="88" font-family="Raleway,Arial,sans-serif" font-size="92" font-weight="600" fill="#4F6FB8">Σ</text>
+      <text x="122" y="88" font-family="Raleway,Arial,sans-serif" font-size="24" font-weight="600" font-style="italic" fill="#D4A843" opacity="0.8" filter="url(#gb)" letter-spacing="2">quation</text>
+    </svg>
+  </div>
+  <nav>
+    <button onclick="location.href='/'">Home</button>
+    <a href="/dtla">South Park</a>
+    <a href="/lalife">LA Life</a>
+  </nav>
+</header>
+
+<div id="map"></div>
+<div id="tier-label">Monument Tier · 280 × 158 · Template Preview</div>
+
+<script>
+/* ── Monument venue data ─────────────────────────────── */
+const MONUMENTS = [
+  {
+    name:    'LA Convention Center',
+    venue:   'LACC · South Hall',
+    lat:     34.0403, lng: -118.2696,
+    ytId:    'HrxX9TBj2zY',
+    ytTitle: 'Events & Conventions 2025',
+    events:  'https://www.lacclink.com/events'
+  },
+  {
+    name:    'LA Live · Microsoft Theatre',
+    venue:   'Entertainment District',
+    lat:     34.0430, lng: -118.2673,
+    ytId:    'HrxX9TBj2zY',
+    ytTitle: 'LA Live Highlights 2025',
+    events:  'https://www.lalive.com/events'
+  },
+  {
+    name:    'The Broad',
+    venue:   'Contemporary Art Museum',
+    lat:     34.0545, lng: -118.2503,
+    ytId:    'HrxX9TBj2zY',
+    ytTitle: 'Current Exhibitions — The Broad',
+    events:  'https://www.thebroad.org/visit'
+  },
+  {
+    name:    'MOCA Grand Avenue',
+    venue:   'Museum of Contemporary Art',
+    lat:     34.0520, lng: -118.2505,
+    ytId:    'HrxX9TBj2zY',
+    ytTitle: 'MOCA Exhibitions 2025–26',
+    events:  'https://www.moca.org/visit'
+  },
+  {
+    name:    'Central Library',
+    venue:   'Los Angeles Public Library',
+    lat:     34.0447, lng: -118.2493,
+    ytId:    'HrxX9TBj2zY',
+    ytTitle: 'Programs & Events',
+    events:  'https://www.lapl.org/branches/central-library'
+  },
+  {
+    name:    'Union Station',
+    venue:   'Historic Transit Hub',
+    lat:     34.0562, lng: -118.2365,
+    ytId:    'HrxX9TBj2zY',
+    ytTitle: 'Union Station — LA Gateway',
+    events:  'https://www.unionstationla.com'
+  },
+  {
+    name:    'Olvera Street',
+    venue:   'El Pueblo Historic District',
+    lat:     34.0575, lng: -118.2380,
+    ytId:    'HrxX9TBj2zY',
+    ytTitle: 'Festivals & Cultural Events',
+    events:  'https://olvera-street.com/events'
+  },
+  {
+    name:    'Grand Performances',
+    venue:   'California Plaza · Free Concerts',
+    lat:     34.0525, lng: -118.2517,
+    ytId:    'HrxX9TBj2zY',
+    ytTitle: 'Summer Concert Series 2025',
+    events:  'https://grandperformances.org/calendar'
+  }
+];
+
+/* ── Fetch latest YT video for a channel ─────────────── */
+async function fetchLatestVideo(channelQuery) {
+  try {
+    const r = await fetch(`/api/youtube?q=${encodeURIComponent(channelQuery)}&maxResults=1`);
+    if (r.ok) {
+      const d = await r.json();
+      if (d.videos && d.videos[0]) return d.videos[0];
+    }
+  } catch(e) {}
+  return null;
+}
+
+/* ── Build Monument card element ─────────────────────── */
+function makeMonument(m, video) {
+  const thumb = video
+    ? video.thumb
+    : `https://img.youtube.com/vi/${m.ytId}/hqdefault.jpg`;
+  const title = video ? video.title : m.ytTitle;
+
+  const el = document.createElement('div');
+  el.className = 'monument';
+  el.innerHTML = `
+    <div class="mn-yt">
+      <img src="${thumb}" alt="${m.name}">
+      <div class="mn-play"><div class="mn-play-btn">▶</div></div>
+      <div class="mn-live"><div class="mn-live-dot"></div>YT</div>
+    </div>
+    <div class="mn-info">
+      <div class="mn-venue">${m.venue}</div>
+      <div class="mn-name">${m.name}</div>
+      <div class="mn-row">
+        <a class="mn-events-link" href="${m.events}" target="_blank">View Events →</a>
+        <span class="mn-yt-title">${title}</span>
+      </div>
+    </div>`;
+
+  el.addEventListener('click', (e) => {
+    if (e.target.classList.contains('mn-events-link')) return;
+    window.open(`https://www.youtube.com/watch?v=${video ? video.id : m.ytId}`, '_blank');
+  });
+  return el;
+}
+
+/* ── Map init ─────────────────────────────────────────── */
+function initMap() {
+  const map = new google.maps.Map(document.getElementById('map'), {
+    center:            { lat: 34.0490, lng: -118.2520 },
+    zoom:              14,
+    tilt:              45,
+    heading:           340,
+    mapId:             '96844e6a7bb74a7d5514d3a5',
+    mapTypeId:         'hybrid',
+    mapTypeControl:    false,
+    streetViewControl: false,
+    fullscreenControl: false,
+    gestureHandling:   'greedy',
+    zoomControlOptions: { position: google.maps.ControlPosition.RIGHT_CENTER }
+  });
+
+  // Cinematic load — settle into DTLA at pitch
+  setTimeout(() => map.moveCamera({
+    center: { lat: 34.0490, lng: -118.2520 }, zoom: 15.2, tilt: 52, heading: 336
+  }), 1200);
+
+  // Load monuments — fetch live YT if API available, else use thumbnail
+  const YT_QUERIES = [
+    'LA Convention Center events',
+    'LA Live Microsoft Theatre',
+    'The Broad museum Los Angeles',
+    'MOCA Los Angeles museum',
+    'Los Angeles Central Library',
+    'LA Union Station',
+    'Olvera Street Los Angeles',
+    'Grand Performances Los Angeles'
+  ];
+
+  Promise.all(YT_QUERIES.map(q => fetchLatestVideo(q))).then(videos => {
+    MONUMENTS.forEach((m, i) => {
+      new google.maps.marker.AdvancedMarkerElement({
+        map,
+        position: { lat: m.lat, lng: m.lng },
+        title:    m.name,
+        content:  makeMonument(m, videos[i])
+      });
+    });
+  });
+}
+
+window.initMap = initMap;
+</script>
+
+<script
+  src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCEQGh-rbZeXKH1pWKIfvLkFRkwyqvAkr0&callback=initMap&v=weekly&libraries=marker&map_ids=96844e6a7bb74a7d5514d3a5"
+  async defer>
+</script>
+
+</body>
+</html>
