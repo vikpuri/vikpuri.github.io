@@ -144,16 +144,37 @@ Every named object added to any Requation map must have a corresponding URL slug
 
 ---
 
-## Build Pipeline (Vercel)
+## Build Pipeline (Vercel) — migrated 2026-04-25
 
-- Source: `dtla.html`, `laveen.html`, `lalife.html`, `desertlife.html`, `index.html`, `gm-landing.html`
-- Build: `node build.js` → outputs to `dist/`
-- API functions: `api/*.js` — served at `/api/functionname` (NOT `/.netlify/functions/`)
-- Deploy: Vercel runs `node build.js` on push to `master`, serves `dist/`, routes `/api/*` to functions
-- Config: `vercel.json` (replaces `netlify.toml`)
-- Environment variables: set in Vercel dashboard → Settings → Environment Variables
-  - TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_PHONE, ADMIN_PHONE
-  - YOUTUBE_API_KEY, PREDICTHQ_KEY, YELP_API_KEY, EVENTBRITE_TOKEN, RESEND_API_KEY
+**Why Netlify was replaced:**
+- Static site (GitHub Pages) and serverless functions (Netlify) were on two different systems — `/.netlify/functions/` calls failed in production because requation.com served from GitHub Pages, not Netlify
+- Vercel unifies both under one domain: static files + `/api/*` functions, one deploy, no split
+- Better edge performance for 3D map tile loading; no cold-start issues on function calls
+
+**How it works:**
+- Push to `master` on GitHub → Vercel auto-builds in ~10s
+- `node build.js` → outputs HTML to `dist/`
+- `api/*.js` functions → served at `/api/functionname` on same domain
+- `vercel.json` controls build command, output directory, and clean URL rewrites
+
+**Files changed in migration:**
+- `vercel.json` created (replaces `netlify.toml`)
+- `api/` folder created — 6 functions converted from Netlify to Vercel format
+- All HTML files updated: `/.netlify/functions/` → `/api/`
+- `api/espn.js` added — ESPN public API for sports events (replaces PredictHQ, no key needed)
+- `gm-landing.html` added to `build.js` copy list
+
+**Environment variables** (set in Vercel dashboard → Settings → Environment Variables):
+- `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_PHONE`, `ADMIN_PHONE`
+- `YOUTUBE_API_KEY` (also used as Google Maps/Places key — same Google Cloud project)
+- `YELP_API_KEY`, `RESEND_API_KEY`, `SUPABASE_KEY`
+- `PREDICTHQ_KEY` and `MAPBOX_TOKEN` — NOT needed, removed
+
+**DNS (as of 2026-04-25):**
+- requation.com → Vercel (A record updated in Netlify DNS panel)
+- www.requation.com → redirects to requation.com
+- Nameservers still: dns1-4.p04.nsone.net (Netlify DNS — manages records only, no longer hosts site)
+- Live and verified: `Server: Vercel`, 200 OK
 
 ---
 
