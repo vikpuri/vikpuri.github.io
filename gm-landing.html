@@ -319,13 +319,15 @@ async function initCesium() {
   const tileset = await Cesium.createGooglePhotorealistic3DTileset();
   viewer.scene.primitives.add(tileset);
 
-  /* Camera above Arctic at 5,000km facing south — globe appears as a sphere
-     in the lower-center of frame with black space above. No flyTo, no arc. */
+  /* Camera at 10°N (Gulf of Mexico area), 10,000km altitude, facing north.
+     heading 0° = north up, east right, west left — standard map convention.
+     Globe appears as a sphere in lower-center; North America faces camera;
+     DTLA (west) left of Laveen (east) as expected. */
   viewer.camera.setView({
-    destination: Cesium.Cartesian3.fromDegrees(-115.2, 70, 5000000),
+    destination: Cesium.Cartesian3.fromDegrees(-115.2, 10, 10000000),
     orientation: {
-      heading: Cesium.Math.toRadians(180),
-      pitch:   Cesium.Math.toRadians(-15),
+      heading: Cesium.Math.toRadians(0),
+      pitch:   Cesium.Math.toRadians(-30),
       roll:    0
     }
   });
