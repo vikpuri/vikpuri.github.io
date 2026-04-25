@@ -289,7 +289,7 @@ const PROPS = [
   { id: 'dtla',   lat: 34.0457095, lng: -118.2585553, link: '/dtla',
     cls: 'dtla-pin',   state: 'California', name: 'South Park · DTLA',
     detail: '801 S Grand Ave · $885,000' },
-  { id: 'laveen', lat: 33.34300558128699, lng: -112.11811961950843, link: '/laveen',
+  { id: 'laveen', lat: 33.34284751970459, lng: -112.11814600203087, link: '/laveen',
     cls: 'laveen-pin', state: 'Arizona',    name: 'Urban Farmhouse · Laveen',
     detail: '11403 S 27th Dr · $2,000,000' }
 ];
@@ -319,15 +319,14 @@ async function initCesium() {
   const tileset = await Cesium.createGooglePhotorealistic3DTileset();
   viewer.scene.primitives.add(tileset);
 
-  /* Camera at 10°N (Gulf of Mexico area), 10,000km altitude, facing north.
-     heading 0° = north up, east right, west left — standard map convention.
-     Globe appears as a sphere in lower-center; North America faces camera;
-     DTLA (west) left of Laveen (east) as expected. */
+  /* Camera directly above SW USA — same longitude/latitude as both properties,
+     14,000km altitude, looking straight down. Guarantees North America faces
+     camera and pins land on correct spots. heading 0° = north up. */
   viewer.camera.setView({
-    destination: Cesium.Cartesian3.fromDegrees(-115.2, 10, 10000000),
+    destination: Cesium.Cartesian3.fromDegrees(-115.2, 34.5, 14000000),
     orientation: {
       heading: Cesium.Math.toRadians(0),
-      pitch:   Cesium.Math.toRadians(-30),
+      pitch:   Cesium.Math.toRadians(-90),
       roll:    0
     }
   });
