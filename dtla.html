@@ -41,6 +41,7 @@
     .leg-dot   { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; border: 1.5px solid rgba(255,255,255,0.8); }
     .leg-label { font-family: 'DM Mono', monospace; font-size: .46rem; color: var(--text-muted); }
 
+    /* ── Property pin ── */
     .prop-pin {
       width: 38px; height: 38px; border-radius: 50%;
       background: #B22234; border: 3px solid #fff;
@@ -52,6 +53,8 @@
       70%  { box-shadow: 0 0 0 18px rgba(178,34,52,0); }
       100% { box-shadow: 0 0 0 0 rgba(178,34,52,0); }
     }
+
+    /* ── POI dot ── */
     .poi-dot {
       width: 11px; height: 11px; border-radius: 50%;
       border: 2px solid rgba(255,255,255,0.9);
@@ -59,6 +62,55 @@
       cursor: pointer; transition: transform .15s;
     }
     .poi-dot:hover { transform: scale(1.6); }
+
+    /* ── Monument card 280×158 ── */
+    .monument {
+      width: 280px; height: 158px; position: relative; overflow: hidden; cursor: pointer;
+      background: linear-gradient(155deg, rgba(255,255,255,0.97) 0%, rgba(250,248,244,0.93) 100%);
+      border: 1.5px solid rgba(255,255,255,0.92);
+      box-shadow: 0 6px 28px rgba(0,0,0,0.13), 0 1px 0 rgba(255,255,255,0.95) inset, 0 0 0 0.5px rgba(201,168,76,0.3);
+      backdrop-filter: blur(18px); border-radius: 4px;
+      transform: translateY(-100%) translateY(-18px);
+      transition: box-shadow .2s, transform .15s;
+    }
+    .monument:hover {
+      box-shadow: 0 12px 40px rgba(0,0,0,0.18), 0 1px 0 rgba(255,255,255,0.95) inset, 0 0 0 1px rgba(201,168,76,0.55);
+      transform: translateY(-100%) translateY(-24px);
+    }
+    .monument::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 46%;
+      background: linear-gradient(180deg, rgba(255,255,255,0.52) 0%, transparent 100%);
+      pointer-events: none; z-index: 4;
+    }
+    .mn-yt { position: absolute; top: 0; left: 0; right: 0; height: 100px; overflow: hidden; background: #111; }
+    .mn-yt img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .3s; }
+    .monument:hover .mn-yt img { transform: scale(1.04); }
+    .mn-play {
+      position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+      background: rgba(0,0,0,0.1); z-index: 2;
+    }
+    .mn-play-btn {
+      width: 30px; height: 30px; background: rgba(255,0,0,0.85); border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      color: #fff; font-size: 12px; box-shadow: 0 2px 10px rgba(255,0,0,0.4);
+    }
+    .mn-badge {
+      position: absolute; top: 7px; left: 8px; z-index: 3;
+      background: rgba(201,168,76,0.9); color: #2C2A26;
+      font-family: 'DM Mono', monospace; font-size: .38rem; letter-spacing: .13em;
+      text-transform: uppercase; padding: 2px 6px; border-radius: 2px;
+    }
+    .mn-info { position: absolute; bottom: 0; left: 0; right: 0; padding: 6px 10px 8px; z-index: 3; }
+    .mn-venue { font-size: .4rem; letter-spacing: .16em; text-transform: uppercase; color: var(--gold); margin-bottom: 2px; }
+    .mn-name  { font-family: 'Source Serif 4', serif; font-size: .73rem; font-weight: 600; color: var(--text); line-height: 1.2; margin-bottom: 4px; }
+    .mn-events-link {
+      font-family: 'DM Mono', monospace; font-size: .44rem; letter-spacing: .1em;
+      text-transform: uppercase; color: var(--text-muted); text-decoration: none;
+      border-bottom: 1px solid var(--sand); padding-bottom: 1px; transition: color .2s;
+    }
+    .mn-events-link:hover { color: var(--gold); }
+
+    /* ── Info popup ── */
     .gm-popup {
       background: rgba(250,248,244,0.97); border: 1.5px solid rgba(255,255,255,0.9);
       box-shadow: 0 4px 20px rgba(0,0,0,0.12); backdrop-filter: blur(14px);
@@ -101,25 +153,52 @@
   <div class="leg-row"><div class="leg-dot" style="background:#9C27B0"></div><span class="leg-label">Museum</span></div>
   <div class="leg-row"><div class="leg-dot" style="background:#388E3C"></div><span class="leg-label">Park</span></div>
   <div class="leg-row"><div class="leg-dot" style="background:#F44336"></div><span class="leg-label">Gym</span></div>
+  <div class="leg-row"><div class="leg-dot" style="background:#C9A84C;border:2px solid rgba(201,168,76,0.5)"></div><span class="leg-label">Monument</span></div>
 </div>
 
 <script>
-const CENTER = { lat: 34.0422, lng: -118.2637 };
+/* 8th & Grand intersection — confirmed address */
+const CENTER = { lat: 34.0430, lng: -118.2641 };
 
-/* brand name filters for grocery category */
-const GROCERY_BRANDS = [
-  'whole foods','trader joe','ralph','vons','pavilion','albertson','sprouts','erewhon','smart & final'
+const GROCERY_BRANDS = ['whole foods','trader joe',"ralph's",'ralphs','vons','pavilion','albertson','sprouts','erewhon'];
+
+const MONUMENTS = [
+  { name:'LA Convention Center', venue:'LACC',                            lat:34.0403, lng:-118.2696, events:'https://www.lacclink.com/events',               query:'LA Convention Center events' },
+  { name:'LA Live',              venue:'Entertainment District',           lat:34.0430, lng:-118.2673, events:'https://www.lalive.com/events',                 query:'LA Live events concerts' },
+  { name:'The Broad',            venue:'Contemporary Art',                 lat:34.0545, lng:-118.2503, events:'https://www.thebroad.org/visit',                query:'The Broad museum Los Angeles' },
+  { name:'MOCA Grand Ave',       venue:'Museum of Contemporary Art',       lat:34.0520, lng:-118.2505, events:'https://www.moca.org/visit',                    query:'MOCA Los Angeles museum' },
+  { name:'Central Library',      venue:'LA Public Library',                lat:34.0447, lng:-118.2493, events:'https://www.lapl.org/branches/central-library', query:'Los Angeles Central Library events' },
+  { name:'Union Station',        venue:'Historic Transit Hub',             lat:34.0562, lng:-118.2365, events:'https://www.unionstationla.com',                query:'LA Union Station' },
+  { name:'Olvera Street',        venue:'El Pueblo Historic District',      lat:34.0575, lng:-118.2380, events:'https://olvera-street.com/events',              query:'Olvera Street Los Angeles festivals' },
+  { name:'Grand Performances',   venue:'California Plaza · Free Concerts', lat:34.0525, lng:-118.2517, events:'https://grandperformances.org/calendar',        query:'Grand Performances Los Angeles concerts' }
 ];
 
-function isBrand(name, brands) {
-  const n = name.toLowerCase();
-  return brands.some(b => n.includes(b));
+async function fetchYT(query) {
+  try {
+    const r = await fetch(`/api/youtube?q=${encodeURIComponent(query)}&maxResults=1`);
+    if (r.ok) { const d = await r.json(); return (d.videos || [])[0] || null; }
+  } catch(e) {}
+  return null;
 }
 
-function makeDot(color) {
+function makeMonument(m, video) {
+  const thumb = video ? video.thumb : `https://img.youtube.com/vi/HrxX9TBj2zY/hqdefault.jpg`;
   const el = document.createElement('div');
-  el.className = 'poi-dot';
-  el.style.background = color;
+  el.className = 'monument';
+  el.innerHTML = `
+    <div class="mn-yt">
+      <img src="${thumb}" alt="${m.name}" loading="lazy">
+      <div class="mn-play"><div class="mn-play-btn">▶</div></div>
+      <div class="mn-badge">Monument</div>
+    </div>
+    <div class="mn-info">
+      <div class="mn-venue">${m.venue}</div>
+      <div class="mn-name">${m.name}</div>
+      <a class="mn-events-link" href="${m.events}" target="_blank" onclick="event.stopPropagation()">View Events →</a>
+    </div>`;
+  el.addEventListener('click', () => {
+    window.open('https://www.youtube.com/watch?v=' + (video ? video.id : 'HrxX9TBj2zY'), '_blank');
+  });
   return el;
 }
 
@@ -140,15 +219,17 @@ function initMap() {
   propEl.className = 'prop-pin';
   new google.maps.marker.AdvancedMarkerElement({
     map, position: CENTER,
-    title: '801 S Grand Ave · Your Property', content: propEl
+    title: '801 S Grand Ave · 8th & Grand', content: propEl
   });
 
   /* ── Info window ── */
   const infoWin = new google.maps.InfoWindow();
   map.addListener('click', () => infoWin.close());
 
-  function addMarker(place, color, category) {
-    const dot = makeDot(color);
+  function addPOI(place, color, category) {
+    const dot = document.createElement('div');
+    dot.className = 'poi-dot';
+    dot.style.background = color;
     const mk = new google.maps.marker.AdvancedMarkerElement({
       map, position: place.geometry.location, title: place.name, content: dot
     });
@@ -162,63 +243,53 @@ function initMap() {
   }
 
   const svc = new google.maps.places.PlacesService(map);
-
-  /* helper — run a nearbySearch and pass results to callback */
   function nearby(opts, fn) {
-    svc.nearbySearch({ location: CENTER, ...opts }, (results, status) => {
-      if (status === google.maps.places.PlacesServiceStatus.OK) fn(results || []);
+    svc.nearbySearch({ location: CENTER, ...opts }, (res, status) => {
+      if (status === google.maps.places.PlacesServiceStatus.OK) fn(res || []);
     });
   }
 
-  /* ── Grocery — brand-filtered ── */
-  nearby({ radius: 3000, type: 'grocery_or_supermarket' }, results => {
-    results
-      .filter(p => isBrand(p.name, GROCERY_BRANDS))
-      .forEach(p => addMarker(p, '#4CAF50', 'Grocery'));
-  });
+  nearby({ radius: 3000, type: 'grocery_or_supermarket' }, res =>
+    res.filter(p => GROCERY_BRANDS.some(b => p.name.toLowerCase().includes(b)))
+       .forEach(p => addPOI(p, '#4CAF50', 'Grocery'))
+  );
+  nearby({ radius: 5000, type: 'department_store', keyword: 'Target' }, res =>
+    res.filter(p => p.name.toLowerCase().includes('target'))
+       .forEach(p => addPOI(p, '#CC0000', 'Target'))
+  );
+  nearby({ radius: 8000, type: 'hardware_store', keyword: 'Home Depot' }, res =>
+    res.filter(p => p.name.toLowerCase().includes('home depot'))
+       .forEach(p => addPOI(p, '#FF6600', 'Home Depot'))
+  );
+  nearby({ radius: 8000, type: 'hardware_store', keyword: "Lowe's" }, res =>
+    res.filter(p => p.name.toLowerCase().includes('lowe'))
+       .forEach(p => addPOI(p, '#004990', "Lowe's"))
+  );
+  nearby({ radius: 3000, type: 'bank', keyword: 'credit union' }, res =>
+    res.filter(p => p.name.toLowerCase().includes('credit union'))
+       .forEach(p => addPOI(p, '#2196F3', 'Credit Union'))
+  );
+  nearby({ radius: 5000, type: 'movie_theater' }, res =>
+    res.slice(0, 8).forEach(p => addPOI(p, '#6A1B9A', 'Cinema'))
+  );
+  nearby({ radius: 4000, type: 'museum' }, res =>
+    res.slice(0, 10).forEach(p => addPOI(p, '#9C27B0', 'Museum'))
+  );
+  nearby({ radius: 3000, type: 'park' }, res =>
+    res.slice(0, 10).forEach(p => addPOI(p, '#388E3C', 'Park'))
+  );
+  nearby({ radius: 3000, type: 'gym' }, res =>
+    res.slice(0, 8).forEach(p => addPOI(p, '#F44336', 'Gym'))
+  );
 
-  /* ── Target ── */
-  nearby({ radius: 5000, type: 'department_store', keyword: 'Target' }, results => {
-    results.filter(p => p.name.toLowerCase().includes('target'))
-           .forEach(p => addMarker(p, '#CC0000', 'Target'));
-  });
-
-  /* ── Home Depot ── */
-  nearby({ radius: 8000, keyword: 'Home Depot', type: 'hardware_store' }, results => {
-    results.filter(p => p.name.toLowerCase().includes('home depot'))
-           .forEach(p => addMarker(p, '#FF6600', 'Home Depot'));
-  });
-
-  /* ── Lowe's ── */
-  nearby({ radius: 8000, keyword: "Lowe's", type: 'hardware_store' }, results => {
-    results.filter(p => p.name.toLowerCase().includes("lowe"))
-           .forEach(p => addMarker(p, '#004990', "Lowe's"));
-  });
-
-  /* ── Credit unions ── */
-  nearby({ radius: 3000, keyword: 'credit union', type: 'bank' }, results => {
-    results.filter(p => p.name.toLowerCase().includes('credit union'))
-           .forEach(p => addMarker(p, '#2196F3', 'Credit Union'));
-  });
-
-  /* ── Movie theaters ── */
-  nearby({ radius: 5000, type: 'movie_theater' }, results => {
-    results.slice(0, 8).forEach(p => addMarker(p, '#6A1B9A', 'Cinema'));
-  });
-
-  /* ── Museums ── */
-  nearby({ radius: 4000, type: 'museum' }, results => {
-    results.slice(0, 10).forEach(p => addMarker(p, '#9C27B0', 'Museum'));
-  });
-
-  /* ── Parks ── */
-  nearby({ radius: 3000, type: 'park' }, results => {
-    results.slice(0, 10).forEach(p => addMarker(p, '#388E3C', 'Park'));
-  });
-
-  /* ── Gyms ── */
-  nearby({ radius: 3000, type: 'gym' }, results => {
-    results.slice(0, 8).forEach(p => addMarker(p, '#F44336', 'Gym'));
+  /* ── Monument markers with YT thumbnails ── */
+  Promise.all(MONUMENTS.map(m => fetchYT(m.query))).then(videos => {
+    MONUMENTS.forEach((m, i) => {
+      new google.maps.marker.AdvancedMarkerElement({
+        map, position: { lat: m.lat, lng: m.lng },
+        title: m.name, content: makeMonument(m, videos[i])
+      });
+    });
   });
 }
 window.initMap = initMap;
