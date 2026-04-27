@@ -1,5 +1,61 @@
 # Requation — Build Plan
 
+---
+
+## Google Maps — 3 Structural Rules (Vendor, 2026-04-28)
+
+All map pages must follow these at all times.
+
+| Rule | Law | CesiumJS equivalent |
+|------|-----|-------------------|
+| **1 · Fixed Container** | Map div must have defined CSS height; never init if display:none or 0px | `#cesiumContainer` needs explicit dimensions before `new Cesium.Viewer()` |
+| **2 · Marker Sync** | All coordinates in DB/JSON — never hardcoded in UI components | Supabase `properties` + `places` tables; `CENTER` const = camera start only |
+| **3 · Center & Pan** | On listing click use `map.panTo()` — never re-create the map | `viewer.camera.flyTo()` — viewer is a singleton |
+
+---
+
+## Geocoding Utility (Phase 3.5 — Do First)
+
+**Problem:** Google Places API cannot geocode residential addresses. Laveen property at 11403 S 27th Dr has been wrong from the start — all geocoding services return the water works plant because they're optimized for commercial entities.
+
+**Vendor-confirmed fix:** Enable **Geocoding API** in GCP Console → build `/api/geocode` endpoint → call once per address → store lat/lng in Supabase.
+
+### Step 1 — Enable Geocoding API
+In Google Cloud Console → APIs & Services → Enable APIs → search "Geocoding API" → Enable.
+Same project as the existing Maps/Places key. No new credentials needed.
+
+### Step 2 — Build `/api/geocode.js`
+
+```javascript
+// api/geocode.js
+export default async function handler(req, res) {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  const { address } = req.query;
+  if (!address) return res.status(400).json({ error: 'address required' });
+  const key = process.env.YOUTUBE_API_KEY; // same GCP key
+  const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(address)}&key=${key}`;
+  const r = await fetch(url);
+  const data = await r.json();
+  if (data.status !== 'OK') return res.status(404).json({ error: data.status, data });
+  const { lat, lng } = data.results[0].geometry.location;
+  res.status(200).json({ lat, lng, formatted: data.results[0].formatted_address });
+}
+```
+
+### Step 3 — Geocode Laveen property
+
+```bash
+curl "https://requation.com/api/geocode?address=11403+S+27th+Dr+Laveen+AZ+85339"
+# → { lat: XX.XXXXX, lng: -XXX.XXXXX, formatted: "11403 S 27th Dr, Laveen Village, AZ 85339, USA" }
+```
+
+Store result in Supabase `properties` table → update `laveen.html` CENTER → done.
+
+### Scale Vision
+This same endpoint geocodes every future listing. Input: address. Output: lat/lng in DB. The rendering code never changes — only the data does (Rule 2).
+
+---
+
 ## Phase 4 · Google Places → Supabase + Yelp Deduplication
 
 **Goal:** Replace ephemeral Google Places dot markers (desktop-only bug) with persistent, deduplicated POI data stored in Supabase. One unified source for all map markers.

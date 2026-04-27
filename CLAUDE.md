@@ -307,6 +307,81 @@ https://maps.googleapis.com/maps/api/streetview
 
 ---
 
+## Google Maps — Implementation Rules (Vendor, 2026-04-28)
+
+These three rules apply to ALL pages that use any Google Maps surface (Maps JS API, CesiumJS + Google Tiles, etc.). They are structural laws, not suggestions.
+
+### Rule 1 — The Fixed Container Rule
+> "Always wrap the Google Map in a div with a defined CSS height. Never initialize the map if the container has `display: none` or zero height."
+
+```css
+/* CORRECT */
+#map {
+  width: 100%;
+  height: 100vh;   /* or fixed px — never leave undefined */
+}
+
+/* html, body must also have height set */
+html, body { height: 100%; margin: 0; }
+```
+
+**CesiumJS equivalent:** The `<div id="cesiumContainer">` must have explicit `width/height` before `new Cesium.Viewer()` is called. If the container is hidden or 0px at init time, the viewer silently fails.
+
+**Never set** `overflow: hidden` on `<html>` — it clips the CesiumJS canvas and breaks rendering.
+
+### Rule 2 — The Marker Sync Rule
+> "Store all coordinate data for pins in a separate JSON file, not inside the UI components. This allows us to scale to thousands of listings without rewriting the rendering code."
+
+**Requation implementation:**
+- Property coordinates live in Supabase `properties` table — not hardcoded in HTML
+- POI coordinates live in Supabase `places`/`restaurants` table — not in JS arrays
+- The `CENTER` constant in each page's HTML is the ONE allowed hardcoded coordinate — it is the camera starting point only, not a marker definition
+- All markers are constructed by iterating a data array: `rows.forEach(r => addMarker(r))`
+
+**Scale target:** Same rendering code must work for 2 listings and 2,000,000 listings. Data changes; rendering code does not.
+
+### Rule 3 — The Center & Pan Rule
+> "When a user clicks a listing, use `map.panTo()` to smoothly move the center of the map to the coordinates of that property, rather than re-loading the entire map."
+
+**Google Maps JS API:** `map.panTo({ lat, lng })`
+
+**CesiumJS equivalent:**
+```javascript
+// On listing click — fly smoothly, do not re-init viewer
+viewer.camera.flyTo({
+  destination: Cesium.Cartesian3.fromDegrees(lng, lat, 800),
+  orientation: { heading: Cesium.Math.toRadians(200), pitch: Cesium.Math.toRadians(-35), roll: 0 },
+  duration: 1.5
+});
+```
+
+**Never** destroy and re-create the viewer on listing click. The viewer is a singleton — pan/fly to new coordinates only.
+
+---
+
+## Geocoding API — Residential Address Strategy (Vendor, 2026-04-28)
+
+> "Google's Places database is optimized for commercial entities, landmarks, and public businesses, **not individual residential plots**. To get the exact coordinates for a residential property, use the **Google Maps Geocoding API** — the specialized tool designed to turn any specific street address into lat/lng."
+
+**Why Places API can't find 11403 S 27th Dr:** Confirmed by vendor. Places API is for businesses. Residential addresses require the Geocoding API.
+
+**The fix for Laveen property coordinates:**
+1. Enable **Geocoding API** in GCP Console (same project, just needs enabling)
+2. Call it server-side in a new `/api/geocode` endpoint
+3. Store the result in Supabase `properties` table
+4. Render from Supabase — never hardcode again
+
+**Geocoding Utility pattern (vendor recommended):**
+```
+Input: address string → Server → Geocoding API → Output: lat/lng → Store in DB → Inject into marker
+```
+
+This is how all 33 million US business listings will eventually be geocoded: one API call per address, result stored permanently, never repeated.
+
+**Note on Laveen Village center:** `33.3826, -112.1236` is the approximate geographic center of Laveen Village — useful as a camera starting point, NOT as the property pin coordinate. The property at 11403 S 27th Dr is approximately 2.5 miles south of this point (~33.342).
+
+---
+
 ## After Every Push — Verify These
 
 ```bash
