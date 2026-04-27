@@ -325,6 +325,94 @@ grep "openPanel" dtla.html | grep -v "function\|onclick\|marker"
 
 ---
 
+## CesiumJS — Vendor-Approved Patterns (2026-04-28)
+
+**Source:** Official CesiumJS/Google documentation provided by Vik. Stay 100% faithful to these.
+
+### POI Markers — Billboard Entities (NOT DOM Overlay)
+
+**Always use `viewer.entities.add({ billboard: {...} })` for Google Places POI markers.**
+DOM overlay + `SceneTransforms.worldToWindowCoordinates` breaks on mobile. Billboard entities are native CesiumJS and render on all devices.
+
+```javascript
+// ✅ CORRECT — vendor pattern
+viewer.entities.add({
+  position: Cesium.Cartesian3.fromDegrees(lng, lat),
+  billboard: {
+    image: place.icon,                    // server-supplied icon path
+    verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
+    heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
+    scaleByDistance: new Cesium.NearFarScalar(150, 1.0, 1500000, 0.3),
+  },
+  label: {
+    text: place.name,
+    font: '11px DM Mono, monospace',
+    verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
+    pixelOffset: new Cesium.Cartesian2(0, -36),
+    heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
+    show: false    // hidden by default — show on hover or zoom threshold
+  }
+});
+
+// ❌ WRONG — DOM overlay (mobile-invisible, breaks on high-DPI)
+// const dot = document.createElement('div');
+// viewer.scene.postRender.addEventListener(() => { ... SceneTransforms ... });
+```
+
+**Exception:** The property pin (red circle + pulse ring CSS) remains a DOM overlay — custom CSS animation and click → openPanel require it. All Google Places POI markers must use billboard entities.
+
+### Backend — Icon Mapping from `types[]`
+
+The `/api/places` endpoint must map Google's `types[]` array to a local icon asset path and return it as `place.icon`. Frontend never hardcodes icon paths — it reads them from the server response.
+
+```javascript
+function getIcon(types) {
+  if (types.some(t => ['restaurant','cafe','food'].includes(t))) return '/assets/pins/restaurant-pin.png';
+  if (types.some(t => ['grocery_or_supermarket','supermarket'].includes(t))) return '/assets/pins/grocery-pin.png';
+  if (types.some(t => ['gym','fitness_center'].includes(t))) return '/assets/pins/gym-pin.png';
+  if (types.some(t => ['shopping_mall','store'].includes(t))) return '/assets/pins/shopping-pin.png';
+  if (types.some(t => ['museum','art_gallery'].includes(t))) return '/assets/pins/culture-pin.png';
+  if (types.some(t => ['park'].includes(t))) return '/assets/pins/park-pin.png';
+  if (types.some(t => ['movie_theater'].includes(t))) return '/assets/pins/entertainment-pin.png';
+  if (types.some(t => ['lodging','hotel'].includes(t))) return '/assets/pins/hotel-pin.png';
+  return '/assets/pins/default-pin.png';
+}
+```
+
+### Camera Fly-In After Entity Load
+
+```javascript
+// Option A: Fly to specific coords + altitude
+viewer.camera.flyTo({
+  destination: Cesium.Cartesian3.fromDegrees(lng, lat, 1500),
+  orientation: { heading: Cesium.Math.toRadians(0), pitch: Cesium.Math.toRadians(-45), roll: 0 },
+  duration: 3.0
+});
+
+// Option B (preferred): Auto-frame all loaded markers
+viewer.flyTo(entities, { duration: 3.0 });
+```
+
+**Full reference:** `docs/cesiumjs-vendor-patterns.md`
+
+---
+
+## Claude Code Guardrails (Vendor — Google/CesiumJS docs)
+
+These apply to ALL sessions on this project:
+
+1. **Environment keys** — NEVER bake API keys directly into Node.js source files. Always read from `.env` / Vercel environment variables. The GCP key embedded in HTML client files is a publishable key that is intentionally client-safe — that is the one exception.
+
+2. **CLAUDE.md** — This file IS the project memory. Read it fully before any session. It is equivalent to running `/init` in Claude Code before heavy tasks.
+
+3. **Pin labels** — Default to `show: false`. Only reveal on hover or at a defined zoom threshold. Always-visible labels = visual noise on a populated 3D map.
+
+4. **One change at a time** — Execute, confirm with user, then next. No cascading changes.
+
+5. **Billboard entities over DOM overlays** — See CesiumJS vendor pattern above.
+
+---
+
 ## Working With the User
 
 - **Always confirm before pushing** — state what changed and what didn't
