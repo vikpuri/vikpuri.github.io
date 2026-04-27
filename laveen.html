@@ -464,18 +464,19 @@ const PROP = {
     'https://i.imgur.com/fJUhniW.jpeg'
   ],
   videos: [
-    {id:'wn9pZDkd6bo',title:'South Mountain · Sonoran Desert'},
-    {id:'JmSbKXsZfB0',title:'Phoenix Metro — Aerial 4K'},
-    {id:'vVX-PrBRtTY',title:'Arizona Farmhouse · Desert Modern'},
-    {id:'Hs8aCPuEXec',title:'Laveen · Loop 202 Corridor'},
-    {id:'5-0KkO9CJPE',title:'South Mountain — Golden Hour'},
-    {id:'sU1NmE_Bu6I',title:'Desert Living · Requation AZ'},
-    {id:'8_WJP4lj4BA',title:'Phoenix Skyline — City of Tomorrow'},
-    {id:'k3Th4sELfn0',title:'Arizona Luxury — Desert Estate'},
-    {id:'oH3JefYb6YM',title:'Phoenix Urban Farm'},
-    {id:'Ny_5OMGToC4',title:'Arizona Dream · Open Skies'},
+    {id:'wn9pZDkd6bo',title:'Desert Rain — Monsoon Season'},
+    {id:'lTk4aLK1MYo',title:"Nature's Light — Laveen"},
+    {id:'HmJqTSnu1e8',title:'Love & Desert Sky'},
+    {id:'Rp3JzD2jseY',title:'Kubla Khan — Desert Pleasuredome'},
+    {id:'jKe7eilvgHM',title:"Morrison's Desert"},
     {id:'hrPKYsoz_0U',title:'Monsoon at South Mountain'},
-    {id:'M7MY9zNWY50',title:'Desert Light — Laveen'}
+    {id:'KEuwFQn8bmA',title:'Desert Nature — Golden Hour'},
+    {id:'yKjrEa8IT9c',title:'Rain on the Mesa'},
+    {id:'M7MY9zNWY50',title:'Desert Light — Laveen Estate'},
+    {id:'ut67g0F1lXw',title:"Nature's Canvas — Arizona"},
+    {id:'YO1DPp3Bi8c',title:'The Green Estate — Monsoon'},
+    {id:'sJMBOYnNlgE',title:'Desert Love — South Mountain'},
+    {id:'sU1NmE_Bu6I',title:'Light & Shadow — Laveen'}
   ]
 };
 
@@ -723,8 +724,8 @@ async function initCesium() {
   viewer.scene.primitives.add(tileset);
 
   viewer.camera.flyTo({
-    destination: Cesium.Cartesian3.fromDegrees(CENTER.lng, CENTER.lat, 500),
-    orientation: { heading:Cesium.Math.toRadians(190), pitch:Cesium.Math.toRadians(-32), roll:0 },
+    destination: Cesium.Cartesian3.fromDegrees(CENTER.lng, CENTER.lat, 1200),
+    orientation: { heading:Cesium.Math.toRadians(190), pitch:Cesium.Math.toRadians(-40), roll:0 },
     duration: 2
   });
 
