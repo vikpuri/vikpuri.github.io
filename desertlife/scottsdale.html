@@ -139,8 +139,18 @@ const SB_HDRS = { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY };
 
 const SDALE_ZIPS = ['85018','85250','85251','85252','85253','85254','85255','85257','85258','85259','85260','85262','85266','85281','85282'];
 
-// ♥ Arcadia / Scottsdale favorites — add when Vik specifies
-const HEARTS = [];  // Ready for input
+// ♥ Arcadia / Scottsdale favorites
+const HEARTS = [
+  { name: 'LaGrande Orange',             lat: 33.5097, lng: -111.9985, cat: 'Cafe · Brunch',        addr: '4410 N 40th St, Phoenix AZ 85018' },
+  { name: 'AJ\'s Fine Foods',            lat: 33.4973, lng: -111.9796, cat: 'Gourmet Grocery',      addr: '4750 E Indian School Rd, Phoenix AZ 85018' },
+  { name: 'Neiman Marcus Cafe',          lat: 33.5076, lng: -111.9262, cat: 'Cafe · Fashion Square', addr: '7600 E Camelback Rd, Scottsdale AZ 85251' },
+  { name: 'Cheesecake Factory',          lat: 33.5068, lng: -111.9270, cat: 'American · Fashion Square', addr: '7014-1 E Camelback Rd, Scottsdale AZ 85251' },
+  { name: 'DeFalco\'s',                  lat: 33.4773, lng: -111.9244, cat: 'Italian Deli · Market', addr: '2334 N Scottsdale Rd, Scottsdale AZ 85257' },
+  { name: 'Dick\'s Last Resort',         lat: 33.4951, lng: -111.9252, cat: 'Bar · Old Town',        addr: '3945 N Goldwater Blvd, Scottsdale AZ 85251' },
+  { name: 'Old Town Scottsdale Tavern',  lat: 33.4948, lng: -111.9218, cat: 'Bar · Old Town',        addr: '7320 E Shoeman Ln, Scottsdale AZ 85251' },
+  { name: 'Wildflower Bread Company',    lat: 33.5046, lng: -111.9277, cat: 'Bakery · Cafe',         addr: '7135 E Camelback Rd, Scottsdale AZ 85251' },
+  { name: "Gus' Fried Chicken",         lat: 33.4697, lng: -112.0786, cat: 'Fried Chicken',          addr: '3508 N 7th Ave, Phoenix AZ 85013' },
+];
 
 let map, advMarker;
 
