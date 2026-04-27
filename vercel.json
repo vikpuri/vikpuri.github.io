@@ -2,9 +2,14 @@
   "buildCommand": "node build.js",
   "outputDirectory": "dist",
   "rewrites": [
-    { "source": "/",              "destination": "/gm-landing.html" },
-    { "source": "/dtla",          "destination": "/dtla.html" },
-    { "source": "/dtla-template", "destination": "/dtla-template.html" },
-    { "source": "/laveen",        "destination": "/laveen.html" }
+    { "source": "/",                 "destination": "/gm-landing.html" },
+    { "source": "/dtla",             "destination": "/dtla.html" },
+    { "source": "/laveen",           "destination": "/laveen.html" },
+    { "source": "/mylocal",          "destination": "/mylocal.html" },
+    { "source": "/lalife",           "destination": "/lalife.html" },
+    { "source": "/lalife/weho",      "destination": "/lalife/weho.html" },
+    { "source": "/lalife/venice",    "destination": "/lalife/venice.html" },
+    { "source": "/desertlife",       "destination": "/desertlife.html" },
+    { "source": "/dashboard",        "destination": "/dashboard.html" }
   ]
 }

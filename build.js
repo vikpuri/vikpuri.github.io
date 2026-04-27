@@ -48,7 +48,7 @@ fs.mkdirSync('dist');
 // ── Inject secrets into HTML files ───────────────────────────────
 const HTML_FILES = [
   'gm-landing.html', 'gm-dtla-v1.html', 'map-test.html', 'dtla.html', 'dtla-template.html', 'laveen.html',
-  'dashboard.html', 'grid-demo.html'
+  'dashboard.html', 'grid-demo.html', 'mylocal.html',
 ];
 HTML_FILES.forEach(f => {
   if (!fs.existsSync(f)) return;
@@ -56,7 +56,23 @@ HTML_FILES.forEach(f => {
   console.log('  ✓', f);
 });
 
-// ── Copy redirect stubs (no secrets in these) ─────────────────────
+// ── Copy sub-page directories (lalife, desertlife) — full directory ──
+['lalife', 'desertlife'].forEach(dir => {
+  if (!fs.existsSync(dir)) return;
+  fs.mkdirSync(path.join('dist', dir), { recursive: true });
+  fs.readdirSync(dir).forEach(f => {
+    const src = path.join(dir, f);
+    const dst = path.join('dist', dir, f);
+    if (f.endsWith('.html')) {
+      fs.writeFileSync(dst, inject(fs.readFileSync(src, 'utf8')));
+      console.log('  ✓', dir + '/' + f);
+    } else {
+      copyItem(src, dst);
+    }
+  });
+});
+
+// ── Copy redirect stubs ────────────────────────────────────────────
 ['dtla', 'laveen'].forEach(dir => {
   copyItem(path.join(dir, 'index.html'), path.join('dist', dir, 'index.html'));
 });

@@ -886,7 +886,7 @@ async function initCesium() {
   viewer.imageryLayers.removeAll();
 
   /* Google Photorealistic 3D Tiles */
-  const tileset = await Cesium.createGooglePhotorealistic3DTileset();
+  const tileset = await Cesium.createGooglePhotorealistic3DTileset({ key: 'AIzaSyD7UMA5ILPXv9QK2_gvxPVth30MavRd2WQ' });
   viewer.scene.primitives.add(tileset);
 
   /* Fly to property — arrive tilted over South Park DTLA */
