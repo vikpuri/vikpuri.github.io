@@ -286,10 +286,10 @@ function rqCheck(pw){return rqHash(pw)===rqGetHash()}
         <div class="sec-lbl">Services &amp; Consoles</div>
         <div class="hub-grid">
 
-          <a class="svc" href="https://app.netlify.com" target="_blank">
+          <a class="svc" href="https://vercel.com/dashboard" target="_blank">
             <div class="svc-status ok" id="st-netlify"></div>
-            <div class="svc-icon">⚡</div>
-            <div class="svc-name">Netlify</div>
+            <div class="svc-icon">▲</div>
+            <div class="svc-name">Vercel</div>
           </a>
 
           <a class="svc" href="https://supabase.com/dashboard/project/mpmprnjhunjfeacikgml" target="_blank">
@@ -304,10 +304,10 @@ function rqCheck(pw){return rqHash(pw)===rqGetHash()}
             <div class="svc-name">GitHub</div>
           </a>
 
-          <a class="svc" href="https://account.mapbox.com" target="_blank">
+          <a class="svc" href="https://console.cloud.google.com" target="_blank">
             <div class="svc-status ok"></div>
-            <div class="svc-icon">🗺</div>
-            <div class="svc-name">Mapbox</div>
+            <div class="svc-icon">🌐</div>
+            <div class="svc-name">Google Cloud</div>
           </a>
 
           <a class="svc" href="https://studio.youtube.com" target="_blank">
@@ -334,10 +334,10 @@ function rqCheck(pw){return rqHash(pw)===rqGetHash()}
             <div class="svc-name">Stripe</div>
           </a>
 
-          <a class="svc" href="https://app.predicthq.com" target="_blank">
+          <a class="svc" href="https://dash.cloudflare.com" target="_blank">
             <div class="svc-status warn"></div>
-            <div class="svc-icon">📅</div>
-            <div class="svc-name">PredictHQ</div>
+            <div class="svc-icon">🔶</div>
+            <div class="svc-name">Cloudflare</div>
           </a>
 
           <a class="svc" href="/grid-demo.html" target="_blank">
@@ -375,15 +375,16 @@ function rqCheck(pw){return rqHash(pw)===rqGetHash()}
       <div>
         <div class="sec-lbl">API Health</div>
         <div class="health-grid">
-          <div class="hrow"><div class="hdot ok"></div><div class="hname">Mapbox GL JS</div><div class="hnote">v3.3.0 · ok</div></div>
+          <div class="hrow"><div class="hdot ok"></div><div class="hname">CesiumJS 1.140</div><div class="hnote">Google 3D Tiles · live</div></div>
           <div class="hrow"><div class="hdot ok" id="h-sb-dot"></div><div class="hname">Supabase DB</div><div class="hnote" id="h-sb-note">querying…</div></div>
+          <div class="hrow"><div class="hdot ok"></div><div class="hname">Google Places API</div><div class="hnote" id="h-places-note">⚠ dots desktop-only</div></div>
           <div class="hrow"><div class="hdot ok"></div><div class="hname">Yelp Fusion</div><div class="hnote">POI data</div></div>
+          <div class="hrow"><div class="hdot ok"></div><div class="hname">ESPN Events</div><div class="hnote">free · no key</div></div>
           <div class="hrow"><div class="hdot ok"></div><div class="hname">Radio Streams</div><div class="hnote">KLOS · Mountain</div></div>
           <div class="hrow"><div class="hdot ok"></div><div class="hname">Resend Email</div><div class="hnote">lead capture</div></div>
           <div class="hrow"><div class="hdot chk" id="h-yt-dot"></div><div class="hname">YouTube Data v3</div><div class="hnote" id="h-yt-note">checking…</div></div>
           <div class="hrow"><div class="hdot warn"></div><div class="hname">Twilio SMS</div><div class="hnote">CORS fix pending</div></div>
-          <div class="hrow"><div class="hdot warn"></div><div class="hname">PredictHQ Events</div><div class="hnote">404 · plan check</div></div>
-          <div class="hrow"><div class="hdot warn"></div><div class="hname">Stripe</div><div class="hnote">test mode</div></div>
+          <div class="hrow"><div class="hdot warn"></div><div class="hname">Stripe</div><div class="hnote">test mode · no bank</div></div>
         </div>
       </div>
 
@@ -417,7 +418,7 @@ function rqCheck(pw){return rqHash(pw)===rqGetHash()}
       <div class="map-badge">
         <strong>DTLA</strong> 34.0455 · -118.2587<br>
         <strong>Laveen</strong> 33.3428 · -112.1181<br>
-        <span style="color:var(--t4)">Mapbox GL JS v3.3 · Standard · 3D · Night</span>
+        <span style="color:var(--t4)">CesiumJS 1.140 · Google Photorealistic 3D Tiles · Vercel</span>
       </div>
     </div>
 
@@ -430,7 +431,7 @@ function rqCheck(pw){return rqHash(pw)===rqGetHash()}
 
     <div class="arch-head">
       <div class="arch-title">Platform Architecture</div>
-      <div class="arch-sub">Requation · JSON data model · Node.js serverless pipeline · Google Maps migration path · requation.com</div>
+      <div class="arch-sub">Requation · CesiumJS + Google Photorealistic 3D · Vercel serverless · Supabase · requation.com</div>
     </div>
 
     <!-- STAT ROW -->
@@ -468,52 +469,60 @@ function rqCheck(pw){return rqHash(pw)===rqGetHash()}
       <div class="layer-col">
         <div class="layer-head logic">② Logic Layer</div>
         <div class="layer-box">
-          <div class="lb-title">Netlify Serverless</div>
-          <div class="lb-body">Runtime: Node.js 18<br>Build: esbuild via netlify.toml<br>Auto-deploy on git push master<br>Dir: <code>netlify/functions/</code></div>
+          <div class="lb-title">Vercel Serverless</div>
+          <div class="lb-body">Runtime: Node.js 18<br>Build: <code>node build.js → dist/</code><br>Auto-deploy on git push master<br>Dir: <code>api/*.js</code> → <code>/api/*</code></div>
         </div>
         <div class="layer-box">
-          <div class="lb-title">youtube.js</div>
-          <div class="lb-body">YouTube Data API v3 proxy.<br>Fetches channel videos for<br>DTLA + Laveen billboard.</div>
+          <div class="lb-title">places.js</div>
+          <div class="lb-body">Google Places (New) v1 proxy.<br>nearbySearch 10 types · 20 POIs.<br>⚠ Results desktop-only on map.<br>→ Needs Supabase persistence.</div>
         </div>
         <div class="layer-box">
           <div class="lb-title">yelp.js</div>
           <div class="lb-body">Yelp Fusion Business Search.<br>Enriches POI markers with<br>ratings, photos, hours.</div>
         </div>
         <div class="layer-box">
-          <div class="lb-title">twilio.js</div>
-          <div class="lb-body">SMS via Twilio REST API.<br>Click-to-contact from POI popup.<br>⚠ CORS OPTIONS fix pending.</div>
+          <div class="lb-title">espn.js</div>
+          <div class="lb-body">ESPN public API · no key.<br>Sports scores + schedules.<br>DTLA (Lakers/Dodgers/Kings)<br>AZ (Suns/Cardinals/D-Backs)</div>
         </div>
         <div class="layer-box">
-          <div class="lb-title">predicthq.js</div>
-          <div class="lb-body">Event feed · 19+ sources.<br>SOAPBOX map markers.<br>⚠ 404 · plan upgrade needed.</div>
+          <div class="lb-title">twilio.js · aerialview.js</div>
+          <div class="lb-body">Twilio SMS: click-to-contact.<br>⚠ CORS OPTIONS pending.<br>Aerial View: Google aerial<br>footage by postal address.</div>
+        </div>
+        <div class="layer-box">
+          <div class="lb-title">contact.js</div>
+          <div class="lb-body">Resend email + Twilio SMS.<br>Lead capture from Contact modal.<br>Runs server-side — keys hidden.</div>
         </div>
       </div>
 
       <div class="layer-col">
         <div class="layer-head delivery">③ Delivery Layer</div>
         <div class="layer-box">
-          <div class="lb-title">Netlify CDN</div>
-          <div class="lb-body">Domain: requation.com<br>HTTPS · TLS 1.3 · Let's Encrypt<br>Global edge network<br>Build: <code>node build.js → dist/</code></div>
+          <div class="lb-title">Vercel CDN</div>
+          <div class="lb-body">Domain: requation.com<br>HTTPS · TLS 1.3 · auto-renew<br>Global edge · ~10s deploys<br>Static + serverless unified</div>
         </div>
         <div class="layer-box">
           <div class="lb-title">Static HTML pages</div>
           <div class="lb-body">/ · /dtla · /laveen<br>/lalife · /desertlife<br>/dashboard · /grid-demo.html<br>No framework · Vanilla JS<br>No client-side bundler</div>
         </div>
         <div class="layer-box">
-          <div class="lb-title">netlify.toml redirects</div>
-          <div class="lb-body">/dtla → /dtla/index.html<br>/laveen → /laveen/index.html<br>/lalife → /lalife/index.html<br>/desertlife → /desertlife/…<br>/dashboard → /dashboard.html</div>
+          <div class="lb-title">vercel.json rewrites</div>
+          <div class="lb-body">/dtla → dtla.html<br>/laveen → laveen.html<br>/lalife → lalife.html<br>/dashboard → dashboard.html<br><code>/api/*</code> → serverless fns</div>
+        </div>
+        <div class="layer-box">
+          <div class="lb-title">Cloudflare DNS (target)</div>
+          <div class="lb-body">NS migration: Netlify DNS → CF<br>Orange-cloud proxy for DDoS<br>Edge cache: bypass <code>/api/*</code><br>SSL/TLS: Full strict · HSTS</div>
         </div>
       </div>
 
       <div class="layer-col">
         <div class="layer-head pres">④ Presentation Layer</div>
-        <div class="layer-box">
-          <div class="lb-title">Mapbox GL JS v3.3 (now)</div>
-          <div class="lb-body">Standard style · 3D buildings<br>Pitch 62° · Fog · Night preset<br><code>mapboxgl.Marker</code> per POI<br>Custom HTML DOM markers</div>
+        <div class="layer-box" style="opacity:.5;border-style:dashed">
+          <div class="lb-title" style="color:var(--t3)">Mapbox GL JS (retired)</div>
+          <div class="lb-body">Standard style · Prototype only.<br>Replaced 2026-04-25.<br>Repo: vikpuri.github.io</div>
         </div>
         <div class="layer-box hi">
-          <div class="lb-title">→ Google Maps (target)</div>
-          <div class="lb-body">Maps JS API + Places API<br>Photorealistic 3D Tiles<br><code>AdvancedMarkerElement</code><br><code>Maps3DElement</code> globe</div>
+          <div class="lb-title">✓ CesiumJS 1.140 — LIVE</div>
+          <div class="lb-body">Google Photorealistic 3D Tiles<br>DOM overlay pins · postRender<br>flyTo / setView camera<br>Property pages + landing globe</div>
         </div>
         <div class="layer-box">
           <div class="lb-title">NEON MAPS Ad Layer</div>
@@ -558,9 +567,12 @@ function rqCheck(pw){return rqHash(pw)===rqGetHash()}
 rows.forEach(b =&gt; {
   <span class="j-key">const</span> el = document.createElement(<span class="j-str">'div'</span>);
   el.className = <span class="j-str">'poi-marker'</span>;
-  <span class="j-key">new</span> mapboxgl.Marker({ element: el })
-    .setLngLat([b.lng, b.lat])
-    .addTo(map);  <span class="j-cmt">// one row → one map pin</span>
+  <span class="j-cmt">// CesiumJS DOM overlay — projected each postRender frame</span>
+  <span class="j-key">const</span> pos = Cesium.Cartesian3.fromDegrees(b.lng, b.lat, <span class="j-num">0</span>);
+  viewer.scene.postRender.addEventListener(() =&gt; {
+    <span class="j-key">const</span> sc = Cesium.SceneTransforms.worldToWindowCoordinates(viewer.scene, pos);
+    <span class="j-key">if</span>(sc){ el.style.left = sc.x + <span class="j-str">'px'</span>; el.style.top = sc.y + <span class="j-str">'px'</span>; }
+  });  <span class="j-cmt">// one row → one DOM pin over 3D tile mesh</span>
 });</div>
 
     <!-- MIGRATION PATH -->
@@ -569,28 +581,28 @@ rows.forEach(b =&gt; {
       <div class="arch-sub">Same JSON data, same Supabase DB — swap only the map SDK</div>
     </div>
     <div class="migration-path">
-      <div class="mig-step">
-        <div class="mig-lbl now">● Now · Prototype</div>
-        <div class="mig-title">Mapbox GL JS v3.3</div>
-        <div class="mig-body">Concept proven. 2 markets live. 47+ POIs. NEON MAPS ad layer built. Full Node.js serverless pipeline running on Netlify.</div>
+      <div class="mig-step" style="opacity:.55">
+        <div class="mig-lbl" style="color:var(--t3)">✓ Retired · Phase 1</div>
+        <div class="mig-title" style="color:var(--t3)">Mapbox GL JS v3.3</div>
+        <div class="mig-body">Concept proven. 2 markets. 47+ POIs. NEON MAPS layer built. Netlify pipeline. Retired 2026-04-25.</div>
+      </div>
+      <div class="mig-arr">→</div>
+      <div class="mig-step" style="opacity:.55">
+        <div class="mig-lbl" style="color:var(--t3)">✓ Complete · Phase 2</div>
+        <div class="mig-title" style="color:var(--t3)">Google Maps JS API</div>
+        <div class="mig-body">Maps JS + Places API + <code style="color:var(--cyan);font-size:.46rem">AdvancedMarkerElement</code>. Street View + Aerial View tabs on property card. Cinematic moveCamera on load.</div>
       </div>
       <div class="mig-arr">→</div>
       <div class="mig-step">
-        <div class="mig-lbl next">Next · Migration</div>
-        <div class="mig-title">Google Maps JS API</div>
-        <div class="mig-body">Replace <code style="color:var(--cyan);font-size:.46rem">mapboxgl.Map()</code> with <code style="color:var(--cyan);font-size:.46rem">google.maps.Map()</code>. Replace HTML markers with <code style="color:var(--cyan);font-size:.46rem">AdvancedMarkerElement</code>. Same Supabase JSON feed unchanged.</div>
+        <div class="mig-lbl now">● Now · Phase 3</div>
+        <div class="mig-title">CesiumJS + Google 3D Tiles</div>
+        <div class="mig-body"><code style="color:var(--cyan);font-size:.46rem">createGooglePhotorealistic3DTileset()</code>. DOM overlay pins. Landing globe. /dtla + /laveen on Vercel. Google Places colored dot markers. 2026-04-25.</div>
       </div>
       <div class="mig-arr">→</div>
       <div class="mig-step">
-        <div class="mig-lbl next">Next · 3D</div>
-        <div class="mig-title">Photorealistic 3D Tiles</div>
-        <div class="mig-body">Enable <code style="color:var(--cyan);font-size:.46rem">Maps3DElement</code> + photorealistic tiles API. Every business floats as a NEON MAPS object inside Google's 3D city mesh.</div>
-      </div>
-      <div class="mig-arr">→</div>
-      <div class="mig-step">
-        <div class="mig-lbl future">Vision · Scale</div>
+        <div class="mig-lbl future">Vision · Phase 4</div>
         <div class="mig-title">33M US Businesses</div>
-        <div class="mig-body">Every licensed business with a physical address = 1 DB row = 1 3D map object. <code style="color:var(--gold);font-size:.46rem">neon_tier</code> field controls which NEON MAPS ad template renders at that coordinate.</div>
+        <div class="mig-body">Every licensed business = 1 DB row = 1 3D map object. <code style="color:var(--gold);font-size:.46rem">neon_tier</code> field controls NEON MAPS ad template. Google Places → Supabase with Yelp dedup.</div>
       </div>
     </div>
 
@@ -621,9 +633,10 @@ rows.forEach(b =&gt; {
         <div class="ap-title">Data Pipeline</div>
         <div class="ap-body">
           <strong>Ingest</strong> — Business data entered as JSON rows in Supabase. AZ and CA data isolated by <code>state</code> column. Never mixed.<br><br>
-          <strong>Enrich</strong> — Yelp Fusion adds ratings, photos, hours at render time via Netlify Node.js proxy. No enrichment data stored in DB.<br><br>
+          <strong>Enrich</strong> — Yelp Fusion adds ratings, photos, hours via Vercel <code>/api/yelp</code> proxy. No enrichment data stored in DB.<br><br>
+          <strong>Places</strong> — Google Places (New) v1 via <code>/api/places</code>. Returns up to 20 POIs in 800m radius. ⚠ DOM dot markers currently desktop-only — not rendering on Asus/iPhone. Target: persist results to Supabase <code>places</code> table + dedup against Yelp by name + coordinates (≤50m).<br><br>
           <strong>Serve</strong> — PostgREST REST API streams JSON directly to browser. No ORM, no framework, direct <code>fetch()</code>.<br><br>
-          <strong>Render</strong> — Vanilla JS constructs one DOM element per JSON row, passed to <code>mapboxgl.Marker</code>. 1 row → 1 pin.<br><br>
+          <strong>Render</strong> — Vanilla JS DOM overlay pins via CesiumJS <code>SceneTransforms.worldToWindowCoordinates</code>. 1 row → 1 pin.<br><br>
           <strong>Advertise</strong> — <code>neon_tier</code> field on the record controls which NEON MAPS template renders at that lat/lng.
         </div>
       </div>
@@ -632,11 +645,11 @@ rows.forEach(b =&gt; {
         <div class="ap-title">Tech Stack</div>
         <div class="ap-body">
           <strong>Frontend</strong> — Vanilla HTML / CSS / JavaScript. No React, no Vue, no webpack. Intentional: fast load, zero dependency rot.<br><br>
-          <strong>Maps</strong> — Mapbox GL JS v3.3.0 (prototype). Target: Google Maps JS API + Places API + Photorealistic 3D Tiles.<br><br>
+          <strong>Maps</strong> — CesiumJS 1.140 + Google Photorealistic 3D Tiles (<code>createGooglePhotorealistic3DTileset</code>). Landing page: CesiumJS globe. Property pages: street-level 3D flyTo. Google Maps JS API used for Street View + Aerial View tabs.<br><br>
           <strong>Database</strong> — Supabase PostgreSQL. PostgREST REST. Publishable anon key (safe to embed in client HTML).<br><br>
-          <strong>Serverless</strong> — Netlify Functions, Node.js 18. API proxies only — secrets never exposed to client.<br><br>
-          <strong>Deploy</strong> — GitHub push → Netlify auto-build → <code>node build.js</code> → <code>dist/</code> → CDN.<br><br>
-          <strong>Domain</strong> — requation.com · Netlify CDN · Let's Encrypt TLS · auto-renew.
+          <strong>Serverless</strong> — Vercel Functions, Node.js 18. <code>api/</code> dir → <code>/api/*</code> routes. Secrets in Vercel env vars — never in client HTML.<br><br>
+          <strong>Deploy</strong> — GitHub push → Vercel auto-build (~10s) → <code>node build.js</code> → <code>dist/</code> → CDN. vercel.json controls clean URLs.<br><br>
+          <strong>Domain</strong> — requation.com · Vercel CDN · TLS auto-renew. Cloudflare DNS migration pending (DDoS + edge cache).
         </div>
       </div>
 
@@ -778,10 +791,11 @@ async function loadKPIs(){
 
 async function checkYT(){
   try{
-    const r=await fetch('/.netlify/functions/youtube?channelId=UC_x5XG1OV2P6uZZ5FSM9Ttw&maxResults=1');
-    const ok=r.ok||r.status===200;
+    const key='AIzaSyD7UMA5ILPXv9QK2_gvxPVth30MavRd2WQ';
+    const r=await fetch(`https://www.googleapis.com/youtube/v3/videos?id=HrxX9TBj2zY&key=${key}&part=id`);
+    const ok=r.ok;
     document.getElementById('h-yt-dot').className='hdot '+(ok?'ok':'warn');
-    document.getElementById('h-yt-note').textContent=ok?'ok':'quota / key check';
+    document.getElementById('h-yt-note').textContent=ok?'ok · Data v3':'quota / key check';
     document.getElementById('st-youtube').className='svc-status '+(ok?'ok':'warn');
   }catch(e){
     document.getElementById('h-yt-dot').className='hdot warn';
