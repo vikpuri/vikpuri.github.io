@@ -736,7 +736,7 @@ async function initCesium() {
   document.body.appendChild(pinEl);
   pinEl.addEventListener('click', openPanel);
 
-  const propPos = Cesium.Cartesian3.fromDegrees(CENTER.lng, CENTER.lat, 30);
+  const propPos = Cesium.Cartesian3.fromDegrees(CENTER.lng, CENTER.lat, 0);
   viewer.scene.postRender.addEventListener(() => {
     const pos = Cesium.SceneTransforms.worldToWindowCoordinates(viewer.scene, propPos);
     if(pos){pinEl.style.left=(pos.x-19)+'px';pinEl.style.top=(pos.y-19)+'px';pinEl.style.display='block';}
