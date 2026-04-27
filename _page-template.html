@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Requation · FILL_PAGE_TITLE</title>
+  <meta property="og:type"        content="website">
+  <meta property="og:url"         content="https://requation.com/FILL_SLUG">
+  <meta property="og:title"       content="FILL_OG_TITLE — Requation">
+  <meta property="og:description" content="FILL_OG_DESC">
+  <meta property="og:image"       content="FILL_OG_IMAGE">
+
+  <!-- CesiumJS 1.140 — vendor Rule 1: always loaded before container init -->
+  <link href="https://cesium.com/downloads/cesiumjs/releases/1.140/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
+  <script src="https://cesium.com/downloads/cesiumjs/releases/1.140/Build/Cesium/Cesium.js"></script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@1,700&family=Raleway:wght@600&family=Source+Serif+4:wght@300;400;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <style>
+    /* ── Design tokens ── */
+    :root {
+      --gold:#C9A84C; --gold-dim:rgba(201,168,76,.1); --gold-border:rgba(201,168,76,.3);
+      --cream:#FAF8F4; --cream-2:#F4F1EB; --cream-3:#EDE9E0;
+      --ink:#1C1C1C; --ink-2:#2E2E2E; --ink-3:#444;
+      --rule:rgba(0,0,0,.12); --rule-heavy:rgba(0,0,0,.22);
+      --text-muted:#666; --sand:#E8DDD0;
+      --waymo:#1A73E8; --waymo-dim:rgba(26,115,232,.08); --waymo-border:rgba(26,115,232,.28);
+      --header-h:60px;
+    }
+    *,::before,::after { box-sizing:border-box; margin:0; padding:0; }
+
+    /* ── Rule 1: html gets height only, overflow:hidden on body only ── */
+    html { height:100%; }
+    body { height:100%; background:var(--cream); color:var(--ink);
+           font-family:'Source Serif 4',Georgia,serif; overflow:hidden; }
+
+    /* ── Rule 1: CesiumJS container — explicit dimensions before Viewer init ── */
+    #cesiumContainer { position:fixed; top:0; left:0; width:100%; height:100%; z-index:0; }
+    .cesium-viewer-toolbar,
+    .cesium-viewer-animationContainer,
+    .cesium-viewer-timelineContainer,
+    .cesium-viewer-fullscreenContainer,
+    .cesium-viewer-vrContainer { display:none !important; }
+    .cesium-widget-credits { z-index:2 !important; bottom:4px !important; right:4px !important; }
+
+    /* ── Header ── */
+    header {
+      position:fixed; top:0; left:0; right:0; height:var(--header-h); z-index:100;
+      background:linear-gradient(180deg,#fff 0%,var(--cream) 100%);
+      border-bottom:2px solid var(--ink);
+      display:flex; align-items:center; justify-content:space-between; padding:0 24px;
+      box-shadow:0 2px 16px rgba(0,0,0,.07);
+    }
+    .logo-wrap { display:flex; align-items:center; cursor:pointer; gap:12px; }
+    .logo-addr { font-family:'DM Mono',monospace; font-size:.5rem; letter-spacing:.12em;
+                 text-transform:uppercase; color:var(--text-muted);
+                 border-left:1px solid var(--sand); padding-left:12px; }
+    nav { display:flex; align-items:center; gap:24px; }
+    nav a, nav button {
+      font-family:'Source Serif 4',serif; font-size:.68rem; letter-spacing:.14em;
+      text-transform:uppercase; color:var(--text-muted);
+      text-decoration:none; background:none; border:none; cursor:pointer; transition:color .2s;
+    }
+    nav a:hover, nav button:hover { color:var(--ink); }
+
+    /* ── Media console — 200px universal, bottom-left on property pages ── */
+    #media-col {
+      position:fixed; bottom:20px; top:auto; left:16px; width:200px;
+      z-index:90; display:flex; flex-direction:column; gap:8px;
+    }
+    @media(max-width:640px){ #media-col{width:140px;left:8px} }
+
+    /* ── YT billboard ── */
+    #bb-wrap {
+      width:100%; background:#111; border-radius:4px; overflow:hidden;
+      border:1.5px solid var(--gold-border); cursor:pointer;
+    }
+    .bb-thumb { width:100%; aspect-ratio:16/9; object-fit:cover; display:block; }
+    #bb-iframe { width:100%; aspect-ratio:16/9; border:none; display:none; }
+    #bb-meta {
+      padding:6px 8px; background:rgba(0,0,0,.72);
+      font-family:'DM Mono',monospace; font-size:.42rem;
+      letter-spacing:.1em; text-transform:uppercase; color:rgba(255,255,255,.8);
+      display:flex; justify-content:space-between; align-items:center;
+    }
+    #bb-nav { display:flex; gap:4px; }
+    #bb-nav button { background:none; border:none; color:rgba(255,255,255,.6); cursor:pointer; font-size:.9rem; }
+
+    /* ── Radio bar ── */
+    #radio-bar {
+      background:rgba(255,255,255,.92); border:1.5px solid var(--rule-heavy);
+      border-radius:4px; padding:7px 10px;
+      display:flex; align-items:center; gap:8px;
+    }
+    #radio-btn { background:none; border:none; cursor:pointer; font-size:1rem; }
+    #radio-label { font-family:'DM Mono',monospace; font-size:.4rem; letter-spacing:.12em;
+                   text-transform:uppercase; color:var(--text-muted); }
+    .wave { display:flex; align-items:flex-end; gap:2px; height:14px; }
+    .wave span { width:3px; border-radius:1px; background:var(--gold); animation:wave 1.2s ease-in-out infinite; }
+    .wave span:nth-child(2){animation-delay:.15s} .wave span:nth-child(3){animation-delay:.3s}
+    .wave span:nth-child(4){animation-delay:.45s} .wave span:nth-child(5){animation-delay:.6s}
+    @keyframes wave { 0%,100%{transform:scaleY(.35)} 50%{transform:scaleY(1)} }
+
+    /* ── Right-drawer panel ── */
+    #panel {
+      position:fixed; top:var(--header-h); right:-440px; width:420px; height:calc(100% - var(--header-h));
+      background:var(--cream); border-left:2px solid var(--ink); z-index:95;
+      overflow-y:auto; transition:right .35s cubic-bezier(.4,0,.2,1);
+      display:flex; flex-direction:column;
+    }
+    #panel.open { right:0; }
+    @media(max-width:640px){ #panel{width:100%;right:-100%;} }
+
+    /* ── Panel tabs ── */
+    #tab-bar {
+      display:flex; border-bottom:1.5px solid var(--rule-heavy);
+      background:var(--cream-2); position:sticky; top:0; z-index:2;
+    }
+    .tab-btn {
+      flex:1; padding:11px 4px; border:none; background:none; cursor:pointer;
+      font-family:'Source Serif 4',serif; font-size:.6rem; letter-spacing:.12em;
+      text-transform:uppercase; color:var(--text-muted); border-bottom:2px solid transparent;
+      transition:all .2s;
+    }
+    .tab-btn.active { color:var(--ink); border-bottom-color:var(--ink); background:var(--cream); }
+
+    /* ── Tab panes ── */
+    .tab-pane { display:none; padding:20px; flex-direction:column; gap:16px; }
+    .tab-pane.active { display:flex; }
+
+    /* ── Property pane ── */
+    .prop-hero { width:100%; aspect-ratio:16/9; object-fit:cover; border-radius:3px;
+                 border:1px solid var(--rule); }
+    .prop-address {
+      font-family:'DM Mono',monospace; font-size:.52rem; letter-spacing:.12em;
+      text-transform:uppercase; color:var(--text-muted); padding-bottom:8px;
+      border-bottom:1px solid var(--rule);
+    }
+    .stat-row { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+    .stat-cell { background:var(--cream-2); border:1px solid var(--rule); border-radius:3px; padding:10px 12px; }
+    .stat-label { font-family:'DM Mono',monospace; font-size:.4rem; letter-spacing:.12em;
+                  text-transform:uppercase; color:var(--text-muted); }
+    .stat-value { font-family:'Source Serif 4',serif; font-size:1rem; font-weight:600;
+                  color:var(--ink); margin-top:2px; }
+    .section-head { font-family:'Source Serif 4',serif; font-size:.65rem; letter-spacing:.14em;
+                    text-transform:uppercase; color:var(--text-muted); padding-bottom:4px;
+                    border-bottom:1px solid var(--rule); }
+    .feature-list { list-style:none; display:flex; flex-direction:column; gap:6px; }
+    .feature-list li { font-size:.82rem; color:var(--ink-2); padding-left:12px; position:relative; }
+    .feature-list li::before { content:'—'; position:absolute; left:0; color:var(--gold); }
+
+    /* ── Directory pane items ── */
+    .dir-item {
+      display:flex; align-items:center; gap:12px; padding:10px 0;
+      border-bottom:1px solid var(--rule); cursor:pointer; transition:background .15s;
+    }
+    .dir-item:hover { background:var(--cream-2); margin:0 -20px; padding:10px 20px; }
+    .dir-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
+    .dir-name { font-size:.82rem; color:var(--ink); flex:1; }
+    .dir-dist { font-family:'DM Mono',monospace; font-size:.4rem; letter-spacing:.1em;
+                text-transform:uppercase; color:var(--text-muted); }
+
+    /* ── Waymo pane ── */
+    .waymo-hero {
+      background:var(--waymo-dim); border:1.5px solid var(--waymo-border);
+      border-radius:4px; padding:16px; text-align:center;
+    }
+    .waymo-badge { font-family:'DM Mono',monospace; font-size:.5rem; letter-spacing:.14em;
+                   text-transform:uppercase; color:var(--waymo); }
+    .waymo-eta { font-size:2rem; font-weight:600; color:var(--ink); margin:8px 0 4px; }
+    .waymo-sub { font-size:.75rem; color:var(--text-muted); }
+    .waymo-cta {
+      display:block; margin-top:12px; padding:10px; border-radius:3px;
+      background:var(--waymo); color:#fff; text-decoration:none;
+      font-family:'DM Mono',monospace; font-size:.5rem; letter-spacing:.12em;
+      text-transform:uppercase; text-align:center;
+    }
+
+    /* ── Property pin (DOM overlay — only exception to billboard rule) ── */
+    #prop-pin {
+      position:fixed; width:38px; height:38px; border-radius:50%;
+      border:3px solid #fff; box-shadow:0 2px 12px rgba(0,0,0,.45);
+      cursor:pointer; z-index:10; display:none; transform:translate(-50%,-50%);
+      background:var(--gold);
+    }
+    #prop-pin::after {
+      content:''; position:absolute; inset:-6px; border-radius:50%;
+      border:2px solid rgba(201,168,76,.45); animation:pulse 2s ease-out infinite;
+    }
+    @keyframes pulse { 0%{transform:scale(1);opacity:1} 100%{transform:scale(1.6);opacity:0} }
+
+    /* ── Close button ── */
+    #panel-close {
+      position:absolute; top:12px; right:12px; z-index:3;
+      background:none; border:none; cursor:pointer; font-size:1.2rem; color:var(--text-muted);
+    }
+    #panel-close:hover { color:var(--ink); }
+
+    /* ── Places toggle ── */
+    #places-toggle {
+      position:fixed; bottom:20px; right:20px; z-index:90;
+      background:var(--cream); border:1.5px solid var(--rule-heavy);
+      border-radius:4px; padding:8px 14px; cursor:pointer;
+      font-family:'DM Mono',monospace; font-size:.45rem; letter-spacing:.12em;
+      text-transform:uppercase; color:var(--text-muted); transition:all .2s;
+    }
+    #places-toggle.active { background:var(--ink); color:var(--cream); border-color:var(--ink); }
+    @media(max-width:640px){ #places-toggle{bottom:80px;} }
+  </style>
+</head>
+<body>
+
+<!-- Rule 1: CesiumJS container FIRST, before any other DOM -->
+<div id="cesiumContainer"></div>
+
+<!-- Media console — immediately after map, before header (DOM order rule) -->
+<div id="media-col">
+  <div id="bb-wrap" onclick="playInline(0)">
+    <img id="bb-thumb" class="bb-thumb" src="" alt="">
+    <iframe id="bb-iframe" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+    <div id="bb-meta">
+      <span id="bb-title">Loading…</span>
+      <div id="bb-nav">
+        <button onclick="event.stopPropagation();changeVideo(-1)">‹</button>
+        <button onclick="event.stopPropagation();changeVideo(1)">›</button>
+      </div>
+    </div>
+  </div>
+  <div id="radio-bar">
+    <button id="radio-btn" onclick="toggleRadio()">▶</button>
+    <div class="wave" id="radio-wave" style="display:none">
+      <span></span><span></span><span></span><span></span><span></span>
+    </div>
+    <span id="radio-label">FILL_RADIO_LABEL</span>
+    <audio id="radio-audio" src="FILL_RADIO_STREAM"></audio>
+  </div>
+</div>
+
+<header>
+  <div class="logo-wrap" onclick="goHome()">
+    <svg width="32" height="32" viewBox="0 0 60 60" fill="none">
+      <text x="4" y="46" font-family="EB Garamond" font-style="italic" font-weight="700" font-size="52" fill="#1C1C1C">r</text>
+      <line x1="18" y1="48" x2="44" y2="12" stroke="#C9A84C" stroke-width="2.2"/>
+      <text x="38" y="28" font-family="EB Garamond" font-style="italic" font-weight="700" font-size="26" fill="#C9A84C">Σ</text>
+    </svg>
+    <span style="font-family:'Raleway',sans-serif;font-size:.9rem;font-weight:600;letter-spacing:.04em">quation</span>
+    <span class="logo-addr">FILL_LOCATION_LINE</span>
+  </div>
+  <nav>
+    <a href="/">Home</a>
+    <a href="/FILL_PARENT_PAGE">← FILL_PARENT_LABEL</a>
+    <button onclick="openPanel()">Info</button>
+  </nav>
+</header>
+
+<!-- Right-drawer panel -->
+<div id="panel">
+  <button id="panel-close" onclick="closePanel()">✕</button>
+  <div id="tab-bar">
+    <!-- Tabs injected by JS from PAGE_CONFIG.tabs -->
+  </div>
+
+  <!-- Property tab -->
+  <div id="pane-property" class="tab-pane">
+    <!-- Injected from PAGE_CONFIG.card -->
+  </div>
+
+  <!-- Neighborhood tab -->
+  <div id="pane-neighborhood" class="tab-pane">
+    <!-- Injected from PAGE_CONFIG.neighborhood -->
+  </div>
+
+  <!-- Directory tab -->
+  <div id="pane-directory" class="tab-pane">
+    <!-- Injected from PAGE_CONFIG.directory -->
+  </div>
+
+  <!-- Waymo tab -->
+  <div id="pane-waymo" class="tab-pane">
+    <div class="waymo-hero">
+      <div class="waymo-badge">Waymo One · Autonomous Ride</div>
+      <div class="waymo-eta" id="waymo-eta">—</div>
+      <div class="waymo-sub">estimated wait · FILL_WAYMO_ZONE</div>
+      <a href="https://waymo.com/intl/us/waymo-one/" target="_blank" class="waymo-cta">Book Waymo One →</a>
+    </div>
+    <p style="font-size:.78rem;color:var(--text-muted);line-height:1.6">
+      FILL_WAYMO_DESC
+    </p>
+  </div>
+</div>
+
+<!-- Property pin (DOM overlay) -->
+<div id="prop-pin"></div>
+
+<!-- POI toggle -->
+<button id="places-toggle" onclick="togglePlaces()">Show Nearby</button>
+
+<script>
+/* ═══════════════════════════════════════════════════════════
+   PAGE CONFIG — only edit this block per page
+   ═══════════════════════════════════════════════════════════ */
+const PAGE_CONFIG = {
+  slug:     'FILL_SLUG',           // e.g. 'dtla-grand-park'
+  parent:   'FILL_PARENT_PAGE',    // e.g. 'dtla'
+
+  // Rule 2: coordinates come from /api/geocode or Supabase — never guessed
+  center:   { lat: FILL_LAT, lng: FILL_LNG },
+
+  camera: {
+    altitude: FILL_ALT,    // meters above ground
+    pitch:    FILL_PITCH,  // degrees, negative = looking down
+    heading:  FILL_HEAD,   // degrees 0–360
+  },
+
+  card: {
+    name:     'FILL_NAME',
+    address:  'FILL_ADDRESS',
+    category: 'FILL_CATEGORY',   // e.g. 'Park · 1.0 mi'
+    price:    'FILL_PRICE',      // e.g. '$2,000,000' or '' for POI pages
+    beds:     'FILL_BEDS',       // e.g. '4 BD / 4.5 BA' or '' for POI pages
+    sqft:     'FILL_SQFT',       // e.g. '5,400 sqft' or ''
+    photo:    'FILL_PHOTO_URL',
+    mapsUri:  'FILL_MAPS_URI',
+    website:  'FILL_WEBSITE',
+    features: [
+      'FILL_FEATURE_1',
+      'FILL_FEATURE_2',
+    ],
+  },
+
+  // Videos — AZ only on /laveen-* pages, CA only on /dtla-* pages. Never mix.
+  videos: [
+    { id: 'FILL_YT_ID', title: 'FILL_TITLE' },
+  ],
+
+  radio: {
+    label:  'FILL_RADIO_LABEL',   // e.g. 'KLOS 99.5 FM' or '99.5 The Mountain'
+    stream: 'FILL_RADIO_STREAM',
+  },
+
+  tabs: ['property', 'neighborhood', 'directory', 'waymo'],  // remove unused
+
+  // POI types to show from /api/places — Rule 2: list drives API call
+  poiTypes: ['restaurant', 'cafe', 'park', 'grocery_or_supermarket', 'gym'],
+
+  // Neighborhood blurb (plain text, 2–3 sentences)
+  neighborhoodText: 'FILL_NEIGHBORHOOD_TEXT',
+
+  // Directory — curated POIs for this page's context
+  directory: [
+    // { name, category, color, distance, mapsUri }
+    // FILL_DIRECTORY_ITEMS
+  ],
+};
+/* ═══════════════════════════════════════════════════════════ */
+
+// CesiumJS token
+Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJlYWE1OWUxNy1mMWZiLTQzYjYtYTQ0OS1kMWFjYmFkNjc4MTIiLCJpZCI6MjU5LCJpYXQiOjE2OTk1OTk5MDZ9.aBGnOcVjHxuTxkFe8LVR3qPZfBG5v7hIUFLr6Igs5Ew';
+
+// ── Init ──────────────────────────────────────────────────
+const viewer = new Cesium.Viewer('cesiumContainer', {
+  terrainProvider: Cesium.createWorldTerrain(),
+  baseLayerPicker: false, navigationHelpButton: false,
+  sceneModePicker: false, geocoder: false, homeButton: false,
+  infoBox: false, selectionIndicator: false,
+});
+viewer.scene.globe.enableLighting = false;
+
+// Photorealistic 3D tiles
+Cesium.createGooglePhotorealistic3DTileset().then(t => viewer.scene.primitives.add(t));
+
+// Rule 3: setView (instant), then flyTo (cinematic) — viewer is singleton
+const { lat, lng } = PAGE_CONFIG.center;
+const { altitude, pitch, heading } = PAGE_CONFIG.camera;
+
+viewer.camera.setView({
+  destination: Cesium.Cartesian3.fromDegrees(lng, lat, altitude + 8000),
+  orientation: { heading: 0, pitch: Cesium.Math.toRadians(-90), roll: 0 }
+});
+
+setTimeout(() => {
+  viewer.camera.flyTo({
+    destination: Cesium.Cartesian3.fromDegrees(lng, lat, altitude),
+    orientation: {
+      heading: Cesium.Math.toRadians(heading),
+      pitch:   Cesium.Math.toRadians(pitch),
+      roll:    0
+    },
+    duration: 2.5
+  });
+}, 600);
+
+// ── Property pin (DOM overlay — only exception) ───────────
+const pinEl = document.getElementById('prop-pin');
+let pinActive = false;
+setTimeout(() => { pinActive = true; }, 2500);
+
+const propPos = Cesium.Cartesian3.fromDegrees(lng, lat, 0);
+viewer.scene.postRender.addEventListener(() => {
+  if (!pinActive) return;
+  const pos = Cesium.SceneTransforms.worldToWindowCoordinates(viewer.scene, propPos);
+  if (pos) {
+    pinEl.style.left = pos.x + 'px';
+    pinEl.style.top  = pos.y + 'px';
+    pinEl.style.display = 'block';
+  } else {
+    pinEl.style.display = 'none';
+  }
+});
+pinEl.addEventListener('click', openPanel);
+
+// ── Google Places — billboard entities (vendor pattern) ───
+let placeEntities = [], placesVisible = false, placesLoaded = false;
+
+async function loadPlaces() {
+  try {
+    const r = await fetch(`/api/places?lat=${lat}&lng=${lng}&radius=900`);
+    const data = await r.json();
+    (data.places || []).forEach(p => {
+      const entity = viewer.entities.add({
+        position: Cesium.Cartesian3.fromDegrees(p.lng, p.lat),
+        billboard: {
+          image:           p.icon,
+          verticalOrigin:  Cesium.VerticalOrigin.BOTTOM,
+          heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
+          scaleByDistance: new Cesium.NearFarScalar(1.5e2, 1.0, 1.5e6, 0.3),
+          show:            false
+        },
+        label: {
+          text:            p.name,
+          font:            '11px Source Serif 4, serif',
+          verticalOrigin:  Cesium.VerticalOrigin.BOTTOM,
+          pixelOffset:     new Cesium.Cartesian2(0, -28),
+          heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
+          fillColor:       Cesium.Color.WHITE,
+          outlineColor:    Cesium.Color.BLACK,
+          outlineWidth:    2,
+          style:           Cesium.LabelStyle.FILL_AND_OUTLINE,
+          disableDepthTestDistance: Number.POSITIVE_INFINITY,
+          show:            false
+        },
+        properties: { mapsUri: p.mapsUri, category: p.category }
+      });
+      placeEntities.push(entity);
+    });
+    placesLoaded = true;
+  } catch (e) { console.warn('Places load failed:', e.message); }
+}
+loadPlaces();
+
+function togglePlaces() {
+  placesVisible = !placesVisible;
+  document.getElementById('places-toggle').classList.toggle('active', placesVisible);
+  placeEntities.forEach(e => { if (e.billboard) e.billboard.show = placesVisible; });
+}
+
+// ── Panel ─────────────────────────────────────────────────
+let mediaHidden = false;
+
+function openPanel() {
+  hideMedia();
+  buildPanel();
+  document.getElementById('panel').classList.add('open');
+  activateTab(PAGE_CONFIG.tabs[0]);
+}
+function closePanel() {
+  document.getElementById('panel').classList.remove('open');
+  showMedia();
+}
+function hideMedia() { document.getElementById('media-col').style.opacity = '0'; document.getElementById('media-col').style.pointerEvents = 'none'; mediaHidden = true; }
+function showMedia() { document.getElementById('media-col').style.opacity = '1'; document.getElementById('media-col').style.pointerEvents = 'auto'; mediaHidden = false; }
+
+function goHome() {
+  window.location.href = '/';
+}
+
+// ── Build panel from PAGE_CONFIG ──────────────────────────
+let panelBuilt = false;
+function buildPanel() {
+  if (panelBuilt) return;
+  panelBuilt = true;
+
+  const cfg = PAGE_CONFIG;
+
+  // Tabs
+  const tabBar = document.getElementById('tab-bar');
+  cfg.tabs.forEach((t, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'tab-btn' + (i === 0 ? ' active' : '');
+    btn.textContent = t.charAt(0).toUpperCase() + t.slice(1);
+    btn.setAttribute('data-tab', t);
+    btn.onclick = () => activateTab(t);
+    tabBar.appendChild(btn);
+  });
+
+  // Property pane
+  const prop = document.getElementById('pane-property');
+  prop.innerHTML = `
+    <img class="prop-hero" src="${cfg.card.photo}" alt="${cfg.card.name}">
+    <p class="prop-address">${cfg.card.address}</p>
+    <div class="stat-row">
+      ${cfg.card.price ? `<div class="stat-cell"><div class="stat-label">Price</div><div class="stat-value">${cfg.card.price}</div></div>` : ''}
+      ${cfg.card.beds  ? `<div class="stat-cell"><div class="stat-label">Beds / Baths</div><div class="stat-value">${cfg.card.beds}</div></div>` : ''}
+      ${cfg.card.sqft  ? `<div class="stat-cell"><div class="stat-label">Size</div><div class="stat-value">${cfg.card.sqft}</div></div>` : ''}
+      <div class="stat-cell"><div class="stat-label">Category</div><div class="stat-value" style="font-size:.8rem">${cfg.card.category}</div></div>
+    </div>
+    ${cfg.card.features.length ? `
+    <p class="section-head">Highlights</p>
+    <ul class="feature-list">${cfg.card.features.map(f=>`<li>${f}</li>`).join('')}</ul>` : ''}
+    ${cfg.card.website ? `<a href="${cfg.card.website}" target="_blank" style="font-family:'DM Mono',monospace;font-size:.45rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink);text-decoration:none;border-bottom:1px solid var(--rule);padding-bottom:2px">View Website →</a>` : ''}
+    ${cfg.card.mapsUri ? `<a href="${cfg.card.mapsUri}" target="_blank" style="font-family:'DM Mono',monospace;font-size:.45rem;letter-spacing:.12em;text-transform:uppercase;color:var(--text-muted);text-decoration:none">Open in Google Maps →</a>` : ''}
+  `;
+
+  // Neighborhood pane
+  document.getElementById('pane-neighborhood').innerHTML = `
+    <p class="section-head">About this Area</p>
+    <p style="font-size:.82rem;color:var(--ink-2);line-height:1.65">${cfg.neighborhoodText}</p>
+  `;
+
+  // Directory pane
+  const dir = document.getElementById('pane-directory');
+  dir.innerHTML = `<p class="section-head">Nearby</p>`;
+  cfg.directory.forEach(item => {
+    const el = document.createElement('div');
+    el.className = 'dir-item';
+    el.dataset.slug = `${cfg.parent}-${item.name.toLowerCase().replace(/\s+/g,'-')}`;
+    el.innerHTML = `
+      <div class="dir-dot" style="background:${item.color}"></div>
+      <div class="dir-name">${item.name}</div>
+      <div class="dir-dist">${item.distance}</div>
+    `;
+    el.onclick = () => {
+      if (item.mapsUri) window.open(item.mapsUri, '_blank');
+    };
+    dir.appendChild(el);
+  });
+}
+
+function activateTab(name) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === name));
+  document.querySelectorAll('.tab-pane').forEach(p => p.classList.toggle('active', p.id === 'pane-' + name));
+}
+
+// ── YT Billboard ──────────────────────────────────────────
+const VIDEOS = PAGE_CONFIG.videos;
+let vidIdx = 0;
+
+function setVideo(i) {
+  vidIdx = ((i % VIDEOS.length) + VIDEOS.length) % VIDEOS.length;
+  document.getElementById('bb-thumb').src = `https://i.ytimg.com/vi/${VIDEOS[vidIdx].id}/mqdefault.jpg`;
+  document.getElementById('bb-title').textContent = VIDEOS[vidIdx].title;
+  document.getElementById('bb-iframe').style.display = 'none';
+  document.getElementById('bb-thumb').style.display = 'block';
+}
+function changeVideo(dir) { setVideo(vidIdx + dir); }
+function playInline(i) {
+  setVideo(i);
+  document.getElementById('bb-iframe').src = `https://www.youtube.com/embed/${VIDEOS[vidIdx].id}?autoplay=1&rel=0`;
+  document.getElementById('bb-iframe').style.display = 'block';
+  document.getElementById('bb-thumb').style.display = 'none';
+}
+setVideo(0);
+
+// ── Radio ─────────────────────────────────────────────────
+const audio = document.getElementById('radio-audio');
+audio.src = PAGE_CONFIG.radio.stream;
+document.getElementById('radio-label').textContent = PAGE_CONFIG.radio.label;
+let radioOn = false;
+function toggleRadio() {
+  if (radioOn) { audio.pause(); document.getElementById('radio-btn').textContent = '▶'; document.getElementById('radio-wave').style.display='none'; }
+  else         { audio.play().catch(()=>{}); document.getElementById('radio-btn').textContent = '■'; document.getElementById('radio-wave').style.display='flex'; }
+  radioOn = !radioOn;
+}
+
+// ── Map click hides media ─────────────────────────────────
+viewer.canvas.addEventListener('click', () => { if (!mediaHidden) hideMedia(); });
+</script>
+</body>
+</html>
