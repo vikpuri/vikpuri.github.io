@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Requation · LaveenLocal · Urban Farmhouse — Vik's Favorites</title>
+  <meta name="description" content="HyperLocal Laveen AZ — the places Vik actually goes. Street-level 3D map with Waymo rides to every spot along Baseline Road and South Mountain.">
+  <meta property="og:title" content="LaveenLocal — Requation HyperLocal AZ">
+  <meta property="og:image" content="https://i.imgur.com/0aYf87y.jpeg">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@1,700&family=Raleway:wght@600&family=Source+Serif+4:wght@300;400;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --gold:#C9A84C; --gold-dim:rgba(201,168,76,.1); --gold-border:rgba(201,168,76,.35);
+      --cream:#FAF8F4; --cream-2:#F4F1EB;
+      --ink:#1C1C1C; --ink-3:#444;
+      --rule:rgba(0,0,0,.12); --rule-heavy:rgba(0,0,0,.22);
+      --text-muted:#666; --sand:#E8DDD0;
+      --header-h:56px; --route-h:36px;
+    }
+    *,::before,::after { box-sizing:border-box; margin:0; padding:0; }
+    html { height:100%; }
+    body { height:100%; background:#1a1510; color:var(--ink);
+           font-family:'Source Serif 4',Georgia,serif; overflow:hidden; }
+
+    #map { position:fixed; inset:0; z-index:0; }
+
+    header {
+      position:fixed; top:0; left:0; right:0; height:var(--header-h); z-index:100;
+      background:rgba(255,255,255,.97); border-bottom:2px solid var(--ink);
+      display:flex; align-items:center; justify-content:space-between; padding:0 20px;
+    }
+    .logo-wrap { display:flex; align-items:center; gap:10px; text-decoration:none; }
+    .logo-addr { font-family:'DM Mono',monospace; font-size:.45rem; letter-spacing:.12em;
+                 text-transform:uppercase; color:var(--text-muted);
+                 border-left:1px solid var(--sand); padding-left:10px; }
+    .header-tag { font-family:'DM Mono',monospace; font-size:.42rem; letter-spacing:.12em;
+                  text-transform:uppercase; color:var(--gold);
+                  background:var(--gold-dim); border:1px solid var(--gold-border);
+                  padding:3px 8px; border-radius:2px; }
+
+    #prop-pin {
+      position:fixed; width:42px; height:42px; border-radius:50%;
+      background:var(--gold); border:3px solid #fff;
+      box-shadow:0 2px 16px rgba(0,0,0,.5); z-index:20;
+      cursor:pointer; display:none; transform:translate(-50%,-50%);
+    }
+    #prop-pin::after {
+      content:''; position:absolute; inset:-7px; border-radius:50%;
+      border:2px solid rgba(201,168,76,.5); animation:pulse 2s ease-out infinite;
+    }
+    @keyframes pulse { 0%{transform:scale(1);opacity:1} 100%{transform:scale(1.7);opacity:0} }
+
+    .heart-pin {
+      background:var(--gold); color:#fff; padding:5px 10px; border-radius:20px;
+      font-family:'Source Serif 4',serif; font-size:11px; font-weight:600;
+      cursor:pointer; white-space:nowrap; box-shadow:0 2px 12px rgba(0,0,0,.3);
+      display:flex; align-items:center; gap:4px; transition:transform .15s;
+    }
+    .heart-pin:hover { transform:scale(1.08); }
+
+    #info-card {
+      position:fixed; bottom:calc(var(--route-h) + 12px); left:50%;
+      transform:translateX(-50%);
+      width:min(420px, calc(100vw - 24px));
+      background:var(--cream); border:2px solid var(--ink); border-radius:4px;
+      box-shadow:0 12px 40px rgba(0,0,0,.35); z-index:200; display:none;
+    }
+    #info-card.open { display:flex; flex-direction:column; animation:slideUp .22s ease; }
+    @keyframes slideUp { from{transform:translateX(-50%) translateY(16px);opacity:0} to{transform:translateX(-50%) translateY(0);opacity:1} }
+    #card-close { position:absolute; top:9px; right:12px; background:none; border:none; cursor:pointer; font-size:1.1rem; color:var(--text-muted); }
+    #card-close:hover { color:var(--ink); }
+    #card-body { padding:16px 20px 8px; }
+    #card-tag { font-family:'DM Mono',monospace; font-size:.38rem; letter-spacing:.14em; text-transform:uppercase; color:var(--gold); margin-bottom:2px; }
+    #card-name { font-size:1.05rem; font-weight:600; color:var(--ink); margin-bottom:2px; }
+    #card-addr { font-family:'DM Mono',monospace; font-size:.42rem; color:var(--text-muted); letter-spacing:.06em; margin-bottom:10px; }
+    #card-actions { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px; }
+    .card-btn { padding:8px 14px; border-radius:3px; font-family:'DM Mono',monospace; font-size:.42rem; letter-spacing:.1em; text-transform:uppercase; text-decoration:none; border:none; cursor:pointer; }
+    .card-btn-waymo { background:#1A73E8; color:#fff; }
+    .card-btn-yt    { background:#FF0000; color:#fff; }
+    #card-yt { width:100%; aspect-ratio:16/9; border:none; display:none; }
+
+    #route-nav {
+      position:fixed; bottom:0; left:0; right:0; height:var(--route-h);
+      background:rgba(255,255,255,.97); border-top:1.5px solid var(--rule-heavy);
+      display:flex; align-items:center; justify-content:center; z-index:100;
+      font-family:'DM Mono',monospace; font-size:.42rem; letter-spacing:.12em;
+      text-transform:uppercase;
+    }
+    .route-stop { padding:0 14px; color:var(--text-muted); text-decoration:none;
+                  border-right:1px solid var(--rule); line-height:var(--route-h);
+                  transition:color .2s; white-space:nowrap; }
+    .route-stop:last-child { border-right:none; }
+    .route-stop:hover { color:var(--ink); }
+    .route-stop.current { color:var(--ink); font-weight:500; border-bottom:2px solid var(--gold); }
+    .route-arrow { padding:0 8px; color:var(--text-muted); }
+
+    #heart-count {
+      position:fixed; top:calc(var(--header-h) + 12px); left:12px; z-index:90;
+      background:rgba(255,255,255,.92); border:1.5px solid var(--rule-heavy);
+      border-radius:4px; padding:8px 14px;
+      font-family:'DM Mono',monospace; font-size:.42rem; letter-spacing:.1em;
+      text-transform:uppercase; color:var(--ink-3);
+    }
+    #heart-count strong { color:var(--gold); }
+  </style>
+</head>
+<body>
+
+<div id="map"></div>
+<div id="prop-pin"></div>
+
+<header>
+  <a class="logo-wrap" href="/">
+    <svg width="28" height="28" viewBox="0 0 60 60" fill="none">
+      <text x="4" y="46" font-family="EB Garamond" font-style="italic" font-weight="700" font-size="52" fill="#1C1C1C">r</text>
+      <line x1="18" y1="48" x2="44" y2="12" stroke="#C9A84C" stroke-width="2.2"/>
+      <text x="38" y="28" font-family="EB Garamond" font-style="italic" font-weight="700" font-size="26" fill="#C9A84C">Σ</text>
+    </svg>
+    <span style="font-family:'Raleway',sans-serif;font-size:.85rem;font-weight:600;letter-spacing:.04em">quation</span>
+    <span class="logo-addr">LaveenLocal · 11403 S 27th Dr · AZ</span>
+  </a>
+  <span class="header-tag">♥ 6 AZ Favorites</span>
+</header>
+
+<div id="heart-count">♥ <strong>6</strong> curated places</div>
+
+<div id="info-card">
+  <button id="card-close" onclick="closeCard()">✕</button>
+  <div id="card-body">
+    <div id="card-tag"></div>
+    <div id="card-name"></div>
+    <div id="card-addr"></div>
+    <div id="card-actions"></div>
+  </div>
+  <iframe id="card-yt" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+</div>
+
+<nav id="route-nav">
+  <a href="/laveen" class="route-stop">Laveen</a>
+  <span class="route-arrow">→</span>
+  <span class="route-stop current">LaveenLocal</span>
+  <span class="route-arrow">→</span>
+  <a href="/desertlife/phoenix" class="route-stop">Phoenix</a>
+  <span class="route-arrow">→</span>
+  <a href="/desertlife/scottsdale" class="route-stop">Arcadia · Scottsdale ♦</a>
+</nav>
+
+<script>
+// Rule 2: CENTER = camera start only; property coords pending Geocoding API fix
+const CENTER = { lat: 33.34284751970459, lng: -112.11814600203087 }; // CONFIRM — geocoding pending
+
+// 6 ♥ Laveen / South Mountain favorites — coords // CONFIRM pending Geocoding API
+const HEARTS = [
+  {
+    name:      'Los Dos Molinos',
+    lat:       33.3416, lng: -112.0717,          // CONFIRM — S Central Ave, Phoenix
+    cat:       'New Mexico Kitchen',
+    addr:      '8646 S Central Ave, Phoenix AZ 85042',
+    ytSearch:  'Los Dos Molinos Phoenix restaurant',
+  },
+  {
+    name:      'South Mountain Park Preserve',
+    lat:       33.3388, lng: -112.0737,           // main entrance, S Central Ave
+    cat:       'Park · Hiking · 16,000 acres',
+    addr:      '10919 S Central Ave, Phoenix AZ 85042',
+    ytSearch:  'South Mountain Park Preserve Phoenix hiking',
+  },
+  {
+    name:      'In-N-Out Burger',
+    lat:       33.3780, lng: -112.0870,           // CONFIRM — Baseline Rd area
+    cat:       'Burgers · Baseline Road',
+    addr:      'Baseline Rd, Phoenix AZ — address TBD',
+    ytSearch:  'In-N-Out Burger Phoenix Arizona',
+    confirm:   true,
+  },
+  {
+    name:      "Raising Cane's",
+    lat:       33.3775, lng: -112.0820,           // CONFIRM — Baseline Rd area
+    cat:       'Chicken · Baseline Road',
+    addr:      'Baseline Rd, Phoenix AZ — address TBD',
+    ytSearch:  "Raising Cane's Phoenix Arizona",
+    confirm:   true,
+  },
+  {
+    name:      'Paris Baguette',
+    lat:       33.3260, lng: -112.0415,           // CONFIRM — Baseline Rd area
+    cat:       'Bakery · Baseline Road',
+    addr:      'Baseline Rd, AZ — address TBD',
+    ytSearch:  'Paris Baguette bakery Arizona',
+    confirm:   true,
+  },
+  {
+    name:      'Einstein Bros Bagels',
+    lat:       33.3770, lng: -112.0800,           // CONFIRM — Baseline Rd area
+    cat:       'Bagels · Baseline Road',
+    addr:      'Baseline Rd, AZ — address TBD',
+    ytSearch:  'Einstein Bros Bagels Phoenix Arizona',
+    confirm:   true,
+  },
+];
+
+let map, advMarker;
+
+async function initMap() {
+  const { Map }                   = await google.maps.importLibrary('maps');
+  const { AdvancedMarkerElement } = await google.maps.importLibrary('marker');
+  advMarker = AdvancedMarkerElement;
+
+  map = new Map(document.getElementById('map'), {
+    center:  CENTER,
+    zoom:    15,
+    tilt:    67.5,
+    heading: 0,
+    mapId:  '96844e6a7bb74a7d5514d3a5',
+    gestureHandling: 'greedy',
+  });
+
+  initPropPin();
+  loadHearts();
+}
+
+function initPropPin() {
+  const pin = document.getElementById('prop-pin');
+  let active = false;
+  setTimeout(() => { active = true; pin.style.display = 'block'; }, 1200);
+  pin.addEventListener('click', () => {
+    showCard({
+      tag:      'Your Property',
+      name:     '11403 S 27th Dr',
+      addr:     'Laveen Village · AZ 85339 · 4BD/4.5BA · $2,000,000',
+      cat:      '5,400 sqft · 4.4 acres · Solar',
+      ytSearch: 'Laveen Village Arizona desert home',
+      waymo:    null,
+    });
+  });
+  map.addListener('bounds_changed', () => {
+    if (!active) return;
+    const proj = map.getProjection();
+    if (!proj) return;
+    const pt  = proj.fromLatLngToPoint(new google.maps.LatLng(CENTER.lat, CENTER.lng));
+    const bnd = map.getBounds();
+    if (!bnd) return;
+    const ne = proj.fromLatLngToPoint(bnd.getNorthEast());
+    const sw = proj.fromLatLngToPoint(bnd.getSouthWest());
+    const sc = Math.pow(2, map.getZoom());
+    pin.style.left = (pt.x - sw.x) * sc + 'px';
+    pin.style.top  = (pt.y - ne.y) * sc + 'px';
+  });
+}
+
+function loadHearts() {
+  HEARTS.forEach(h => {
+    const el = document.createElement('div');
+    el.className = 'heart-pin';
+    el.innerHTML = '♥ ' + h.name;
+    const m = new advMarker({ position: { lat: h.lat, lng: h.lng }, map, content: el, title: h.name, zIndex: 10 });
+    m.addListener('click', () => {
+      map.panTo({ lat: h.lat, lng: h.lng });
+      showCard({
+        tag:      '♥ Vik\'s Favorite' + (h.confirm ? ' · address TBC' : ''),
+        name:     h.name,
+        addr:     h.addr,
+        cat:      h.cat,
+        ytSearch: h.ytSearch,
+        waymo:    'https://waymo.com/waymo-one/?destination=' + encodeURIComponent(h.addr),
+      });
+    });
+  });
+}
+
+function showCard({ tag, name, addr, cat, ytSearch, waymo }) {
+  document.getElementById('card-tag').textContent  = tag;
+  document.getElementById('card-name').textContent = name;
+  document.getElementById('card-addr').textContent = addr + (cat ? ' · ' + cat : '');
+  const act = document.getElementById('card-actions');
+  act.innerHTML = '';
+  const ytBtn = Object.assign(document.createElement('button'), { className:'card-btn card-btn-yt', textContent:'▶ Watch on YouTube' });
+  ytBtn.onclick = () => {
+    const f = document.getElementById('card-yt');
+    f.style.display = 'block';
+    f.src = 'https://www.youtube.com/embed?listType=search&list=' + encodeURIComponent(ytSearch) + '&autoplay=1';
+  };
+  act.appendChild(ytBtn);
+  if (waymo) {
+    act.appendChild(Object.assign(document.createElement('a'), { className:'card-btn card-btn-waymo', textContent:'Waymo One →', href:waymo, target:'_blank' }));
+  }
+  document.getElementById('card-yt').style.display = 'none';
+  document.getElementById('card-yt').src = '';
+  const card = document.getElementById('info-card');
+  card.classList.remove('open'); void card.offsetWidth; card.classList.add('open');
+}
+
+function closeCard() {
+  document.getElementById('info-card').classList.remove('open');
+  document.getElementById('card-yt').src = '';
+}
+
+window.initMap = initMap;
+</script>
+
+<script async
+  src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD7UMA5ILPXv9QK2_gvxPVth30MavRd2WQ&callback=initMap&libraries=marker&v=weekly">
+</script>
+</body>
+</html>

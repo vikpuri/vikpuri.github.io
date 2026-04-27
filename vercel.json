@@ -8,8 +8,11 @@
     { "source": "/mylocal",          "destination": "/mylocal.html" },
     { "source": "/lalife",           "destination": "/lalife.html" },
     { "source": "/lalife/weho",      "destination": "/lalife/weho.html" },
-    { "source": "/lalife/venice",    "destination": "/lalife/venice.html" },
-    { "source": "/desertlife",       "destination": "/desertlife.html" },
-    { "source": "/dashboard",        "destination": "/dashboard.html" }
+    { "source": "/lalife/venice",         "destination": "/lalife/venice.html" },
+    { "source": "/desertlife",            "destination": "/desertlife.html" },
+    { "source": "/laveenlocal",           "destination": "/laveenlocal.html" },
+    { "source": "/desertlife/phoenix",    "destination": "/desertlife/phoenix.html" },
+    { "source": "/desertlife/scottsdale", "destination": "/desertlife/scottsdale.html" },
+    { "source": "/dashboard",             "destination": "/dashboard.html" }
   ]
 }
