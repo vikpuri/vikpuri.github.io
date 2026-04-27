@@ -276,21 +276,7 @@
     #places-toggle:hover { background:#fff; box-shadow:0 4px 18px rgba(0,0,0,0.18); }
     #places-toggle.active { background:var(--gold); border-color:var(--gold); }
 
-    /* Places dots */
-    .place-dot {
-      width:10px; height:10px; border-radius:50%;
-      border:1.5px solid #fff; position:fixed; z-index:9;
-      cursor:pointer; pointer-events:auto;
-      transform:translate(-50%,-50%);
-    }
-    .place-dot:hover::after {
-      content: attr(data-name);
-      position:absolute; bottom:14px; left:50%; transform:translateX(-50%);
-      background:rgba(44,42,38,.92); color:#fff;
-      font-family:'Source Serif 4',serif; font-size:.55rem;
-      padding:3px 7px; border-radius:3px; white-space:nowrap;
-      pointer-events:none;
-    }
+    /* Places — billboard entities handle their own rendering; no DOM CSS needed */
 
     @media(max-width:640px) {
       header { padding:0 14px; }
@@ -942,63 +928,61 @@ async function initCesium() {
   loadPlaces(viewer);
 }
 
-/* ── Google Places dot markers ───────────────────────── */
-const PLACE_COLORS = {
-  grocery_or_supermarket:'#4CAF50', cafe:'#795548', restaurant:'#FF5722',
-  gym:'#2196F3', shopping_mall:'#9C27B0', museum:'#FF9800',
-  park:'#8BC34A', movie_theater:'#E91E63', hotel:'#607D8B', library:'#009688'
-};
-let placeDots = [], placesVisible = false, placesLoaded = false;
-let cesiumViewerRef = null;
+/* ── Google Places — CesiumJS billboard entities (vendor pattern) ─────────
+   Server supplies icon (SVG data URI). Billboard CLAMP_TO_GROUND + scaleByDistance.
+   Labels hidden by default, no DOM overlay, works on all devices.            */
+let placeEntities = [], placesVisible = false, placesLoaded = false;
 
 async function loadPlaces(viewer) {
-  cesiumViewerRef = viewer;
   try {
     const r = await fetch(`/api/places?lat=${CENTER.lat}&lng=${CENTER.lng}&radius=900`);
     const data = await r.json();
     if (!data.places) return;
+
     data.places.forEach(p => {
-      const type = (p.types || [])[0] || 'restaurant';
-      const color = PLACE_COLORS[type] || '#888';
-      const pos3d = Cesium.Cartesian3.fromDegrees(
-        p.location.longitude, p.location.latitude, 0
-      );
-      const el = document.createElement('div');
-      el.className = 'place-dot';
-      el.style.background = color;
-      el.style.display = 'none';
-      el.dataset.name = (p.displayName && p.displayName.text) || p.id;
-      if (p.googleMapsUri) el.addEventListener('click', e => { e.stopPropagation(); window.open(p.googleMapsUri,'_blank'); });
-      document.body.appendChild(el);
-      placeDots.push({ el, pos3d });
+      const entity = viewer.entities.add({
+        position: Cesium.Cartesian3.fromDegrees(p.lng, p.lat),
+        billboard: {
+          image:           p.icon,                                    // server-supplied SVG icon
+          verticalOrigin:  Cesium.VerticalOrigin.BOTTOM,
+          heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
+          scaleByDistance: new Cesium.NearFarScalar(1.5e2, 1.0, 1.5e6, 0.3),
+          show:            placesVisible
+        },
+        label: {
+          text:             p.name,
+          font:             '11px Source Serif 4, serif',
+          verticalOrigin:   Cesium.VerticalOrigin.BOTTOM,
+          pixelOffset:      new Cesium.Cartesian2(0, -28),
+          heightReference:  Cesium.HeightReference.CLAMP_TO_GROUND,
+          fillColor:        Cesium.Color.WHITE,
+          outlineColor:     Cesium.Color.BLACK,
+          outlineWidth:     2,
+          style:            Cesium.LabelStyle.FILL_AND_OUTLINE,
+          disableDepthTestDistance: Number.POSITIVE_INFINITY,
+          show:             false    // hidden by default — labels appear on hover (not yet wired)
+        },
+        properties: { mapsUri: p.mapsUri, category: p.category }
+      });
+      placeEntities.push(entity);
     });
+
     placesLoaded = true;
     if (placesVisible) showPlaceDots();
   } catch(e) { console.warn('Places load failed', e); }
 }
 
 function showPlaceDots() {
-  placeDots.forEach(d => { d.el.style.display = 'block'; });
-  cesiumViewerRef && cesiumViewerRef.scene.postRender.addEventListener(updatePlaceDots);
+  placeEntities.forEach(e => { if (e.billboard) e.billboard.show = true; });
 }
 function hidePlaceDots() {
-  placeDots.forEach(d => { d.el.style.display = 'none'; });
-  cesiumViewerRef && cesiumViewerRef.scene.postRender.removeEventListener(updatePlaceDots);
-}
-function updatePlaceDots() {
-  if (!cesiumViewerRef) return;
-  placeDots.forEach(({ el, pos3d }) => {
-    const pos = Cesium.SceneTransforms.worldToWindowCoordinates(cesiumViewerRef.scene, pos3d);
-    if (pos && pos.x > 0 && pos.x < window.innerWidth && pos.y > 0 && pos.y < window.innerHeight) {
-      el.style.left = pos.x + 'px'; el.style.top = pos.y + 'px';
-    } else { el.style.display = 'none'; }
-  });
+  placeEntities.forEach(e => { if (e.billboard) e.billboard.show = false; });
 }
 function togglePlaces() {
   const btn = document.getElementById('places-toggle');
   placesVisible = !placesVisible;
   btn.classList.toggle('active', placesVisible);
-  if (placesVisible) { if (placesLoaded) showPlaceDots(); }
+  if (placesVisible && placesLoaded) showPlaceDots();
   else hidePlaceDots();
 }
 
