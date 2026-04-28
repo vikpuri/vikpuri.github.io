@@ -144,12 +144,13 @@
 
 <header>
   <a class="logo-wrap" href="/">
-    <svg width="28" height="28" viewBox="0 0 60 60" fill="none">
-      <text x="4" y="46" font-family="EB Garamond" font-style="italic" font-weight="700" font-size="52" fill="#1C1C1C">r</text>
-      <line x1="18" y1="48" x2="44" y2="12" stroke="#C9A84C" stroke-width="2.2"/>
-      <text x="38" y="28" font-family="EB Garamond" font-style="italic" font-weight="700" font-size="26" fill="#C9A84C">Σ</text>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 440 100" height="52" preserveAspectRatio="xMinYMid meet" aria-label="Requation">
+      <defs><filter id="gb"><feGaussianBlur stdDeviation="1.2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+      <text x="6" y="42" font-family="EB Garamond,Georgia,serif" font-size="46" font-weight="700" font-style="italic" fill="#B22234">r</text>
+      <line x1="31" y1="76" x2="50" y2="41" stroke="#7A7A7A" stroke-width="5" stroke-linecap="round"/>
+      <text x="56" y="88" font-family="Raleway,Arial,sans-serif" font-size="92" font-weight="600" fill="#4F6FB8">Σ</text>
+      <text x="122" y="88" font-family="Raleway,Arial,sans-serif" font-size="24" font-weight="600" font-style="italic" fill="#D4A843" opacity="0.8" filter="url(#gb)" letter-spacing="2">quation</text>
     </svg>
-    <span style="font-family:'Raleway',sans-serif;font-size:.85rem;font-weight:600;letter-spacing:.04em">quation</span>
     <span class="logo-addr" id="logo-addr">Place Detail</span>
   </a>
   <span id="sku-badge">—</span>
@@ -222,6 +223,17 @@ const PLACES = {
   'venice-intelligentsia':      { sku:'VENICE-002', name:'Intelligentsia Coffee',   lat:33.9916, lng:-118.4639, cat:'Coffee',               addr:'1331 Abbot Kinney Blvd, Venice CA 90291', parent:'Venice',    parentUrl:'/lalife/venice', waymo:'https://waymo.com/waymo-one/?destination=1331+Abbot+Kinney+Blvd+Venice+CA+90291', ytSearch:'Intelligentsia Coffee Venice Abbot Kinney', heart:true },
   'venice-salt-and-straw':      { sku:'VENICE-003', name:'Salt & Straw',            lat:33.9918, lng:-118.4642, cat:'Ice Cream',             addr:'1357 Abbot Kinney Blvd, Venice CA 90291', parent:'Venice',    parentUrl:'/lalife/venice', waymo:'https://waymo.com/waymo-one/?destination=1357+Abbot+Kinney+Blvd+Venice+CA+90291', ytSearch:'Salt and Straw ice cream Venice LA',         heart:true },
   'venice-nati':                { sku:'VENICE-004', name:'NATI',                    lat:33.9919, lng:-118.4643, cat:'Clothing · Abbot Kinney', addr:'1427 Abbot Kinney Blvd, Venice CA 90291', parent:'Venice',   parentUrl:'/lalife/venice', waymo:'https://waymo.com/waymo-one/?destination=1427+Abbot+Kinney+Blvd+Venice+CA+90291', ytSearch:'NATI clothing store Abbot Kinney Venice',   heart:true },
+
+  /* LAVEENLOCAL — South Mountain / Phoenix Favorites */
+  'laveenlocal-los-dos-molinos': { sku:'LAVEEN-001', name:'Los Dos Molinos',          lat:33.3416, lng:-112.0717, cat:'New Mexico Kitchen',          addr:'8646 S Central Ave, Phoenix AZ 85042',           parent:'Laveen',  parentUrl:'/laveen', waymo:'https://waymo.com/waymo-one/?destination=8646+S+Central+Ave+Phoenix+AZ+85042',           ytSearch:'Los Dos Molinos Phoenix restaurant',           heart:true },
+  'laveenlocal-tbone-steakhouse': { sku:'LAVEEN-002', name:'T-Bone Steakhouse',        lat:33.3565, lng:-112.0820, cat:'Steakhouse · South Mountain',  addr:'10037 S 19th Ave, Phoenix AZ 85041',             parent:'Laveen',  parentUrl:'/laveen', waymo:'https://waymo.com/waymo-one/?destination=10037+S+19th+Ave+Phoenix+AZ+85041',           ytSearch:'T-Bone Steakhouse South Mountain Phoenix',     heart:true },
+  'laveenlocal-roosters-roost':   { sku:'LAVEEN-003', name:"Rooster's Roost",          lat:33.3640, lng:-112.0910, cat:'Bar · Live Music',              addr:'South Mountain, Phoenix AZ 85041',               parent:'Laveen',  parentUrl:'/laveen', waymo:'https://waymo.com/waymo-one/?destination=South+Mountain+Phoenix+AZ+85041',             ytSearch:"Rustler's Rooste South Mountain Phoenix",      heart:true },
+  'laveenlocal-wild-horse-pass':  { sku:'LAVEEN-004', name:'Wild Horse Pass Casino',   lat:33.2990, lng:-111.9920, cat:'Casino · Resort',               addr:'5040 W Wild Horse Pass Blvd, Chandler AZ 85226', parent:'Laveen',  parentUrl:'/laveen', waymo:'https://waymo.com/waymo-one/?destination=5040+W+Wild+Horse+Pass+Blvd+Chandler+AZ+85226', ytSearch:'Wild Horse Pass Casino Resort Arizona',        heart:true },
+  'laveenlocal-south-mountain':   { sku:'LAVEEN-005', name:'South Mountain Park',      lat:33.3388, lng:-112.0737, cat:'Park · Hiking · 16,000 acres',  addr:'10919 S Central Ave, Phoenix AZ 85042',          parent:'Laveen',  parentUrl:'/laveen', waymo:'https://waymo.com/waymo-one/?destination=10919+S+Central+Ave+Phoenix+AZ+85042',        ytSearch:'South Mountain Park Preserve Phoenix hiking',  heart:true },
+  'laveenlocal-in-n-out':         { sku:'LAVEEN-006', name:'In-N-Out Burger',          lat:33.3780, lng:-112.0870, cat:'Burgers',                       addr:'Baseline Rd, Phoenix AZ',                        parent:'Laveen',  parentUrl:'/laveen', waymo:'https://waymo.com/waymo-one/?destination=Baseline+Rd+Phoenix+AZ',                     ytSearch:'In-N-Out Burger Phoenix Arizona',              heart:true },
+  'laveenlocal-raising-canes':    { sku:'LAVEEN-007', name:"Raising Cane's",           lat:33.3775, lng:-112.0820, cat:'Chicken',                       addr:'Baseline Rd, Phoenix AZ',                        parent:'Laveen',  parentUrl:'/laveen', waymo:'https://waymo.com/waymo-one/?destination=Baseline+Rd+Phoenix+AZ',                     ytSearch:"Raising Cane's Phoenix Arizona",               heart:true },
+  'laveenlocal-paris-baguette':   { sku:'LAVEEN-008', name:'Paris Baguette',           lat:33.3260, lng:-112.0415, cat:'Bakery',                        addr:'Baseline Rd, Phoenix AZ',                        parent:'Laveen',  parentUrl:'/laveen', waymo:'https://waymo.com/waymo-one/?destination=Baseline+Rd+Phoenix+AZ',                     ytSearch:'Paris Baguette bakery Arizona',                heart:true },
+  'laveenlocal-einstein-bagels':  { sku:'LAVEEN-009', name:'Einstein Bros Bagels',     lat:33.3770, lng:-112.0800, cat:'Bagels',                        addr:'Baseline Rd, Phoenix AZ',                        parent:'Laveen',  parentUrl:'/laveen', waymo:'https://waymo.com/waymo-one/?destination=Baseline+Rd+Phoenix+AZ',                     ytSearch:'Einstein Bros Bagels Phoenix Arizona',         heart:true },
 };
 
 /* ── Boot: read ?id= slug ─────────────────────────────────────────── */
