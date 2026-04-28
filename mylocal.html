@@ -318,51 +318,32 @@ async function loadRPOI() {
   } catch(e) { console.warn('RPOI load failed:', e.message); }
 }
 
-/* ── Yelp businesses from Supabase restaurants table ── */
+/* ── Yelp businesses — live from Yelp Fusion API ── */
 async function loadYelp() {
   try {
-    const zips = MYLOCAL_ZIPS.join(',');
-    const r = await fetch(
-      `${SB_URL}/rest/v1/restaurants?zip=in.(${zips})&select=name,category,lat,lng,zip,rating,yelp_url,waymo_url,address&order=rating.desc&limit=400`,
-      { headers: SB_HDRS }
-    );
-    const rows = await r.json();
-    if (!Array.isArray(rows) || !rows.length) return;
-
-    rows.forEach(p => {
-      if (!p.lat || !p.lng) return;
+    const r = await fetch(`/api/yelp?lat=${CENTER.lat}&lng=${CENTER.lng}&radius=3000&rating=4`);
+    const data = await r.json();
+    if (!data.businesses?.length) return;
+    data.businesses.forEach(b => {
+      if (!b.coordinates?.latitude || !b.coordinates?.longitude) return;
       const el = document.createElement('div');
       el.className = 'yelp-pin';
-      el.title = p.name + (p.rating ? ' ★' + p.rating : '');
-
-      const m = new advMarker({ position: { lat: p.lat, lng: p.lng }, map, content: el, zIndex: 5 });
+      el.title = b.name + (b.rating ? ' ★' + b.rating : '');
+      const m = new advMarker({ position: { lat: b.coordinates.latitude, lng: b.coordinates.longitude }, map, content: el, zIndex: 5 });
       m.addListener('click', () => {
-        map.panTo({ lat: p.lat, lng: p.lng });
+        map.panTo({ lat: b.coordinates.latitude, lng: b.coordinates.longitude });
         showCard({
-          tag:   (p.rating ? '★ ' + p.rating + ' · ' : '') + (p.category || 'Yelp'),
-          name:  p.name,
-          addr:  p.address || '',
-          cat:   p.category,
-          waymo: p.waymo_url || ('https://waymo.com/waymo-one/?destination=' + encodeURIComponent(p.address || '')),
-          slug:  null,
+          tag:     (b.rating ? '★ ' + b.rating + ' · ' : '') + (b.categories?.[0]?.title || 'Yelp'),
+          name:    b.name,
+          addr:    b.location?.address1 || '',
+          cat:     b.categories?.[0]?.title || '',
+          waymo:   'https://waymo.com/waymo-one/?destination=' + encodeURIComponent(b.location?.address1 || b.name),
+          yelpUrl: b.url,
         });
-        // Also wire Yelp button dynamically
-        const actEl = document.getElementById('card-actions');
-        if (p.yelp_url) {
-          const yBtn = Object.assign(document.createElement('a'), {
-            className: 'card-btn card-btn-yelp',
-            textContent: 'Yelp →',
-            href: p.yelp_url,
-            target: '_blank',
-          });
-          actEl.appendChild(yBtn);
-        }
       });
     });
-    console.log('Yelp loaded:', rows.length, 'businesses');
-  } catch (e) {
-    console.warn('Yelp load failed:', e.message);
-  }
+    console.log('Yelp loaded:', data.businesses.length, 'businesses');
+  } catch(e) { console.warn('Yelp load failed:', e.message); }
 }
 
 /* ── ♥ Favorites ── */

@@ -202,35 +202,33 @@ async function initMap() {
   loadHearts();
 }
 
+/* ── Yelp businesses — live from Yelp Fusion API ── */
 async function loadYelp() {
   try {
-    const zips = PHX_ZIPS.join(',');
-    const r = await fetch(
-      `${SB_URL}/rest/v1/restaurants?zip=in.(${zips})&select=name,category,lat,lng,zip,rating,yelp_url,waymo_url,address&order=rating.desc&limit=300`,
-      { headers: SB_HDRS }
-    );
-    const rows = await r.json();
-    if (!Array.isArray(rows) || !rows.length) return;
-    rows.forEach(p => {
-      if (!p.lat || !p.lng) return;
+    const r = await fetch(`/api/yelp?lat=${CENTER.lat}&lng=${CENTER.lng}&radius=10000&rating=4`);
+    const data = await r.json();
+    if (!data.businesses?.length) return;
+    data.businesses.forEach(b => {
+      if (!b.coordinates?.latitude || !b.coordinates?.longitude) return;
       const el = document.createElement('div');
       el.className = 'yelp-pin';
-      el.setAttribute('data-cat', p.category || '');
-      el.title = p.name + (p.rating ? ' ★' + p.rating : '');
-      const m = new advMarker({ position: { lat: p.lat, lng: p.lng }, map, content: el, zIndex: 5 });
+      el.setAttribute('data-cat', b.categories?.[0]?.title || '');
+      el.title = b.name + (b.rating ? ' ★' + b.rating : '');
+      const m = new advMarker({ position: { lat: b.coordinates.latitude, lng: b.coordinates.longitude }, map, content: el, zIndex: 5 });
       m.addListener('click', () => {
-        map.panTo({ lat: p.lat, lng: p.lng });
+        map.panTo({ lat: b.coordinates.latitude, lng: b.coordinates.longitude });
         showCard({
-          tag:     (p.rating ? '★ ' + p.rating + ' · ' : '') + (p.category || 'Yelp'),
-          name:    p.name,
-          addr:    p.address || '',
-          stats:   [p.category, p.zip].filter(Boolean),
-          primary: p.yelp_url ? { label: 'Yelp →', href: p.yelp_url } : null,
-          waymo:   p.waymo_url || waymoDest(p.address),
+          tag:     (b.rating ? '★ ' + b.rating + ' · ' : '') + (b.categories?.[0]?.title || 'Yelp'),
+          name:    b.name,
+          addr:    b.location?.address1 || '',
+          stats:   [b.categories?.[0]?.title, b.location?.zip_code].filter(Boolean),
+          primary: b.url ? { label: 'Yelp →', href: b.url } : null,
+          waymo:   waymoDest(b.location?.address1 || b.name),
         });
       });
     });
-  } catch (e) { console.warn('Yelp load failed:', e.message); }
+    console.log('Yelp loaded:', data.businesses.length, 'businesses');
+  } catch(e) { console.warn('Yelp load failed:', e.message); }
 }
 
 async function loadRPOI() {

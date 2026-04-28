@@ -580,12 +580,26 @@ function renderLaveenFavs() {
 
 /* ── Directory ── */
 const DIR_ICONS = {
-  'Grocery':'🛒','Hardware':'🔨','Coffee':'☕','Cafes':'☕','Cafe':'☕','Coffee & Tea':'☕',
-  'Bakeries':'🥐','Cinema':'🎬','Dental':'🦷','Gym':'💪','Fashion':'👗',
-  'FastFood':'🍔','Ice Cream & Frozen Yogurt':'🍦','Desserts':'🍦',
-  'Restaurants':'🍽️','restaurant':'🍽️','food':'🍴','bars':'🍺',
-  'gyms':'💪','grocery':'🛒','shopping':'🛍️','arts':'🎭',
-  'Museums':'🖼️','Fitness & Instruction':'💪','Juice Bars & Smoothies':'🥤'
+  'Restaurants':'🍽️','Restaurant':'🍽️','Food':'🍴','Fast Food':'🍔','FastFood':'🍔',
+  'Burgers':'🍔','Pizza':'🍕','Sandwiches':'🥪','Tacos':'🌮','Barbeque':'🥩',
+  'Steakhouses':'🥩','Seafood':'🦞','Sushi Bars':'🍣','Japanese':'🍣',
+  'Korean':'🍜','Chinese':'🍜','Thai':'🍜','Indian':'🍛','Italian':'🍝',
+  'Mexican':'🌮','Mediterranean':'🫒','Persian/Iranian':'🫒',
+  'Breakfast & Brunch':'🍳','Bakeries':'🥐','Desserts':'🍰',
+  'Ice Cream & Frozen Yogurt':'🍦','Gelato':'🍦','Shaved Ice':'🧊',
+  'Bubble Tea':'🧋','Juice Bars & Smoothies':'🥤','Coffee':'☕',
+  'Coffee & Tea':'☕','Cafes':'☕','Cafe':'☕',
+  'Bars':'🍺','Wine Bars':'🍷','Nightlife':'🎶',
+  'Grocery':'🛒','Grocery Stores':'🛒','Fruits & Veggies':'🥦',
+  'Specialty Food':'🧺','Farmers Market':'🌽',
+  'Gym':'💪','Gyms':'💪','Fitness & Instruction':'💪','Active Life':'🏃',
+  'Cinema':'🎬','Arts & Entertainment':'🎭',
+  'Hotels':'🏨','Hotels & Travel':'🏨',
+  'Shopping':'🛍️','Fashion':'👗','Shoes':'👟','Cosmetics':'💄',
+  'Dental':'🦷','MedSpa':'💆','Health & Medical':'🏥',
+  'Hardware':'🔨','Home Services':'🔧',
+  'Food Trucks':'🚚','Caterers':'👨‍🍳',
+  'Parks':'🌳','Pet':'🐾',
 };
 const DIR_ZIPS = '85339,85041,85042,85044';
 let dirData = [], dirLoaded = false;
@@ -597,23 +611,22 @@ async function loadDirectory() {
   const el = document.getElementById('dir-list');
   el.innerHTML = '<div class="dir-empty">Loading…</div>';
   try {
-    const r = await fetch(
-      `${SB_URL}/rest/v1/restaurants?select=name,category,address,zip,rating,yelp_url,waymo_url&zip=in.(${DIR_ZIPS})&limit=500&order=name.asc`,
-      { headers: SB_HDRS }
-    );
-    const sbRaw = await r.json();
-    if (!Array.isArray(sbRaw) || !sbRaw.length) {
+    const r = await fetch(`/api/yelp?lat=${CENTER.lat}&lng=${CENTER.lng}&radius=8000&rating=4`);
+    const data = await r.json();
+    if (!data.businesses?.length) {
       el.innerHTML = '<div class="dir-empty">No listings found for this area</div>';
       return;
     }
     const seen = new Set();
-    dirData = sbRaw
+    dirData = data.businesses
       .filter(b => { const k=normName(b.name); if(seen.has(k)) return false; seen.add(k); return true; })
       .map(b => ({
-        name:b.name, category:b.category||'Business',
-        address:b.address||b.zip||'', rating:b.rating||null,
-        yelp_url:b.yelp_url||null, waymo_url:b.waymo_url||null,
-        _norm:normName(b.name)
+        name:     b.name,
+        category: b.categories?.[0]?.title || 'Business',
+        address:  b.location?.address1 || '',
+        rating:   b.rating || null,
+        yelp_url: b.url || null,
+        waymo_url:'https://waymo.com/waymo-one/?destination=' + encodeURIComponent(b.location?.address1 || b.name),
       }))
       .sort((a,b) => a.name.localeCompare(b.name));
     dirLoaded = true;
