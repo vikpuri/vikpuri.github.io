@@ -563,7 +563,12 @@ function renderLaveenFavs() {
   const el = document.getElementById('fav-list-laveen');
   if (!el || el.dataset.loaded) return;
   el.dataset.loaded = '1';
-  el.innerHTML = LAVEEN_FAVS.map(f => `
+  el.innerHTML = `
+    <a href="/desertlife/phoenix" style="display:flex;align-items:center;justify-content:space-between;padding:13px 16px;background:var(--ink);text-decoration:none;">
+      <div style="font-family:'Source Serif 4',serif;font-size:.82rem;font-weight:600;color:var(--cream)">Explore Phoenix / Laveen →</div>
+      <div style="font-family:'DM Mono',monospace;font-size:.42rem;letter-spacing:.1em;text-transform:uppercase;color:var(--gold)">Live Map</div>
+    </a>` +
+  LAVEEN_FAVS.map(f => `
     <div onclick="flyToFav(${f.lat}, ${f.lng})" style="cursor:pointer;display:flex;align-items:center;justify-content:space-between;padding:11px 16px;border-bottom:1px solid var(--rule);transition:background .15s;" onmouseover="this.style.background='var(--cream-2)'" onmouseout="this.style.background=''">
       <div>
         <div style="font-family:'Source Serif 4',Georgia,serif;font-size:.86rem;font-weight:600;color:var(--ink)">♥ ${f.name}</div>
