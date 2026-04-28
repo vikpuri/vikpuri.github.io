@@ -66,6 +66,23 @@
     }
     .heart-pin:hover { transform:scale(1.08); box-shadow:0 4px 18px rgba(0,0,0,.4); }
 
+    /* ── Property label above pin ── */
+    #prop-label {
+      position:fixed; z-index:21; background:var(--ink); color:var(--cream);
+      font-family:'DM Mono',monospace; font-size:.38rem; letter-spacing:.1em;
+      text-transform:uppercase; padding:3px 8px; border-radius:2px;
+      white-space:nowrap; display:none; transform:translate(-50%,-100%);
+      pointer-events:none;
+    }
+
+    /* ── RPOI listing price pins ── */
+    .rpoi-pin { background:#fff; border:2px solid var(--gold); border-radius:6px;
+                padding:4px 8px; box-shadow:0 2px 10px rgba(0,0,0,.25);
+                cursor:pointer; transition:transform .15s; min-width:58px; text-align:center; }
+    .rpoi-pin:hover { transform:scale(1.08); }
+    .rpoi-price { font-family:'DM Mono',monospace; font-size:11px; font-weight:500; color:var(--ink); line-height:1.3; }
+    .rpoi-beds  { font-family:'DM Mono',monospace; font-size:9px; color:var(--text-muted); }
+
     /* ── Info card — slides up from bottom ── */
     #info-card {
       position:fixed; bottom:calc(var(--route-h) + 12px); left:50%;
@@ -135,7 +152,8 @@
 <body>
 
 <div id="map"></div>
-<div id="prop-pin"></div>
+<div id="prop-pin" title="← Return to DTLA property"></div>
+<div id="prop-label">← Property</div>
 
 <header>
   <a class="logo-wrap" href="/">
@@ -229,44 +247,75 @@ async function initMap() {
   // Property pin — DOM overlay (only exception to billboard rule)
   initPropPin();
 
-  // Load Yelp businesses then HEART favorites on top
+  // Load RPOI (Redfin), Yelp, then HEART favorites on top
+  await loadRPOI();
   await loadYelp();
   loadHearts();
 }
 
-/* ── Property pin (DOM overlay — custom CSS pulse, click → info) ── */
+/* ── Property pin — click returns to /dtla ── */
 function initPropPin() {
-  const pin = document.getElementById('prop-pin');
+  const pin   = document.getElementById('prop-pin');
+  const label = document.getElementById('prop-label');
   let pinActive = false;
-  setTimeout(() => { pinActive = true; pin.style.display = 'block'; }, 1200);
-  pin.addEventListener('click', () => {
-    showCard({
-      tag: 'Your Property',
-      name: '801 S Grand Ave #1600',
-      addr: 'South Park · DTLA · Los Angeles CA 90017',
-      cat: '2 BD / 2 BA · $885,000',
-      ytSearch: '801 S Grand Ave DTLA Los Angeles',
-      waymo: null,
-    });
-  });
+  setTimeout(() => { pinActive = true; pin.style.display = 'block'; label.style.display = 'block'; }, 1200);
+  pin.addEventListener('click', () => { window.location.href = '/dtla'; });
 
-  // Position pin over property lat/lng on every render
   map.addListener('bounds_changed', () => {
     if (!pinActive) return;
     const proj = map.getProjection();
     if (!proj) return;
-    const point = proj.fromLatLngToPoint(new google.maps.LatLng(CENTER.lat, CENTER.lng));
+    const point  = proj.fromLatLngToPoint(new google.maps.LatLng(CENTER.lat, CENTER.lng));
     const bounds = map.getBounds();
     if (!bounds) return;
-    const ne = proj.fromLatLngToPoint(bounds.getNorthEast());
-    const sw = proj.fromLatLngToPoint(bounds.getSouthWest());
-    const mapDiv = document.getElementById('map');
+    const ne    = proj.fromLatLngToPoint(bounds.getNorthEast());
+    const sw    = proj.fromLatLngToPoint(bounds.getSouthWest());
     const scale = Math.pow(2, map.getZoom());
     const x = (point.x - sw.x) * scale;
     const y = (point.y - ne.y) * scale;
-    pin.style.left = x + 'px';
-    pin.style.top  = y + 'px';
+    pin.style.left   = x + 'px';
+    pin.style.top    = y + 'px';
+    label.style.left = x + 'px';
+    label.style.top  = (y - 36) + 'px';
   });
+}
+
+/* ── Redfin RPOI listing pins ── */
+async function loadRPOI() {
+  try {
+    const r = await fetch(
+      `${SB_URL}/rest/v1/properties?zip=in.(${MYLOCAL_ZIPS.join(',')})&mls_status=eq.active&select=address,neighborhood,zip,lat,lng,price,beds,baths,sqft,redfin_url&order=price.asc&limit=200`,
+      { headers: SB_HDRS }
+    );
+    const rows = await r.json();
+    if (!Array.isArray(rows) || !rows.length) return;
+    rows.forEach(p => {
+      if (!p.lat || !p.lng) return;
+      const el = document.createElement('div');
+      el.className = 'rpoi-pin';
+      const priceK = p.price ? '$' + Math.round(p.price / 1000) + 'K' : '—';
+      el.innerHTML = `<div class="rpoi-price">${priceK}</div>${p.beds ? `<div class="rpoi-beds">${p.beds} bd</div>` : ''}`;
+      const m = new advMarker({ position: { lat: p.lat, lng: p.lng }, map, content: el, title: p.address });
+      m.addListener('click', () => {
+        map.panTo({ lat: p.lat, lng: p.lng });
+        showCard({
+          tag:   p.neighborhood || 'DTLA Listing',
+          name:  p.address,
+          addr:  priceK + (p.beds ? ' · ' + p.beds + ' BD / ' + p.baths + ' BA' : ''),
+          cat:   (p.sqft || '—') + ' sqft',
+          waymo: 'https://waymo.com/waymo-one/?destination=' + encodeURIComponent(p.address),
+          slug:  null,
+        });
+        if (p.redfin_url) {
+          const btn = Object.assign(document.createElement('a'), {
+            className:'card-btn card-btn-view', textContent:'Redfin →',
+            href:p.redfin_url, target:'_blank',
+          });
+          document.getElementById('card-actions').appendChild(btn);
+        }
+      });
+    });
+  } catch(e) { console.warn('RPOI load failed:', e.message); }
 }
 
 /* ── Yelp businesses from Supabase restaurants table ── */
