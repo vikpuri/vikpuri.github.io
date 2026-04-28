@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Requation · Place</title>
+  <meta name="description" content="HyperLocal place detail — Requation directory.">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@1,700&family=Raleway:wght@600&family=Source+Serif+4:wght@300;400;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --gold:#C9A84C; --gold-dim:rgba(201,168,76,.1); --gold-border:rgba(201,168,76,.35);
+      --cream:#FAF8F4; --cream-2:#F4F1EB;
+      --ink:#1C1C1C; --ink-3:#444;
+      --rule:rgba(0,0,0,.12); --rule-heavy:rgba(0,0,0,.22);
+      --text-muted:#666; --sand:#E8DDD0;
+      --header-h:56px; --card-h:58vh;
+    }
+    *,::before,::after { box-sizing:border-box; margin:0; padding:0; }
+    html { height:100%; }
+    body { height:100%; background:#1a1a1a; font-family:'Source Serif 4',Georgia,serif; overflow:hidden; }
+
+    /* Rule 1 */
+    #map { position:fixed; inset:0; z-index:0; }
+
+    /* ── Header ── */
+    header {
+      position:fixed; top:0; left:0; right:0; height:var(--header-h); z-index:100;
+      background:rgba(255,255,255,.97); border-bottom:2px solid var(--ink);
+      display:flex; align-items:center; justify-content:space-between; padding:0 20px;
+    }
+    .logo-wrap { display:flex; align-items:center; gap:10px; text-decoration:none; }
+    .logo-addr { font-family:'DM Mono',monospace; font-size:.45rem; letter-spacing:.12em;
+                 text-transform:uppercase; color:var(--text-muted);
+                 border-left:1px solid var(--sand); padding-left:10px; }
+    #sku-badge {
+      font-family:'DM Mono',monospace; font-size:.42rem; letter-spacing:.14em;
+      text-transform:uppercase; color:var(--gold);
+      background:var(--gold-dim); border:1px solid var(--gold-border);
+      padding:4px 10px; border-radius:2px;
+    }
+
+    /* ── Place card — anchored to bottom ── */
+    #place-card {
+      position:fixed; bottom:0; left:0; right:0;
+      height:var(--card-h);
+      background:var(--cream); border-top:2px solid var(--ink);
+      border-radius:12px 12px 0 0;
+      box-shadow:0 -8px 40px rgba(0,0,0,.28);
+      z-index:50; display:flex; flex-direction:column;
+      overflow:hidden;
+    }
+
+    /* drag handle feel */
+    .card-handle {
+      width:36px; height:4px; background:var(--sand);
+      border-radius:2px; margin:10px auto 0;
+      flex-shrink:0;
+    }
+
+    .card-scroll { flex:1; overflow-y:auto; padding:12px 20px 24px; }
+
+    /* ── SKU / parent row ── */
+    .card-meta {
+      display:flex; align-items:center; justify-content:space-between;
+      margin-bottom:10px; flex-wrap:wrap; gap:6px;
+    }
+    #place-sku {
+      font-family:'DM Mono',monospace; font-size:.38rem; letter-spacing:.16em;
+      text-transform:uppercase; color:var(--gold);
+    }
+    #back-link {
+      font-family:'DM Mono',monospace; font-size:.38rem; letter-spacing:.1em;
+      text-transform:uppercase; color:var(--text-muted); text-decoration:none;
+    }
+    #back-link:hover { color:var(--ink); }
+
+    /* ── Heart + category ── */
+    .card-tags { display:flex; gap:6px; align-items:center; margin-bottom:8px; flex-wrap:wrap; }
+    #place-heart {
+      background:var(--gold); color:#fff; font-size:.38rem;
+      font-family:'DM Mono',monospace; letter-spacing:.1em; text-transform:uppercase;
+      padding:3px 8px; border-radius:20px;
+    }
+    #place-cat {
+      background:var(--cream-2); border:1px solid var(--rule);
+      font-family:'DM Mono',monospace; font-size:.38rem; letter-spacing:.1em;
+      text-transform:uppercase; color:var(--ink-3);
+      padding:3px 8px; border-radius:3px;
+    }
+
+    /* ── Name + address ── */
+    #place-name { font-size:1.35rem; font-weight:600; color:var(--ink); line-height:1.2; margin-bottom:4px; }
+    #place-addr { font-family:'DM Mono',monospace; font-size:.42rem; color:var(--text-muted);
+                  letter-spacing:.06em; margin-bottom:14px; }
+
+    /* ── Specs row ── */
+    #place-specs { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:16px; }
+    .spec-pill {
+      background:var(--cream-2); border:1px solid var(--rule); border-radius:3px;
+      padding:5px 10px; font-family:'DM Mono',monospace; font-size:.4rem;
+      letter-spacing:.08em; text-transform:uppercase; color:var(--ink-3);
+    }
+    .spec-pill.pending { color:var(--text-muted); border-style:dashed; }
+
+    /* ── Actions ── */
+    #place-actions { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px; }
+    .place-btn {
+      padding:9px 16px; border-radius:3px; font-family:'DM Mono',monospace;
+      font-size:.42rem; letter-spacing:.1em; text-transform:uppercase;
+      text-decoration:none; border:none; cursor:pointer; flex-shrink:0;
+    }
+    .btn-waymo  { background:#1A73E8; color:#fff; }
+    .btn-yt     { background:#FF0000; color:#fff; }
+    .btn-yelp   { background:#d32323; color:#fff; }
+    .btn-maps   { background:var(--ink); color:var(--cream); }
+
+    #place-yt { width:100%; aspect-ratio:16/9; border:none; display:none; border-radius:3px; }
+
+    /* ── Not-found state ── */
+    #not-found {
+      position:fixed; inset:0; display:none; align-items:center; justify-content:center;
+      background:var(--cream); z-index:200; flex-direction:column; gap:12px;
+    }
+    #not-found h2 { font-size:1.2rem; color:var(--ink); }
+    #not-found p  { font-family:'DM Mono',monospace; font-size:.42rem; color:var(--text-muted); }
+    #not-found a  { font-family:'DM Mono',monospace; font-size:.42rem; color:var(--gold); }
+
+    /* ── Heart map marker ── */
+    .heart-pin {
+      background:var(--gold); color:#fff; padding:5px 10px; border-radius:20px;
+      font-family:'Source Serif 4',serif; font-size:11px; font-weight:600;
+      white-space:nowrap; box-shadow:0 2px 12px rgba(0,0,0,.3);
+      display:flex; align-items:center; gap:4px;
+    }
+  </style>
+</head>
+<body>
+
+<div id="map"></div>
+
+<header>
+  <a class="logo-wrap" href="/">
+    <svg width="28" height="28" viewBox="0 0 60 60" fill="none">
+      <text x="4" y="46" font-family="EB Garamond" font-style="italic" font-weight="700" font-size="52" fill="#1C1C1C">r</text>
+      <line x1="18" y1="48" x2="44" y2="12" stroke="#C9A84C" stroke-width="2.2"/>
+      <text x="38" y="28" font-family="EB Garamond" font-style="italic" font-weight="700" font-size="26" fill="#C9A84C">Σ</text>
+    </svg>
+    <span style="font-family:'Raleway',sans-serif;font-size:.85rem;font-weight:600;letter-spacing:.04em">quation</span>
+    <span class="logo-addr" id="logo-addr">Place Detail</span>
+  </a>
+  <span id="sku-badge">—</span>
+</header>
+
+<div id="place-card">
+  <div class="card-handle"></div>
+  <div class="card-scroll">
+    <div class="card-meta">
+      <div id="place-sku"></div>
+      <a id="back-link" href="/">← Back</a>
+    </div>
+    <div class="card-tags">
+      <div id="place-heart" style="display:none">♥ Curated Favorite</div>
+      <div id="place-cat"></div>
+    </div>
+    <div id="place-name"></div>
+    <div id="place-addr"></div>
+    <div id="place-specs">
+      <div class="spec-pill pending">Hours · Yelp pending</div>
+      <div class="spec-pill pending">Price · Yelp pending</div>
+      <div class="spec-pill pending">Rating · Yelp pending</div>
+    </div>
+    <div id="place-actions"></div>
+    <iframe id="place-yt" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+  </div>
+</div>
+
+<div id="not-found">
+  <h2>Place not found</h2>
+  <p>SKU not recognized.</p>
+  <a href="/">← Return home</a>
+</div>
+
+<script>
+/* ── SKU / Product lookup table ──────────────────────────────────── */
+/* Rule 2: coordinates from geocoding — center of place only         */
+const PLACES = {
+  /* MYLOCAL — DTLA 18 Favorites */
+  'mylocal-dalians-cafe':       { sku:'MYLOCAL-001', name:"Dalian's Cafe",         lat:34.049308, lng:-118.254484, cat:'Cafe',           addr:'530 S Grand Ave, Los Angeles CA 90071',        parent:'MyLocal',   parentUrl:'/mylocal', waymo:'https://waymo.com/waymo-one/?destination=530+S+Grand+Ave+Los+Angeles+CA+90071',        ytSearch:"Dalians Cafe DTLA Los Angeles",              heart:true },
+  'mylocal-philz-coffee':       { sku:'MYLOCAL-002', name:'Philz Coffee',           lat:34.045710, lng:-118.258555, cat:'Coffee',         addr:'801 S Grand Ave, Los Angeles CA 90017',        parent:'MyLocal',   parentUrl:'/mylocal', waymo:'https://waymo.com/waymo-one/?destination=801+S+Grand+Ave+Los+Angeles+CA+90017',        ytSearch:'Philz Coffee Los Angeles',                   heart:true },
+  'mylocal-northern-cafe':      { sku:'MYLOCAL-003', name:'Northern Cafe',          lat:34.047350, lng:-118.264600, cat:'Restaurant',     addr:'725 W 7th St, Los Angeles CA 90017',           parent:'MyLocal',   parentUrl:'/mylocal', waymo:'https://waymo.com/waymo-one/?destination=725+W+7th+St+Los+Angeles+CA+90017',           ytSearch:'Northern Cafe DTLA',                         heart:true },
+  'mylocal-lalas-argentine':    { sku:'MYLOCAL-004', name:"LALA's Argentine Grill", lat:34.041871, lng:-118.255055, cat:'Steak',         addr:'105 W 9th St, Los Angeles CA 90015',           parent:'MyLocal',   parentUrl:'/mylocal', waymo:'https://waymo.com/waymo-one/?destination=105+W+9th+St+Los+Angeles+CA+90015',           ytSearch:"LALA's Argentine Grill DTLA",                heart:true },
+  'mylocal-the-broad':          { sku:'MYLOCAL-005', name:'The Broad',              lat:34.054017, lng:-118.249890, cat:'Museum',         addr:'221 S Grand Ave, Los Angeles CA 90012',        parent:'MyLocal',   parentUrl:'/mylocal', waymo:'https://waymo.com/waymo-one/?destination=221+S+Grand+Ave+Los+Angeles+CA+90012',        ytSearch:'The Broad Museum Los Angeles',               heart:true },
+  'mylocal-moca':               { sku:'MYLOCAL-006', name:'MOCA Grand Ave',         lat:34.054135, lng:-118.249700, cat:'Museum',         addr:'250 S Grand Ave, Los Angeles CA 90012',        parent:'MyLocal',   parentUrl:'/mylocal', waymo:'https://waymo.com/waymo-one/?destination=250+S+Grand+Ave+Los+Angeles+CA+90012',        ytSearch:'MOCA Los Angeles Grand Ave',                 heart:true },
+  'mylocal-music-center':       { sku:'MYLOCAL-007', name:'Music Center',           lat:34.055692, lng:-118.248434, cat:'Arts',           addr:'135 N Grand Ave, Los Angeles CA 90012',        parent:'MyLocal',   parentUrl:'/mylocal', waymo:'https://waymo.com/waymo-one/?destination=135+N+Grand+Ave+Los+Angeles+CA+90012',        ytSearch:'Walt Disney Concert Hall Los Angeles',       heart:true },
+  'mylocal-dwp-building':       { sku:'MYLOCAL-008', name:'DWP Building',           lat:34.055300, lng:-118.250400, cat:'Landmark',       addr:'111 N Hope St, Los Angeles CA 90012',          parent:'MyLocal',   parentUrl:'/mylocal', waymo:'https://waymo.com/waymo-one/?destination=111+N+Hope+St+Los+Angeles+CA+90012',          ytSearch:'LADWP Building Los Angeles landmark',        heart:true },
+  'mylocal-blujam-cafe':        { sku:'MYLOCAL-009', name:'BluJam Cafe',            lat:34.046400, lng:-118.248800, cat:'Cafe',           addr:'541 S Spring St, Los Angeles CA 90013',        parent:'MyLocal',   parentUrl:'/mylocal', waymo:'https://waymo.com/waymo-one/?destination=541+S+Spring+St+Los+Angeles+CA+90013',        ytSearch:'BluJam Cafe Los Angeles',                    heart:true },
+  'mylocal-pitchoun-bakery':    { sku:'MYLOCAL-010', name:'Pitchoun Bakery',        lat:34.050500, lng:-118.258100, cat:'Bakery',         addr:'545 S Flower St, Los Angeles CA 90071',        parent:'MyLocal',   parentUrl:'/mylocal', waymo:'https://waymo.com/waymo-one/?destination=545+S+Flower+St+Los+Angeles+CA+90071',        ytSearch:'Pitchoun Bakery Los Angeles DTLA',           heart:true },
+  'mylocal-arts-cleaners':      { sku:'MYLOCAL-011', name:"Art's Cleaners",         lat:34.047300, lng:-118.251700, cat:'Services',       addr:'209 W 7th St, Los Angeles CA 90014',           parent:'MyLocal',   parentUrl:'/mylocal', waymo:'https://waymo.com/waymo-one/?destination=209+W+7th+St+Los+Angeles+CA+90014',           ytSearch:"Art's Cleaners DTLA Los Angeles",            heart:true },
+  'mylocal-joycedtla':          { sku:'MYLOCAL-012', name:'JoyceDTLA',              lat:34.046269, lng:-118.257165, cat:'Restaurant',     addr:'770 S Grand Ave A, Los Angeles CA 90017',      parent:'MyLocal',   parentUrl:'/mylocal', waymo:'https://waymo.com/waymo-one/?destination=770+S+Grand+Ave+Los+Angeles+CA+90017',        ytSearch:'JoyceDTLA restaurant Los Angeles',           heart:true },
+  'mylocal-inkawasi':           { sku:'MYLOCAL-013', name:'InkaWasi',               lat:34.044500, lng:-118.260100, cat:'Peruvian',       addr:'900 W Olympic Blvd, Los Angeles CA 90015',     parent:'MyLocal',   parentUrl:'/mylocal', waymo:'https://waymo.com/waymo-one/?destination=900+W+Olympic+Blvd+Los+Angeles+CA+90015',      ytSearch:'InkaWasi restaurant Los Angeles',            heart:true },
+  'mylocal-pine-and-crane':     { sku:'MYLOCAL-014', name:'Pine and Crane',         lat:34.039300, lng:-118.250800, cat:'Taiwanese',      addr:'1120 S Grand Ave, Los Angeles CA 90015',       parent:'MyLocal',   parentUrl:'/mylocal', waymo:'https://waymo.com/waymo-one/?destination=1120+S+Grand+Ave+Los+Angeles+CA+90015',       ytSearch:'Pine and Crane restaurant Los Angeles',      heart:true },
+  'mylocal-bubble-u':           { sku:'MYLOCAL-015', name:'Bubble U',               lat:34.044100, lng:-118.252800, cat:'Boba',           addr:'819 Santee St #111, Los Angeles CA 90014',     parent:'MyLocal',   parentUrl:'/mylocal', waymo:'https://waymo.com/waymo-one/?destination=819+Santee+St+Los+Angeles+CA+90014',          ytSearch:'Bubble U boba DTLA Los Angeles',             heart:true },
+  'mylocal-bottega-louie':      { sku:'MYLOCAL-016', name:'Bottega Louie',          lat:34.048900, lng:-118.254900, cat:'Italian',        addr:'700 S Grand Ave, Los Angeles CA 90017',        parent:'MyLocal',   parentUrl:'/mylocal', waymo:'https://waymo.com/waymo-one/?destination=700+S+Grand+Ave+Los+Angeles+CA+90017',        ytSearch:'Bottega Louie Los Angeles DTLA',             heart:true },
+  'mylocal-chick-fil-a':        { sku:'MYLOCAL-017', name:'Chick-fil-A',            lat:34.046975, lng:-118.261250, cat:'Fast Food',      addr:'660 S Figueroa St, Los Angeles CA 90017',      parent:'MyLocal',   parentUrl:'/mylocal', waymo:'https://waymo.com/waymo-one/?destination=660+S+Figueroa+St+Los+Angeles+CA+90017',      ytSearch:'Chick-fil-A DTLA Los Angeles',               heart:true },
+  'mylocal-apple-store':        { sku:'MYLOCAL-018', name:'Apple Store Broadway',   lat:34.048800, lng:-118.248200, cat:'Tech · Retail',      addr:'801 S Broadway, Los Angeles CA 90014',         parent:'MyLocal',   parentUrl:'/mylocal', waymo:'https://waymo.com/waymo-one/?destination=801+S+Broadway+Los+Angeles+CA+90014',         ytSearch:'Apple Store Broadway DTLA Los Angeles',           heart:true },
+  'mylocal-wolfs-salon':        { sku:'MYLOCAL-019', name:"Wolf's European Salon",  lat:34.050800, lng:-118.257900, cat:'Hair · Bonaventure',  addr:'404 S Figueroa St, Los Angeles CA 90071',      parent:'MyLocal',   parentUrl:'/mylocal', waymo:'https://waymo.com/waymo-one/?destination=404+S+Figueroa+St+Los+Angeles+CA+90071',      ytSearch:"Wolf's Salon Los Angeles Bonaventure",            heart:true },
+
+  /* BROADWAY — WalkingLA 6 */
+  'broadway-grand-central':     { sku:'BROADWAY-001', name:'Grand Central Market',  lat:34.0504, lng:-118.2494, cat:'Food Hall · Est.1917',   addr:'317 S Broadway, Los Angeles CA 90013',  parent:'WalkingLA', parentUrl:'/lalife/broadway', waymo:'https://waymo.com/waymo-one/?destination=317+S+Broadway+Los+Angeles+CA+90013',  ytSearch:'Grand Central Market Los Angeles',          heart:true },
+  'broadway-angels-flight':     { sku:'BROADWAY-002', name:"Angel's Flight",        lat:34.0522, lng:-118.2487, cat:'Funicular · Landmark',    addr:'351 S Hill St, Los Angeles CA 90013',   parent:'WalkingLA', parentUrl:'/lalife/broadway', waymo:'https://waymo.com/waymo-one/?destination=351+S+Hill+St+Los+Angeles+CA+90013',   ytSearch:"Angel's Flight Los Angeles funicular",      heart:true },
+  'broadway-bradbury':          { sku:'BROADWAY-003', name:'Bradbury Building',     lat:34.0502, lng:-118.2491, cat:'Architecture · 1893',     addr:'304 S Broadway, Los Angeles CA 90013',  parent:'WalkingLA', parentUrl:'/lalife/broadway', waymo:'https://waymo.com/waymo-one/?destination=304+S+Broadway+Los+Angeles+CA+90013',  ytSearch:'Bradbury Building Los Angeles interior',    heart:true },
+  'broadway-pershing-square':   { sku:'BROADWAY-004', name:'Pershing Square',       lat:34.0484, lng:-118.2523, cat:'Park · Transit Hub',      addr:'532 S Olive St, Los Angeles CA 90013',  parent:'WalkingLA', parentUrl:'/lalife/broadway', waymo:'https://waymo.com/waymo-one/?destination=532+S+Olive+St+Los+Angeles+CA+90013',  ytSearch:'Pershing Square Los Angeles',               heart:true },
+  'broadway-jewelry-district':  { sku:'BROADWAY-005', name:'Jewelry District',      lat:34.0447, lng:-118.2509, cat:'Shopping · Hill St',      addr:'660 S Hill St, Los Angeles CA 90014',   parent:'WalkingLA', parentUrl:'/lalife/broadway', waymo:'https://waymo.com/waymo-one/?destination=660+S+Hill+St+Los+Angeles+CA+90014',   ytSearch:'Los Angeles Jewelry District Hill Street',  heart:true },
+  'broadway-last-bookstore':    { sku:'BROADWAY-006', name:'The Last Bookstore',    lat:34.0488, lng:-118.2485, cat:'Books · Records',          addr:'453 S Spring St, Los Angeles CA 90013', parent:'WalkingLA', parentUrl:'/lalife/broadway', waymo:'https://waymo.com/waymo-one/?destination=453+S+Spring+St+Los+Angeles+CA+90013', ytSearch:'The Last Bookstore Los Angeles',             heart:true },
+
+  /* VENICE — Abbot Kinney 4 */
+  'venice-levain-bakery':       { sku:'VENICE-001', name:'Levain Bakery',           lat:33.9917, lng:-118.4641, cat:'Bakery',               addr:'1203 Abbot Kinney Blvd, Venice CA 90291', parent:'Venice',    parentUrl:'/lalife/venice', waymo:'https://waymo.com/waymo-one/?destination=1203+Abbot+Kinney+Blvd+Venice+CA+90291', ytSearch:'Levain Bakery Venice Los Angeles',           heart:true },
+  'venice-intelligentsia':      { sku:'VENICE-002', name:'Intelligentsia Coffee',   lat:33.9916, lng:-118.4639, cat:'Coffee',               addr:'1331 Abbot Kinney Blvd, Venice CA 90291', parent:'Venice',    parentUrl:'/lalife/venice', waymo:'https://waymo.com/waymo-one/?destination=1331+Abbot+Kinney+Blvd+Venice+CA+90291', ytSearch:'Intelligentsia Coffee Venice Abbot Kinney', heart:true },
+  'venice-salt-and-straw':      { sku:'VENICE-003', name:'Salt & Straw',            lat:33.9918, lng:-118.4642, cat:'Ice Cream',             addr:'1357 Abbot Kinney Blvd, Venice CA 90291', parent:'Venice',    parentUrl:'/lalife/venice', waymo:'https://waymo.com/waymo-one/?destination=1357+Abbot+Kinney+Blvd+Venice+CA+90291', ytSearch:'Salt and Straw ice cream Venice LA',         heart:true },
+  'venice-nati':                { sku:'VENICE-004', name:'NATI',                    lat:33.9919, lng:-118.4643, cat:'Clothing · Abbot Kinney', addr:'1427 Abbot Kinney Blvd, Venice CA 90291', parent:'Venice',   parentUrl:'/lalife/venice', waymo:'https://waymo.com/waymo-one/?destination=1427+Abbot+Kinney+Blvd+Venice+CA+90291', ytSearch:'NATI clothing store Abbot Kinney Venice',   heart:true },
+};
+
+/* ── Boot: read ?id= slug ─────────────────────────────────────────── */
+const slug  = new URLSearchParams(location.search).get('id') || '';
+const place = PLACES[slug];
+
+if (!place) {
+  document.getElementById('not-found').style.display = 'flex';
+  document.getElementById('place-card').style.display = 'none';
+} else {
+  document.title = `${place.name} · ${place.sku} — Requation`;
+  document.getElementById('sku-badge').textContent    = place.sku;
+  document.getElementById('logo-addr').textContent    = place.parent + ' · ' + place.cat;
+  document.getElementById('place-sku').textContent    = place.sku;
+  document.getElementById('back-link').textContent    = '← ' + place.parent;
+  document.getElementById('back-link').href           = place.parentUrl;
+  document.getElementById('place-name').textContent   = place.name;
+  document.getElementById('place-addr').textContent   = place.addr;
+  document.getElementById('place-cat').textContent    = place.cat;
+  if (place.heart) document.getElementById('place-heart').style.display = 'inline-block';
+
+  const act = document.getElementById('place-actions');
+  if (place.waymo) {
+    const w = Object.assign(document.createElement('a'), { className:'place-btn btn-waymo', textContent:'Waymo One →', href:place.waymo, target:'_blank' });
+    act.appendChild(w);
+  }
+  const yt = document.createElement('button');
+  yt.className = 'place-btn btn-yt'; yt.textContent = '▶ YouTube';
+  yt.onclick = () => {
+    const f = document.getElementById('place-yt');
+    f.style.display = 'block';
+    f.src = 'https://www.youtube.com/embed?listType=search&list=' + encodeURIComponent(place.ytSearch) + '&autoplay=1';
+  };
+  act.appendChild(yt);
+
+  /* Yelp button — live when Yelp data populated */
+  const yelp = Object.assign(document.createElement('button'), { className:'place-btn btn-maps', textContent:'Maps →' });
+  yelp.onclick = () => window.open('https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(place.addr), '_blank');
+  act.appendChild(yelp);
+}
+
+/* ── Rule 3: map singleton centered on place ── */
+async function initMap() {
+  const { Map }                   = await google.maps.importLibrary('maps');
+  const { AdvancedMarkerElement } = await google.maps.importLibrary('marker');
+
+  const center = place
+    ? { lat: place.lat, lng: place.lng }
+    : { lat: 34.0457, lng: -118.2586 };
+
+  const map = new Map(document.getElementById('map'), {
+    center, zoom: 18, tilt: 45,
+    mapId: '96844e6a7bb74a7d5514d3a5',
+    gestureHandling: 'greedy',
+  });
+
+  if (place) {
+    const el = document.createElement('div');
+    el.className = 'heart-pin';
+    el.innerHTML = '♥ ' + place.name;
+    new AdvancedMarkerElement({ position: center, map, content: el, title: place.name });
+  }
+}
+window.initMap = initMap;
+</script>
+
+<script async
+  src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD7UMA5ILPXv9QK2_gvxPVth30MavRd2WQ&callback=initMap&libraries=marker&v=weekly">
+</script>
+</body>
+</html>
