@@ -1,6 +1,7 @@
 const SUPABASE_URL = 'https://mpmprnjhunjfeacikgml.supabase.co';
 const SUPABASE_KEY = process.env.SUPABASE_SERVICE_KEY;
-const NETLIFY_YELP = 'https://phenomenal-fenglisu-7217d6.netlify.app/.netlify/functions/yelp';
+// Vercel replaced Netlify (2026-04-25). Netlify endpoint deprecated.
+const NETLIFY_YELP = 'https://requation.com/api/yelp';
 
 // Market zip codes
 const MARKETS = {
