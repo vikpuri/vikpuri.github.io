@@ -48,7 +48,7 @@ fs.mkdirSync('dist');
 // ── Inject secrets into HTML files ───────────────────────────────
 const HTML_FILES = [
   'gm-landing.html', 'gm-dtla-v1.html', 'map-test.html', 'dtla.html', 'dtla-template.html', 'laveen.html',
-  'dashboard.html', 'grid-demo.html', 'mylocal.html', 'laveenlocal.html',
+  'dashboard.html', 'grid-demo.html', 'mylocal.html', 'laveenlocal.html', 'place.html',
 ];
 HTML_FILES.forEach(f => {
   if (!fs.existsSync(f)) return;
