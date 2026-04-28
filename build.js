@@ -78,8 +78,7 @@ HTML_FILES.forEach(f => {
 });
 
 // ── Copy static assets ────────────────────────────────────────────
-// Note: netlify/functions are NOT copied to dist — Netlify sources them
-// directly from the repo root per netlify.toml [functions] directory setting.
 ['CNAME'].forEach(item => copyItem(item, path.join('dist', item)));
+copyItem('assets', path.join('dist', 'assets'));
 
 console.log('\n✅  Build complete → dist/');
