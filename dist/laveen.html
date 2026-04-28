@@ -538,28 +538,39 @@ function switchTab(name) {
 
 /* ── Favorites ── */
 const LAVEEN_FAVS = [
-  { name: 'Los Dos Molinos',        slug: 'laveenlocal-los-dos-molinos', cat: 'New Mexico Kitchen',          addr: '8646 S Central Ave, Phoenix AZ' },
-  { name: 'T-Bone Steakhouse',      slug: 'laveenlocal-tbone-steakhouse', cat: 'Steakhouse · South Mountain', addr: '10037 S 19th Ave, Phoenix AZ' },
-  { name: "Rooster's Roost",        slug: 'laveenlocal-roosters-roost',  cat: 'Bar · Live Music',             addr: 'South Mountain, Phoenix AZ' },
-  { name: 'Wild Horse Pass Casino', slug: 'laveenlocal-wild-horse-pass', cat: 'Casino · Resort',              addr: '5040 W Wild Horse Pass Blvd, Chandler AZ' },
-  { name: 'South Mountain Park',    slug: 'laveenlocal-south-mountain',  cat: 'Park · 16,000 acres',          addr: '10919 S Central Ave, Phoenix AZ' },
-  { name: 'In-N-Out Burger',        slug: 'laveenlocal-in-n-out',        cat: 'Burgers',                      addr: 'Baseline Rd, Phoenix AZ' },
-  { name: "Raising Cane's",         slug: 'laveenlocal-raising-canes',   cat: 'Chicken',                      addr: 'Baseline Rd, Phoenix AZ' },
-  { name: 'Paris Baguette',         slug: 'laveenlocal-paris-baguette',  cat: 'Bakery',                       addr: 'Baseline Rd, Phoenix AZ' },
-  { name: 'Einstein Bros Bagels',   slug: 'laveenlocal-einstein-bagels', cat: 'Bagels',                       addr: 'Baseline Rd, Phoenix AZ' },
+  { name: 'Los Dos Molinos',        slug: 'laveenlocal-los-dos-molinos',  cat: 'New Mexico Kitchen',          addr: '8646 S Central Ave, Phoenix AZ',          lat: 33.3416, lng: -112.0717 },
+  { name: 'T-Bone Steakhouse',      slug: 'laveenlocal-tbone-steakhouse', cat: 'Steakhouse · South Mountain', addr: '10037 S 19th Ave, Phoenix AZ',            lat: 33.3565, lng: -112.0820 },
+  { name: "Rooster's Roost",        slug: 'laveenlocal-roosters-roost',   cat: 'Bar · Live Music',             addr: 'South Mountain, Phoenix AZ',              lat: 33.3640, lng: -112.0910 },
+  { name: 'Wild Horse Pass Casino', slug: 'laveenlocal-wild-horse-pass',  cat: 'Casino · Resort',              addr: '5040 W Wild Horse Pass Blvd, Chandler AZ', lat: 33.2990, lng: -111.9920 },
+  { name: 'South Mountain Park',    slug: 'laveenlocal-south-mountain',   cat: 'Park · 16,000 acres',          addr: '10919 S Central Ave, Phoenix AZ',         lat: 33.3388, lng: -112.0737 },
+  { name: 'In-N-Out Burger',        slug: 'laveenlocal-in-n-out',         cat: 'Burgers',                      addr: 'Baseline Rd, Phoenix AZ',                 lat: 33.3780, lng: -112.0870 },
+  { name: "Raising Cane's",         slug: 'laveenlocal-raising-canes',    cat: 'Chicken',                      addr: 'Baseline Rd, Phoenix AZ',                 lat: 33.3775, lng: -112.0820 },
+  { name: 'Paris Baguette',         slug: 'laveenlocal-paris-baguette',   cat: 'Bakery',                       addr: 'Baseline Rd, Phoenix AZ',                 lat: 33.3260, lng: -112.0415 },
+  { name: 'Einstein Bros Bagels',   slug: 'laveenlocal-einstein-bagels',  cat: 'Bagels',                       addr: 'Baseline Rd, Phoenix AZ',                 lat: 33.3770, lng: -112.0800 },
 ];
+
+function flyToFav(lat, lng) {
+  closePanel();
+  if (!window._viewer) return;
+  window._viewer.camera.flyTo({
+    destination: Cesium.Cartesian3.fromDegrees(lng, lat, 400),
+    orientation: { heading: Cesium.Math.toRadians(190), pitch: Cesium.Math.toRadians(-35), roll: 0 },
+    duration: 1.5
+  });
+}
+
 function renderLaveenFavs() {
   const el = document.getElementById('fav-list-laveen');
   if (!el || el.dataset.loaded) return;
   el.dataset.loaded = '1';
   el.innerHTML = LAVEEN_FAVS.map(f => `
-    <a href="/place?id=${f.slug}" style="display:flex;align-items:center;justify-content:space-between;padding:11px 16px;border-bottom:1px solid var(--rule);text-decoration:none;color:inherit">
+    <div onclick="flyToFav(${f.lat}, ${f.lng})" style="cursor:pointer;display:flex;align-items:center;justify-content:space-between;padding:11px 16px;border-bottom:1px solid var(--rule);transition:background .15s;" onmouseover="this.style.background='var(--cream-2)'" onmouseout="this.style.background=''">
       <div>
         <div style="font-family:'Source Serif 4',Georgia,serif;font-size:.86rem;font-weight:600;color:var(--ink)">♥ ${f.name}</div>
         <div style="font-family:'DM Mono',monospace;font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);margin-top:3px">${f.cat} · ${f.addr}</div>
       </div>
-      <div style="font-family:'DM Mono',monospace;font-size:.62rem;letter-spacing:.08em;color:var(--gold);flex-shrink:0;margin-left:12px">View →</div>
-    </a>`).join('');
+      <div style="font-family:'DM Mono',monospace;font-size:.62rem;letter-spacing:.08em;color:var(--gold);flex-shrink:0;margin-left:12px">Fly to →</div>
+    </div>`).join('');
 }
 
 /* ── Directory ── */
@@ -780,6 +791,7 @@ async function initCesium() {
 
   loadStripVideos();
   addYTMarkers();
+  window._viewer = viewer;
 }
 
 initCesium().catch(e => console.error('Cesium init failed:', e));
