@@ -303,7 +303,7 @@
     </div>
     <div class="panel-title" onclick="goHome()">Urban Farmhouse</div>
     <div class="panel-subtitle">11403 S 27th Dr · Laveen, AZ 85339</div>
-    <button id="panel-close" onclick="closePanel()" title="Close">
+    <button id="panel-close" onclick="window.location.href='/laveenlocal'" title="→ LaveenLocal map">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 115 100" width="26" height="26" style="display:block">
         <text x="4" y="42" font-family="EB Garamond,Georgia,serif" font-size="46" font-weight="700" font-style="italic" fill="#B22234">r</text>
         <line x1="31" y1="76" x2="50" y2="41" stroke="#7A7A7A" stroke-width="6" stroke-linecap="round"/>
@@ -538,15 +538,15 @@ function switchTab(name) {
 
 /* ── Favorites ── */
 const LAVEEN_FAVS = [
-  { name: 'Los Dos Molinos',        slug: 'laveenlocal-los-dos-molinos',  cat: 'New Mexico Kitchen',          addr: '8646 S Central Ave, Phoenix AZ 85042',          lat: 33.3671, lng: -112.0739 },
-  { name: 'T-Bone Steakhouse',      slug: 'laveenlocal-tbone-steakhouse', cat: 'Steakhouse · South Mountain', addr: '10037 S 19th Ave, Phoenix AZ 85041',            lat: 33.3554, lng: -112.1004 },
-  { name: "Rooster's Roost",        slug: 'laveenlocal-roosters-roost',   cat: 'Bar · Live Music',             addr: '8383 S 48th St, Phoenix AZ 85044',              lat: 33.3703, lng: -111.9735 },
-  { name: 'Wild Horse Pass Casino', slug: 'laveenlocal-wild-horse-pass',  cat: 'Casino · Resort',              addr: '5040 W Wild Horse Pass Blvd, Chandler AZ 85226', lat: 33.2800, lng: -111.9700 },
-  { name: 'South Mountain Park',    slug: 'laveenlocal-south-mountain',   cat: 'Park · 16,000 acres',          addr: '10919 S Central Ave, Phoenix AZ 85042',         lat: 33.3310, lng: -112.0735 },
-  { name: 'In-N-Out Burger',        slug: 'laveenlocal-in-n-out',         cat: 'Burgers · Laveen',             addr: '5940 W Baseline Rd, Laveen AZ 85339',           lat: 33.3653, lng: -112.1573 },
-  { name: "Raising Cane's",         slug: 'laveenlocal-raising-canes',    cat: 'Chicken · Laveen',             addr: '5950 W Baseline Rd, Laveen AZ 85339',           lat: 33.3654, lng: -112.1575 },
-  { name: 'Paris Baguette',         slug: 'laveenlocal-paris-baguette',   cat: 'Bakery · Baseline',            addr: '3220 E Baseline Rd, Phoenix AZ 85042',          lat: 33.3650, lng: -112.0167 },
-  { name: 'Einstein Bros Bagels',   slug: 'laveenlocal-einstein-bagels',  cat: 'Bagels · Baseline',            addr: '3211 E Baseline Rd, Phoenix AZ 85042',          lat: 33.3650, lng: -112.0170 },
+  { name: 'Los Dos Molinos',        slug: 'laveenlocal-los-dos-molinos',  cat: 'New Mexico Kitchen',          addr: '8646 S Central Ave, Phoenix AZ 85042',           lat: 33.3671406, lng: -112.0738578 },
+  { name: 'T-Bone Steakhouse',      slug: 'laveenlocal-tbone-steakhouse', cat: 'Steakhouse · South Mountain', addr: '10037 S 19th Ave, Phoenix AZ 85041',             lat: 33.3554406, lng: -112.1004140 },
+  { name: "Rooster's Roost",        slug: 'laveenlocal-roosters-roost',   cat: 'Bar · Live Music',             addr: '8383 S 48th St, Phoenix AZ 85044',               lat: 33.3702977, lng: -111.9733725 },
+  { name: 'Wild Horse Pass Casino', slug: 'laveenlocal-wild-horse-pass',  cat: 'Casino · Resort',              addr: '5040 S Maricopa Rd, Chandler AZ 85226',          lat: 33.2815857, lng: -111.9737159 },
+  { name: 'South Mountain Park',    slug: 'laveenlocal-south-mountain',   cat: 'Park · 16,000 acres',          addr: '10919 S Central Ave, Phoenix AZ 85042',          lat: 33.3470300, lng: -112.0844480 },
+  { name: 'In-N-Out Burger',        slug: 'laveenlocal-in-n-out',         cat: 'Burgers · Laveen',             addr: '5940 W Baseline Rd, Laveen AZ 85339',            lat: 33.3779798, lng: -112.1866421 },
+  { name: "Raising Cane's",         slug: 'laveenlocal-raising-canes',    cat: 'Chicken · Laveen',             addr: '5950 W Baseline Rd, Laveen AZ 85339',            lat: 33.3780270, lng: -112.1874405 },
+  { name: 'Paris Baguette',         slug: 'laveenlocal-paris-baguette',   cat: 'Bakery · Baseline',            addr: '3220 E Baseline Rd, Phoenix AZ 85042',           lat: 33.3789130, lng: -112.0110059 },
+  { name: 'Einstein Bros Bagels',   slug: 'laveenlocal-einstein-bagels',  cat: 'Bagels · Baseline',            addr: '3211 E Baseline Rd, Phoenix AZ 85042',           lat: 33.3779285, lng: -112.0125085 },
 ];
 
 function flyToFav(lat, lng) {
