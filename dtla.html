@@ -641,7 +641,7 @@ function switchTab(name) {
   if (name === 'favorites') renderFavorites();
 }
 
-/* ── Directory (Supabase + Yelp, deduplicated) ── */
+/* ── Directory (live Yelp data from Supabase) ── */
 const DIR_ICONS = {
   'Grocery':'🛒','Hardware':'🔨','Coffee':'☕','Cafes':'☕','Cafe':'☕','Coffee & Tea':'☕',
   'Bakeries':'🥐','Cinema':'🎬','Dental':'🦷','MedSpa':'💆','Gym':'💪','Fashion':'👗',
@@ -653,48 +653,6 @@ const DIR_ICONS = {
 const DIR_ZIPS = '90017,90015,90013,90014';
 let dirData = [], dirLoaded = false;
 
-/* Static seed — always visible while Supabase/Yelp load */
-const SEED_DIR = [
-  {name:'Whole Foods Market',     category:'Grocery',       address:'0.0 mi · 788 S Grand Ave'},
-  {name:'Philz Coffee',           category:'Coffee',        address:'100 ft · 799 S Grand Ave'},
-  {name:'Bottega Louie',          category:'Restaurants',   address:'0.1 mi · 700 S Grand Ave'},
-  {name:'Joe Auto Parks',         category:'Parking',       address:'0.1 mi'},
-  {name:'InterContinental DTLA',  category:'Hotels',        address:'0.1 mi · 900 Wilshire Blvd'},
-  {name:'Perch LA',               category:'Restaurants',   address:'0.2 mi · 448 S Hill St'},
-  {name:'Rudy\'s Barbershop',     category:'Hair Salons',   address:'0.2 mi'},
-  {name:'Broken Spanish',         category:'Restaurants',   address:'0.3 mi · 1050 S Flower St'},
-  {name:'Groundwork Coffee',      category:'Coffee',        address:'0.3 mi'},
-  {name:'The Westin Bonaventure', category:'Hotels',        address:'0.3 mi · 404 S Figueroa St'},
-  {name:'Pershing Square Garage', category:'Parking',       address:'0.3 mi'},
-  {name:'Equinox DTLA',           category:'Gyms',          address:'0.3 mi · 755 S Grand Ave'},
-  {name:'Pershing Square',        category:'Parks',         address:'0.4 mi'},
-  {name:'Ralphs DTLA',            category:'Grocery',       address:'0.4 mi · 645 W 9th St'},
-  {name:'Otium',                  category:'Restaurants',   address:'0.4 mi · 222 S Hope St'},
-  {name:'Self-Help Federal CU',   category:'Credit Unions', address:'0.4 mi'},
-  {name:'Jewelry District',       category:'Shopping',      address:'0.4 mi'},
-  {name:'Headlines Salon DTLA',   category:'Hair Salons',   address:'0.4 mi'},
-  {name:'Officine Brera',         category:'Restaurants',   address:'0.5 mi · 1331 E 6th St'},
-  {name:'Freehand Los Angeles',   category:'Hotels',        address:'0.5 mi · 416 W 8th St'},
-  {name:'LA Fitness',             category:'Gyms',          address:'0.5 mi'},
-  {name:'LA Central Library',     category:'Libraries',     address:'0.5 mi · 630 W 5th St'},
-  {name:'AMC Broadway',           category:'Movie Theaters',address:'0.6 mi'},
-  {name:'Blue Bottle Coffee',     category:'Coffee',        address:'0.6 mi'},
-  {name:'Apple Store Broadway',   category:'Shopping',      address:'0.6 mi · 801 S Broadway'},
-  {name:'Adidas Broadway',        category:'Shopping',      address:'0.6 mi'},
-  {name:'West Elm',               category:'Shopping',      address:'0.6 mi'},
-  {name:'Barry\'s Bootcamp',      category:'Gyms',          address:'0.6 mi'},
-  {name:'NoMad Los Angeles',      category:'Hotels',        address:'0.6 mi · 649 S Olive St'},
-  {name:'Grand Central Market',   category:'Shopping',      address:'0.7 mi · 317 S Broadway'},
-  {name:'Downtown Dog Lounge',    category:'Pet',           address:'0.4 mi'},
-  {name:'The Broad',              category:'Culture',       address:'0.8 mi · 221 S Grand Ave'},
-  {name:'Regal LA Live',          category:'Movie Theaters',address:'0.8 mi'},
-  {name:'MOCA Grand Ave',         category:'Culture',       address:'0.9 mi · 250 S Grand Ave'},
-  {name:'Walt Disney Concert Hall',category:'Culture',      address:'0.9 mi · 111 S Grand Ave'},
-  {name:'Grand Park',             category:'Parks',         address:'1.0 mi · 200 N Grand Ave'},
-  {name:'VCA Animal Hospital',    category:'Pet',           address:'0.7 mi'},
-  {name:'Alamo Drafthouse',       category:'Movie Theaters',address:'1.2 mi'},
-].map(b => ({...b, source:'seed', _norm:b.name.toLowerCase()}));
-
 function normName(s) {
   return (s||'').toLowerCase().replace(/[^a-z0-9]/g,'').slice(0,22);
 }
@@ -704,43 +662,29 @@ async function loadDirectory() {
   const el = document.getElementById('dir-list');
   el.innerHTML = '<div class="dir-empty">Loading…</div>';
   try {
-    const [sbRes, yelpRes] = await Promise.allSettled([
-      fetch(`${SB_URL}/rest/v1/restaurants?select=name,category,address,zip,yelp_url,waymo_url&zip=in.(${DIR_ZIPS})&limit=500&order=name.asc`, { headers: SB_HDRS }).then(r => r.json()),
-      fetch(`/api/yelp?zip=90017&categories=food,shopping,active,arts&rating=3.5`).then(r => r.json())
-    ]);
-
-    const sbRaw   = (sbRes.status==='fulfilled' && Array.isArray(sbRes.value)) ? sbRes.value : [];
-    const yelpBiz = (yelpRes.status==='fulfilled' && yelpRes.value.businesses)  ? yelpRes.value.businesses : [];
-
-    /* Normalise Supabase entries */
+    const r = await fetch(
+      `${SB_URL}/rest/v1/restaurants?select=name,category,address,zip,rating,yelp_url,waymo_url&zip=in.(${DIR_ZIPS})&limit=500&order=name.asc`,
+      { headers: SB_HDRS }
+    );
+    const sbRaw = await r.json();
+    if (!Array.isArray(sbRaw) || !sbRaw.length) {
+      el.innerHTML = '<div class="dir-empty">No listings found for this area</div>';
+      return;
+    }
     const seen = new Set();
-    const fromSB = sbRaw
+    dirData = sbRaw
       .filter(b => { const k=normName(b.name); if(seen.has(k)) return false; seen.add(k); return true; })
       .map(b => ({
         name:b.name, category:b.category||'Business',
-        address:b.address||b.zip||'', yelp_url:b.yelp_url||null,
-        waymo_url:b.waymo_url||null, source:'sb', _norm:normName(b.name)
-      }));
-
-    /* Add Yelp entries not already in Supabase */
-    const sbSet = new Set(fromSB.map(b=>b._norm));
-    const fromYelp = yelpBiz
-      .filter(b => b.name && !sbSet.has(normName(b.name)))
-      .map(b => ({
-        name:b.name,
-        category:(b.categories||[{}])[0].title||'Business',
-        address:b.location ? b.location.address1||'' : '',
-        rating:b.rating,
-        yelp_url:b.url||null, waymo_url:null,
-        source:'yelp', _norm:normName(b.name)
-      }));
-
-    const live = [...fromSB, ...fromYelp].sort((a,b) => a.name.localeCompare(b.name));
-    dirData = live.length ? live : SEED_DIR;
+        address:b.address||b.zip||'', rating:b.rating||null,
+        yelp_url:b.yelp_url||null, waymo_url:b.waymo_url||null,
+        _norm:normName(b.name)
+      }))
+      .sort((a,b) => a.name.localeCompare(b.name));
     dirLoaded = true;
     renderDir(dirData);
   } catch(e) {
-    dirData = SEED_DIR; dirLoaded = true; renderDir(dirData);
+    el.innerHTML = '<div class="dir-empty">Could not load directory</div>';
   }
 }
 
@@ -766,7 +710,7 @@ function renderDir(data) {
     const icon = DIR_ICONS[cat] || '🏢';
     const items = groups[cat];
     const cards = items.map(b => {
-      const ratingBadge = (b.source==='yelp' && b.rating)
+      const ratingBadge = b.rating
         ? `<span style="font-size:.52rem;background:#FF6600;color:#fff;padding:2px 6px;border-radius:2px;font-weight:600">★ ${b.rating}</span>` : '';
       const yelpBtn = b.yelp_url
         ? `<a href="${b.yelp_url}" target="_blank" onclick="event.stopPropagation()" style="font-size:.58rem;background:#B22234;color:#fff;padding:3px 8px;border-radius:2px;text-decoration:none;font-weight:600">Yelp →</a>` : '';

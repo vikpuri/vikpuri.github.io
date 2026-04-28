@@ -597,25 +597,29 @@ async function loadDirectory() {
   const el = document.getElementById('dir-list');
   el.innerHTML = '<div class="dir-empty">Loading…</div>';
   try {
-    const [sbRes, yelpRes] = await Promise.allSettled([
-      fetch(`${SB_URL}/rest/v1/restaurants?select=name,category,address,zip,yelp_url,waymo_url&zip=in.(${DIR_ZIPS})&limit=500&order=name.asc`, { headers: SB_HDRS }).then(r => r.json()),
-      fetch(`/api/yelp?zip=85339&categories=food,shopping,active,arts&rating=3.5`).then(r => r.json())
-    ]);
-    const sbRaw   = (sbRes.status==='fulfilled' && Array.isArray(sbRes.value)) ? sbRes.value : [];
-    const yelpBiz = (yelpRes.status==='fulfilled' && yelpRes.value.businesses) ? yelpRes.value.businesses : [];
+    const r = await fetch(
+      `${SB_URL}/rest/v1/restaurants?select=name,category,address,zip,rating,yelp_url,waymo_url&zip=in.(${DIR_ZIPS})&limit=500&order=name.asc`,
+      { headers: SB_HDRS }
+    );
+    const sbRaw = await r.json();
+    if (!Array.isArray(sbRaw) || !sbRaw.length) {
+      el.innerHTML = '<div class="dir-empty">No listings found for this area</div>';
+      return;
+    }
     const seen = new Set();
-    const fromSB = sbRaw
+    dirData = sbRaw
       .filter(b => { const k=normName(b.name); if(seen.has(k)) return false; seen.add(k); return true; })
-      .map(b => ({ name:b.name, category:b.category||'Business', address:b.address||b.zip||'', yelp_url:b.yelp_url||null, waymo_url:b.waymo_url||null, source:'sb', _norm:normName(b.name) }));
-    const sbSet = new Set(fromSB.map(b=>b._norm));
-    const fromYelp = yelpBiz
-      .filter(b => b.name && !sbSet.has(normName(b.name)))
-      .map(b => ({ name:b.name, category:(b.categories||[{}])[0].title||'Business', address:b.location?b.location.address1||'':'', rating:b.rating, yelp_url:b.url||null, waymo_url:null, source:'yelp', _norm:normName(b.name) }));
-    dirData = [...fromSB, ...fromYelp].sort((a,b) => a.name.localeCompare(b.name));
+      .map(b => ({
+        name:b.name, category:b.category||'Business',
+        address:b.address||b.zip||'', rating:b.rating||null,
+        yelp_url:b.yelp_url||null, waymo_url:b.waymo_url||null,
+        _norm:normName(b.name)
+      }))
+      .sort((a,b) => a.name.localeCompare(b.name));
     dirLoaded = true;
     renderDir(dirData);
   } catch(e) {
-    document.getElementById('dir-list').innerHTML = '<div class="dir-empty">Could not load directory</div>';
+    el.innerHTML = '<div class="dir-empty">Could not load directory</div>';
   }
 }
 
@@ -624,7 +628,7 @@ function renderDir(data) {
   if (!data.length) { el.innerHTML = '<div class="dir-empty">No results</div>'; return; }
   el.innerHTML = data.map(b => {
     const icon = DIR_ICONS[b.category] || '🏢';
-    const ratingBadge = (b.source==='yelp'&&b.rating) ? `<span style="font-size:.52rem;background:#FF6600;color:#fff;padding:2px 6px;border-radius:2px;font-weight:600">★ ${b.rating}</span>` : '';
+    const ratingBadge = b.rating ? `<span style="font-size:.52rem;background:#FF6600;color:#fff;padding:2px 6px;border-radius:2px;font-weight:600">★ ${b.rating}</span>` : '';
     const yelpBtn = b.yelp_url ? `<a href="${b.yelp_url}" target="_blank" onclick="event.stopPropagation()" style="font-size:.58rem;background:#B22234;color:#fff;padding:3px 8px;border-radius:2px;text-decoration:none;font-weight:600">Yelp →</a>` : '';
     const waymoBtn = b.waymo_url ? `<a href="${b.waymo_url}" target="_blank" onclick="event.stopPropagation()" style="font-size:.58rem;background:#1A73E8;color:#fff;padding:3px 8px;border-radius:2px;text-decoration:none;font-weight:600">🚗 Waymo</a>` : '';
     const links = (yelpBtn||waymoBtn) ? `<div style="display:flex;gap:6px;margin-top:5px;align-items:center">${ratingBadge}${yelpBtn}${waymoBtn}</div>` : (ratingBadge ? `<div style="margin-top:4px">${ratingBadge}</div>` : '');
