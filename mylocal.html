@@ -95,8 +95,11 @@
       font-size:.42rem; letter-spacing:.1em; text-transform:uppercase;
       text-decoration:none; border:none; cursor:pointer;
     }
+    .card-btn-view    { background:#2d2d2d; color:#f5e6c8; border:1px solid #c9a84c; }
     .card-btn-waymo   { background:#1A73E8; color:#fff; }
     .card-btn-yt      { background:#FF0000; color:#fff; }
+    .card-btn-yelp    { background:#FF1A1A; color:#fff; }
+    .yelp-pin { width:9px; height:9px; border-radius:50%; background:#FF6B35; border:2px solid #fff; cursor:pointer; box-shadow:0 1px 4px rgba(0,0,0,.35); }
     .card-btn-order   { background:var(--ink); color:var(--cream); }
 
     /* ── YouTube embed in card ── */
@@ -177,27 +180,32 @@
 /* ── Rule 2: all coordinates geocoded or DB-sourced — never guessed in UI ── */
 const CENTER = { lat: 34.0457095, lng: -118.2585553 };  // 801 S Grand Ave (user GPS-confirmed)
 
+const SB_URL  = 'https://mpmprnjhunjfeacikgml.supabase.co';
+const SB_KEY  = '__SB_KEY__';
+const SB_HDRS = { apikey: SB_KEY, Authorization: 'Bearer ' + SB_KEY };
+const MYLOCAL_ZIPS = ['90013','90014','90015','90017','90012','90071'];
+
 // 18 ♥ DTLA favorites — coords from Supabase where available; // CONFIRM = geocode pending
 const HEARTS = [
-  { name: "Dalian's Cafe",          lat: 34.049308,   lng: -118.254484,  cat: 'Cafe',          addr: '530 S Grand Ave, Los Angeles CA 90071',          ytSearch: 'Dalians Cafe DTLA Los Angeles' },
-  { name: 'Philz Coffee',            lat: 34.045710,   lng: -118.258555,  cat: 'Coffee',         addr: '801 S Grand Ave, Los Angeles CA 90017',          ytSearch: 'Philz Coffee Los Angeles' },
-  { name: 'Northern Cafe',           lat: 34.047350,   lng: -118.264600,  cat: 'Restaurant',     addr: '725 W 7th St, Los Angeles CA 90017',             ytSearch: 'Northern Cafe DTLA' },
-  { name: "LALA's Argentine Grill",  lat: 34.041871,   lng: -118.255055,  cat: 'Steak',          addr: '105 W 9th St, Los Angeles CA 90015',             ytSearch: "LALA's Argentine Grill DTLA" },
-  { name: 'The Broad',               lat: 34.054017,   lng: -118.249890,  cat: 'Museum',         addr: '221 S Grand Ave, Los Angeles CA 90012',          ytSearch: 'The Broad Museum Los Angeles' },
-  { name: 'MOCA Grand Ave',          lat: 34.054135,   lng: -118.249700,  cat: 'Museum',         addr: '250 S Grand Ave, Los Angeles CA 90012',          ytSearch: 'MOCA Los Angeles Grand Ave' },
-  { name: 'Music Center',            lat: 34.055692,   lng: -118.248434,  cat: 'Arts',           addr: '135 N Grand Ave, Los Angeles CA 90012',          ytSearch: 'Walt Disney Concert Hall Los Angeles' },
-  { name: 'DWP Building',            lat: 34.055300,   lng: -118.250400,  cat: 'Landmark',       addr: '111 N Hope St, Los Angeles CA 90012',            ytSearch: 'LADWP Building Los Angeles landmark' },
-  { name: 'BluJam Cafe',             lat: 34.046400,   lng: -118.248800,  cat: 'Cafe',           addr: '541 S Spring St, Los Angeles CA 90013',          ytSearch: 'BluJam Cafe Los Angeles' },
-  { name: 'Pitchoun Bakery',         lat: 34.050500,   lng: -118.258100,  cat: 'Bakery',         addr: '545 S Flower St, Los Angeles CA 90071',          ytSearch: 'Pitchoun Bakery Los Angeles DTLA' },
-  { name: "Art's Cleaners",          lat: 34.047300,   lng: -118.251700,  cat: 'Services',       addr: '209 W 7th St, Los Angeles CA 90014',             ytSearch: "Art's Cleaners DTLA Los Angeles" },
-  { name: 'JoyceDTLA',               lat: 34.046269,   lng: -118.257165,  cat: 'Restaurant',     addr: '770 S Grand Ave A, Los Angeles CA 90017',        ytSearch: 'JoyceDTLA restaurant Los Angeles' },
-  { name: 'InkaWasi',                lat: 34.044500,   lng: -118.260100,  cat: 'Peruvian',       addr: '900 W Olympic Blvd, Los Angeles CA 90015',       ytSearch: 'InkaWasi restaurant Los Angeles' },
-  { name: 'Pine and Crane',          lat: 34.039300,   lng: -118.250800,  cat: 'Taiwanese',      addr: '1120 S Grand Ave, Los Angeles CA 90015',         ytSearch: 'Pine and Crane restaurant Los Angeles' },
-  { name: 'Bubble U',                lat: 34.044100,   lng: -118.252800,  cat: 'Boba',           addr: '819 Santee St #111, Los Angeles CA 90014',       ytSearch: 'Bubble U boba DTLA Los Angeles' },
-  { name: 'Bottega Louie',           lat: 34.048900,   lng: -118.254900,  cat: 'Italian',        addr: '700 S Grand Ave, Los Angeles CA 90017',          ytSearch: 'Bottega Louie Los Angeles DTLA' },
-  { name: 'Chick-fil-A',             lat: 34.046975,   lng: -118.261250,  cat: 'Fast Food',      addr: '660 S Figueroa St, Los Angeles CA 90017',        ytSearch: 'Chick-fil-A DTLA Los Angeles' },
-  { name: 'Apple Store Broadway',    lat: 34.048800,   lng: -118.248200,  cat: 'Tech · Retail',  addr: '801 S Broadway, Los Angeles CA 90014',           ytSearch: 'Apple Store Broadway DTLA Los Angeles' },
-  { name: "Wolf's European Salon",   lat: 34.050800,   lng: -118.257900,  cat: 'Hair · Bonaventure', addr: '404 S Figueroa St, Los Angeles CA 90071',      ytSearch: "Wolf's Salon Los Angeles Bonaventure", },
+  { name: "Dalian's Cafe",          slug: 'mylocal-dalians-cafe',      lat: 34.049308,  lng: -118.254484, cat: 'Cafe',              addr: '530 S Grand Ave, Los Angeles CA 90071',       ytSearch: 'Dalians Cafe DTLA Los Angeles' },
+  { name: 'Philz Coffee',            slug: 'mylocal-philz-coffee',      lat: 34.045710,  lng: -118.258555, cat: 'Coffee',            addr: '801 S Grand Ave, Los Angeles CA 90017',       ytSearch: 'Philz Coffee Los Angeles' },
+  { name: 'Northern Cafe',           slug: 'mylocal-northern-cafe',     lat: 34.047350,  lng: -118.264600, cat: 'Restaurant',        addr: '725 W 7th St, Los Angeles CA 90017',          ytSearch: 'Northern Cafe DTLA' },
+  { name: "LALA's Argentine Grill",  slug: 'mylocal-lalas-argentine',   lat: 34.041871,  lng: -118.255055, cat: 'Steak',             addr: '105 W 9th St, Los Angeles CA 90015',          ytSearch: "LALA's Argentine Grill DTLA" },
+  { name: 'The Broad',               slug: 'mylocal-the-broad',         lat: 34.054017,  lng: -118.249890, cat: 'Museum',            addr: '221 S Grand Ave, Los Angeles CA 90012',       ytSearch: 'The Broad Museum Los Angeles' },
+  { name: 'MOCA Grand Ave',          slug: 'mylocal-moca',              lat: 34.054135,  lng: -118.249700, cat: 'Museum',            addr: '250 S Grand Ave, Los Angeles CA 90012',       ytSearch: 'MOCA Los Angeles Grand Ave' },
+  { name: 'Music Center',            slug: 'mylocal-music-center',      lat: 34.055692,  lng: -118.248434, cat: 'Arts',              addr: '135 N Grand Ave, Los Angeles CA 90012',       ytSearch: 'Walt Disney Concert Hall Los Angeles' },
+  { name: 'DWP Building',            slug: 'mylocal-dwp-building',      lat: 34.055300,  lng: -118.250400, cat: 'Landmark',          addr: '111 N Hope St, Los Angeles CA 90012',         ytSearch: 'LADWP Building Los Angeles landmark' },
+  { name: 'BluJam Cafe',             slug: 'mylocal-blujam-cafe',       lat: 34.046400,  lng: -118.248800, cat: 'Cafe',              addr: '541 S Spring St, Los Angeles CA 90013',       ytSearch: 'BluJam Cafe Los Angeles' },
+  { name: 'Pitchoun Bakery',         slug: 'mylocal-pitchoun-bakery',   lat: 34.050500,  lng: -118.258100, cat: 'Bakery',            addr: '545 S Flower St, Los Angeles CA 90071',       ytSearch: 'Pitchoun Bakery Los Angeles DTLA' },
+  { name: "Art's Cleaners",          slug: 'mylocal-arts-cleaners',     lat: 34.047300,  lng: -118.251700, cat: 'Services',          addr: '209 W 7th St, Los Angeles CA 90014',          ytSearch: "Art's Cleaners DTLA Los Angeles" },
+  { name: 'JoyceDTLA',               slug: 'mylocal-joycedtla',         lat: 34.046269,  lng: -118.257165, cat: 'Restaurant',        addr: '770 S Grand Ave A, Los Angeles CA 90017',     ytSearch: 'JoyceDTLA restaurant Los Angeles' },
+  { name: 'InkaWasi',                slug: 'mylocal-inkawasi',          lat: 34.044500,  lng: -118.260100, cat: 'Peruvian',          addr: '900 W Olympic Blvd, Los Angeles CA 90015',    ytSearch: 'InkaWasi restaurant Los Angeles' },
+  { name: 'Pine and Crane',          slug: 'mylocal-pine-and-crane',    lat: 34.039300,  lng: -118.250800, cat: 'Taiwanese',         addr: '1120 S Grand Ave, Los Angeles CA 90015',      ytSearch: 'Pine and Crane restaurant Los Angeles' },
+  { name: 'Bubble U',                slug: 'mylocal-bubble-u',          lat: 34.044100,  lng: -118.252800, cat: 'Boba',              addr: '819 Santee St #111, Los Angeles CA 90014',    ytSearch: 'Bubble U boba DTLA Los Angeles' },
+  { name: 'Bottega Louie',           slug: 'mylocal-bottega-louie',     lat: 34.048900,  lng: -118.254900, cat: 'Italian',           addr: '700 S Grand Ave, Los Angeles CA 90017',       ytSearch: 'Bottega Louie Los Angeles DTLA' },
+  { name: 'Chick-fil-A',             slug: 'mylocal-chick-fil-a',       lat: 34.046975,  lng: -118.261250, cat: 'Fast Food',         addr: '660 S Figueroa St, Los Angeles CA 90017',     ytSearch: 'Chick-fil-A DTLA Los Angeles' },
+  { name: 'Apple Store Broadway',    slug: 'mylocal-apple-store',       lat: 34.048800,  lng: -118.248200, cat: 'Tech · Retail',     addr: '801 S Broadway, Los Angeles CA 90014',        ytSearch: 'Apple Store Broadway DTLA Los Angeles' },
+  { name: "Wolf's European Salon",   slug: 'mylocal-wolfs-salon',       lat: 34.050800,  lng: -118.257900, cat: 'Hair · Bonaventure', addr: '404 S Figueroa St, Los Angeles CA 90071',    ytSearch: "Wolf's Salon Los Angeles Bonaventure" },
 ];
 
 let map, advMarker;
@@ -220,7 +228,8 @@ async function initMap() {
   // Property pin — DOM overlay (only exception to billboard rule)
   initPropPin();
 
-  // Load ♥ markers
+  // Load Yelp businesses then HEART favorites on top
+  await loadYelp();
   loadHearts();
 }
 
@@ -259,6 +268,53 @@ function initPropPin() {
   });
 }
 
+/* ── Yelp businesses from Supabase restaurants table ── */
+async function loadYelp() {
+  try {
+    const zips = MYLOCAL_ZIPS.join(',');
+    const r = await fetch(
+      `${SB_URL}/rest/v1/restaurants?zip=in.(${zips})&select=name,category,lat,lng,zip,rating,yelp_url,waymo_url,address&order=rating.desc&limit=400`,
+      { headers: SB_HDRS }
+    );
+    const rows = await r.json();
+    if (!Array.isArray(rows) || !rows.length) return;
+
+    rows.forEach(p => {
+      if (!p.lat || !p.lng) return;
+      const el = document.createElement('div');
+      el.className = 'yelp-pin';
+      el.title = p.name + (p.rating ? ' ★' + p.rating : '');
+
+      const m = new advMarker({ position: { lat: p.lat, lng: p.lng }, map, content: el, zIndex: 5 });
+      m.addListener('click', () => {
+        map.panTo({ lat: p.lat, lng: p.lng });
+        showCard({
+          tag:   (p.rating ? '★ ' + p.rating + ' · ' : '') + (p.category || 'Yelp'),
+          name:  p.name,
+          addr:  p.address || '',
+          cat:   p.category,
+          waymo: p.waymo_url || ('https://waymo.com/waymo-one/?destination=' + encodeURIComponent(p.address || '')),
+          slug:  null,
+        });
+        // Also wire Yelp button dynamically
+        const actEl = document.getElementById('card-actions');
+        if (p.yelp_url) {
+          const yBtn = Object.assign(document.createElement('a'), {
+            className: 'card-btn card-btn-yelp',
+            textContent: 'Yelp →',
+            href: p.yelp_url,
+            target: '_blank',
+          });
+          actEl.appendChild(yBtn);
+        }
+      });
+    });
+    console.log('Yelp loaded:', rows.length, 'businesses');
+  } catch (e) {
+    console.warn('Yelp load failed:', e.message);
+  }
+}
+
 /* ── ♥ Favorites ── */
 function loadHearts() {
   HEARTS.forEach(h => {
@@ -278,19 +334,20 @@ function loadHearts() {
       // Rule 3 — panTo, never recreate map
       map.panTo({ lat: h.lat, lng: h.lng });
       showCard({
-        tag:       '♥ Vik\'s Favorite' + (h.confirm ? ' · location TBC' : ''),
-        name:      h.name,
-        addr:      h.addr,
-        cat:       h.cat,
-        ytSearch:  h.ytSearch,
-        waymo:     'https://waymo.com/waymo-one/?destination=' + encodeURIComponent(h.addr),
+        tag:      '♥ Vik\'s Favorite' + (h.confirm ? ' · location TBC' : ''),
+        name:     h.name,
+        addr:     h.addr,
+        cat:      h.cat,
+        ytSearch: h.ytSearch,
+        waymo:    'https://waymo.com/waymo-one/?destination=' + encodeURIComponent(h.addr),
+        slug:     h.slug,
       });
     });
   });
 }
 
 /* ── Info card ── */
-function showCard({ tag, name, addr, cat, ytSearch, waymo }) {
+function showCard({ tag, name, addr, cat, ytSearch, waymo, slug }) {
   document.getElementById('card-tag').textContent  = tag;
   document.getElementById('card-name').textContent = name;
   document.getElementById('card-addr').textContent = addr + (cat ? ' · ' + cat : '');
@@ -298,10 +355,19 @@ function showCard({ tag, name, addr, cat, ytSearch, waymo }) {
   const actEl = document.getElementById('card-actions');
   actEl.innerHTML = '';
 
+  if (slug) {
+    const vBtn = Object.assign(document.createElement('a'), {
+      className: 'card-btn card-btn-view',
+      textContent: 'View page →',
+      href: '/place?id=' + slug,
+    });
+    actEl.appendChild(vBtn);
+  }
+
   // YouTube — search link (plays on YouTube in new tab; inline embed below)
   const ytBtn = Object.assign(document.createElement('button'), {
     className: 'card-btn card-btn-yt',
-    textContent: '▶ Watch on YouTube',
+    textContent: '▶ YouTube',
   });
   ytBtn.onclick = () => playYT(ytSearch);
   actEl.appendChild(ytBtn);
@@ -309,7 +375,7 @@ function showCard({ tag, name, addr, cat, ytSearch, waymo }) {
   if (waymo) {
     const wBtn = Object.assign(document.createElement('a'), {
       className: 'card-btn card-btn-waymo',
-      textContent: 'Waymo One →',
+      textContent: 'Waymo →',
       href: waymo,
       target: '_blank',
     });

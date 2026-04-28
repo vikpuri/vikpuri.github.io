@@ -81,6 +81,9 @@
     .card-btn { padding:8px 14px; border-radius:3px; font-family:'DM Mono',monospace; font-size:.42rem; letter-spacing:.1em; text-transform:uppercase; text-decoration:none; border:none; cursor:pointer; }
     .card-btn-waymo { background:#1A73E8; color:#fff; }
     .card-btn-yt    { background:#FF0000; color:#fff; }
+    .card-btn-yelp  { background:#FF1A1A; color:#fff; }
+    .card-btn-view  { background:#2d2d2d; color:#f5e6c8; border:1px solid #c9a84c; }
+    .yelp-pin { width:9px; height:9px; border-radius:50%; background:#FF6B35; border:2px solid #fff; cursor:pointer; box-shadow:0 1px 4px rgba(0,0,0,.35); }
     #card-yt { width:100%; aspect-ratio:16/9; border:none; display:none; }
 
     #route-nav {
@@ -153,25 +156,58 @@
 // Rule 2: CENTER = camera start only; property coords pending Geocoding API fix
 const CENTER = { lat: 33.34284751970459, lng: -112.11814600203087 }; // CONFIRM — geocoding pending
 
+const SB_URL  = 'https://mpmprnjhunjfeacikgml.supabase.co';
+const SB_KEY  = '__SB_KEY__';
+const SB_HDRS = { apikey: SB_KEY, Authorization: 'Bearer ' + SB_KEY };
+const LAVEEN_ZIPS = ['85339','85041','85042','85040'];
+
 // 6 ♥ Laveen / South Mountain favorites — coords // CONFIRM pending Geocoding API
 const HEARTS = [
   {
-    name:      'Los Dos Molinos',
-    lat:       33.3416, lng: -112.0717,          // CONFIRM — S Central Ave, Phoenix
-    cat:       'New Mexico Kitchen',
+    name:      'Los Dos Molinos',                  // LANDMARK — always first
+    slug:      'laveenlocal-los-dos-molinos',
+    lat:       33.3416, lng: -112.0717,
+    cat:       'New Mexico Kitchen · Phoenix Classic',
     addr:      '8646 S Central Ave, Phoenix AZ 85042',
     ytSearch:  'Los Dos Molinos Phoenix restaurant',
   },
   {
+    name:      'T-Bone Steakhouse',
+    slug:      'laveenlocal-tbone-steakhouse',
+    lat:       33.3565, lng: -112.0820,
+    cat:       'Steakhouse · South Mountain',
+    addr:      '10037 S 19th Ave, Phoenix AZ 85041',
+    ytSearch:  'T-Bone Steakhouse South Mountain Phoenix',
+  },
+  {
+    name:      "Rooster's Roost",
+    slug:      'laveenlocal-roosters-roost',
+    lat:       33.3640, lng: -112.0910,
+    cat:       'Bar · Live Music · South Mountain',
+    addr:      'South Mountain, Phoenix AZ 85041',
+    ytSearch:  "Rustler's Rooste South Mountain Phoenix",
+    confirm:   true,
+  },
+  {
+    name:      'Wild Horse Pass Casino',
+    slug:      'laveenlocal-wild-horse-pass',
+    lat:       33.2990, lng: -111.9920,
+    cat:       'Casino · Resort · Gila River',
+    addr:      '5040 W Wild Horse Pass Blvd, Chandler AZ 85226',
+    ytSearch:  'Wild Horse Pass Casino Resort Arizona',
+  },
+  {
     name:      'South Mountain Park Preserve',
-    lat:       33.3388, lng: -112.0737,           // main entrance, S Central Ave
+    slug:      'laveenlocal-south-mountain',
+    lat:       33.3388, lng: -112.0737,
     cat:       'Park · Hiking · 16,000 acres',
     addr:      '10919 S Central Ave, Phoenix AZ 85042',
     ytSearch:  'South Mountain Park Preserve Phoenix hiking',
   },
   {
     name:      'In-N-Out Burger',
-    lat:       33.3780, lng: -112.0870,           // CONFIRM — Baseline Rd area
+    slug:      'laveenlocal-in-n-out',
+    lat:       33.3780, lng: -112.0870,
     cat:       'Burgers · Baseline Road',
     addr:      'Baseline Rd, Phoenix AZ — address TBD',
     ytSearch:  'In-N-Out Burger Phoenix Arizona',
@@ -179,7 +215,8 @@ const HEARTS = [
   },
   {
     name:      "Raising Cane's",
-    lat:       33.3775, lng: -112.0820,           // CONFIRM — Baseline Rd area
+    slug:      'laveenlocal-raising-canes',
+    lat:       33.3775, lng: -112.0820,
     cat:       'Chicken · Baseline Road',
     addr:      'Baseline Rd, Phoenix AZ — address TBD',
     ytSearch:  "Raising Cane's Phoenix Arizona",
@@ -187,7 +224,8 @@ const HEARTS = [
   },
   {
     name:      'Paris Baguette',
-    lat:       33.3260, lng: -112.0415,           // CONFIRM — Baseline Rd area
+    slug:      'laveenlocal-paris-baguette',
+    lat:       33.3260, lng: -112.0415,
     cat:       'Bakery · Baseline Road',
     addr:      'Baseline Rd, AZ — address TBD',
     ytSearch:  'Paris Baguette bakery Arizona',
@@ -195,7 +233,8 @@ const HEARTS = [
   },
   {
     name:      'Einstein Bros Bagels',
-    lat:       33.3770, lng: -112.0800,           // CONFIRM — Baseline Rd area
+    slug:      'laveenlocal-einstein-bagels',
+    lat:       33.3770, lng: -112.0800,
     cat:       'Bagels · Baseline Road',
     addr:      'Baseline Rd, AZ — address TBD',
     ytSearch:  'Einstein Bros Bagels Phoenix Arizona',
@@ -220,7 +259,37 @@ async function initMap() {
   });
 
   initPropPin();
+  await loadYelp();
   loadHearts();
+}
+
+async function loadYelp() {
+  try {
+    const zips = LAVEEN_ZIPS.join(',');
+    const r = await fetch(
+      `${SB_URL}/rest/v1/restaurants?zip=in.(${zips})&select=name,category,lat,lng,zip,rating,yelp_url,waymo_url,address&order=rating.desc&limit=200`,
+      { headers: SB_HDRS }
+    );
+    const rows = await r.json();
+    if (!Array.isArray(rows) || !rows.length) return;
+    rows.forEach(p => {
+      if (!p.lat || !p.lng) return;
+      const el = document.createElement('div');
+      el.className = 'yelp-pin';
+      el.title = p.name + (p.rating ? ' ★' + p.rating : '');
+      const m = new advMarker({ position: { lat: p.lat, lng: p.lng }, map, content: el, zIndex: 5 });
+      m.addListener('click', () => {
+        map.panTo({ lat: p.lat, lng: p.lng });
+        showCard({
+          tag: (p.rating ? '★ ' + p.rating + ' · ' : '') + (p.category || 'Yelp'),
+          name: p.name, addr: p.address || '', cat: p.category,
+          waymo: p.waymo_url || ('https://waymo.com/waymo-one/?destination=' + encodeURIComponent(p.address || '')),
+          yelpUrl: p.yelp_url,
+        });
+      });
+    });
+    console.log('Yelp loaded:', rows.length);
+  } catch (e) { console.warn('Yelp load failed:', e.message); }
 }
 
 function initPropPin() {
@@ -267,26 +336,31 @@ function loadHearts() {
         cat:      h.cat,
         ytSearch: h.ytSearch,
         waymo:    'https://waymo.com/waymo-one/?destination=' + encodeURIComponent(h.addr),
+        slug:     h.slug || null,
       });
     });
   });
 }
 
-function showCard({ tag, name, addr, cat, ytSearch, waymo }) {
+function showCard({ tag, name, addr, cat, ytSearch, waymo, slug, yelpUrl }) {
   document.getElementById('card-tag').textContent  = tag;
   document.getElementById('card-name').textContent = name;
   document.getElementById('card-addr').textContent = addr + (cat ? ' · ' + cat : '');
   const act = document.getElementById('card-actions');
   act.innerHTML = '';
-  const ytBtn = Object.assign(document.createElement('button'), { className:'card-btn card-btn-yt', textContent:'▶ Watch on YouTube' });
-  ytBtn.onclick = () => {
-    const f = document.getElementById('card-yt');
-    f.style.display = 'block';
-    f.src = 'https://www.youtube.com/embed?listType=search&list=' + encodeURIComponent(ytSearch) + '&autoplay=1';
-  };
-  act.appendChild(ytBtn);
+  if (slug) act.appendChild(Object.assign(document.createElement('a'), { className:'card-btn card-btn-view', textContent:'View page →', href:'/place?id=' + slug }));
+  if (yelpUrl) act.appendChild(Object.assign(document.createElement('a'), { className:'card-btn card-btn-yelp', textContent:'Yelp →', href:yelpUrl, target:'_blank' }));
+  if (ytSearch) {
+    const ytBtn = Object.assign(document.createElement('button'), { className:'card-btn card-btn-yt', textContent:'▶ YouTube' });
+    ytBtn.onclick = () => {
+      const f = document.getElementById('card-yt');
+      f.style.display = 'block';
+      f.src = 'https://www.youtube.com/embed?listType=search&list=' + encodeURIComponent(ytSearch) + '&autoplay=1';
+    };
+    act.appendChild(ytBtn);
+  }
   if (waymo) {
-    act.appendChild(Object.assign(document.createElement('a'), { className:'card-btn card-btn-waymo', textContent:'Waymo One →', href:waymo, target:'_blank' }));
+    act.appendChild(Object.assign(document.createElement('a'), { className:'card-btn card-btn-waymo', textContent:'Waymo →', href:waymo, target:'_blank' }));
   }
   document.getElementById('card-yt').style.display = 'none';
   document.getElementById('card-yt').src = '';
