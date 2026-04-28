@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Requation · HyperLocal AZ · Arcadia & Scottsdale</title>
+  <meta name="description" content="HyperLocal 3D directory — Arcadia, Scottsdale. The farthest point on the AZ route. Active listings and local favorites going northeast from Laveen.">
+  <meta property="og:title" content="Arcadia · Scottsdale ♦ — Requation HyperLocal AZ">
+  <meta property="og:image" content="https://i.imgur.com/0aYf87y.jpeg">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@1,700&family=Raleway:wght@600&family=Source+Serif+4:wght@300;400;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --gold:#C9A84C; --gold-dim:rgba(201,168,76,.1); --gold-border:rgba(201,168,76,.35);
+      --cream:#FAF8F4; --cream-2:#F4F1EB;
+      --ink:#1C1C1C; --ink-3:#444;
+      --rule:rgba(0,0,0,.12); --rule-heavy:rgba(0,0,0,.22);
+      --text-muted:#666; --sand:#E8DDD0;
+      --header-h:56px; --route-h:36px;
+    }
+    *,::before,::after { box-sizing:border-box; margin:0; padding:0; }
+    html { height:100%; }
+    body { height:100%; background:#dce8e0; color:var(--ink);
+           font-family:'Source Serif 4',Georgia,serif; overflow:hidden; }
+
+    #map { position:fixed; inset:0; z-index:0; }
+
+    #route-nav {
+      position:fixed; bottom:0; left:0; right:0; height:var(--route-h);
+      background:rgba(255,255,255,.96); border-top:1.5px solid var(--rule-heavy);
+      display:flex; align-items:center; justify-content:center; z-index:100;
+      font-family:'DM Mono',monospace; font-size:.42rem; letter-spacing:.12em;
+      text-transform:uppercase;
+    }
+    .route-stop { padding:0 14px; color:var(--text-muted); text-decoration:none;
+                  border-right:1px solid var(--rule); line-height:var(--route-h);
+                  transition:color .2s; white-space:nowrap; }
+    .route-stop:last-child { border-right:none; }
+    .route-stop:hover { color:var(--ink); }
+    .route-stop.current { color:var(--ink); font-weight:500; border-bottom:2px solid var(--gold); }
+    .route-arrow { padding:0 8px; color:var(--text-muted); }
+
+    header {
+      position:fixed; top:0; left:0; right:0; height:var(--header-h); z-index:100;
+      background:rgba(255,255,255,.96); border-bottom:2px solid var(--ink);
+      display:flex; align-items:center; justify-content:space-between; padding:0 20px;
+      backdrop-filter:blur(8px);
+    }
+    .logo-wrap { display:flex; align-items:center; gap:10px; text-decoration:none; }
+    .logo-addr { font-family:'DM Mono',monospace; font-size:.45rem; letter-spacing:.12em;
+                 text-transform:uppercase; color:var(--text-muted);
+                 border-left:1px solid var(--sand); padding-left:10px; }
+    .header-tag { font-family:'DM Mono',monospace; font-size:.42rem; letter-spacing:.12em;
+                  text-transform:uppercase; color:var(--gold);
+                  background:var(--gold-dim); border:1px solid var(--gold-border);
+                  padding:3px 8px; border-radius:2px; }
+
+    .rpoi-pin { background:#fff; border:2px solid var(--gold); border-radius:6px; padding:4px 8px; box-shadow:0 2px 10px rgba(0,0,0,.25); cursor:pointer; transition:transform .15s; min-width:58px; text-align:center; }
+    .rpoi-pin:hover { transform:scale(1.08); }
+    .rpoi-price { font-family:'DM Mono',monospace; font-size:11px; font-weight:500; color:var(--ink); line-height:1.3; }
+    .rpoi-beds  { font-family:'DM Mono',monospace; font-size:9px; color:var(--text-muted); }
+
+    .heart-pin { background:var(--gold); color:#fff; padding:5px 10px; border-radius:20px; font-family:'Source Serif 4',serif; font-size:11px; font-weight:600; cursor:pointer; white-space:nowrap; box-shadow:0 2px 10px rgba(0,0,0,.2); display:flex; align-items:center; gap:4px; transition:transform .15s; }
+    .heart-pin:hover { transform:scale(1.06); }
+
+    #info-card { position:fixed; bottom:calc(var(--route-h) + 12px); left:50%; transform:translateX(-50%); width:min(380px,calc(100vw - 32px)); background:var(--cream); border:2px solid var(--ink); border-radius:4px; box-shadow:0 8px 32px rgba(0,0,0,.18); z-index:200; display:none; }
+    #info-card.open { display:block; animation:slideUp .2s ease; }
+    @keyframes slideUp { from{transform:translateX(-50%) translateY(12px);opacity:0} to{transform:translateX(-50%) translateY(0);opacity:1} }
+    #card-close { position:absolute; top:8px; right:10px; background:none; border:none; cursor:pointer; font-size:1rem; color:var(--text-muted); }
+    #card-close:hover { color:var(--ink); }
+    #card-body { padding:16px 20px 14px; }
+    #card-tag  { font-family:'DM Mono',monospace; font-size:.38rem; letter-spacing:.14em; text-transform:uppercase; color:var(--gold); margin-bottom:3px; }
+    #card-name { font-size:1rem; font-weight:600; color:var(--ink); margin-bottom:2px; }
+    #card-addr { font-family:'DM Mono',monospace; font-size:.42rem; color:var(--text-muted); letter-spacing:.06em; margin-bottom:10px; }
+    #card-stats { display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap; }
+    .card-stat { background:var(--cream-2); border:1px solid var(--rule); border-radius:3px; padding:5px 10px; font-family:'DM Mono',monospace; font-size:.42rem; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-3); }
+    #card-actions { display:flex; gap:8px; flex-wrap:wrap; }
+    .card-btn { padding:8px 14px; border-radius:3px; font-family:'DM Mono',monospace; font-size:.42rem; letter-spacing:.1em; text-transform:uppercase; text-decoration:none; border:none; cursor:pointer; }
+    .card-btn-waymo  { background:#1A73E8; color:#fff; }
+    .card-btn-redfin { background:#cc3340; color:#fff; }
+
+    #status-badge { position:fixed; top:calc(var(--header-h) + 12px); left:12px; z-index:90; background:rgba(255,255,255,.92); border:1.5px solid var(--rule-heavy); border-radius:4px; padding:8px 14px; font-family:'DM Mono',monospace; font-size:.42rem; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-3); }
+    #status-badge strong { color:var(--gold); }
+
+    #end-badge { position:fixed; top:calc(var(--header-h) + 12px); left:50%; transform:translateX(-50%); background:rgba(255,255,255,.92); border:1.5px solid var(--gold-border); border-radius:20px; padding:6px 16px; z-index:90; font-family:'DM Mono',monospace; font-size:.42rem; letter-spacing:.12em; text-transform:uppercase; color:var(--gold); white-space:nowrap; }
+  </style>
+</head>
+<body>
+
+<div id="map"></div>
+
+<header>
+  <a class="logo-wrap" href="/">
+    <svg width="28" height="28" viewBox="0 0 60 60" fill="none">
+      <text x="4" y="46" font-family="EB Garamond" font-style="italic" font-weight="700" font-size="52" fill="#1C1C1C">r</text>
+      <line x1="18" y1="48" x2="44" y2="12" stroke="#C9A84C" stroke-width="2.2"/>
+      <text x="38" y="28" font-family="EB Garamond" font-style="italic" font-weight="700" font-size="26" fill="#C9A84C">Σ</text>
+    </svg>
+    <span style="font-family:'Raleway',sans-serif;font-size:.85rem;font-weight:600;letter-spacing:.04em">quation</span>
+    <span class="logo-addr">HyperLocal · Arcadia · Scottsdale AZ</span>
+  </a>
+  <span class="header-tag">End of the Line ♦</span>
+</header>
+
+<div id="end-badge">♦ Northeast terminus · Scottsdale</div>
+<div id="status-badge">Loading listings…</div>
+
+<div id="info-card">
+  <button id="card-close" onclick="closeCard()">✕</button>
+  <div id="card-body">
+    <div id="card-tag"></div>
+    <div id="card-name"></div>
+    <div id="card-addr"></div>
+    <div id="card-stats"></div>
+    <div id="card-actions"></div>
+  </div>
+</div>
+
+<nav id="route-nav">
+  <a href="/laveen" class="route-stop">Laveen</a>
+  <span class="route-arrow">→</span>
+  <a href="/laveenlocal" class="route-stop">LaveenLocal</a>
+  <span class="route-arrow">→</span>
+  <a href="/desertlife/phoenix" class="route-stop">Phoenix</a>
+  <span class="route-arrow">→</span>
+  <span class="route-stop current">Arcadia · Scottsdale ♦</span>
+</nav>
+
+<script>
+const CENTER = { lat: 33.4942, lng: -111.9261 };  // Scottsdale / Arcadia area
+const ZOOM   = 12;
+
+const SB_URL  = 'https://mpmprnjhunjfeacikgml.supabase.co';
+const SB_KEY  = 'sb_publishable_T6XISHd9O2Ol0raPaEASqQ_klUXnyY3';
+const SB_HDRS = { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY };
+
+const SDALE_ZIPS = ['85018','85250','85251','85252','85253','85254','85255','85257','85258','85259','85260','85262','85266','85281','85282'];
+
+// ♥ Arcadia / Scottsdale favorites
+const HEARTS = [
+  { name: 'LaGrande Orange',             lat: 33.5097, lng: -111.9985, cat: 'Cafe · Brunch',        addr: '4410 N 40th St, Phoenix AZ 85018' },
+  { name: 'AJ\'s Fine Foods',            lat: 33.4973, lng: -111.9796, cat: 'Gourmet Grocery',      addr: '4750 E Indian School Rd, Phoenix AZ 85018' },
+  { name: 'Neiman Marcus Cafe',          lat: 33.5076, lng: -111.9262, cat: 'Cafe · Fashion Square', addr: '7600 E Camelback Rd, Scottsdale AZ 85251' },
+  { name: 'Cheesecake Factory',          lat: 33.5068, lng: -111.9270, cat: 'American · Fashion Square', addr: '7014-1 E Camelback Rd, Scottsdale AZ 85251' },
+  { name: 'DeFalco\'s',                  lat: 33.4773, lng: -111.9244, cat: 'Italian Deli · Market', addr: '2334 N Scottsdale Rd, Scottsdale AZ 85257' },
+  { name: 'Dick\'s Last Resort',         lat: 33.4951, lng: -111.9252, cat: 'Bar · Old Town',        addr: '3945 N Goldwater Blvd, Scottsdale AZ 85251' },
+  { name: 'Old Town Scottsdale Tavern',  lat: 33.4948, lng: -111.9218, cat: 'Bar · Old Town',        addr: '7320 E Shoeman Ln, Scottsdale AZ 85251' },
+  { name: 'Wildflower Bread Company',    lat: 33.5046, lng: -111.9277, cat: 'Bakery · Cafe',         addr: '7135 E Camelback Rd, Scottsdale AZ 85251' },
+  { name: "Gus' Fried Chicken",         lat: 33.4697, lng: -112.0786, cat: 'Fried Chicken',          addr: '3508 N 7th Ave, Phoenix AZ 85013' },
+];
+
+let map, advMarker;
+
+async function initMap() {
+  const { Map }                   = await google.maps.importLibrary('maps');
+  const { AdvancedMarkerElement } = await google.maps.importLibrary('marker');
+  advMarker = AdvancedMarkerElement;
+
+  map = new Map(document.getElementById('map'), {
+    center:  CENTER,
+    zoom:    ZOOM,
+    mapId:  '96844e6a7bb74a7d5514d3a5',
+    gestureHandling: 'greedy',
+  });
+
+  await loadRPOI();
+  loadHearts();
+}
+
+async function loadRPOI() {
+  try {
+    const r = await fetch(
+      `${SB_URL}/rest/v1/properties?zip=in.(${SDALE_ZIPS.join(',')})&mls_status=eq.active&select=name,address,neighborhood,zip,lat,lng,price,beds,baths,sqft,redfin_url&order=price.asc&limit=200`,
+      { headers: SB_HDRS }
+    );
+    const rows = await r.json();
+
+    if (rows.length === 0) {
+      document.getElementById('status-badge').innerHTML = 'AZ listings <strong>coming soon</strong>';
+      return;
+    }
+
+    document.getElementById('status-badge').innerHTML = `<strong>${rows.length}</strong> active listings`;
+
+    rows.forEach(p => {
+      if (!p.lat || !p.lng) return;
+      const el = document.createElement('div');
+      el.className = 'rpoi-pin';
+      const priceK = p.price ? '$' + Math.round(p.price / 1000) + 'K' : '—';
+      el.innerHTML = `<div class="rpoi-price">${priceK}</div>${p.beds ? `<div class="rpoi-beds">${p.beds} bd</div>` : ''}`;
+      const m = new advMarker({ position: { lat: p.lat, lng: p.lng }, map, content: el, title: p.name });
+      m.addListener('click', () => {
+        map.panTo({ lat: p.lat, lng: p.lng });
+        showCard({ tag: p.neighborhood || 'Scottsdale RPOI', name: p.address, addr: p.zip, stats: [priceK, p.beds + ' BD', p.baths + ' BA', (p.sqft || '—') + ' sqft'], primary: { label: 'Redfin →', href: p.redfin_url }, waymo: waymoDest(p.address) });
+      });
+    });
+  } catch (e) {
+    document.getElementById('status-badge').textContent = 'Listings unavailable';
+  }
+}
+
+function loadHearts() {
+  HEARTS.forEach(h => {
+    const el = document.createElement('div');
+    el.className = 'heart-pin';
+    el.innerHTML = '♥ ' + h.name;
+    const m = new advMarker({ position: { lat: h.lat, lng: h.lng }, map, content: el, title: h.name, zIndex: 10 });
+    m.addListener('click', () => { map.panTo({ lat: h.lat, lng: h.lng }); showCard({ tag:'♥ Favorite', name:h.name, addr:h.addr, stats:[h.cat], waymo:waymoDest(h.addr) }); });
+  });
+}
+
+function showCard({ tag, name, addr, stats, primary, waymo }) {
+  document.getElementById('card-tag').textContent  = tag;
+  document.getElementById('card-name').textContent = name;
+  document.getElementById('card-addr').textContent = addr;
+  document.getElementById('card-stats').innerHTML  = (stats || []).map(s => `<div class="card-stat">${s}</div>`).join('');
+  const act = document.getElementById('card-actions');
+  act.innerHTML = '';
+  if (primary) act.appendChild(Object.assign(document.createElement('a'), { className:'card-btn card-btn-redfin', textContent:primary.label, href:primary.href, target:'_blank' }));
+  if (waymo)   act.appendChild(Object.assign(document.createElement('a'), { className:'card-btn card-btn-waymo',  textContent:'Waymo One →',    href:waymo,         target:'_blank' }));
+  const card = document.getElementById('info-card');
+  card.classList.remove('open'); void card.offsetWidth; card.classList.add('open');
+}
+
+function closeCard() { document.getElementById('info-card').classList.remove('open'); }
+function waymoDest(addr) { return 'https://waymo.com/waymo-one/?destination=' + encodeURIComponent(addr || ''); }
+
+window.initMap = initMap;
+</script>
+
+<script async
+  src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD7UMA5ILPXv9QK2_gvxPVth30MavRd2WQ&callback=initMap&libraries=marker&v=weekly">
+</script>
+</body>
+</html>

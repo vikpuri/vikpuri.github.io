@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Requation — Map Grid Reference</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Source+Serif+4:wght@400;600&display=swap" rel="stylesheet">
+<link href="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.css" rel="stylesheet">
+<script src="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --hh:56px;
+  --ink:#1A1A1A;
+  --cream:#FAF8F4;
+  --gold:#D4A843;
+  --blue:#4F6FB8;
+  --cyan:#00BFF;
+  --rule:rgba(26,26,26,.15);
+}
+body{font-family:'DM Mono',monospace;background:#0d1117;overflow:hidden;height:100vh}
+
+/* ── HEADER ── */
+header{
+  position:fixed;top:0;left:0;right:0;height:var(--hh);z-index:200;
+  background:var(--cream);border-bottom:2px solid var(--ink);
+  display:flex;align-items:center;padding:0 20px;gap:16px;
+}
+.logo{font-family:'Source Serif 4',serif;font-size:.8rem;font-weight:600;color:var(--ink);letter-spacing:.04em}
+.logo span{color:#B22234;font-style:italic}
+.hdr-label{font-size:.55rem;letter-spacing:.18em;text-transform:uppercase;color:var(--ink);opacity:.45;margin-left:auto}
+.toggle-btn{
+  font-size:.58rem;letter-spacing:.12em;text-transform:uppercase;
+  background:var(--ink);color:var(--cream);border:none;
+  padding:6px 14px;border-radius:3px;cursor:pointer;
+}
+.toggle-btn.on{background:#00BCD4;color:#fff}
+
+/* ── MAP ── */
+#map{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0}
+
+/* ── GRID OVERLAY ── */
+#grid-overlay{
+  position:fixed;
+  top:var(--hh);left:0;right:0;bottom:0;
+  display:none;
+  grid-template-columns:repeat(5,1fr);
+  grid-template-rows:repeat(5,1fr);
+  z-index:150;
+  pointer-events:none;
+}
+.gc{
+  border:1px solid rgba(0,188,212,.28);
+  display:flex;flex-direction:column;
+  align-items:flex-start;justify-content:flex-start;
+  padding:5px 6px;
+  position:relative;
+}
+.gc-ref{
+  font-size:.58rem;letter-spacing:.14em;
+  color:rgba(0,188,212,.85);
+  background:rgba(0,0,0,.55);
+  padding:2px 6px;border-radius:2px;
+  font-weight:500;
+}
+.gc-hl{background:rgba(0,188,212,.08)}
+
+/* ── COLUMN + ROW LABELS ── */
+#col-labels{
+  position:fixed;top:var(--hh);left:0;right:0;height:22px;
+  display:grid;grid-template-columns:repeat(5,1fr);
+  z-index:160;pointer-events:none;
+}
+#row-labels{
+  position:fixed;top:var(--hh);left:0;bottom:0;width:22px;
+  display:grid;grid-template-rows:repeat(5,1fr);
+  z-index:160;pointer-events:none;
+}
+.axis-lbl{
+  display:flex;align-items:center;justify-content:center;
+  font-size:.58rem;letter-spacing:.1em;
+  color:rgba(0,188,212,.9);
+  background:rgba(0,0,0,.6);
+  font-weight:500;
+}
+
+/* ── CROSSHAIR READOUT ── */
+#readout{
+  position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
+  background:rgba(0,0,0,.82);backdrop-filter:blur(8px);
+  color:#fff;padding:10px 20px;border-radius:24px;
+  font-size:.68rem;letter-spacing:.1em;z-index:300;
+  border:1px solid rgba(0,188,212,.4);
+  display:none;white-space:nowrap;
+  transition:opacity .2s;
+}
+#readout.show{display:block}
+#readout .gr{color:#00BCD4;font-weight:500;font-size:.85rem;margin-right:10px}
+#readout .coords{color:rgba(255,255,255,.6);font-size:.6rem}
+
+/* ── PLACEMENT LEGEND ── */
+#legend{
+  position:fixed;top:calc(var(--hh) + 12px);right:12px;
+  background:rgba(0,0,0,.78);backdrop-filter:blur(8px);
+  border:1px solid rgba(255,255,255,.12);border-radius:6px;
+  padding:12px 14px;z-index:300;min-width:190px;
+}
+.legend-title{font-size:.52rem;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.4);margin-bottom:8px}
+.legend-row{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.legend-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.legend-text{font-size:.6rem;color:rgba(255,255,255,.75);line-height:1.3}
+.legend-grid{font-size:.58rem;color:#00BCD4;font-weight:500;margin-left:auto;letter-spacing:.08em}
+
+/* ── INSTRUCTIONS ── */
+#instructions{
+  position:fixed;bottom:24px;left:16px;
+  background:rgba(0,0,0,.7);backdrop-filter:blur(6px);
+  color:rgba(255,255,255,.55);padding:8px 14px;border-radius:4px;
+  font-size:.58rem;letter-spacing:.08em;z-index:300;line-height:1.8;
+}
+
+/* ── WORK MODEL PANEL ── */
+#work-model{
+  position:fixed;top:0;right:0;bottom:0;width:380px;
+  background:var(--cream);border-left:2px solid var(--ink);
+  z-index:400;overflow-y:auto;
+  transform:translateX(100%);
+  transition:transform .3s cubic-bezier(.22,.68,0,1.2);
+  padding:0 0 40px;
+}
+#work-model.open{transform:translateX(0)}
+.wm-header{
+  position:sticky;top:0;background:var(--ink);color:var(--cream);
+  padding:14px 20px;display:flex;align-items:center;justify-content:space-between;
+  z-index:1;
+}
+.wm-title{font-family:'Source Serif 4',serif;font-size:.9rem;font-weight:600;letter-spacing:.04em}
+.wm-title span{color:var(--gold)}
+.wm-close{background:none;border:none;color:var(--cream);font-size:1rem;cursor:pointer;opacity:.7;padding:4px 8px}
+.wm-close:hover{opacity:1}
+.wm-section{padding:20px 20px 0}
+.wm-section-title{
+  font-size:.5rem;letter-spacing:.22em;text-transform:uppercase;
+  color:var(--ink);opacity:.4;margin-bottom:10px;border-bottom:1px solid var(--rule);padding-bottom:6px;
+}
+.wm-mission{
+  font-family:'Source Serif 4',serif;font-size:1.05rem;font-weight:600;
+  color:var(--ink);line-height:1.5;margin-bottom:8px;
+}
+.wm-sub{font-size:.65rem;color:var(--ink);opacity:.6;line-height:1.7;margin-bottom:16px}
+.wm-tag{
+  display:inline-block;font-size:.52rem;letter-spacing:.14em;text-transform:uppercase;
+  background:var(--ink);color:var(--cream);padding:3px 9px;border-radius:2px;margin:0 4px 6px 0;
+}
+.wm-tag.gold{background:var(--gold);color:var(--ink)}
+.wm-tag.blue{background:var(--blue);color:#fff}
+.wm-tag.red{background:#B22234;color:#fff}
+.tier-row{
+  display:grid;grid-template-columns:90px 1fr;gap:8px;align-items:start;
+  padding:10px 0;border-bottom:1px solid var(--rule);
+}
+.tier-name{
+  font-size:.58rem;letter-spacing:.12em;text-transform:uppercase;font-weight:500;
+  color:var(--ink);padding-top:1px;
+}
+.tier-name.monument{color:#B22234}
+.tier-name.billboard{color:var(--blue)}
+.tier-name.soapbox{color:#2E7D32}
+.tier-desc{font-size:.6rem;color:var(--ink);opacity:.65;line-height:1.6}
+.tier-size{font-size:.56rem;color:var(--ink);opacity:.4;margin-top:2px;letter-spacing:.06em}
+.rule-row{
+  display:flex;gap:10px;padding:8px 0;border-bottom:1px solid var(--rule);align-items:flex-start;
+}
+.rule-num{
+  font-size:.65rem;font-weight:500;color:var(--gold);flex-shrink:0;width:18px;padding-top:1px;
+}
+.rule-text{font-size:.6rem;color:var(--ink);opacity:.7;line-height:1.6}
+.rule-text strong{color:var(--ink);opacity:1;font-weight:500}
+.platform-row{
+  display:flex;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--rule);
+}
+.platform-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.platform-label{font-size:.6rem;color:var(--ink);opacity:.65;line-height:1.5}
+.platform-label strong{color:var(--ink);opacity:1}
+
+/* ── ACTIVE CELL HIGHLIGHT ── */
+#active-cell{
+  position:fixed;
+  background:rgba(0,188,212,.1);
+  border:2px solid rgba(0,188,212,.6);
+  pointer-events:none;
+  z-index:145;
+  display:none;
+  transition:all .1s;
+}
+</style>
+</head>
+<body>
+
+<div id="map"></div>
+
+<!-- GRID OVERLAY -->
+<div id="grid-overlay"></div>
+
+<!-- COLUMN LABELS (A–E) -->
+<div id="col-labels">
+  <div class="axis-lbl">A</div>
+  <div class="axis-lbl">B</div>
+  <div class="axis-lbl">C</div>
+  <div class="axis-lbl">D</div>
+  <div class="axis-lbl">E</div>
+</div>
+
+<!-- ROW LABELS (1–5) -->
+<div id="row-labels">
+  <div class="axis-lbl">1</div>
+  <div class="axis-lbl">2</div>
+  <div class="axis-lbl">3</div>
+  <div class="axis-lbl">4</div>
+  <div class="axis-lbl">5</div>
+</div>
+
+<!-- ACTIVE CELL HIGHLIGHT -->
+<div id="active-cell"></div>
+
+<!-- HEADER -->
+<header>
+  <div class="logo"><span>r</span>/Σ Grid Reference</div>
+  <span class="hdr-label">Thomas Bros · A–E × 1–5</span>
+  <button class="toggle-btn" id="toggle-btn" onclick="toggleGrid()">Show Grid · [G]</button>
+  <button class="toggle-btn" onclick="toggleWorkModel()" style="margin-left:8px;background:#2E7D32">Work Model</button>
+</header>
+
+<!-- WORK MODEL PANEL -->
+<div id="work-model">
+  <div class="wm-header">
+    <div class="wm-title"><span>r</span>/Σ Work Model</div>
+    <button class="wm-close" onclick="toggleWorkModel()">✕</button>
+  </div>
+
+  <div class="wm-section">
+    <div class="wm-section-title">Mission</div>
+    <div class="wm-mission">A directory of every licensed business in Google Maps</div>
+    <div class="wm-sub">Requation is being built to help bricks-and-mortar small businesses gain the same visibility as large chains — by placing them as first-class objects in a 3D map environment, not buried in a list.</div>
+    <div>
+      <span class="wm-tag red">Small Business</span>
+      <span class="wm-tag gold">3D Maps</span>
+      <span class="wm-tag blue">Directory</span>
+      <span class="wm-tag">Licensed Only</span>
+    </div>
+  </div>
+
+  <div class="wm-section" style="margin-top:18px">
+    <div class="wm-section-title">Build Philosophy</div>
+    <div class="rule-row">
+      <div class="rule-num">1</div>
+      <div class="rule-text"><strong>Learn the map first.</strong> Every element must have a grid reference before any placement code is written. State A–E × 1–5 ref, then code.</div>
+    </div>
+    <div class="rule-row">
+      <div class="rule-num">2</div>
+      <div class="rule-text"><strong>Visual models over documentation.</strong> We build with code + visual references. Grid-demo is the reference layer for placement decisions.</div>
+    </div>
+    <div class="rule-row">
+      <div class="rule-num">3</div>
+      <div class="rule-text"><strong>One thing at a time.</strong> Draft template → state purpose → get sign-off → build standalone HTML → get approval → then commit.</div>
+    </div>
+    <div class="rule-row">
+      <div class="rule-num">4</div>
+      <div class="rule-text"><strong>Data never crosses state lines.</strong> AZ data stays in AZ pages. CA data stays in CA pages. No exceptions.</div>
+    </div>
+    <div class="rule-row">
+      <div class="rule-num">5</div>
+      <div class="rule-text"><strong>Prototype on Mapbox, ship on Google Maps.</strong> All current builds (dtla, laveen, lalife, desertlife) are the learning layer. Production is Google Maps photorealistic 3D tiles.</div>
+    </div>
+  </div>
+
+  <div class="wm-section" style="margin-top:18px">
+    <div class="wm-section-title">Platform Target</div>
+    <div class="platform-row">
+      <div class="platform-dot" style="background:#4285F4"></div>
+      <div class="platform-label"><strong>Google Maps JS API + Places API</strong> — production platform. Photorealistic 3D tiles. Every licensed business as a map object.</div>
+    </div>
+    <div class="platform-row">
+      <div class="platform-dot" style="background:#00BCD4"></div>
+      <div class="platform-label"><strong>Mapbox GL JS v3.3</strong> — prototype + learning layer. Current live site. Standard style, 3D buildings, pitch 62.</div>
+    </div>
+    <div class="platform-row">
+      <div class="platform-dot" style="background:#2E7D32"></div>
+      <div class="platform-label"><strong>Netlify + Supabase</strong> — deploy target. Serverless functions for Twilio, events APIs, business data queries.</div>
+    </div>
+  </div>
+
+  <div class="wm-section" style="margin-top:18px">
+    <div class="wm-section-title">NEON MAPS — Advertising Layer</div>
+    <div class="tier-row">
+      <div>
+        <div class="tier-name monument">MONUMENT</div>
+        <div class="tier-size">280 × 158 px</div>
+      </div>
+      <div class="tier-desc">Full-motion video billboard. Anchored to property or landmark coord. Highest tier — autoplay loop, no user action required.</div>
+    </div>
+    <div class="tier-row">
+      <div>
+        <div class="tier-name billboard">BILLBOARD</div>
+        <div class="tier-size">210 × 118 px</div>
+      </div>
+      <div class="tier-desc">Static or short-loop visual. Mid-tier. Click-to-expand or link-out. Placed on POIs and key corridor anchors.</div>
+    </div>
+    <div class="tier-row">
+      <div>
+        <div class="tier-name soapbox">SOAPBOX</div>
+        <div class="tier-size">140 × 79 px</div>
+      </div>
+      <div class="tier-desc">Event-driven card. Green border = free, red border = ticketed. Appears at venue lat/lng when event is live. Powers the events directory column.</div>
+    </div>
+  </div>
+
+  <div class="wm-section" style="margin-top:18px">
+    <div class="wm-section-title">Current Markets</div>
+    <div class="platform-row">
+      <div class="platform-dot" style="background:#B22234"></div>
+      <div class="platform-label"><strong>Downtown LA (DTLA)</strong> — CA. Grand Ave Arts District. Walk Score 98. 330+ listings. Olympics 2028 pipeline.</div>
+    </div>
+    <div class="platform-row">
+      <div class="platform-dot" style="background:#C9A84C"></div>
+      <div class="platform-label"><strong>Laveen, Phoenix</strong> — AZ. Baseline Rd corridor. TSMC $65B + Intel $20B semiconductor anchor. Sky Harbor $38B impact zone.</div>
+    </div>
+    <div class="platform-row">
+      <div class="platform-dot" style="background:#4F6FB8"></div>
+      <div class="platform-label"><strong>LA Life / Desert Life</strong> — lifestyle context layers. POI-dense, Yelp-integrated, RPOI gold disc markers.</div>
+    </div>
+  </div>
+
+  <div class="wm-section" style="margin-top:18px;padding-bottom:20px">
+    <div class="wm-section-title">Grid Reference — Thomas Bros 5×5</div>
+    <div class="wm-sub">Every element on every page has an assigned grid cell. Toggle the grid overlay [G] to verify placement. Click any cell to read its ref + lat/lng. This file is the canonical placement reference.</div>
+    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:4px;margin-top:8px">
+      <div style="text-align:center;font-size:.52rem;color:rgba(0,188,212,.9);background:rgba(0,188,212,.08);border:1px solid rgba(0,188,212,.3);padding:6px 2px;border-radius:2px">A</div>
+      <div style="text-align:center;font-size:.52rem;color:rgba(0,188,212,.9);background:rgba(0,188,212,.08);border:1px solid rgba(0,188,212,.3);padding:6px 2px;border-radius:2px">B</div>
+      <div style="text-align:center;font-size:.52rem;color:rgba(0,188,212,.9);background:rgba(0,188,212,.08);border:1px solid rgba(0,188,212,.3);padding:6px 2px;border-radius:2px">C</div>
+      <div style="text-align:center;font-size:.52rem;color:rgba(0,188,212,.9);background:rgba(0,188,212,.08);border:1px solid rgba(0,188,212,.3);padding:6px 2px;border-radius:2px">D</div>
+      <div style="text-align:center;font-size:.52rem;color:rgba(0,188,212,.9);background:rgba(0,188,212,.08);border:1px solid rgba(0,188,212,.3);padding:6px 2px;border-radius:2px">E</div>
+    </div>
+    <div style="font-size:.55rem;color:var(--ink);opacity:.45;margin-top:6px;line-height:1.7">Cols A–E left→right · Rows 1–5 top→bottom · Toggle [G] to see live overlay</div>
+  </div>
+</div>
+
+<!-- CURRENT ELEMENT PLACEMENTS -->
+<div id="legend">
+  <div class="legend-title">Current Placements</div>
+  <div class="legend-row">
+    <div class="legend-dot" style="background:#B22234;box-shadow:0 0 6px #B22234"></div>
+    <div class="legend-text">Property marker</div>
+    <div class="legend-grid">B3</div>
+  </div>
+  <div class="legend-row">
+    <div class="legend-dot" style="background:#C9A84C;box-shadow:0 0 6px #C9A84C"></div>
+    <div class="legend-text">RPOI (Laveen gold disc)</div>
+    <div class="legend-grid">C3</div>
+  </div>
+  <div class="legend-row">
+    <div class="legend-dot" style="background:#00CED1;box-shadow:0 0 6px #00CED1"></div>
+    <div class="legend-text">Active listing dot</div>
+    <div class="legend-grid">B2</div>
+  </div>
+  <div class="legend-row">
+    <div class="legend-dot" style="background:#4F6FB8"></div>
+    <div class="legend-text">media-col (dtla/laveen)</div>
+    <div class="legend-grid">A5 fixed</div>
+  </div>
+  <div class="legend-row">
+    <div class="legend-dot" style="background:#4F6FB8"></div>
+    <div class="legend-text">media-col (lalife/desert)</div>
+    <div class="legend-grid">A1 fixed</div>
+  </div>
+  <div class="legend-row">
+    <div class="legend-dot" style="background:#FAF8F4;border:1px solid #888"></div>
+    <div class="legend-text">Property panel</div>
+    <div class="legend-grid">E1→E5</div>
+  </div>
+  <div class="legend-row">
+    <div class="legend-dot" style="background:#2E7D32;box-shadow:0 0 6px #2E7D32"></div>
+    <div class="legend-text">SOAPBOX (events)</div>
+    <div class="legend-grid">varies</div>
+  </div>
+</div>
+
+<!-- READOUT -->
+<div id="readout">
+  <span class="gr" id="readout-grid">–</span>
+  <span class="coords" id="readout-coords">–</span>
+</div>
+
+<!-- INSTRUCTIONS -->
+<div id="instructions">
+  [G] or button — toggle grid overlay<br>
+  Click map — read grid ref + lat/lng<br>
+  Pan/zoom freely — grid stays fixed to viewport
+</div>
+
+<script>
+mapboxgl.accessToken='pk.eyJ1IjoidmlranB1cmkiLCJhIjoiY20zcm1yZ2ozMGNyZjJrcHZ6bHc2YnpuMCJ9.xxbsRqbDz7MHFHPpLJKNEA';
+
+const map=new mapboxgl.Map({
+  container:'map',
+  style:'mapbox://styles/mapbox/standard',
+  center:[-118.2587,34.0455],
+  zoom:15.5,
+  pitch:62,
+  bearing:200,
+  hash:false
+});
+
+map.on('load',()=>{
+  map.setConfigProperty('basemap','lightPreset','day');
+  map.setConfigProperty('basemap','show3dObjects',true);
+  try{map.setFog({'range':[1,14],'color':'rgba(235,228,212,.3)','high-color':'#b0cce0','horizon-blend':0.05});}catch(e){}
+
+  // Reference markers — current element placements
+  addRefMarker([-118.2587,34.0455],'#B22234','Property','B3');
+  addRefMarker([-118.2637,34.0422],'#00CED1','Active Listing','B2');
+  addRefMarker([-112.1180767,33.3427905],'#C9A84C','RPOI Laveen','C3');
+});
+
+function addRefMarker(coords,color,label,grid){
+  const el=document.createElement('div');
+  el.style.cssText=`width:12px;height:12px;border-radius:50%;background:${color};border:2px solid #fff;box-shadow:0 0 8px ${color};cursor:default`;
+  el.title=`${label} — ${grid}`;
+  new mapboxgl.Marker({element:el,anchor:'center'}).setLngLat(coords).addTo(map);
+}
+
+// ── BUILD GRID CELLS ──
+const overlay=document.getElementById('grid-overlay');
+const COLS=['A','B','C','D','E'];
+for(let r=1;r<=5;r++){
+  for(let c=0;c<5;c++){
+    const cell=document.createElement('div');
+    cell.className='gc';
+    cell.dataset.ref=COLS[c]+r;
+    const lbl=document.createElement('div');
+    lbl.className='gc-ref';
+    lbl.textContent=COLS[c]+r;
+    cell.appendChild(lbl);
+    overlay.appendChild(cell);
+  }
+}
+
+// ── TOGGLE ──
+let gridOn=false;
+function toggleGrid(){
+  gridOn=!gridOn;
+  overlay.style.display=gridOn?'grid':'none';
+  document.getElementById('col-labels').style.display=gridOn?'grid':'none';
+  document.getElementById('row-labels').style.display=gridOn?'grid':'none';
+  const btn=document.getElementById('toggle-btn');
+  btn.textContent=gridOn?'Hide Grid · [G]':'Show Grid · [G]';
+  btn.classList.toggle('on',gridOn);
+  if(!gridOn){
+    document.getElementById('readout').classList.remove('show');
+    document.getElementById('active-cell').style.display='none';
+  }
+}
+document.addEventListener('keydown',e=>{if(e.key==='g'||e.key==='G')toggleGrid();});
+
+// Initially hide row/col labels
+document.getElementById('col-labels').style.display='none';
+document.getElementById('row-labels').style.display='none';
+
+// ── CLICK TO READ GRID ──
+map.on('click',e=>{
+  if(!gridOn) return;
+
+  const HH=parseInt(getComputedStyle(document.documentElement).getPropertyValue('--hh'))||56;
+  const vw=window.innerWidth;
+  const vh=window.innerHeight-HH;
+  const px=e.point.x;
+  const py=e.point.y-HH;
+
+  const colIdx=Math.min(Math.floor(px/vw*5),4);
+  const rowIdx=Math.min(Math.floor(py/vh*5),4);
+  const gridRef=COLS[colIdx]+(rowIdx+1);
+
+  // Highlight active cell
+  const ac=document.getElementById('active-cell');
+  const cw=vw/5, rh=vh/5;
+  ac.style.cssText=`position:fixed;left:${colIdx*cw}px;top:${HH+rowIdx*rh}px;width:${cw}px;height:${rh}px;background:rgba(0,188,212,.1);border:2px solid rgba(0,188,212,.7);pointer-events:none;z-index:145;display:block`;
+
+  // Readout
+  const lat=e.lngLat.lat.toFixed(6);
+  const lng=e.lngLat.lng.toFixed(6);
+  document.getElementById('readout-grid').textContent=gridRef;
+  document.getElementById('readout-coords').textContent=`lat ${lat}  ·  lng ${lng}`;
+  document.getElementById('readout').classList.add('show');
+
+  console.log(`Grid: ${gridRef} | lat: ${lat} | lng: ${lng} | zoom: ${map.getZoom().toFixed(1)}`);
+});
+
+// ── WORK MODEL TOGGLE ──
+function toggleWorkModel(){
+  document.getElementById('work-model').classList.toggle('open');
+}
+</script>
+</body>
+</html>

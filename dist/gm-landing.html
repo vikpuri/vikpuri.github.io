@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Requation — Real Estate Intelligence</title>
+  <link rel="stylesheet" href="https://cesium.com/downloads/cesiumjs/releases/1.140/Build/Cesium/Widgets/widgets.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@1,700&family=Raleway:wght@600&family=Source+Serif+4:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --white:      #FFFFFF;
+      --cream:      #FAF8F4;
+      --linen:      #F5F0E8;
+      --sand:       #E8DDD0;
+      --gold:       #C9A84C;
+      --gold-light: #DFC07A;
+      --text:       #2C2A26;
+      --ink:        #2C2A26;
+      --ink-3:      #444;
+      --text-mid:   #6B6058;
+      --text-muted: #9E9087;
+      --rule-heavy: rgba(0,0,0,0.22);
+      --border:     rgba(255,255,255,0.82);
+      --h:          60px;
+      --yt:         90px;
+    }
+
+    html { margin: 0; padding: 0; height: 100%; background: #0e0e10; }
+    body { margin: 0; padding: 0; height: 100%; overflow: hidden; background: #0e0e10; }
+
+    /* ── Cesium globe ─────────────────────────────────── */
+    #cesiumContainer {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      z-index: 0;
+    }
+
+    /* Hide all Cesium chrome */
+    .cesium-viewer-toolbar,
+    .cesium-viewer-animationContainer,
+    .cesium-viewer-timelineContainer,
+    .cesium-viewer-bottom,
+    .cesium-viewer-fullscreenContainer,
+    .cesium-viewer-vrContainer,
+    .cesium-credit-container,
+    .cesium-widget-credits { display: none !important; }
+
+    /* ── Property pins ────────────────────────────────── */
+    .prop-pin {
+      width: 38px; height: 38px; border-radius: 50%;
+      border: 3px solid #fff;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.35);
+      cursor: pointer; position: fixed; z-index: 10;
+      transition: transform .15s;
+      display: none;
+    }
+    .prop-pin:hover { transform: scale(1.15); }
+
+    .prop-pin.dtla-pin {
+      background: #B22234;
+      animation: pulse-dtla 2s ease-out infinite;
+    }
+    @keyframes pulse-dtla {
+      0%   { box-shadow: 0 0 0 0 rgba(178,34,52,0.7), 0 2px 12px rgba(0,0,0,0.35); }
+      70%  { box-shadow: 0 0 0 18px rgba(178,34,52,0), 0 2px 12px rgba(0,0,0,0.35); }
+      100% { box-shadow: 0 0 0 0 rgba(178,34,52,0), 0 2px 12px rgba(0,0,0,0.35); }
+    }
+
+    .prop-pin.laveen-pin {
+      background: #C9A84C;
+      animation: pulse-laveen 2s ease-out infinite;
+    }
+    @keyframes pulse-laveen {
+      0%   { box-shadow: 0 0 0 0 rgba(201,168,76,0.7), 0 2px 12px rgba(0,0,0,0.35); }
+      70%  { box-shadow: 0 0 0 18px rgba(201,168,76,0), 0 2px 12px rgba(0,0,0,0.35); }
+      100% { box-shadow: 0 0 0 0 rgba(201,168,76,0), 0 2px 12px rgba(0,0,0,0.35); }
+    }
+
+    /* ── Pin hover labels ─────────────────────────────── */
+    .pin-label {
+      position: fixed; z-index: 20;
+      background: linear-gradient(155deg, rgba(255,255,255,0.97) 0%, rgba(250,248,244,0.93) 100%);
+      border: 1.5px solid rgba(255,255,255,0.9);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.13), 0 0 0 0.5px rgba(201,168,76,0.25);
+      backdrop-filter: blur(16px);
+      padding: 11px 15px;
+      pointer-events: none;
+      opacity: 0;
+      transform: translateY(-4px);
+      transition: opacity .18s, transform .18s;
+      white-space: nowrap;
+    }
+    .pin-label.visible { opacity: 1; transform: translateY(0); }
+    .pl-state  { font-size: .48rem; letter-spacing: .18em; text-transform: uppercase; color: var(--gold); margin-bottom: 3px; }
+    .pl-name   { font-size: .76rem; font-weight: 600; color: var(--text); font-family: 'Source Serif 4', serif; line-height: 1.3; }
+    .pl-detail { font-size: .58rem; color: var(--text-mid); margin-top: 4px; letter-spacing: .02em; }
+
+    /* ── Header ───────────────────────────────────────── */
+    header {
+      position: fixed; top: 0; left: 0; right: 0;
+      height: var(--h); z-index: 100;
+      background: linear-gradient(180deg, #ffffff 0%, var(--cream) 100%);
+      border-bottom: 1px solid var(--sand);
+      display: flex; align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      box-shadow: 0 2px 16px rgba(0,0,0,0.07), 0 1px 0 rgba(255,255,255,0.9) inset;
+    }
+
+    .logo-wrap { display: flex; align-items: center; cursor: pointer; }
+
+    nav { display: flex; align-items: center; gap: 24px; }
+    nav a, nav button {
+      font-family: 'Source Serif 4', serif;
+      font-size: .68rem; letter-spacing: .14em;
+      text-transform: uppercase; color: var(--text-muted);
+      text-decoration: none; background: none;
+      border: none; cursor: pointer; transition: color .2s;
+    }
+    nav a:hover, nav button:hover { color: var(--text); }
+
+    /* ── YT strip ─────────────────────────────────────── */
+    #yt-strip {
+      position: fixed;
+      top: var(--h); left: 0; right: 0;
+      height: var(--yt); z-index: 90;
+      background: var(--sand);
+      border-bottom: 1px solid var(--border);
+      overflow: hidden;
+    }
+    #yt-strip::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(180deg, rgba(255,255,255,0.28) 0%, transparent 55%);
+      pointer-events: none; z-index: 3;
+    }
+    #yt-strip iframe {
+      position: absolute;
+      width: 104vw;
+      height: calc(104vw * 9 / 16);
+      top: 50%; left: -2vw;
+      transform: translateY(-50%);
+      border: none; pointer-events: none;
+    }
+    #yt-overlay {
+      position: absolute; inset: 0;
+      background: linear-gradient(
+        to right,
+        rgba(245,240,232,0.42) 0%,
+        transparent 12%,
+        transparent 88%,
+        rgba(245,240,232,0.42) 100%
+      );
+      cursor: pointer; z-index: 2;
+    }
+    #yt-label {
+      position: absolute; bottom: 7px; left: 16px;
+      font-family: 'Source Serif 4', serif;
+      font-size: .55rem; letter-spacing: .16em; text-transform: uppercase;
+      color: var(--text-mid);
+    }
+
+    /* ── Modals ───────────────────────────────────────── */
+    .modal-overlay { display:none; position:fixed; inset:0; background:rgba(28,28,28,.55); z-index:200; align-items:center; justify-content:center; backdrop-filter:blur(3px); }
+    .modal-overlay.active { display:flex; }
+    .modal { background:var(--cream); border:1px solid var(--rule-heavy); border-top:3px solid var(--ink); width:90%; max-width:520px; padding:40px; position:relative; animation:modalIn .3s ease; overflow-y:auto; max-height:78vh; }
+    @keyframes modalIn { from{opacity:0;transform:translateY(16px) scale(.98)} to{opacity:1;transform:translateY(0) scale(1)} }
+    .modal-close { position:absolute; top:16px; right:18px; background:none; border:none; color:var(--text-muted); font-size:1.2rem; cursor:pointer; transition:color .2s; }
+    .modal-close:hover { color:var(--ink); }
+    .modal-tag { font-family:'Source Serif 4',serif; font-size:.58rem; letter-spacing:.2em; text-transform:uppercase; color:var(--gold); margin-bottom:10px; display:block; }
+    .modal-title { font-family:'EB Garamond',Georgia,serif; font-size:1.9rem; font-style:italic; font-weight:700; color:var(--ink); margin-bottom:14px; }
+    .modal-body { font-family:'Source Serif 4',serif; font-size:.82rem; line-height:1.78; color:var(--ink-3); }
+    .modal-divider { height:1px; background:var(--rule-heavy); margin:20px 0; }
+    .contact-row { display:flex; align-items:center; gap:14px; padding:10px 0; }
+    .contact-icon { font-size:1.2rem; }
+    .contact-info { font-family:'Source Serif 4',serif; font-size:.82rem; color:var(--ink); display:flex; flex-direction:column; gap:2px; }
+    .contact-info strong { font-size:.58rem; letter-spacing:.18em; text-transform:uppercase; color:var(--text-muted); font-weight:600; }
+
+    /* ── Mobile ───────────────────────────────────────── */
+    @media (max-width: 640px) {
+      :root { --yt: 66px; }
+      header { padding: 0 14px; }
+      nav a { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<div id="cesiumContainer"></div>
+
+<!-- Header -->
+<header>
+  <div class="logo-wrap" onclick="goHome()">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 440 100" height="52" preserveAspectRatio="xMinYMid meet" aria-label="Requation">
+      <defs><filter id="gb"><feGaussianBlur stdDeviation="1.2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+      <text x="6" y="42" font-family="EB Garamond,Georgia,serif" font-size="46" font-weight="700" font-style="italic" fill="#B22234">r</text>
+      <line x1="31" y1="76" x2="50" y2="41" stroke="#7A7A7A" stroke-width="5" stroke-linecap="round"/>
+      <text x="56" y="88" font-family="Raleway,Arial,sans-serif" font-size="92" font-weight="600" fill="#4F6FB8">Σ</text>
+      <text x="122" y="88" font-family="Raleway,Arial,sans-serif" font-size="24" font-weight="600" font-style="italic" fill="#D4A843" opacity="0.8" filter="url(#gb)" letter-spacing="2">quation</text>
+    </svg>
+  </div>
+  <nav>
+    <button onclick="goHome()">Home</button>
+    <a href="/dtla">Los Angeles</a>
+    <a href="/laveen">Arizona</a>
+    <button onclick="openModal('about')">About</button>
+    <button onclick="openModal('contact')">Contact</button>
+  </nav>
+</header>
+
+<!-- YT strip -->
+<div id="yt-strip">
+  <iframe id="yt-frame"
+    src=""
+    allow="autoplay; encrypted-media"
+    allowfullscreen>
+  </iframe>
+  <div id="yt-overlay" onclick="toggleSound()"></div>
+  <div id="yt-label">▶ Neighborhood · Click to unmute</div>
+</div>
+
+<script>
+/* ── YT strip ─────────────────────────────────────────── */
+const LANDING_VIDEOS = [
+  {id:'GFD0WG60c6Q', title:'Urban Light — South Park'},
+  {id:'1mXG5MJ6i1U', title:'City Views — 16th Floor'},
+  {id:'FR8hkxtha9A', title:'DTLA — Night'},
+  {id:'wn9pZDkd6bo', title:'Desert Rain — Monsoon Season'},
+  {id:'hrPKYsoz_0U', title:'Monsoon at South Mountain'},
+  {id:'M7MY9zNWY50', title:'Desert Light — Laveen'}
+];
+
+let muted = true;
+let currentVideoTitle = '';
+
+function initYT() {
+  const v = LANDING_VIDEOS[Math.floor(Math.random() * LANDING_VIDEOS.length)];
+  currentVideoTitle = v.title;
+  document.getElementById('yt-frame').src =
+    `https://www.youtube.com/embed/${v.id}?autoplay=1&mute=1&loop=1&playlist=${v.id}&controls=0&showinfo=0&rel=0&modestbranding=1`;
+  document.getElementById('yt-label').textContent = '▶ ' + v.title + ' · Click to unmute';
+}
+
+function toggleSound() {
+  const frame = document.getElementById('yt-frame');
+  const label = document.getElementById('yt-label');
+  muted = !muted;
+  frame.src = frame.src.replace(muted ? 'mute=0' : 'mute=1', muted ? 'mute=1' : 'mute=0');
+  label.textContent = muted ? '▶ ' + currentVideoTitle + ' · Click to unmute' : '🔊 ' + currentVideoTitle + ' — Click to mute';
+}
+
+/* ── Modals ───────────────────────────────────────────── */
+function openModal(id) { document.getElementById('modal-' + id).classList.add('active'); }
+function closeModal(id) { document.getElementById('modal-' + id).classList.remove('active'); }
+
+function submitContact(e) {
+  e.preventDefault();
+  const btn = document.getElementById('cf-btn');
+  const status = document.getElementById('cf-status');
+  btn.disabled = true; btn.textContent = 'Sending…';
+  fetch('/api/contact', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      name:    document.getElementById('cf-name').value,
+      email:   document.getElementById('cf-email').value,
+      message: document.getElementById('cf-message').value
+    })
+  })
+  .then(r => r.json())
+  .then(() => { status.textContent = "Message sent. We'll be in touch."; btn.textContent = 'Sent'; })
+  .catch(() => { status.textContent = 'Error — please try again.'; btn.disabled = false; btn.textContent = 'Send Message'; });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  initYT();
+  document.querySelectorAll('.modal-overlay').forEach(el =>
+    el.addEventListener('click', e => { if (e.target === el) el.classList.remove('active'); })
+  );
+});
+
+function goHome() { location.href = '/'; }
+
+/* ── Properties ───────────────────────────────────────── */
+const PROPS = [
+  { id: 'dtla',   lat: 34.0457095, lng: -118.2585553, link: '/dtla',
+    cls: 'dtla-pin',   state: 'California', name: 'South Park · DTLA',
+    detail: '801 S Grand Ave · $885,000' },
+  { id: 'laveen', lat: 33.34284751970459, lng: -112.11814600203087, link: '/laveen',
+    cls: 'laveen-pin', state: 'Arizona',    name: 'Urban Farmhouse · Laveen',
+    detail: '11403 S 27th Dr · $2,000,000' }
+];
+</script>
+
+<script src="https://cesium.com/downloads/cesiumjs/releases/1.140/Build/Cesium/Cesium.js"></script>
+<script>
+Cesium.GoogleMaps.defaultApiKey = 'AIzaSyD7UMA5ILPXv9QK2_gvxPVth30MavRd2WQ';
+
+async function initCesium() {
+  const viewer = new Cesium.Viewer('cesiumContainer', {
+    timeline:             false,
+    animation:            false,
+    baseLayerPicker:      false,
+    geocoder:             false,
+    homeButton:           false,
+    sceneModePicker:      false,
+    navigationHelpButton: false,
+    infoBox:              false,
+    selectionIndicator:   false,
+    fullscreenButton:     false,
+    vrButton:             false
+  });
+
+  viewer.imageryLayers.removeAll();
+
+  /* Zoom limits — keep both property pins in frame */
+  viewer.scene.screenSpaceCameraController.minimumZoomDistance = 3000000;
+  viewer.scene.screenSpaceCameraController.maximumZoomDistance = 20000000;
+
+  const tileset = await Cesium.createGooglePhotorealistic3DTileset();
+  viewer.scene.primitives.add(tileset);
+
+  /* Camera directly above SW USA — same longitude/latitude as both properties,
+     14,000km altitude, looking straight down. Guarantees North America faces
+     camera and pins land on correct spots. heading 0° = north up. */
+  viewer.camera.setView({
+    destination: Cesium.Cartesian3.fromDegrees(-115.2, 34.5, 14000000),
+    orientation: {
+      heading: Cesium.Math.toRadians(0),
+      pitch:   Cesium.Math.toRadians(-90),
+      roll:    0
+    }
+  });
+
+  /* Pins active after tiles settle */
+  let pinsActive = false;
+  setTimeout(() => { pinsActive = true; }, 2000);
+
+  /* Build one DOM pin + hover label per property */
+  const pinData = PROPS.map(p => {
+    const pinEl = document.createElement('div');
+    pinEl.className = 'prop-pin ' + p.cls;
+    document.body.appendChild(pinEl);
+    pinEl.addEventListener('click', () => { location.href = p.link; });
+
+    const labelEl = document.createElement('div');
+    labelEl.className = 'pin-label';
+    labelEl.innerHTML =
+      '<div class="pl-state">' + p.state + '</div>' +
+      '<div class="pl-name">'  + p.name  + '</div>' +
+      '<div class="pl-detail">' + p.detail + '</div>';
+    document.body.appendChild(labelEl);
+
+    pinEl.addEventListener('mouseenter', () => labelEl.classList.add('visible'));
+    pinEl.addEventListener('mouseleave', () => labelEl.classList.remove('visible'));
+
+    return {
+      el: pinEl, label: labelEl,
+      pos3d: Cesium.Cartesian3.fromDegrees(p.lng, p.lat, 0)
+    };
+  });
+
+  /* Project 3D positions to screen each frame */
+  viewer.scene.postRender.addEventListener(() => {
+    pinData.forEach(({ el, label, pos3d }) => {
+      if (!pinsActive) { el.style.display = 'none'; return; }
+      const pos = Cesium.SceneTransforms.worldToWindowCoordinates(viewer.scene, pos3d);
+      if (pos && pos.x > 0 && pos.x < window.innerWidth && pos.y > 0 && pos.y < window.innerHeight) {
+        el.style.left    = (pos.x - 19) + 'px';
+        el.style.top     = (pos.y - 19) + 'px';
+        el.style.display = 'block';
+        label.style.left = (pos.x + 24) + 'px';
+        label.style.top  = (pos.y - 40) + 'px';
+      } else {
+        el.style.display = 'none';
+        label.classList.remove('visible');
+      }
+    });
+  });
+}
+
+initCesium().catch(e => console.error('Cesium init failed:', e));
+</script>
+
+<!-- About modal -->
+<div class="modal-overlay" id="modal-about">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('about')">&#x2715;</button>
+    <span class="modal-tag">Who We Are</span>
+    <div class="modal-title">Real Estate Intelligence</div>
+    <div class="modal-body">I needed to sell my house. Not because I wanted to. Because I had to.<br><br>The MLS controls 80% of the American real estate market. It is a private, for-profit syndicate — not a public utility, not a cooperative, not a service. A corporation. Far away. Collecting both sides of every transaction through a doctrine called procuring cause, until 2024, when the courts finally said enough.<br><br>I said it sooner.<br><br>Requation is an effort to change the real estate equation — from MegaCorp to every American. Not a listing site. Not a portal. A map. Seen from above, in three dimensions, the way a city actually works. Every property in context. Every neighborhood alive with the intelligence that buyers deserve and sellers have been denied.<br><br>I have done this before. In White Center, Seattle — one of America's most forgotten neighborhoods — I once brought fruit to a food desert. Just showed up with produce where there was none. Nobody paid me. That is not the point. The point is that neighborhoods breathe. They need tending.<br><br>Requation tends them.<br><br>Not to disrupt. Not to raise a Series A. To sell my own properties first — and then to hand every American owner the same map that corporations have kept to themselves.<br><br>r/Σ = Real Estate as an Equation. Finally solved.</div>
+    <div class="modal-divider"></div>
+  </div>
+</div>
+
+<!-- Contact modal -->
+<div class="modal-overlay" id="modal-contact">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('contact')">&#x2715;</button>
+    <span class="modal-tag">Get In Touch</span>
+    <div class="modal-title">Contact Us</div>
+    <div class="modal-divider"></div>
+    <div class="contact-row"><div class="contact-icon">☎</div><div class="contact-info"><strong>Phone</strong>+1 (213) 215-8870</div></div>
+    <div class="modal-divider"></div>
+    <div style="text-align:center;padding:8px 0 16px">
+      <img src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=https://requation.com" alt="requation.com" style="width:160px;height:160px;border:1px solid var(--rule-heavy)">
+      <div style="font-family:'Source Serif 4',serif;font-size:.7rem;color:var(--text-muted);margin-top:8px;letter-spacing:.05em">requation.com</div>
+    </div>
+    <div class="modal-divider"></div>
+    <form id="contact-form" onsubmit="submitContact(event)" style="display:flex;flex-direction:column;gap:12px">
+      <input type="text" id="cf-name" placeholder="Your Name" required style="font-family:'Source Serif 4',serif;font-size:.82rem;color:var(--ink);background:var(--cream);border:1px solid var(--rule-heavy);border-top:2px solid var(--ink);padding:10px 12px;outline:none;width:100%;box-sizing:border-box">
+      <input type="email" id="cf-email" placeholder="Your Email" required style="font-family:'Source Serif 4',serif;font-size:.82rem;color:var(--ink);background:var(--cream);border:1px solid var(--rule-heavy);border-top:2px solid var(--ink);padding:10px 12px;outline:none;width:100%;box-sizing:border-box">
+      <textarea id="cf-message" placeholder="Your message…" required rows="4" style="font-family:'Source Serif 4',serif;font-size:.82rem;color:var(--ink);background:var(--cream);border:1px solid var(--rule-heavy);border-top:2px solid var(--ink);padding:10px 12px;outline:none;resize:vertical;width:100%;box-sizing:border-box"></textarea>
+      <button type="submit" id="cf-btn" style="font-family:'Source Serif 4',serif;font-size:.66rem;font-weight:600;letter-spacing:.18em;text-transform:uppercase;background:var(--ink);color:var(--cream);border:none;padding:12px;cursor:pointer;transition:background .2s">Send Message</button>
+      <div id="cf-status" style="font-family:'Source Serif 4',serif;font-size:.75rem;text-align:center;min-height:1.2em"></div>
+    </form>
+    <div class="modal-divider"></div>
+    <div style="text-align:center">
+      <div style="font-family:'Source Serif 4',serif;font-size:.58rem;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:8px">Advertise on Requation</div>
+      <a href="#" target="_blank" rel="noopener" style="display:block;width:100%;box-sizing:border-box;padding:12px;background:var(--ink);color:var(--cream);font-family:'Source Serif 4',serif;font-size:.66rem;font-weight:600;letter-spacing:.18em;text-transform:uppercase;text-decoration:none;text-align:center;transition:background .2s">Buy a Listing</a>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Requation · WalkingLA · Broadway Corridor</title>
+  <meta name="description" content="HyperLocal WalkingLA — Broadway from 3rd to Olympic. Grand Central Market, Angel's Flight, Bradbury Building, Pershing Square, Jewelry District.">
+  <meta property="og:title" content="WalkingLA · Broadway — Requation HyperLocal">
+  <meta property="og:image" content="https://i.imgur.com/0aYf87y.jpeg">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@1,700&family=Raleway:wght@600&family=Source+Serif+4:wght@300;400;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --gold:#C9A84C; --gold-dim:rgba(201,168,76,.1); --gold-border:rgba(201,168,76,.35);
+      --cream:#FAF8F4; --cream-2:#F4F1EB;
+      --ink:#1C1C1C; --ink-3:#444;
+      --rule:rgba(0,0,0,.12); --rule-heavy:rgba(0,0,0,.22);
+      --text-muted:#666; --sand:#E8DDD0;
+      --header-h:56px; --route-h:36px;
+    }
+    *,::before,::after { box-sizing:border-box; margin:0; padding:0; }
+    html { height:100%; }
+    body { height:100%; background:#2a2620; color:var(--ink);
+           font-family:'Source Serif 4',Georgia,serif; overflow:hidden; }
+
+    #map { position:fixed; inset:0; z-index:0; }
+
+    #route-nav {
+      position:fixed; bottom:0; left:0; right:0; height:var(--route-h);
+      background:rgba(255,255,255,.96); border-top:1.5px solid var(--rule-heavy);
+      display:flex; align-items:center; justify-content:center; z-index:100;
+      font-family:'DM Mono',monospace; font-size:.42rem; letter-spacing:.12em;
+      text-transform:uppercase;
+    }
+    .route-stop { padding:0 14px; color:var(--text-muted); text-decoration:none;
+                  border-right:1px solid var(--rule); line-height:var(--route-h);
+                  transition:color .2s; white-space:nowrap; }
+    .route-stop:last-child { border-right:none; }
+    .route-stop:hover { color:var(--ink); }
+    .route-stop.current { color:var(--ink); font-weight:500; border-bottom:2px solid var(--gold); }
+    .route-arrow { padding:0 8px; color:var(--text-muted); }
+
+    header {
+      position:fixed; top:0; left:0; right:0; height:var(--header-h); z-index:100;
+      background:rgba(255,255,255,.96); border-bottom:2px solid var(--ink);
+      display:flex; align-items:center; justify-content:space-between; padding:0 20px;
+      backdrop-filter:blur(8px);
+    }
+    .logo-wrap { display:flex; align-items:center; gap:10px; text-decoration:none; }
+    .logo-addr { font-family:'DM Mono',monospace; font-size:.45rem; letter-spacing:.12em;
+                 text-transform:uppercase; color:var(--text-muted);
+                 border-left:1px solid var(--sand); padding-left:10px; }
+    .header-tag { font-family:'DM Mono',monospace; font-size:.42rem; letter-spacing:.12em;
+                  text-transform:uppercase; color:var(--gold);
+                  background:var(--gold-dim); border:1px solid var(--gold-border);
+                  padding:3px 8px; border-radius:2px; }
+
+    .rpoi-pin { background:#fff; border:2px solid var(--gold); border-radius:6px;
+                padding:4px 8px; box-shadow:0 2px 10px rgba(0,0,0,.25);
+                cursor:pointer; transition:transform .15s; min-width:58px; text-align:center; }
+    .rpoi-pin:hover { transform:scale(1.08); }
+    .rpoi-price { font-family:'DM Mono',monospace; font-size:11px; font-weight:500; color:var(--ink); line-height:1.3; }
+    .rpoi-beds  { font-family:'DM Mono',monospace; font-size:9px; color:var(--text-muted); }
+
+    .heart-pin { background:var(--gold); color:#fff; padding:5px 10px; border-radius:20px;
+                 font-family:'Source Serif 4',serif; font-size:11px; font-weight:600;
+                 cursor:pointer; white-space:nowrap; box-shadow:0 2px 10px rgba(0,0,0,.2);
+                 display:flex; align-items:center; gap:4px; transition:transform .15s; }
+    .heart-pin:hover { transform:scale(1.06); }
+
+    #info-card { position:fixed; bottom:calc(var(--route-h) + 12px); left:50%; transform:translateX(-50%);
+                 width:min(400px,calc(100vw - 32px)); background:var(--cream);
+                 border:2px solid var(--ink); border-radius:4px;
+                 box-shadow:0 8px 32px rgba(0,0,0,.18); z-index:200; display:none; }
+    #info-card.open { display:block; animation:slideUp .2s ease; }
+    @keyframes slideUp { from{transform:translateX(-50%) translateY(12px);opacity:0} to{transform:translateX(-50%) translateY(0);opacity:1} }
+    #card-close { position:absolute; top:8px; right:10px; background:none; border:none; cursor:pointer; font-size:1rem; color:var(--text-muted); }
+    #card-close:hover { color:var(--ink); }
+    #card-body { padding:16px 20px 14px; }
+    #card-tag  { font-family:'DM Mono',monospace; font-size:.38rem; letter-spacing:.14em; text-transform:uppercase; color:var(--gold); margin-bottom:3px; }
+    #card-name { font-size:1rem; font-weight:600; color:var(--ink); margin-bottom:2px; }
+    #card-addr { font-family:'DM Mono',monospace; font-size:.42rem; color:var(--text-muted); letter-spacing:.06em; margin-bottom:10px; }
+    #card-stats { display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap; }
+    .card-stat { background:var(--cream-2); border:1px solid var(--rule); border-radius:3px; padding:5px 10px; font-family:'DM Mono',monospace; font-size:.42rem; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-3); }
+    #card-actions { display:flex; gap:8px; flex-wrap:wrap; }
+    .card-btn { padding:8px 14px; border-radius:3px; font-family:'DM Mono',monospace; font-size:.42rem; letter-spacing:.1em; text-transform:uppercase; text-decoration:none; border:none; cursor:pointer; }
+    .card-btn-view   { background:#2d2d2d; color:#f5e6c8; border:1px solid #c9a84c; }
+    .card-btn-waymo  { background:#1A73E8; color:#fff; }
+    .card-btn-redfin { background:#cc3340; color:#fff; }
+    .card-btn-yt     { background:#FF0000; color:#fff; }
+    .card-btn-yelp   { background:#FF1A1A; color:#fff; }
+    .yelp-pin { width:9px; height:9px; border-radius:50%; border:2px solid #fff; cursor:pointer; box-shadow:0 1px 4px rgba(0,0,0,.35); }
+    .yelp-pin[data-cat="Restaurant"],.yelp-pin[data-cat="Food"]{background:#FF6B35;}
+    .yelp-pin[data-cat="Coffee"]{background:#6B4226;}
+    .yelp-pin[data-cat="Bar"]{background:#8B5CF6;}
+    .yelp-pin[data-cat="Shopping"]{background:#10B981;}
+    .yelp-pin { background:#FF1A1A; }
+    #card-yt { width:100%; aspect-ratio:16/9; border:none; display:none; margin-top:10px; }
+
+    #status-badge { position:fixed; top:calc(var(--header-h) + 12px); left:12px; z-index:90;
+                    background:rgba(255,255,255,.92); border:1.5px solid var(--rule-heavy);
+                    border-radius:4px; padding:8px 14px; font-family:'DM Mono',monospace;
+                    font-size:.42rem; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-3); }
+    #status-badge strong { color:var(--gold); }
+
+    #walk-badge { position:fixed; top:calc(var(--header-h) + 12px); right:12px; z-index:90;
+                  background:rgba(255,255,255,.92); border:1.5px solid var(--gold-border);
+                  border-radius:20px; padding:6px 16px;
+                  font-family:'DM Mono',monospace; font-size:.42rem; letter-spacing:.12em;
+                  text-transform:uppercase; color:var(--gold); white-space:nowrap; }
+  </style>
+</head>
+<body>
+
+<div id="map"></div>
+
+<header>
+  <a class="logo-wrap" href="/">
+    <svg width="28" height="28" viewBox="0 0 60 60" fill="none">
+      <text x="4" y="46" font-family="EB Garamond" font-style="italic" font-weight="700" font-size="52" fill="#1C1C1C">r</text>
+      <line x1="18" y1="48" x2="44" y2="12" stroke="#C9A84C" stroke-width="2.2"/>
+      <text x="38" y="28" font-family="EB Garamond" font-style="italic" font-weight="700" font-size="26" fill="#C9A84C">Σ</text>
+    </svg>
+    <span style="font-family:'Raleway',sans-serif;font-size:.85rem;font-weight:600;letter-spacing:.04em">quation</span>
+    <span class="logo-addr">WalkingLA · Broadway · DTLA</span>
+  </a>
+  <span class="header-tag">♥ 6 WalkingLA</span>
+</header>
+
+<div id="status-badge">Loading Broadway…</div>
+<div id="walk-badge">Broadway · 3rd to Olympic</div>
+
+<div id="info-card">
+  <button id="card-close" onclick="closeCard()">✕</button>
+  <div id="card-body">
+    <div id="card-tag"></div>
+    <div id="card-name"></div>
+    <div id="card-addr"></div>
+    <div id="card-stats"></div>
+    <div id="card-actions"></div>
+  </div>
+  <iframe id="card-yt" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+</div>
+
+<nav id="route-nav">
+  <a href="/dtla"   class="route-stop">DTLA</a>
+  <span class="route-arrow">→</span>
+  <a href="/mylocal" class="route-stop">MyLocal</a>
+  <span class="route-arrow">→</span>
+  <span class="route-stop current">WalkingLA</span>
+  <span class="route-arrow">→</span>
+  <a href="/lalife/venice" class="route-stop">Venice</a>
+  <span class="route-arrow">→</span>
+  <a href="/lalife/weho"   class="route-stop">WeHo ♦</a>
+</nav>
+
+<script>
+const CENTER = { lat: 34.0504, lng: -118.2494 };  // Grand Central Market
+const ZOOM   = 16;
+
+const SB_URL  = 'https://mpmprnjhunjfeacikgml.supabase.co';
+const SB_KEY  = 'sb_publishable_T6XISHd9O2Ol0raPaEASqQ_klUXnyY3';
+const SB_HDRS = { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY };
+
+const BROADWAY_ZIPS = ['90012','90013','90014'];
+
+/* ♥ WalkingLA — Broadway corridor from 3rd St to Olympic */
+const HEARTS = [
+  { sku:'BROADWAY-001', slug:'broadway-grand-central',    name:'Grand Central Market', lat:34.0504, lng:-118.2494, cat:'Food Hall · Est. 1917', addr:'317 S Broadway, Los Angeles CA 90013',  ytSearch:'Grand Central Market Los Angeles' },
+  { sku:'BROADWAY-002', slug:'broadway-angels-flight',    name:"Angel's Flight",       lat:34.0522, lng:-118.2487, cat:'Funicular · Landmark',  addr:'351 S Hill St, Los Angeles CA 90013',   ytSearch:"Angel's Flight Los Angeles funicular" },
+  { sku:'BROADWAY-003', slug:'broadway-bradbury',         name:'Bradbury Building',    lat:34.0502, lng:-118.2491, cat:'Architecture · 1893',   addr:'304 S Broadway, Los Angeles CA 90013',  ytSearch:'Bradbury Building Los Angeles interior' },
+  { sku:'BROADWAY-004', slug:'broadway-pershing-square',  name:'Pershing Square',      lat:34.0484, lng:-118.2523, cat:'Park · Transit Hub',    addr:'532 S Olive St, Los Angeles CA 90013',  ytSearch:'Pershing Square Los Angeles' },
+  { sku:'BROADWAY-005', slug:'broadway-jewelry-district', name:'Jewelry District',     lat:34.0447, lng:-118.2509, cat:'Shopping · Hill St',    addr:'660 S Hill St, Los Angeles CA 90014',   ytSearch:'Los Angeles Jewelry District Hill Street' },
+  { sku:'BROADWAY-006', slug:'broadway-last-bookstore',   name:'The Last Bookstore',   lat:34.0488, lng:-118.2485, cat:'Books · Records',       addr:'453 S Spring St, Los Angeles CA 90013', ytSearch:'The Last Bookstore Los Angeles' },
+];
+
+let map, advMarker;
+
+async function initMap() {
+  const { Map }                   = await google.maps.importLibrary('maps');
+  const { AdvancedMarkerElement } = await google.maps.importLibrary('marker');
+  advMarker = AdvancedMarkerElement;
+
+  map = new Map(document.getElementById('map'), {
+    center: CENTER,
+    zoom:   ZOOM,
+    tilt:   67.5,
+    mapId:  '96844e6a7bb74a7d5514d3a5',
+    gestureHandling: 'greedy',
+  });
+
+  await loadRPOI();
+  await loadYelp();
+  loadHearts();
+}
+
+async function loadRPOI() {
+  try {
+    const r = await fetch(
+      `${SB_URL}/rest/v1/properties?zip=in.(${BROADWAY_ZIPS.join(',')})&mls_status=eq.active&select=name,address,neighborhood,zip,lat,lng,price,beds,baths,sqft,redfin_url&order=price.asc&limit=200`,
+      { headers: SB_HDRS }
+    );
+    const rows = await r.json();
+
+    if (!rows.length) {
+      document.getElementById('status-badge').innerHTML = '♥ <strong>6</strong> WalkingLA places';
+      return;
+    }
+
+    document.getElementById('status-badge').innerHTML = `<strong>${rows.length}</strong> listings · ♥ 6 WalkingLA`;
+
+    rows.forEach(p => {
+      if (!p.lat || !p.lng) return;
+      const el = document.createElement('div');
+      el.className = 'rpoi-pin';
+      const priceK = p.price ? '$' + Math.round(p.price / 1000) + 'K' : '—';
+      el.innerHTML = `<div class="rpoi-price">${priceK}</div>${p.beds ? `<div class="rpoi-beds">${p.beds} bd</div>` : ''}`;
+      const m = new advMarker({ position: { lat: p.lat, lng: p.lng }, map, content: el, title: p.address });
+      m.addListener('click', () => {
+        map.panTo({ lat: p.lat, lng: p.lng });
+        showCard({ tag: p.neighborhood || 'Broadway RPOI', name: p.address, addr: p.zip,
+          stats: [priceK, p.beds + ' BD', p.baths + ' BA', (p.sqft || '—') + ' sqft'],
+          primary: { label: 'Redfin →', href: p.redfin_url },
+          waymo: waymoDest(p.address) });
+      });
+    });
+  } catch (e) {
+    document.getElementById('status-badge').innerHTML = '♥ <strong>6</strong> WalkingLA places';
+  }
+}
+
+async function loadYelp() {
+  try {
+    const zips = BROADWAY_ZIPS.join(',');
+    const r = await fetch(
+      `${SB_URL}/rest/v1/restaurants?zip=in.(${zips})&select=name,category,lat,lng,zip,rating,yelp_url,waymo_url,address&order=rating.desc&limit=300`,
+      { headers: SB_HDRS }
+    );
+    const rows = await r.json();
+    if (!Array.isArray(rows) || !rows.length) return;
+
+    rows.forEach(p => {
+      if (!p.lat || !p.lng) return;
+      const el = document.createElement('div');
+      el.className = 'yelp-pin';
+      el.setAttribute('data-cat', p.category || '');
+      el.title = p.name + (p.rating ? ' ★' + p.rating : '');
+
+      const m = new advMarker({ position: { lat: p.lat, lng: p.lng }, map, content: el, zIndex: 5 });
+      m.addListener('click', () => {
+        map.panTo({ lat: p.lat, lng: p.lng });
+        showCard({
+          tag:     (p.rating ? '★ ' + p.rating + ' · ' : '') + (p.category || 'Yelp'),
+          name:    p.name,
+          addr:    p.address || '',
+          stats:   [p.category, p.zip].filter(Boolean),
+          primary: p.yelp_url ? { label: 'Yelp →', href: p.yelp_url } : null,
+          waymo:   p.waymo_url || waymoDest(p.address),
+        });
+      });
+    });
+    console.log('Yelp loaded:', rows.length, 'businesses');
+  } catch (e) {
+    console.warn('Yelp load failed:', e.message);
+  }
+}
+
+function loadHearts() {
+  HEARTS.forEach(h => {
+    const el = document.createElement('div');
+    el.className = 'heart-pin';
+    el.innerHTML = '♥ ' + h.name;
+    const m = new advMarker({ position: { lat: h.lat, lng: h.lng }, map, content: el, title: h.name, zIndex: 10 });
+    m.addListener('click', () => {
+      map.panTo({ lat: h.lat, lng: h.lng });
+      showCard({ tag: '♥ WalkingLA · ' + h.sku, name: h.name, addr: h.addr,
+        stats: [h.cat],
+        ytSearch: h.ytSearch,
+        waymo: waymoDest(h.addr),
+        slug: h.slug });
+    });
+  });
+}
+
+function showCard({ tag, name, addr, stats, primary, waymo, ytSearch, slug }) {
+  document.getElementById('card-tag').textContent  = tag;
+  document.getElementById('card-name').textContent = name;
+  document.getElementById('card-addr').textContent = addr;
+  document.getElementById('card-stats').innerHTML  = (stats || []).map(s => `<div class="card-stat">${s}</div>`).join('');
+  const act = document.getElementById('card-actions');
+  act.innerHTML = '';
+  if (slug) act.appendChild(Object.assign(document.createElement('a'), { className:'card-btn card-btn-view', textContent:'View page →', href:'/place?id=' + slug }));
+  if (primary) act.appendChild(Object.assign(document.createElement('a'), { className:'card-btn card-btn-redfin', textContent:primary.label, href:primary.href, target:'_blank' }));
+  if (ytSearch) {
+    const yt = document.createElement('button');
+    yt.className = 'card-btn card-btn-yt'; yt.textContent = '▶ YouTube';
+    yt.onclick = () => {
+      const f = document.getElementById('card-yt');
+      f.style.display = 'block';
+      f.src = 'https://www.youtube.com/embed?listType=search&list=' + encodeURIComponent(ytSearch) + '&autoplay=1';
+    };
+    act.appendChild(yt);
+  }
+  if (waymo) act.appendChild(Object.assign(document.createElement('a'), { className:'card-btn card-btn-waymo', textContent:'Waymo One →', href:waymo, target:'_blank' }));
+  document.getElementById('card-yt').style.display = 'none';
+  document.getElementById('card-yt').src = '';
+  const card = document.getElementById('info-card');
+  card.classList.remove('open'); void card.offsetWidth; card.classList.add('open');
+}
+
+function closeCard() {
+  document.getElementById('info-card').classList.remove('open');
+  document.getElementById('card-yt').src = '';
+}
+function waymoDest(addr) { return 'https://waymo.com/waymo-one/?destination=' + encodeURIComponent(addr || ''); }
+
+window.initMap = initMap;
+</script>
+
+<script async
+  src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD7UMA5ILPXv9QK2_gvxPVth30MavRd2WQ&callback=initMap&libraries=marker&v=weekly">
+</script>
+</body>
+</html>

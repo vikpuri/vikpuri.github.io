@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Requation · MyLocal · DTLA — Vik's Favorites</title>
+  <meta name="description" content="HyperLocal DTLA — the 18 places Vik actually goes. Street-level 3D map with YouTube stories and Waymo rides to every spot.">
+  <meta property="og:title" content="MyLocal DTLA — Requation HyperLocal">
+  <meta property="og:image" content="https://i.imgur.com/0aYf87y.jpeg">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@1,700&family=Raleway:wght@600&family=Source+Serif+4:wght@300;400;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --gold:#C9A84C; --gold-dim:rgba(201,168,76,.1); --gold-border:rgba(201,168,76,.35);
+      --cream:#FAF8F4; --cream-2:#F4F1EB;
+      --ink:#1C1C1C; --ink-3:#444;
+      --rule:rgba(0,0,0,.12); --rule-heavy:rgba(0,0,0,.22);
+      --text-muted:#666; --sand:#E8DDD0;
+      --header-h:56px; --route-h:36px;
+    }
+    *,::before,::after { box-sizing:border-box; margin:0; padding:0; }
+    html { height:100%; }
+    body { height:100%; background:#1a1a1a; color:var(--ink);
+           font-family:'Source Serif 4',Georgia,serif; overflow:hidden; }
+
+    /* Rule 1 — explicit dimensions, no overflow on html */
+    #map { position:fixed; inset:0; z-index:0; }
+
+    header {
+      position:fixed; top:0; left:0; right:0; height:var(--header-h); z-index:100;
+      background:rgba(255,255,255,.97); border-bottom:2px solid var(--ink);
+      display:flex; align-items:center; justify-content:space-between; padding:0 20px;
+    }
+    .logo-wrap { display:flex; align-items:center; cursor:pointer; gap:10px; text-decoration:none; }
+    .logo-addr { font-family:'DM Mono',monospace; font-size:.45rem; letter-spacing:.12em;
+                 text-transform:uppercase; color:var(--text-muted);
+                 border-left:1px solid var(--sand); padding-left:10px; }
+    .header-tag { font-family:'DM Mono',monospace; font-size:.42rem; letter-spacing:.12em;
+                  text-transform:uppercase; color:var(--gold);
+                  background:var(--gold-dim); border:1px solid var(--gold-border);
+                  padding:3px 8px; border-radius:2px; }
+
+    /* ── Property pin ── */
+    #prop-pin {
+      position:fixed; width:42px; height:42px; border-radius:50%;
+      background:var(--gold); border:3px solid #fff;
+      box-shadow:0 2px 16px rgba(0,0,0,.5); z-index:20;
+      cursor:pointer; display:none; transform:translate(-50%,-50%);
+    }
+    #prop-pin::after {
+      content:''; position:absolute; inset:-7px; border-radius:50%;
+      border:2px solid rgba(201,168,76,.5); animation:pulse 2s ease-out infinite;
+    }
+    @keyframes pulse { 0%{transform:scale(1);opacity:1} 100%{transform:scale(1.7);opacity:0} }
+
+    /* ── Heart markers ── */
+    .heart-pin {
+      background:var(--gold); color:#fff; padding:5px 10px; border-radius:20px;
+      font-family:'Source Serif 4',serif; font-size:11px; font-weight:600;
+      cursor:pointer; white-space:nowrap; box-shadow:0 2px 12px rgba(0,0,0,.3);
+      display:flex; align-items:center; gap:4px;
+      transition:transform .15s, box-shadow .15s;
+    }
+    .heart-pin:hover { transform:scale(1.08); box-shadow:0 4px 18px rgba(0,0,0,.4); }
+
+    /* ── Info card — slides up from bottom ── */
+    #info-card {
+      position:fixed; bottom:calc(var(--route-h) + 12px); left:50%;
+      transform:translateX(-50%);
+      width:min(420px, calc(100vw - 24px));
+      background:var(--cream); border:2px solid var(--ink); border-radius:4px;
+      box-shadow:0 12px 40px rgba(0,0,0,.35); z-index:200; display:none;
+    }
+    #info-card.open { display:flex; flex-direction:column; animation:slideUp .22s ease; }
+    @keyframes slideUp { from{transform:translateX(-50%) translateY(16px);opacity:0} to{transform:translateX(-50%) translateY(0);opacity:1} }
+
+    #card-close {
+      position:absolute; top:9px; right:12px; background:none; border:none;
+      cursor:pointer; font-size:1.1rem; color:var(--text-muted); z-index:1;
+    }
+    #card-close:hover { color:var(--ink); }
+
+    #card-body { padding:16px 20px 8px; }
+    #card-tag { font-family:'DM Mono',monospace; font-size:.38rem; letter-spacing:.14em;
+                text-transform:uppercase; color:var(--gold); margin-bottom:2px; }
+    #card-name { font-size:1.05rem; font-weight:600; color:var(--ink); margin-bottom:2px; }
+    #card-addr { font-family:'DM Mono',monospace; font-size:.42rem; color:var(--text-muted);
+                 letter-spacing:.06em; margin-bottom:10px; }
+    #card-actions { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px; }
+    .card-btn {
+      padding:8px 14px; border-radius:3px; font-family:'DM Mono',monospace;
+      font-size:.42rem; letter-spacing:.1em; text-transform:uppercase;
+      text-decoration:none; border:none; cursor:pointer;
+    }
+    .card-btn-view    { background:#2d2d2d; color:#f5e6c8; border:1px solid #c9a84c; }
+    .card-btn-waymo   { background:#1A73E8; color:#fff; }
+    .card-btn-yt      { background:#FF0000; color:#fff; }
+    .card-btn-yelp    { background:#FF1A1A; color:#fff; }
+    .yelp-pin { width:9px; height:9px; border-radius:50%; background:#FF6B35; border:2px solid #fff; cursor:pointer; box-shadow:0 1px 4px rgba(0,0,0,.35); }
+    .card-btn-order   { background:var(--ink); color:var(--cream); }
+
+    /* ── YouTube embed in card ── */
+    #card-yt { width:100%; aspect-ratio:16/9; border:none; display:none; }
+
+    /* ── Route nav ── */
+    #route-nav {
+      position:fixed; bottom:0; left:0; right:0; height:var(--route-h);
+      background:rgba(255,255,255,.97); border-top:1.5px solid var(--rule-heavy);
+      display:flex; align-items:center; justify-content:center; z-index:100;
+      font-family:'DM Mono',monospace; font-size:.42rem; letter-spacing:.12em;
+      text-transform:uppercase;
+    }
+    .route-stop { padding:0 14px; color:var(--text-muted); text-decoration:none;
+                  border-right:1px solid var(--rule); line-height:var(--route-h);
+                  transition:color .2s; white-space:nowrap; }
+    .route-stop:last-child { border-right:none; }
+    .route-stop:hover { color:var(--ink); }
+    .route-stop.current { color:var(--ink); font-weight:500; border-bottom:2px solid var(--gold); }
+    .route-arrow { padding:0 8px; color:var(--text-muted); }
+
+    /* ── Counter badge ── */
+    #heart-count {
+      position:fixed; top:calc(var(--header-h) + 12px); left:12px; z-index:90;
+      background:rgba(255,255,255,.92); border:1.5px solid var(--rule-heavy);
+      border-radius:4px; padding:8px 14px;
+      font-family:'DM Mono',monospace; font-size:.42rem; letter-spacing:.1em;
+      text-transform:uppercase; color:var(--ink-3);
+    }
+    #heart-count strong { color:var(--gold); }
+  </style>
+</head>
+<body>
+
+<div id="map"></div>
+<div id="prop-pin"></div>
+
+<header>
+  <a class="logo-wrap" href="/">
+    <svg width="28" height="28" viewBox="0 0 60 60" fill="none">
+      <text x="4" y="46" font-family="EB Garamond" font-style="italic" font-weight="700" font-size="52" fill="#1C1C1C">r</text>
+      <line x1="18" y1="48" x2="44" y2="12" stroke="#C9A84C" stroke-width="2.2"/>
+      <text x="38" y="28" font-family="EB Garamond" font-style="italic" font-weight="700" font-size="26" fill="#C9A84C">Σ</text>
+    </svg>
+    <span style="font-family:'Raleway',sans-serif;font-size:.85rem;font-weight:600;letter-spacing:.04em">quation</span>
+    <span class="logo-addr">MyLocal · 801 S Grand · DTLA</span>
+  </a>
+  <span class="header-tag">♥ 19 Favorites</span>
+</header>
+
+<div id="heart-count">♥ <strong>19</strong> curated places</div>
+
+<!-- Info card -->
+<div id="info-card">
+  <button id="card-close" onclick="closeCard()">✕</button>
+  <div id="card-body">
+    <div id="card-tag"></div>
+    <div id="card-name"></div>
+    <div id="card-addr"></div>
+    <div id="card-actions"></div>
+  </div>
+  <iframe id="card-yt" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+</div>
+
+<nav id="route-nav">
+  <a href="/dtla" class="route-stop">DTLA</a>
+  <span class="route-arrow">→</span>
+  <span class="route-stop current">MyLocal</span>
+  <span class="route-arrow">→</span>
+  <a href="/lalife/broadway" class="route-stop">WalkingLA</a>
+  <span class="route-arrow">→</span>
+  <a href="/lalife/venice" class="route-stop">Venice</a>
+  <span class="route-arrow">→</span>
+  <a href="/lalife/weho" class="route-stop">WeHo ♦</a>
+</nav>
+
+<script>
+/* ── Rule 2: all coordinates geocoded or DB-sourced — never guessed in UI ── */
+const CENTER = { lat: 34.0457095, lng: -118.2585553 };  // 801 S Grand Ave (user GPS-confirmed)
+
+const SB_URL  = 'https://mpmprnjhunjfeacikgml.supabase.co';
+const SB_KEY  = 'sb_publishable_T6XISHd9O2Ol0raPaEASqQ_klUXnyY3';
+const SB_HDRS = { apikey: SB_KEY, Authorization: 'Bearer ' + SB_KEY };
+const MYLOCAL_ZIPS = ['90013','90014','90015','90017','90012','90071'];
+
+// 18 ♥ DTLA favorites — coords from Supabase where available; // CONFIRM = geocode pending
+const HEARTS = [
+  { name: "Dalian's Cafe",          slug: 'mylocal-dalians-cafe',      lat: 34.049308,  lng: -118.254484, cat: 'Cafe',              addr: '530 S Grand Ave, Los Angeles CA 90071',       ytSearch: 'Dalians Cafe DTLA Los Angeles' },
+  { name: 'Philz Coffee',            slug: 'mylocal-philz-coffee',      lat: 34.045710,  lng: -118.258555, cat: 'Coffee',            addr: '801 S Grand Ave, Los Angeles CA 90017',       ytSearch: 'Philz Coffee Los Angeles' },
+  { name: 'Northern Cafe',           slug: 'mylocal-northern-cafe',     lat: 34.047350,  lng: -118.264600, cat: 'Restaurant',        addr: '725 W 7th St, Los Angeles CA 90017',          ytSearch: 'Northern Cafe DTLA' },
+  { name: "LALA's Argentine Grill",  slug: 'mylocal-lalas-argentine',   lat: 34.041871,  lng: -118.255055, cat: 'Steak',             addr: '105 W 9th St, Los Angeles CA 90015',          ytSearch: "LALA's Argentine Grill DTLA" },
+  { name: 'The Broad',               slug: 'mylocal-the-broad',         lat: 34.054017,  lng: -118.249890, cat: 'Museum',            addr: '221 S Grand Ave, Los Angeles CA 90012',       ytSearch: 'The Broad Museum Los Angeles' },
+  { name: 'MOCA Grand Ave',          slug: 'mylocal-moca',              lat: 34.054135,  lng: -118.249700, cat: 'Museum',            addr: '250 S Grand Ave, Los Angeles CA 90012',       ytSearch: 'MOCA Los Angeles Grand Ave' },
+  { name: 'Music Center',            slug: 'mylocal-music-center',      lat: 34.055692,  lng: -118.248434, cat: 'Arts',              addr: '135 N Grand Ave, Los Angeles CA 90012',       ytSearch: 'Walt Disney Concert Hall Los Angeles' },
+  { name: 'DWP Building',            slug: 'mylocal-dwp-building',      lat: 34.055300,  lng: -118.250400, cat: 'Landmark',          addr: '111 N Hope St, Los Angeles CA 90012',         ytSearch: 'LADWP Building Los Angeles landmark' },
+  { name: 'BluJam Cafe',             slug: 'mylocal-blujam-cafe',       lat: 34.046400,  lng: -118.248800, cat: 'Cafe',              addr: '541 S Spring St, Los Angeles CA 90013',       ytSearch: 'BluJam Cafe Los Angeles' },
+  { name: 'Pitchoun Bakery',         slug: 'mylocal-pitchoun-bakery',   lat: 34.050500,  lng: -118.258100, cat: 'Bakery',            addr: '545 S Flower St, Los Angeles CA 90071',       ytSearch: 'Pitchoun Bakery Los Angeles DTLA' },
+  { name: "Art's Cleaners",          slug: 'mylocal-arts-cleaners',     lat: 34.047300,  lng: -118.251700, cat: 'Services',          addr: '209 W 7th St, Los Angeles CA 90014',          ytSearch: "Art's Cleaners DTLA Los Angeles" },
+  { name: 'JoyceDTLA',               slug: 'mylocal-joycedtla',         lat: 34.046269,  lng: -118.257165, cat: 'Restaurant',        addr: '770 S Grand Ave A, Los Angeles CA 90017',     ytSearch: 'JoyceDTLA restaurant Los Angeles' },
+  { name: 'InkaWasi',                slug: 'mylocal-inkawasi',          lat: 34.044500,  lng: -118.260100, cat: 'Peruvian',          addr: '900 W Olympic Blvd, Los Angeles CA 90015',    ytSearch: 'InkaWasi restaurant Los Angeles' },
+  { name: 'Pine and Crane',          slug: 'mylocal-pine-and-crane',    lat: 34.039300,  lng: -118.250800, cat: 'Taiwanese',         addr: '1120 S Grand Ave, Los Angeles CA 90015',      ytSearch: 'Pine and Crane restaurant Los Angeles' },
+  { name: 'Bubble U',                slug: 'mylocal-bubble-u',          lat: 34.044100,  lng: -118.252800, cat: 'Boba',              addr: '819 Santee St #111, Los Angeles CA 90014',    ytSearch: 'Bubble U boba DTLA Los Angeles' },
+  { name: 'Bottega Louie',           slug: 'mylocal-bottega-louie',     lat: 34.048900,  lng: -118.254900, cat: 'Italian',           addr: '700 S Grand Ave, Los Angeles CA 90017',       ytSearch: 'Bottega Louie Los Angeles DTLA' },
+  { name: 'Chick-fil-A',             slug: 'mylocal-chick-fil-a',       lat: 34.046975,  lng: -118.261250, cat: 'Fast Food',         addr: '660 S Figueroa St, Los Angeles CA 90017',     ytSearch: 'Chick-fil-A DTLA Los Angeles' },
+  { name: 'Apple Store Broadway',    slug: 'mylocal-apple-store',       lat: 34.048800,  lng: -118.248200, cat: 'Tech · Retail',     addr: '801 S Broadway, Los Angeles CA 90014',        ytSearch: 'Apple Store Broadway DTLA Los Angeles' },
+  { name: "Wolf's European Salon",   slug: 'mylocal-wolfs-salon',       lat: 34.050800,  lng: -118.257900, cat: 'Hair · Bonaventure', addr: '404 S Figueroa St, Los Angeles CA 90071',    ytSearch: "Wolf's Salon Los Angeles Bonaventure" },
+];
+
+let map, advMarker;
+
+async function initMap() {
+  const { Map }                 = await google.maps.importLibrary('maps');
+  const { AdvancedMarkerElement } = await google.maps.importLibrary('marker');
+  advMarker = AdvancedMarkerElement;
+
+  // Rule 1 — #map has position:fixed + inset:0 = explicit dimensions
+  map = new Map(document.getElementById('map'), {
+    center:  CENTER,
+    zoom:    17,
+    tilt:    67.5,    // 3D buildings — requires zoom ≥ 17, mapId set
+    heading: 200,
+    mapId:  '96844e6a7bb74a7d5514d3a5',
+    gestureHandling: 'greedy',
+  });
+
+  // Property pin — DOM overlay (only exception to billboard rule)
+  initPropPin();
+
+  // Load Yelp businesses then HEART favorites on top
+  await loadYelp();
+  loadHearts();
+}
+
+/* ── Property pin (DOM overlay — custom CSS pulse, click → info) ── */
+function initPropPin() {
+  const pin = document.getElementById('prop-pin');
+  let pinActive = false;
+  setTimeout(() => { pinActive = true; pin.style.display = 'block'; }, 1200);
+  pin.addEventListener('click', () => {
+    showCard({
+      tag: 'Your Property',
+      name: '801 S Grand Ave #1600',
+      addr: 'South Park · DTLA · Los Angeles CA 90017',
+      cat: '2 BD / 2 BA · $885,000',
+      ytSearch: '801 S Grand Ave DTLA Los Angeles',
+      waymo: null,
+    });
+  });
+
+  // Position pin over property lat/lng on every render
+  map.addListener('bounds_changed', () => {
+    if (!pinActive) return;
+    const proj = map.getProjection();
+    if (!proj) return;
+    const point = proj.fromLatLngToPoint(new google.maps.LatLng(CENTER.lat, CENTER.lng));
+    const bounds = map.getBounds();
+    if (!bounds) return;
+    const ne = proj.fromLatLngToPoint(bounds.getNorthEast());
+    const sw = proj.fromLatLngToPoint(bounds.getSouthWest());
+    const mapDiv = document.getElementById('map');
+    const scale = Math.pow(2, map.getZoom());
+    const x = (point.x - sw.x) * scale;
+    const y = (point.y - ne.y) * scale;
+    pin.style.left = x + 'px';
+    pin.style.top  = y + 'px';
+  });
+}
+
+/* ── Yelp businesses from Supabase restaurants table ── */
+async function loadYelp() {
+  try {
+    const zips = MYLOCAL_ZIPS.join(',');
+    const r = await fetch(
+      `${SB_URL}/rest/v1/restaurants?zip=in.(${zips})&select=name,category,lat,lng,zip,rating,yelp_url,waymo_url,address&order=rating.desc&limit=400`,
+      { headers: SB_HDRS }
+    );
+    const rows = await r.json();
+    if (!Array.isArray(rows) || !rows.length) return;
+
+    rows.forEach(p => {
+      if (!p.lat || !p.lng) return;
+      const el = document.createElement('div');
+      el.className = 'yelp-pin';
+      el.title = p.name + (p.rating ? ' ★' + p.rating : '');
+
+      const m = new advMarker({ position: { lat: p.lat, lng: p.lng }, map, content: el, zIndex: 5 });
+      m.addListener('click', () => {
+        map.panTo({ lat: p.lat, lng: p.lng });
+        showCard({
+          tag:   (p.rating ? '★ ' + p.rating + ' · ' : '') + (p.category || 'Yelp'),
+          name:  p.name,
+          addr:  p.address || '',
+          cat:   p.category,
+          waymo: p.waymo_url || ('https://waymo.com/waymo-one/?destination=' + encodeURIComponent(p.address || '')),
+          slug:  null,
+        });
+        // Also wire Yelp button dynamically
+        const actEl = document.getElementById('card-actions');
+        if (p.yelp_url) {
+          const yBtn = Object.assign(document.createElement('a'), {
+            className: 'card-btn card-btn-yelp',
+            textContent: 'Yelp →',
+            href: p.yelp_url,
+            target: '_blank',
+          });
+          actEl.appendChild(yBtn);
+        }
+      });
+    });
+    console.log('Yelp loaded:', rows.length, 'businesses');
+  } catch (e) {
+    console.warn('Yelp load failed:', e.message);
+  }
+}
+
+/* ── ♥ Favorites ── */
+function loadHearts() {
+  HEARTS.forEach(h => {
+    const el = document.createElement('div');
+    el.className = 'heart-pin';
+    el.innerHTML = `♥ ${h.name}`;
+
+    const marker = new advMarker({
+      position: { lat: h.lat, lng: h.lng },
+      map,
+      content: el,
+      title: h.name,
+      zIndex: 10,
+    });
+
+    marker.addListener('click', () => {
+      // Rule 3 — panTo, never recreate map
+      map.panTo({ lat: h.lat, lng: h.lng });
+      showCard({
+        tag:      '♥ Vik\'s Favorite' + (h.confirm ? ' · location TBC' : ''),
+        name:     h.name,
+        addr:     h.addr,
+        cat:      h.cat,
+        ytSearch: h.ytSearch,
+        waymo:    'https://waymo.com/waymo-one/?destination=' + encodeURIComponent(h.addr),
+        slug:     h.slug,
+      });
+    });
+  });
+}
+
+/* ── Info card ── */
+function showCard({ tag, name, addr, cat, ytSearch, waymo, slug }) {
+  document.getElementById('card-tag').textContent  = tag;
+  document.getElementById('card-name').textContent = name;
+  document.getElementById('card-addr').textContent = addr + (cat ? ' · ' + cat : '');
+
+  const actEl = document.getElementById('card-actions');
+  actEl.innerHTML = '';
+
+  if (slug) {
+    const vBtn = Object.assign(document.createElement('a'), {
+      className: 'card-btn card-btn-view',
+      textContent: 'View page →',
+      href: '/place?id=' + slug,
+    });
+    actEl.appendChild(vBtn);
+  }
+
+  // YouTube — search link (plays on YouTube in new tab; inline embed below)
+  const ytBtn = Object.assign(document.createElement('button'), {
+    className: 'card-btn card-btn-yt',
+    textContent: '▶ YouTube',
+  });
+  ytBtn.onclick = () => playYT(ytSearch);
+  actEl.appendChild(ytBtn);
+
+  if (waymo) {
+    const wBtn = Object.assign(document.createElement('a'), {
+      className: 'card-btn card-btn-waymo',
+      textContent: 'Waymo →',
+      href: waymo,
+      target: '_blank',
+    });
+    actEl.appendChild(wBtn);
+  }
+
+  // Hide YT iframe until button clicked
+  const ytFrame = document.getElementById('card-yt');
+  ytFrame.style.display = 'none';
+  ytFrame.src = '';
+
+  const card = document.getElementById('info-card');
+  card.classList.remove('open');
+  void card.offsetWidth;
+  card.classList.add('open');
+}
+
+function playYT(query) {
+  const ytFrame = document.getElementById('card-yt');
+  ytFrame.style.display = 'block';
+  ytFrame.src = 'https://www.youtube.com/embed?listType=search&list=' + encodeURIComponent(query) + '&autoplay=1';
+}
+
+function closeCard() {
+  document.getElementById('info-card').classList.remove('open');
+  document.getElementById('card-yt').src = '';
+}
+
+window.initMap = initMap;
+</script>
+
+<script async
+  src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD7UMA5ILPXv9QK2_gvxPVth30MavRd2WQ&callback=initMap&libraries=marker&v=weekly">
+</script>
+</body>
+</html>
