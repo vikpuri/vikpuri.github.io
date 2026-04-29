@@ -335,6 +335,7 @@
   <iframe id="yt-frame-strip" src="" allow="autoplay; encrypted-media" allowfullscreen></iframe>
   <div id="yt-overlay" onclick="toggleStripSound()"></div>
   <div id="yt-label">▶ Loading…</div>
+  <a id="yt-events-link" href="#" target="_blank" style="display:none;position:absolute;top:7px;right:8px;font-family:'DM Mono',monospace;font-size:.40rem;letter-spacing:.1em;text-transform:uppercase;color:#fff;background:rgba(0,0,0,.55);padding:3px 7px;border-radius:2px;text-decoration:none;z-index:5">Events →</a>
 </div>
 
 <!-- ── Panel ── -->
@@ -450,7 +451,7 @@
         <p class="section-text">The autonomous vehicle era rewrites real estate value. Proximity to Waymo stops becomes the new walkability score — a quantifiable, searchable signal on Google Maps that surfaces your property to buyers who live AV-first.</p>
         <p class="section-text" style="margin-top:11px">Requation makes this visible — aerial, interactive, and discoverable at the exact moment a buyer is navigating their next neighborhood from above.</p>
         <div class="section-title" style="margin-top:18px">The Requation Vision</div>
-        <p class="section-text">A living 3D map where every listing, every business, and every Waymo stop is a connected, searchable data point — not a static pin. Real estate intelligence at the speed of Maps.</p>
+        <p class="section-text">A living 3D map where every listing, every business, and every Waymo stop is a connected, searchable data point — not a static pin. Hyperlocal intelligence at the speed of Maps.</p>
       </div>
       <div style="height:20px"></div>
     </div>
@@ -470,7 +471,7 @@
   <div class="modal">
     <button class="modal-close" onclick="closeModal('about')">&#x2715;</button>
     <span class="modal-tag">Who We Are</span>
-    <div class="modal-title">Real Estate Intelligence</div>
+    <div class="modal-title">Hyperlocal</div>
     <div class="modal-body">I needed to sell my house. Not because I wanted to. Because I had to.<br><br>The MLS controls 80% of the American real estate market. It is a private, for-profit syndicate — not a public utility, not a cooperative, not a service. A corporation. Far away. Collecting both sides of every transaction through a doctrine called procuring cause, until 2024, when the courts finally said enough.<br><br>I said it sooner.<br><br>Requation is an effort to change the real estate equation — from MegaCorp to every American. Not a listing site. Not a portal. A map. Seen from above, in three dimensions, the way a city actually works. Every property in context. Every neighborhood alive with the intelligence that buyers deserve and sellers have been denied.<br><br>I have done this before. In White Center, Seattle — one of America's most forgotten neighborhoods — I once brought fruit to a food desert. Just showed up with produce where there was none. Nobody paid me. That is not the point. The point is that neighborhoods breathe. They need tending.<br><br>Requation tends them.<br><br>Not to disrupt. Not to raise a Series A. To sell my own properties first — and then to hand every American owner the same map that corporations have kept to themselves.<br><br>r/Σ = Real Estate as an Equation. Finally solved.</div>
     <div class="modal-divider"></div>
   </div>
@@ -540,16 +541,16 @@ const SB_HDRS = { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY };
 
 /* ── Monument strip ── */
 const STRIP_MONUMENTS = [
-  { name:'Grand Performances', venue:'California Plaza · Free Concerts',   query:'Grand Performances Los Angeles live concert' },
-  { name:'The Broad',          venue:'Contemporary Art Museum',             query:'The Broad Los Angeles museum' },
-  { name:'Music Center',       venue:'Walt Disney Concert Hall · LA Phil',  query:'LA Philharmonic Disney Concert Hall live performance' },
-  { name:'LA Convention Ctr',  venue:'LACC · Events & Conventions',         query:'LA Convention Center event live' },
-  { name:'LA Live',            venue:'Entertainment District · Concerts',   query:'LA Live concert live' },
-  { name:'MOCA',               venue:'Museum of Contemporary Art · LA',     query:'MOCA Los Angeles museum contemporary art' },
-  { name:'LA Parks',           venue:'Grand Park · Recreation',             query:'Los Angeles parks recreation events' },
-  { name:'Dodgers',            venue:'Dodger Stadium · MLB',                query:'Los Angeles Dodgers live game highlights' },
-  { name:'Lakers',             venue:'Crypto.com Arena · NBA',              query:'Los Angeles Lakers NBA live' },
-  { name:'Kings',              venue:'Crypto.com Arena · NHL',              query:'LA Kings NHL live hockey' }
+  { name:'Grand Performances', venue:'California Plaza · Free Concerts',   query:'Grand Performances Los Angeles live concert',        eventsUrl:'https://www.grandperformances.org/events' },
+  { name:'The Broad',          venue:'Contemporary Art Museum',             query:'The Broad Los Angeles museum',                       eventsUrl:'https://www.thebroad.org/calendar' },
+  { name:'Music Center',       venue:'Walt Disney Concert Hall · LA Phil',  query:'LA Philharmonic Disney Concert Hall live performance', eventsUrl:'https://www.laphil.com/calendar' },
+  { name:'LA Convention Ctr',  venue:'LACC · Events & Conventions',         query:'LA Convention Center event live',                    eventsUrl:'https://www.lacclink.com/events' },
+  { name:'LA Live',            venue:'Entertainment District · Concerts',   query:'LA Live concert live',                               eventsUrl:'https://www.lalive.com/events' },
+  { name:'MOCA',               venue:'Museum of Contemporary Art · LA',     query:'MOCA Los Angeles museum contemporary art',           eventsUrl:'https://www.moca.org/calendar' },
+  { name:'LA Parks',           venue:'Grand Park · Recreation',             query:'Los Angeles parks recreation events',                eventsUrl:'https://www.laparks.org/events' },
+  { name:'Dodgers',            venue:'Dodger Stadium · MLB',                query:'Los Angeles Dodgers live game highlights',            eventsUrl:'https://www.mlb.com/dodgers/schedule' },
+  { name:'Lakers',             venue:'Crypto.com Arena · NBA',              query:'Los Angeles Lakers NBA live',                        eventsUrl:'https://www.nba.com/lakers/schedule' },
+  { name:'Kings',              venue:'Crypto.com Arena · NHL',              query:'LA Kings NHL live hockey',                           eventsUrl:'https://www.nhl.com/kings/schedule' }
 ];
 
 /* ── Carousel ── */
@@ -797,6 +798,11 @@ function showStrip(idx) {
   const vid = v ? v.id : 'TXgFRbEJqR4';
   document.getElementById('yt-frame-strip').src = `https://www.youtube.com/embed/${vid}?autoplay=1&mute=1&loop=1&playlist=${vid}&controls=0&showinfo=0&rel=0&modestbranding=1`;
   document.getElementById('yt-label').textContent = `▶ ${m.name} · ${m.venue} · Click to unmute`;
+  const evLink = document.getElementById('yt-events-link');
+  if (evLink) {
+    if (m.eventsUrl) { evLink.href = m.eventsUrl; evLink.style.display = 'block'; }
+    else { evLink.style.display = 'none'; }
+  }
   stripMuted = true;
 }
 function toggleStripSound() {
