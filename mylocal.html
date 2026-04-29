@@ -436,10 +436,16 @@ function showCard({ tag, name, addr, cat, ytSearch, waymo, mapsUrl, yelpUrl, slu
   card.classList.add('open');
 }
 
-function playYT(query) {
+async function playYT(query) {
   const ytFrame = document.getElementById('card-yt');
   ytFrame.style.display = 'block';
-  ytFrame.src = 'https://www.youtube.com/embed?listType=search&list=' + encodeURIComponent(query) + '&autoplay=1';
+  ytFrame.src = '';
+  let vid = 'HrxX9TBj2zY'; // Pink Floyd — plays while search resolves
+  try {
+    const r = await fetch(`/api/youtube?q=${encodeURIComponent(query)}&maxResults=1`);
+    if (r.ok) { const d = await r.json(); const v = (d.videos||[])[0]; if (v?.id) vid = v.id; }
+  } catch(e) {}
+  ytFrame.src = `https://www.youtube.com/embed/${vid}?autoplay=1&rel=0&modestbranding=1`;
 }
 
 function closeCard() {

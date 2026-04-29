@@ -408,10 +408,16 @@ function showCard({ tag, name, addr, cat, ytSearch, waymo, mapsUrl, yelpUrl }) {
   if (yelpUrl) act.appendChild(Object.assign(document.createElement('a'), { className:'card-btn card-btn-yelp', textContent:'Yelp →', href:yelpUrl, target:'_blank' }));
   if (ytSearch) {
     const ytBtn = Object.assign(document.createElement('button'), { className:'card-btn card-btn-yt', textContent:'▶ YouTube' });
-    ytBtn.onclick = () => {
+    ytBtn.onclick = async () => {
       const f = document.getElementById('card-yt');
       f.style.display = 'block';
-      f.src = 'https://www.youtube.com/embed?listType=search&list=' + encodeURIComponent(ytSearch) + '&autoplay=1';
+      f.src = '';
+      let vid = 'HrxX9TBj2zY';
+      try {
+        const r = await fetch(`/api/youtube?q=${encodeURIComponent(ytSearch)}&maxResults=1`);
+        if (r.ok) { const d = await r.json(); const v = (d.videos||[])[0]; if (v?.id) vid = v.id; }
+      } catch(e) {}
+      f.src = `https://www.youtube.com/embed/${vid}?autoplay=1&rel=0&modestbranding=1`;
     };
     act.appendChild(ytBtn);
   }
