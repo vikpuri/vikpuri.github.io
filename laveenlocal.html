@@ -392,19 +392,19 @@ function loadHearts() {
         cat:      h.cat,
         ytSearch: h.ytSearch,
         waymo:    'https://waymo.com/waymo-one/?destination=' + encodeURIComponent(h.addr),
-        slug:     h.slug || null,
+        mapsUrl:  `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(h.name + ' ' + h.addr)}`,
       });
     });
   });
 }
 
-function showCard({ tag, name, addr, cat, ytSearch, waymo, slug, yelpUrl }) {
+function showCard({ tag, name, addr, cat, ytSearch, waymo, mapsUrl, yelpUrl }) {
   document.getElementById('card-tag').textContent  = tag;
   document.getElementById('card-name').textContent = name;
   document.getElementById('card-addr').textContent = addr + (cat ? ' · ' + cat : '');
   const act = document.getElementById('card-actions');
   act.innerHTML = '';
-  if (slug) act.appendChild(Object.assign(document.createElement('a'), { className:'card-btn card-btn-view', textContent:'View page →', href:'/place?id=' + slug }));
+  if (mapsUrl) act.appendChild(Object.assign(document.createElement('a'), { className:'card-btn card-btn-view', textContent:'Maps →', href:mapsUrl, target:'_blank' }));
   if (yelpUrl) act.appendChild(Object.assign(document.createElement('a'), { className:'card-btn card-btn-yelp', textContent:'Yelp →', href:yelpUrl, target:'_blank' }));
   if (ytSearch) {
     const ytBtn = Object.assign(document.createElement('button'), { className:'card-btn card-btn-yt', textContent:'▶ YouTube' });
