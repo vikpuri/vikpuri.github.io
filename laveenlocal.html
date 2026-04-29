@@ -412,7 +412,7 @@ function showCard({ tag, name, addr, cat, ytSearch, waymo, mapsUrl, yelpUrl }) {
       const f = document.getElementById('card-yt');
       f.style.display = 'block';
       f.src = '';
-      let vid = 'HrxX9TBj2zY';
+      let vid = 'TXgFRbEJqR4';
       try {
         const r = await fetch(`/api/youtube?q=${encodeURIComponent(ytSearch)}&maxResults=1`);
         if (r.ok) { const d = await r.json(); const v = (d.videos||[])[0]; if (v?.id) vid = v.id; }

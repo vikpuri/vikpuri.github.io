@@ -794,7 +794,7 @@ async function fetchYT(query) {
 function showStrip(idx) {
   const m   = STRIP_MONUMENTS[idx];
   const v   = stripVideos[idx];
-  const vid = v ? v.id : 'HrxX9TBj2zY';
+  const vid = v ? v.id : 'TXgFRbEJqR4';
   document.getElementById('yt-frame-strip').src = `https://www.youtube.com/embed/${vid}?autoplay=1&mute=1&loop=1&playlist=${vid}&controls=0&showinfo=0&rel=0&modestbranding=1`;
   document.getElementById('yt-label').textContent = `▶ ${m.name} · ${m.venue} · Click to unmute`;
   stripMuted = true;
@@ -825,7 +825,7 @@ async function addYTMarkers() {
   const result = await fetchYT('Grand Performances Los Angeles concert');
   if (result) { ytVideos = [result]; populateBillboard(result); }
   else {
-    const v = { id:'HrxX9TBj2zY', title:'Grand Performances · Live', channel:'Requation', thumb:'https://img.youtube.com/vi/HrxX9TBj2zY/hqdefault.jpg' };
+    const v = { id:'TXgFRbEJqR4', title:'Lobo — I\'d Love You to Want Me', channel:'Requation', thumb:'https://img.youtube.com/vi/TXgFRbEJqR4/hqdefault.jpg' };
     ytVideos = [v]; populateBillboard(v);
   }
 }

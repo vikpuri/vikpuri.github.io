@@ -440,7 +440,7 @@ async function playYT(query) {
   const ytFrame = document.getElementById('card-yt');
   ytFrame.style.display = 'block';
   ytFrame.src = '';
-  let vid = 'HrxX9TBj2zY'; // Pink Floyd — plays while search resolves
+  let vid = 'TXgFRbEJqR4'; // Pink Floyd — plays while search resolves
   try {
     const r = await fetch(`/api/youtube?q=${encodeURIComponent(query)}&maxResults=1`);
     if (r.ok) { const d = await r.json(); const v = (d.videos||[])[0]; if (v?.id) vid = v.id; }
