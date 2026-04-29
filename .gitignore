@@ -9,3 +9,5 @@ goHome-lines.txt
 *.bak3
 *.bak4
 tmp_*.json
+
+.vercel
