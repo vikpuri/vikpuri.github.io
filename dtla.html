@@ -610,23 +610,39 @@ function flyToFav(lat, lng) {
   });
 }
 
-function renderFavorites() {
+async function renderFavorites() {
   const el = document.getElementById('fav-list-dtla');
   if (!el || el.dataset.loaded) return;
   el.dataset.loaded = '1';
+  // Render immediately — Yelp slots filled async below
   el.innerHTML = `
     <a href="/lalife/broadway" style="display:flex;align-items:center;justify-content:space-between;padding:13px 16px;background:var(--ink);text-decoration:none;">
       <div style="font-family:'Source Serif 4',serif;font-size:.82rem;font-weight:600;color:var(--cream)">Explore DTLA Neighborhood →</div>
       <div style="font-family:'DM Mono',monospace;font-size:.42rem;letter-spacing:.1em;text-transform:uppercase;color:var(--gold)">Live Map</div>
     </a>` +
-  MYLOCAL_FAVS.map(f => `
+  MYLOCAL_FAVS.map((f, i) => `
     <div onclick="flyToFav(${f.lat}, ${f.lng})" style="cursor:pointer;display:flex;align-items:center;justify-content:space-between;padding:11px 16px;border-bottom:1px solid var(--rule);transition:background .15s;" onmouseover="this.style.background='var(--cream-2)'" onmouseout="this.style.background=''">
-      <div>
+      <div style="flex:1;min-width:0">
         <div style="font-family:'Source Serif 4',serif;font-size:.82rem;color:var(--ink)">♥ ${f.name}</div>
         <div style="font-family:'DM Mono',monospace;font-size:.40rem;letter-spacing:.08em;color:var(--text-muted);margin-top:2px;text-transform:uppercase">${f.cat} · ${f.addr}</div>
+        <div id="fav-yelp-${i}" style="margin-top:4px"></div>
       </div>
       <div style="font-family:'DM Mono',monospace;font-size:.42rem;color:var(--gold);white-space:nowrap;padding-left:12px">Fly to →</div>
     </div>`).join('');
+  // Enrich each card with live Yelp data (no rating floor — curated list shows all)
+  await Promise.allSettled(MYLOCAL_FAVS.map(async (f, i) => {
+    try {
+      const r = await fetch(`/api/yelp?name=${encodeURIComponent(f.name)}&lat=${f.lat}&lng=${f.lng}&rating=1`);
+      const d = await r.json();
+      const b = d.businesses?.[0];
+      if (!b) return;
+      const slot = document.getElementById(`fav-yelp-${i}`);
+      if (!slot) return;
+      const badge = `<span style="font-size:.52rem;background:#FF6600;color:#fff;padding:2px 6px;border-radius:2px;font-weight:600">★ ${b.rating}</span>`;
+      const btn   = `<a href="${b.url}" target="_blank" onclick="event.stopPropagation()" style="font-size:.58rem;background:#B22234;color:#fff;padding:3px 8px;border-radius:2px;text-decoration:none;font-weight:600">Yelp →</a>`;
+      slot.innerHTML = `<div style="display:flex;gap:6px;align-items:center">${badge}${btn}</div>`;
+    } catch(e) {}
+  }));
 }
 
 /* ── Tabs ── */
