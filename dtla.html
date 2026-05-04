@@ -1106,6 +1106,9 @@ async function initCesium() {
   addYTMarkers();
   loadPlaces(viewer);
   window._viewer = viewer;
+  if (location.hash === '#favorites') {
+    setTimeout(() => { openPanel(); switchTab('favorites'); }, 1800);
+  }
 }
 
 /* ── Google Places — CesiumJS billboard entities (vendor pattern) ─────────

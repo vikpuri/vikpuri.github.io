@@ -934,6 +934,9 @@ async function initCesium() {
   loadStripVideos();
   addYTMarkers();
   window._viewer = viewer;
+  if (location.hash === '#favorites') {
+    setTimeout(() => { openPanel(); switchTab('favorites'); }, 1800);
+  }
 }
 
 initCesium().catch(e => console.error('Cesium init failed:', e));
