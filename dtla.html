@@ -1130,7 +1130,11 @@ async function initCesium() {
   let pinActive = false;
   setTimeout(() => { pinActive = true; }, 2500);
 
-  const propPos = Cesium.Cartesian3.fromDegrees(CENTER.lng, CENTER.lat, 0);
+  let propPos = Cesium.Cartesian3.fromDegrees(CENTER.lng, CENTER.lat, 0);
+  const _carto = Cesium.Cartographic.fromDegrees(CENTER.lng, CENTER.lat);
+  viewer.scene.sampleHeightMostDetailed([_carto]).then(pts => {
+    if (pts && pts[0] && pts[0].height) propPos = Cesium.Cartesian3.fromDegrees(CENTER.lng, CENTER.lat, pts[0].height);
+  }).catch(() => {});
   viewer.scene.postRender.addEventListener(() => {
     if (!pinActive) { pinEl.style.display = 'none'; return; }
     const pos = Cesium.SceneTransforms.worldToWindowCoordinates(viewer.scene, propPos);

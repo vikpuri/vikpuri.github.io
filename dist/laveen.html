@@ -425,7 +425,7 @@
   </div>
   <div class="panel-cta">
     <div class="panel-child-nav">
-      <a href="/desertlife" class="pcn-link">Desert Life</a>
+      <a href="/laveenlocal" class="pcn-link">Local</a>
       <a href="/desertlife/phoenix" class="pcn-link">Phoenix</a>
       <a href="/desertlife/scottsdale" class="pcn-link">Scottsdale</a>
     </div>
@@ -688,36 +688,40 @@ function filterDir() {
 /* ── Claude's Cube ── */
 /* RULE: Food & Drink = master bucket (all food/drink except taco trucks)
          Wellness & Aesthetics = master bucket (botox, facial, salon, hydration, spa, etc.) */
+/* RULE: Food & Drink = master bucket; Wellness = master bucket; per-cell Yelp fetch across all AZ ZIPs */
 const PCUBE_CATS = [
   /* ── Master Buckets ── */
-  {icon:'🍽️',label:'Food & Drink',   color:'#8B2500',match:['restaurant','food','cafe','coffee','bar','juice','smoothie','vegan','vegetarian','delivery','takeout','boba','brewery','pub','bistro','diner','pizza','burger','sushi','sandwich','wine','cocktail','lounge','nightlife','italian','mexican','asian','american','buffet','brunch','bakery']},
-  {icon:'💆',label:'Wellness',        color:'#7B1D5A',match:['botox','facial','salon','hair','nail','spa','massage','hydration','aesthetic','beauty','skincare','wax','lash','medspa','blowout','barber','barbershop','iv therapy','vitamin','anti-aging','threading','brow','med spa','sugaring','microblading','eyelash','filler','treatment']},
+  {icon:'🍽️',label:'Food & Drink',color:'#8B2500',yelpCats:'restaurants,food,bars,coffee,bakeries,breakfast_brunch,newamerican,sandwiches,pizza,burgers,sushi,italian,japanese,mexican,french,thai,korean,chinese,vietnamese,mediterranean,delis,diners'},
+  {icon:'💆',label:'Wellness',    color:'#7B1D5A',yelpCats:'beautysvc,massage,spas,hair,nails,skincarecosmetics,medspa,waxing,blowoutservices,eyelashservice,hairremoval,barbers'},
   /* ── Core Categories ── */
-  {icon:'🛒',label:'Grocery',         color:'#9A6B1F',match:['grocery','supermarket','whole foods','trader joe','market','convenience','bodega']},
-  {icon:'🏋️',label:'Fitness',        color:'#1E6B3C',match:['gym','yoga','pilates','crossfit','fitness','workout','sport','boxing','martial arts','dance','barre','cycling','spin']},
-  {icon:'🏥',label:'Medical',         color:'#0277BD',match:['doctor','dentist','medical','clinic','hospital','urgent care','optometrist','chiropractor','dermatologist','psychiatrist','therapy','mental health']},
-  {icon:'💊',label:'Pharmacy',        color:'#1A5C8A',match:['pharmacy','drugstore','cvs','walgreens','rite aid','compounding']},
-  {icon:'🛍️',label:'Shopping',       color:'#7A5C00',match:['shopping','clothing','boutique','retail','fashion','mall','apparel','shoes','accessories','jewelry','electronics','home goods']},
-  {icon:'🎭',label:'Arts',            color:'#5C1A3A',match:['museum','art','gallery','culture','concert','opera','ballet','performance','exhibit','theater','show']},
-  {icon:'🏨',label:'Hotels',          color:'#1B4F8A',match:['hotel','lodging','motel','inn','hostel','airbnb','resort','suites']},
-  {icon:'🌳',label:'Parks',           color:'#2D6A4F',match:['park','outdoor','nature','recreation','hiking','garden','beach','trail','campground']},
-  {icon:'🎬',label:'Film',            color:'#1A1F3A',match:['movie','cinema','film','theater','screening','imax','drive-in']},
-  {icon:'📚',label:'Library',         color:'#2C4A6E',match:['library','bookstore','book','reading','archive']},
-  {icon:'🐾',label:'Pets',            color:'#C0640A',match:['pet','veterinarian','vet','dog','cat','animal','grooming','kennel','aquarium','pet store']},
-  {icon:'🏦',label:'Finance',         color:'#0D3349',match:['bank','credit union','financial','atm','insurance','accounting','tax','investment','mortgage']},
-  {icon:'🅿️',label:'Parking',        color:'#455A64',match:['parking','garage','valet','lot']},
-  {icon:'🌮',label:'Taco Trucks',     color:'#C84B00',match:['taco truck','food truck','street food','lonchera','cart','mobile food','roach coach']},
-  {icon:'🎉',label:'Events',          color:'#6B2D7A',match:['event','venue','concert hall','banquet','wedding','party','festival','nightclub','club','lounge']},
-  {icon:'🏫',label:'Education',       color:'#4527A0',match:['school','tutoring','learning','academy','college','university','education','daycare','preschool','afterschool']},
-  {icon:'🛠️',label:'Services',       color:'#37474F',match:['auto','repair','plumber','electrician','cleaning','laundry','dry clean','locksmith','moving','storage','contractor']},
-  {icon:'🏪',label:'Corner Store',    color:'#7D2E23',match:['corner store','deli','bodega','liquor','convenience','news','tobacco']},
-  {icon:'🌿',label:'Cannabis',        color:'#33691E',match:['cannabis','dispensary','cbd','marijuana','weed','hemp','recreational','medical marijuana']},
-  {icon:'🚌',label:'Transit',         color:'#263238',match:['transit','bus','metro','rail','subway','train','station','commute','lyft','uber','taxi']},
-  {icon:'🏠',label:'Real Estate',     color:'#4E342E',match:['real estate','realty','property','apartment','rental','leasing','broker','realtor']},
-  {icon:'🤝',label:'Pro Services',    color:'#3E2723',match:['attorney','lawyer','notary','insurance','accountant','financial advisor','consultant','hr','staffing','recruitment']},
-  {icon:'🏢',label:'More',            color:'#212121',match:[]},
+  {icon:'🛒',label:'Grocery',     color:'#9A6B1F',yelpCats:'grocery,organicstores,farmersmarket,health_food,gourmet,convenience'},
+  {icon:'🏋️',label:'Fitness',    color:'#1E6B3C',yelpCats:'gyms,yoga,pilates,cycling,crossfit,boxing,martialarts,dancestudio,barre,fitness'},
+  {icon:'🏥',label:'Medical',     color:'#0277BD',yelpCats:'health,physicians,dentists,urgent_care,optometrists,chiropractors,dermatologists,psychiatrists'},
+  {icon:'💊',label:'Pharmacy',    color:'#1A5C8A',yelpCats:'pharmacy,drugstores'},
+  {icon:'🛍️',label:'Shopping',   color:'#7A5C00',yelpCats:'shopping,fashion,jewelry,cosmetics,electronics,homeandgarden,accessories,shoes,clothing'},
+  {icon:'🎭',label:'Arts',        color:'#5C1A3A',yelpCats:'arts,museums,galleries,theaters,musicvenues,jazzandblues,artsandcrafts'},
+  {icon:'🏨',label:'Hotels',      color:'#1B4F8A',yelpCats:'hotels,hostels,bedbreakfast,guesthouses'},
+  {icon:'🌳',label:'Parks',       color:'#2D6A4F',yelpCats:'parks,recreation,hiking,gardens,beaches,campgrounds'},
+  {icon:'🎬',label:'Film',        color:'#1A1F3A',yelpCats:'movietheaters'},
+  {icon:'📚',label:'Library',     color:'#2C4A6E',yelpCats:'libraries,bookstores'},
+  {icon:'🐾',label:'Pets',        color:'#C0640A',yelpCats:'pets,veterinarians,doggrooming,petboarding,petshops'},
+  {icon:'🏦',label:'Finance',     color:'#0D3349',yelpCats:'banks,creditunions,financialservices,insurance,mortgagebrokers'},
+  {icon:'🅿️',label:'Parking',    color:'#455A64',yelpCats:'parking'},
+  {icon:'🌮',label:'Taco Trucks', color:'#C84B00',yelpCats:'foodtrucks,tacos,mexican'},
+  {icon:'🎉',label:'Events',      color:'#6B2D7A',yelpCats:'venues,eventservices,festivals,nightlife,danceclubs'},
+  {icon:'🏫',label:'Education',   color:'#4527A0',yelpCats:'education,tutoring,daycares,elementaryschools,collegecounsel'},
+  {icon:'🛠️',label:'Services',   color:'#37474F',yelpCats:'homeservices,localservices,automotive,laundryservices,movers'},
+  {icon:'🏪',label:'Corner Store',color:'#7D2E23',yelpCats:'convenience,delis,tobaccoshops,newsstands,liquorstores'},
+  {icon:'🌿',label:'Cannabis',    color:'#33691E',yelpCats:'cannabis_dispensaries'},
+  {icon:'🚌',label:'Transit',     color:'#263238',yelpCats:'publictransport,taxis,limousines'},
+  {icon:'🏠',label:'Real Estate', color:'#4E342E',yelpCats:'realestate,realestateagents,propertymgmt,apartmentguides'},
+  {icon:'🤝',label:'Pro Services',color:'#3E2723',yelpCats:'lawyers,accountants,financialadvising,businessconsulting,notaries'},
+  {icon:'🏢',label:'More',        color:'#212121',yelpCats:''},
 ];
-let pActiveCell = null, pActiveCellIdx = null;
+let pActiveCell = null, pActiveCellIdx = null, cellCache = {};
+
+/* All AZ territory ZIPs — fetched in parallel per cell click */
+const MARKET_ZIPS = ['85339','85041','85042','85044'];
 
 function renderPanelCube() {
   const cube = document.getElementById('panel-cube');
@@ -734,7 +738,7 @@ function renderPanelCube() {
   }
 }
 
-function selectPCell(el, idx) {
+async function selectPCell(el, idx) {
   if (pActiveCell) pActiveCell.classList.remove('pactive');
   el.classList.add('pactive');
   pActiveCell = el;
@@ -742,24 +746,60 @@ function selectPCell(el, idx) {
   const cat = PCUBE_CATS[idx];
   const res = document.getElementById('cube-results');
   if (!res) return;
-  if (!dirLoaded) {
-    res.innerHTML = `<div class="dir-empty">Fetching Yelp data — one moment…</div>`;
-    return;
+
+  if (cellCache[idx]) { showCellResults(cellCache[idx], cat.label); return; }
+
+  res.innerHTML = `<div class="dir-empty" style="font-size:.6rem">Loading ${cat.label} across AZ…</div>`;
+
+  const catParam = cat.yelpCats ? `&categories=${encodeURIComponent(cat.yelpCats)}` : '';
+
+  try {
+    /* Parallel: one call per ZIP — all AZ territory ZIPs */
+    const responses = await Promise.allSettled(
+      MARKET_ZIPS.map(zip => fetch(`/api/yelp?zip=${zip}${catParam}`).then(r => r.json()))
+    );
+
+    const seen = new Set();
+    const results = [];
+    for (const r of responses) {
+      if (r.status !== 'fulfilled' || !r.value.businesses) continue;
+      for (const b of r.value.businesses) {
+        const k = normName(b.name);
+        if (seen.has(k)) continue;
+        seen.add(k);
+        results.push({
+          name:         b.name,
+          category:     b.categories?.[0]?.title || cat.label,
+          address:      b.location?.address1 || '',
+          rating:       b.rating || null,
+          review_count: b.review_count || 0,
+          yelp_url:     b.url || null,
+          waymo_url:    'https://waymo.com/waymo-one/?destination=' + encodeURIComponent(b.location?.address1 || b.name),
+        });
+      }
+    }
+
+    results.sort((a, b) => (b.review_count || 0) - (a.review_count || 0));
+
+    if (!results.length) {
+      res.innerHTML = `<div class="dir-empty">No ${cat.label} found across Laveen ZIPs</div>`;
+      return;
+    }
+    cellCache[idx] = results;
+    showCellResults(results, cat.label);
+  } catch(e) {
+    res.innerHTML = `<div class="dir-empty">Could not load ${cat.label} — try again</div>`;
   }
-  const words = cat.match.length ? cat.match : null;
-  const filtered = words
-    ? dirData.filter(b => words.some(w =>
-        b.category.toLowerCase().includes(w) || b.name.toLowerCase().includes(w)
-      ))
-    : dirData;
-  if (!filtered.length) {
-    res.innerHTML = `<div class="dir-empty">No ${cat.label} listings found nearby</div>`;
-    return;
-  }
-  res.innerHTML = filtered.map(b => {
-    const stars  = b.rating   ? `<span style="font-size:.5rem;background:#FF6600;color:#fff;padding:1px 4px;border-radius:2px;font-weight:700">★${b.rating}</span>` : '';
-    const yelp   = b.yelp_url ? `<a href="${b.yelp_url}" target="_blank" onclick="event.stopPropagation()" style="font-size:.52rem;background:#B22234;color:#fff;padding:2px 5px;border-radius:2px;text-decoration:none;font-weight:600">Yelp</a>` : '';
-    const waymo  = b.waymo_url? `<a href="${b.waymo_url}" target="_blank" onclick="event.stopPropagation()" style="font-size:.52rem;background:#1A73E8;color:#fff;padding:2px 5px;border-radius:2px;text-decoration:none;font-weight:600">🚗 Waymo</a>` : '';
+}
+
+function showCellResults(data, label) {
+  const res = document.getElementById('cube-results');
+  if (!res) return;
+  if (!data.length) { res.innerHTML = `<div class="dir-empty">No ${label} found nearby</div>`; return; }
+  res.innerHTML = data.map(b => {
+    const stars = b.rating   ? `<span style="font-size:.5rem;background:#FF6600;color:#fff;padding:1px 4px;border-radius:2px;font-weight:700">★${b.rating}</span>` : '';
+    const yelp  = b.yelp_url ? `<a href="${b.yelp_url}" target="_blank" onclick="event.stopPropagation()" style="font-size:.52rem;background:#B22234;color:#fff;padding:2px 5px;border-radius:2px;text-decoration:none;font-weight:600">Yelp</a>` : '';
+    const waymo = b.waymo_url? `<a href="${b.waymo_url}" target="_blank" onclick="event.stopPropagation()" style="font-size:.52rem;background:#1A73E8;color:#fff;padding:2px 5px;border-radius:2px;text-decoration:none;font-weight:600">🚗 Waymo</a>` : '';
     return `<div class="dir-card"><div style="flex:1;min-width:0">` +
       `<div class="dir-name">${b.name}</div>` +
       (b.address ? `<div class="dir-addr">${b.address}</div>` : '') +
@@ -921,8 +961,16 @@ async function initCesium() {
   document.body.appendChild(pinEl);
   pinEl.addEventListener('click', openPanel);
 
-  const propPos = Cesium.Cartesian3.fromDegrees(CENTER.lng, CENTER.lat, 0);
+  let pinActive = false;
+  setTimeout(() => { pinActive = true; }, 2500);
+
+  let propPos = Cesium.Cartesian3.fromDegrees(CENTER.lng, CENTER.lat, 0);
+  const _carto = Cesium.Cartographic.fromDegrees(CENTER.lng, CENTER.lat);
+  viewer.scene.sampleHeightMostDetailed([_carto]).then(pts => {
+    if (pts && pts[0] && pts[0].height) propPos = Cesium.Cartesian3.fromDegrees(CENTER.lng, CENTER.lat, pts[0].height);
+  }).catch(() => {});
   viewer.scene.postRender.addEventListener(() => {
+    if (!pinActive) { pinEl.style.display = 'none'; return; }
     const pos = Cesium.SceneTransforms.worldToWindowCoordinates(viewer.scene, propPos);
     if(pos){pinEl.style.left=(pos.x-19)+'px';pinEl.style.top=(pos.y-19)+'px';pinEl.style.display='block';}
     else{pinEl.style.display='none';}
@@ -934,6 +982,9 @@ async function initCesium() {
   loadStripVideos();
   addYTMarkers();
   window._viewer = viewer;
+  if (location.hash === '#favorites') {
+    setTimeout(() => { openPanel(); switchTab('favorites'); }, 1800);
+  }
 }
 
 initCesium().catch(e => console.error('Cesium init failed:', e));
