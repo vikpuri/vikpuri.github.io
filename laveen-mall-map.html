@@ -1,0 +1,963 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Laveen AZ — Neighborhood Directory</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=EB+Garamond:ital,wght@1,700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --cream:#f5f0e8;
+  --parchment:#ede5d0;
+  --ink:#1a1a1a;
+  --gold:#c9a84c;
+}
+
+html,body{
+  height:100%;overflow:hidden;
+  background:#0a0a0a;
+  font-family:'DM Mono',monospace;
+}
+
+#shell{display:flex;flex-direction:column;height:100%}
+
+#hd{
+  flex-shrink:0;
+  background:var(--cream);
+  border-bottom:3px solid var(--gold);
+  border-top:5px solid var(--gold);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:9px 18px;gap:14px;
+}
+.hd-prop{flex:1;min-width:0}
+.hd-title{
+  font-family:'EB Garamond',serif;font-style:italic;font-weight:700;
+  font-size:1.05rem;color:var(--ink);line-height:1;
+}
+.hd-addr{font-size:.36rem;letter-spacing:.14em;text-transform:uppercase;color:#aaa;margin-top:3px}
+.hd-badge{
+  background:var(--ink);
+  color:var(--gold);
+  font-family:'EB Garamond',serif;font-style:italic;font-weight:700;
+  font-size:.78rem;letter-spacing:.03em;text-transform:none;
+  padding:5px 18px;white-space:nowrap;flex-shrink:0;
+  border:1.5px solid var(--gold);
+  box-shadow:0 0 14px rgba(201,168,76,.45),inset 0 0 18px rgba(201,168,76,.07);
+  transition:box-shadow .2s;
+}
+.hd-badge:hover{box-shadow:0 0 28px rgba(201,168,76,.7),inset 0 0 24px rgba(201,168,76,.12)}
+.hb-heart{
+  display:inline-block;color:#ff6b8a;
+  animation:heartPulse 1.6s ease-in-out infinite;
+  font-style:normal;
+}
+@keyframes heartPulse{
+  0%,100%{transform:scale(1)}
+  12%    {transform:scale(1.32)}
+  24%    {transform:scale(1)}
+  36%    {transform:scale(1.18)}
+  60%    {transform:scale(1)}
+}
+.hd-stats{display:flex;gap:14px;flex-shrink:0}
+.hs{text-align:right}
+.hs-v{font-size:.78rem;font-weight:500;color:var(--ink);line-height:1}
+.hs-l{font-size:.32rem;letter-spacing:.13em;text-transform:uppercase;color:#aaa;margin-top:2px}
+
+#cube{
+  flex:1;overflow:hidden;
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  grid-template-rows:repeat(5,1fr);
+  gap:2px;padding:2px;
+}
+
+#anchor{
+  grid-column:3;grid-row:3;
+  background:var(--cream);
+  border:3px solid var(--gold);
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  text-align:center;padding:10px 8px;
+  animation:anchorIn .5s .1s both;
+  position:relative;
+  overflow:hidden;
+}
+#anchor::before{
+  content:'';
+  position:absolute;inset:0;
+  background:radial-gradient(circle,rgba(201,168,76,.12) 0%,transparent 70%);
+  animation:pulse 3s ease-in-out infinite;
+  pointer-events:none;
+}
+@keyframes pulse{0%,100%{opacity:.4}50%{opacity:1}}
+@keyframes anchorIn{
+  from{transform:scale(.7);opacity:0}
+  to{transform:scale(1);opacity:1}
+}
+.a-you{
+  font-size:.32rem;letter-spacing:.24em;text-transform:uppercase;
+  background:var(--ink);color:var(--gold);
+  padding:3px 10px;margin-bottom:6px;display:inline-block;
+}
+.a-star{font-size:1.4rem;color:var(--gold);line-height:1;margin-bottom:3px}
+.a-name{
+  font-family:'EB Garamond',serif;font-style:italic;font-weight:700;
+  font-size:.9rem;color:var(--ink);line-height:1.25;margin-bottom:6px;
+}
+.a-stats{
+  font-size:.35rem;letter-spacing:.04em;
+  color:#666;line-height:2;margin-bottom:8px;
+}
+.a-sms{
+  background:var(--ink);color:var(--cream);border:none;
+  font-family:'DM Mono',monospace;
+  font-size:.4rem;letter-spacing:.14em;text-transform:uppercase;
+  padding:7px 10px;cursor:pointer;width:100%;margin-bottom:4px;
+}
+.a-sms:hover{background:var(--gold);color:var(--ink)}
+.a-brand{
+  font-family:'EB Garamond',serif;font-style:italic;
+  font-size:.55rem;color:var(--gold);
+}
+
+.cell{
+  overflow:hidden;cursor:pointer;
+  padding:8px;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  text-align:center;
+  animation:popIn .32s ease both;
+  animation-delay:calc(var(--i,0) * 0.028s);
+  transition:filter .14s,transform .14s,outline .1s;
+  position:relative;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.2);
+}
+.cell::after{
+  content:'';
+  position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(255,255,255,.18) 0%,transparent 55%);
+  pointer-events:none;
+}
+.cell:hover{filter:brightness(1.22);transform:scale(1.04);z-index:10}
+.cell.on{outline:3px solid rgba(255,255,255,.7);filter:brightness(1.25);z-index:11}
+@keyframes popIn{
+  from{transform:scale(.78) rotate(-4deg);opacity:0}
+  60%{transform:scale(1.04) rotate(1deg)}
+  to{transform:scale(1) rotate(0deg);opacity:1}
+}
+
+.c-icon{font-size:1.5rem;line-height:1;margin-bottom:3px}
+.c-name{
+  font-size:.48rem;font-weight:500;
+  letter-spacing:.16em;text-transform:uppercase;
+  color:rgba(255,255,255,.95);
+  line-height:1.2;margin-bottom:3px;
+}
+.c-count{
+  font-size:.38rem;letter-spacing:.08em;
+  background:rgba(0,0,0,.3);
+  color:rgba(255,255,255,.9);
+  padding:1px 7px;display:inline-block;margin-bottom:4px;
+}
+.c-copy{
+  font-size:.38rem;
+  color:rgba(255,255,255,.6);
+  font-style:italic;line-height:1.4;
+  max-height:2.8em;overflow:hidden;
+}
+.highlight .c-name{font-size:.44rem;letter-spacing:.12em}
+.highlight .c-copy{color:rgba(255,255,255,.5);font-style:normal}
+
+#panel{
+  position:fixed;top:0;right:-300px;bottom:0;width:290px;
+  background:var(--cream);border-left:3px solid var(--ink);
+  z-index:200;transition:right .22s cubic-bezier(.4,0,.2,1);
+  display:flex;flex-direction:column;
+}
+#panel.open{right:0}
+#ph{
+  background:var(--ink);padding:13px 14px 11px;
+  display:flex;justify-content:space-between;align-items:flex-start;flex-shrink:0;
+}
+.phn{font-size:.66rem;letter-spacing:.16em;text-transform:uppercase;font-weight:500;color:var(--cream)}
+.phc{font-size:.38rem;letter-spacing:.1em;text-transform:uppercase;color:#888;margin-top:3px}
+#pclose{background:none;border:none;font-size:1.1rem;cursor:pointer;color:#777;padding:0;flex-shrink:0}
+#pclose:hover{color:var(--cream)}
+#plist{flex:1;overflow-y:auto;padding:4px 0}
+#plist::-webkit-scrollbar{width:3px}
+#plist::-webkit-scrollbar-thumb{background:#d4c9b0}
+.bi{padding:10px 14px;border-bottom:1px solid #d4c9b0}
+.bi:hover{background:var(--parchment)}
+.bin{font-size:.72rem;font-weight:500;color:var(--ink);margin-bottom:2px}
+.bim{font-size:.41rem;letter-spacing:.06em;text-transform:uppercase;color:#999}
+.bilinks{display:flex;gap:5px;margin-top:6px;flex-wrap:wrap}
+
+#ftr{
+  position:fixed;bottom:0;left:0;right:0;height:32px;
+  background:var(--cream);border-top:2px solid var(--ink);
+  display:flex;align-items:center;overflow-x:auto;z-index:100;
+}
+.fl{
+  font-size:.38rem;letter-spacing:.14em;text-transform:uppercase;
+  color:#aaa;text-decoration:none;
+  padding:0 11px;border-right:1px solid #d4c9b0;
+  white-space:nowrap;line-height:32px;flex-shrink:0;transition:color .14s;
+}
+.fl:hover{color:var(--gold)}
+.fl.here{color:var(--gold);pointer-events:none}
+
+/* ══ PROPERTY PANEL ════════════════════════════════════ */
+#prop-panel{position:fixed;top:0;left:-345px;bottom:0;width:335px;background:var(--cream);border-right:3px solid var(--ink);z-index:300;transition:left .22s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column}
+#prop-panel.open{left:0}
+#pp-hd{background:var(--ink);padding:12px 14px 10px;display:flex;justify-content:space-between;align-items:flex-start;flex-shrink:0}
+.pp-htag{font-size:.34rem;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin-bottom:3px}
+.pp-htitle{font-family:'EB Garamond',serif;font-style:italic;font-weight:700;font-size:.92rem;color:var(--cream);line-height:1.2}
+.pp-hsub{font-size:.36rem;letter-spacing:.08em;text-transform:uppercase;color:#888;margin-top:2px}
+#pp-close{background:none;border:none;font-size:1.1rem;cursor:pointer;color:#777;padding:0;flex-shrink:0}
+#pp-close:hover{color:var(--cream)}
+#pp-tabs{display:flex;border-bottom:2px solid var(--ink);flex-shrink:0;background:var(--cream)}
+.pp-tab{flex:1;font-family:'DM Mono',monospace;font-size:.38rem;letter-spacing:.1em;text-transform:uppercase;padding:8px 4px;background:none;border:none;cursor:pointer;color:#aaa;border-bottom:3px solid transparent;transition:color .14s}
+.pp-tab.active{color:var(--ink);border-bottom-color:var(--ink);font-weight:500}
+#pp-body{flex:1;overflow-y:auto;scrollbar-width:thin;scrollbar-color:#d4c9b0 transparent}
+#pp-body::-webkit-scrollbar{width:3px}
+#pp-body::-webkit-scrollbar-thumb{background:#d4c9b0}
+.pp-pane{display:none}.pp-pane.active{display:block}
+.pp-carousel{position:relative;width:100%;height:175px;overflow:hidden;background:#222}
+.pp-track{display:flex;height:100%;transition:transform .3s ease}
+.pp-slide{min-width:100%;height:100%}
+.pp-slide img{width:100%;height:100%;object-fit:cover}
+.pp-cbtn{position:absolute;top:50%;transform:translateY(-50%);background:rgba(0,0,0,.5);color:#fff;border:none;cursor:pointer;font-size:1.3rem;padding:5px 9px;z-index:5;line-height:1}
+.pp-cbtn.prev{left:0}.pp-cbtn.next{right:0}
+.pp-ccount{position:absolute;bottom:5px;right:7px;font-family:'DM Mono',monospace;font-size:.34rem;background:rgba(0,0,0,.55);color:#fff;padding:2px 6px;letter-spacing:.06em}
+.pp-dots{display:flex;gap:3px;justify-content:center;padding:5px 0;flex-wrap:wrap}
+.pp-dot{width:5px;height:5px;border-radius:50%;background:#d4c9b0;cursor:pointer;flex-shrink:0}
+.pp-dot.active{background:var(--ink)}
+.pp-stats{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:#ccc}
+.pp-stat{background:var(--cream);padding:10px 12px}
+.pp-stat-lbl{font-family:'DM Mono',monospace;font-size:.35rem;letter-spacing:.12em;text-transform:uppercase;color:#999;margin-bottom:3px}
+.pp-stat-val{font-family:'DM Mono',monospace;font-size:.88rem;font-weight:500;color:var(--ink)}
+.pp-stitle{font-family:'DM Mono',monospace;font-size:.42rem;letter-spacing:.18em;text-transform:uppercase;color:var(--ink);padding:12px 14px 4px;margin-top:4px}
+.pp-text{font-size:.72rem;line-height:1.65;color:#555;padding:2px 14px 10px}
+.pp-tags{display:flex;flex-wrap:wrap;gap:5px;padding:4px 14px 14px}
+.pp-tag-item{font-family:'DM Mono',monospace;font-size:.33rem;letter-spacing:.1em;text-transform:uppercase;background:var(--parchment);color:var(--ink);padding:3px 7px}
+.pp-vgrid{display:grid;grid-template-columns:1fr 1fr;gap:3px;padding:2px 14px 14px}
+.pp-vitem{cursor:pointer;overflow:hidden}
+.pp-vthumb{position:relative;padding-bottom:56.25%;background:#111;overflow:hidden}
+.pp-vthumb img,.pp-vthumb iframe{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border:none}
+.pp-vplay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.2);font-size:1rem;color:#fff;pointer-events:none}
+.pp-vtitle{font-family:'DM Mono',monospace;font-size:.32rem;letter-spacing:.05em;text-transform:uppercase;color:#888;margin-top:3px;line-height:1.3;text-align:center}
+.pp-idx-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:#ccc}
+.pp-idx-cell{background:var(--cream);padding:11px 12px}
+.pp-idx-val{font-family:'DM Mono',monospace;font-size:.95rem;font-weight:500;color:var(--ink)}
+.pp-idx-lbl{font-family:'DM Mono',monospace;font-size:.38rem;letter-spacing:.1em;text-transform:uppercase;color:#999;margin-top:2px}
+.pp-idx-gold{color:var(--gold)}
+#pp-cta{padding:9px 14px;border-top:2px solid var(--ink);background:var(--cream);flex-shrink:0;display:flex;gap:6px}
+.pp-btn-p{flex:1;background:var(--ink);color:var(--cream);border:none;font-family:'DM Mono',monospace;font-size:.4rem;letter-spacing:.14em;text-transform:uppercase;padding:9px 6px;cursor:pointer}
+.pp-btn-p:hover{background:var(--gold);color:var(--ink)}
+</style>
+</head>
+<body>
+
+<div id="shell">
+
+  <div id="hd">
+    <div class="hd-prop">
+      <div class="hd-title">Urban Farmhouse</div>
+      <div class="hd-addr">11403 S 27th Dr · Laveen AZ 85339</div>
+    </div>
+    <div class="hd-badge" onclick="window.open('/laveenlocal.html','_blank')" style="cursor:pointer"><span class="hb-heart">♥</span> Favorites</div>
+    <div class="hd-stats">
+      <div class="hs"><div class="hs-v">$2M</div><div class="hs-l">Asking</div></div>
+      <div class="hs"><div class="hs-v">4BR/4.5BA</div><div class="hs-l">5,400 SF</div></div>
+      <div class="hs"><div class="hs-v">4.4 Acres</div><div class="hs-l">Land</div></div>
+      <div class="hs" onclick="openPropPanel();switchPropTab('index')" style="cursor:pointer;border-bottom:2px solid var(--gold)"><div class="hs-v" style="color:var(--gold)">Index</div><div class="hs-l">Market ↗</div></div>
+      <div class="hs" onclick="openPropPanel();switchPropTab('waymo')" style="cursor:pointer;border-bottom:2px solid var(--gold)"><div class="hs-v" style="color:var(--gold)">Waymo</div><div class="hs-l">Deployed ↗</div></div>
+      <div class="hs" onclick="openPropPanel();switchPropTab('contact')" style="cursor:pointer;border-bottom:2px solid var(--gold)"><div class="hs-v" style="color:var(--gold)">Contact</div><div class="hs-l">Owner ↗</div></div>
+    </div>
+  </div>
+
+  <div id="cube">
+    <div id="anchor" onclick="openPropPanel()">
+      <div class="a-you">♥ Favorites</div>
+      <div class="a-star">★</div>
+      <div class="a-name">Urban<br>Farmhouse</div>
+      <div class="a-stats">
+        $2,000,000 &nbsp;·&nbsp; 4BD &nbsp;·&nbsp; 4.5BA<br>
+        5,400 SF &nbsp;·&nbsp; 4.4 Acres<br>
+        South Mountain Views
+      </div>
+      <button class="a-sms" onclick="event.stopPropagation();sms()">📱 Text Owner</button>
+      <div class="a-brand">r/Σ Requation</div>
+    </div>
+  </div>
+
+</div>
+
+<div id="panel">
+  <div id="ph">
+    <div><div class="phn" id="phn">—</div><div class="phc" id="phc"></div></div>
+    <button id="pclose" onclick="closePanel()">✕</button>
+  </div>
+  <div id="plist"></div>
+</div>
+
+<!-- PROPERTY DETAIL PANEL -->
+<div id="prop-panel">
+  <div id="pp-hd">
+    <div>
+      <div class="pp-htag">For Sale By Owner · Laveen AZ · ⟴ Waymo Ready</div>
+      <div class="pp-htitle">Urban Farmhouse</div>
+      <div class="pp-hsub">11403 S 27th Dr · Laveen, AZ 85339</div>
+    </div>
+    <button id="pp-close" onclick="closePropPanel()">✕</button>
+  </div>
+  <div id="pp-tabs">
+    <button class="pp-tab active" onclick="switchPropTab('property')">Property</button>
+    <button class="pp-tab" onclick="switchPropTab('index')">Index</button>
+    <button class="pp-tab" onclick="switchPropTab('waymo')">Waymo</button>
+    <button class="pp-tab" onclick="switchPropTab('contact')">Contact</button>
+  </div>
+  <div id="pp-body">
+
+    <!-- Property -->
+    <div class="pp-pane active" id="ppt-property">
+      <div class="pp-carousel">
+        <div class="pp-track" id="pp-track"></div>
+        <button class="pp-cbtn prev" onclick="ppMove(-1)">&#8249;</button>
+        <button class="pp-cbtn next" onclick="ppMove(1)">&#8250;</button>
+        <div class="pp-ccount" id="pp-ccount">1 / 25</div>
+      </div>
+      <div class="pp-dots" id="pp-dots"></div>
+      <div class="pp-stats">
+        <div class="pp-stat"><div class="pp-stat-lbl">Price</div><div class="pp-stat-val">$2,000,000</div></div>
+        <div class="pp-stat"><div class="pp-stat-lbl">Type</div><div class="pp-stat-val" style="font-size:.78rem">Urban Farmhouse</div></div>
+        <div class="pp-stat"><div class="pp-stat-lbl">Beds / Baths</div><div class="pp-stat-val">4BD / 4.5BA</div></div>
+        <div class="pp-stat"><div class="pp-stat-lbl">Size</div><div class="pp-stat-val">5,400 SF</div></div>
+      </div>
+      <div class="pp-stitle">About This Property</div>
+      <p class="pp-text">In Xanadu did Kubla Khan a stately pleasure-dome decree — and on the northern slope of South Mountain, another pleasure-dome rose from desert stone, as if conjured by the same fierce dreaming. Here, where the Saguaros stand sentinel and arroyos carve the earth on three sides like a moat of God's own making — here stands the Urban Farmhouse. Dark skies absolute. No future building permitted. The mountain at your back, eternity ahead.</p>
+      <p class="pp-text">4.4 acres on the largest City Park in America. 5,400 square feet of deliberate living — Barn, Pool House, 8 levels of landscape architecture. The largest saltwater pool in Maricopa County, 85,000 gallons, a mirror for the Milky Way. 75 minutes from Los Angeles airports. For the Creative who needs space to think. The CEO who needs space to breathe.</p>
+      <div class="pp-stitle">Market Tags</div>
+      <div class="pp-tags">
+        <span class="pp-tag-item">Laveen AZ</span><span class="pp-tag-item">Urban Farmhouse</span>
+        <span class="pp-tag-item">4.4 Acres</span><span class="pp-tag-item">Solar</span>
+        <span class="pp-tag-item">South Mountain</span><span class="pp-tag-item">FSBO</span>
+        <span class="pp-tag-item">Waymo Metro</span>
+      </div>
+      <div class="pp-stitle">Documentary — Urban Farmhouse · Laveen</div>
+      <div class="pp-vgrid" id="pp-vgrid"></div>
+      <div style="height:16px"></div>
+    </div>
+
+    <!-- Index -->
+    <div class="pp-pane" id="ppt-index">
+      <div class="pp-idx-grid">
+        <div class="pp-idx-cell"><div class="pp-idx-val">4.4 ac</div><div class="pp-idx-lbl">Lot Size</div></div>
+        <div class="pp-idx-cell"><div class="pp-idx-val">16K ac</div><div class="pp-idx-lbl">South Mountain</div></div>
+        <div class="pp-idx-cell"><div class="pp-idx-val">20 min</div><div class="pp-idx-lbl">Sky Harbor</div></div>
+        <div class="pp-idx-cell"><div class="pp-idx-val pp-idx-gold">Solar</div><div class="pp-idx-lbl">Powered</div></div>
+      </div>
+      <div style="padding:14px">
+        <p style="font-size:.76rem;line-height:1.7;color:#777;margin-bottom:12px"><strong style="color:var(--ink)">The Land</strong><br>4.4 acres inside the Phoenix metro — an artifact. The city built around it. South Mountain rises behind. The Loop 202 runs ahead. There are no more of these.</p>
+        <p style="font-size:.76rem;line-height:1.7;color:#777;margin-bottom:12px"><strong style="color:var(--ink)">The Institutions</strong><br>Banner Health — 10 minutes. Arizona State University — 25 minutes. Chase Field (Diamondbacks). State Farm Stadium (Cardinals). Footprint Center (Suns). Sky Harbor — 20 minutes.</p>
+        <p style="font-size:.76rem;line-height:1.7;color:#777;margin-bottom:12px"><strong style="color:var(--ink)">The Infrastructure</strong><br>Valley Metro Rail — 15 minutes. I-10 · Loop 202 · Loop 101. A city building fast. A property that cannot be subdivided. A price that reflects today, not tomorrow.</p>
+        <p style="font-size:.76rem;line-height:1.7;color:#777;margin-bottom:12px"><strong style="color:var(--ink)">The Nature</strong><br>South Mountain Park — 16,000 acres of Sonoran Desert. The largest municipal park in the US. A national-park experience, 5 minutes from your front door.</p>
+        <p style="font-size:.76rem;line-height:1.7;color:var(--gold);font-style:italic">Requation mapped it first.</p>
+      </div>
+    </div>
+
+    <!-- Waymo -->
+    <div class="pp-pane" id="ppt-waymo">
+      <div style="padding:16px 14px 12px">
+        <div style="font-size:1.6rem;margin-bottom:8px">🚗</div>
+        <div style="font-family:'EB Garamond',serif;font-style:italic;font-size:.92rem;font-weight:700;color:var(--ink);margin-bottom:3px">Waymo Last-Mile Hub</div>
+        <div style="font-family:'DM Mono',monospace;font-size:.38rem;letter-spacing:.1em;text-transform:uppercase;color:#999;margin-bottom:14px">Autonomous Vehicle Ready · Requation Network</div>
+        <p style="font-size:.74rem;line-height:1.65;color:#555;margin-bottom:10px">The Phoenix metro is one of Waymo's most active markets. Ridership is expanding across Scottsdale, Tempe, and Chandler. <strong>Laveen's Loop 202 corridor is next.</strong></p>
+        <p style="font-size:.74rem;line-height:1.65;color:#555;margin-bottom:10px">This property sits on a 4.4-acre parcel with direct freeway access. Requation is building the <strong>3D Yellow Pages on Maps</strong> — every home, every business, every stop, discoverable from above.</p>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:#ccc;margin:14px 0">
+          <div style="background:var(--cream);padding:10px 8px;text-align:center"><div style="font-family:'DM Mono',monospace;font-size:.88rem;font-weight:500;color:var(--ink)">202</div><div style="font-family:'DM Mono',monospace;font-size:.34rem;letter-spacing:.1em;text-transform:uppercase;color:#999;margin-top:2px">Loop Access</div></div>
+          <div style="background:var(--cream);padding:10px 8px;text-align:center"><div style="font-family:'DM Mono',monospace;font-size:.88rem;font-weight:500;color:var(--ink)">24/7</div><div style="font-family:'DM Mono',monospace;font-size:.34rem;letter-spacing:.1em;text-transform:uppercase;color:#999;margin-top:2px">AV Coverage</div></div>
+          <div style="background:var(--cream);padding:10px 8px;text-align:center"><div style="font-family:'DM Mono',monospace;font-size:.88rem;font-weight:500;color:var(--ink)">3D</div><div style="font-family:'DM Mono',monospace;font-size:.34rem;letter-spacing:.1em;text-transform:uppercase;color:#999;margin-top:2px">Map Ready</div></div>
+        </div>
+        <p style="font-size:.74rem;line-height:1.65;color:#555">The autonomous vehicle era rewrites real estate value. Proximity to Waymo stops becomes the new walkability score — a quantifiable, searchable signal on Google Maps that surfaces your property to buyers who live AV-first.</p>
+      </div>
+      <div style="height:16px"></div>
+    </div>
+
+    <!-- Contact / Twilio -->
+    <div class="pp-pane" id="ppt-contact">
+      <div style="padding:16px 14px 12px">
+        <div style="font-size:1.4rem;margin-bottom:6px">📱</div>
+        <div style="font-family:'EB Garamond',serif;font-style:italic;font-size:.92rem;font-weight:700;color:var(--ink);margin-bottom:2px">Contact Owner Directly</div>
+        <div style="font-family:'DM Mono',monospace;font-size:.34rem;letter-spacing:.1em;text-transform:uppercase;color:#999;margin-bottom:16px">For Sale By Owner · Requation Verified</div>
+        <input id="ct-name" type="text" placeholder="Your name" style="display:block;width:100%;box-sizing:border-box;font-family:'DM Mono',monospace;font-size:.72rem;padding:8px 10px;border:1px solid #d4c9b0;background:var(--cream);color:var(--ink);margin-bottom:8px;outline:none">
+        <input id="ct-phone" type="tel" placeholder="Your phone (optional)" style="display:block;width:100%;box-sizing:border-box;font-family:'DM Mono',monospace;font-size:.72rem;padding:8px 10px;border:1px solid #d4c9b0;background:var(--cream);color:var(--ink);margin-bottom:8px;outline:none">
+        <textarea id="ct-msg" rows="3" style="display:block;width:100%;box-sizing:border-box;font-family:'DM Mono',monospace;font-size:.72rem;padding:8px 10px;border:1px solid #d4c9b0;background:var(--cream);color:var(--ink);resize:none;margin-bottom:10px;outline:none">Hi, I saw the Urban Farmhouse on Requation. I'd like to schedule a showing.</textarea>
+        <button onclick="sendContact()" style="display:block;width:100%;font-family:'DM Mono',monospace;font-size:.38rem;letter-spacing:.12em;text-transform:uppercase;background:var(--ink);color:var(--cream);border:none;padding:10px;cursor:pointer;margin-bottom:6px">Send via Requation</button>
+        <div id="ct-status" style="font-family:'DM Mono',monospace;font-size:.68rem;color:#777;min-height:18px;text-align:center"></div>
+        <div style="margin-top:14px;border-top:1px solid #d4c9b0;padding-top:12px">
+          <div style="font-family:'DM Mono',monospace;font-size:.34rem;letter-spacing:.1em;text-transform:uppercase;color:#aaa;margin-bottom:6px">Direct Line</div>
+          <a href="sms:+12132158870" style="display:block;font-family:'DM Mono',monospace;font-size:.76rem;color:var(--gold);text-decoration:none">📱 (213) 215-8870</a>
+        </div>
+      </div>
+      <div style="height:16px"></div>
+    </div>
+
+  </div>
+  <div id="pp-cta">
+    <button class="pp-btn-p" onclick="sms()">📱 Text Owner</button>
+    <button class="pp-btn-p" style="background:var(--gold);color:var(--ink)" onclick="window.open('https://requation.com/laveen','_blank')">View on Map ↗</button>
+  </div>
+</div>
+
+<div id="ftr">
+  <a class="fl here" href="https://requation.com/laveen"              style="color:#c9a84c">★ Laveen AZ</a>
+  <a class="fl"      href="https://requation.com/laveenlocal"         style="color:#E07B39">Laveen Local</a>
+  <a class="fl"      href="https://requation.com/desertlife/phoenix"  style="color:#BF360C">Phoenix</a>
+</div>
+
+<script>
+/* ──────────────────────────────────────────────────────
+   LAVEEN AZ — RUBIK'S CUBE MALL MAP
+   4 ZIPs. 4 calls. Parallel. Up to 200 businesses.
+   ────────────────────────────────────────────────────── */
+
+const CONFIG = {
+  zips: ['85339','85041','85042','85044'],
+  ratingMin: 3.5,
+  center: { lat: 33.34284751970459, lng: -112.11814600203087 }
+};
+
+/* ── CATEGORY NORMALIZATION ─── */
+const CATEGORY_GROUPS = {
+  /* Wellness & Aesthetics — IV, Botox, facials, medspa */
+  'MedSpa':'Wellness & Aesthetics','Med Spa':'Wellness & Aesthetics',
+  'IV Hydration':'Wellness & Aesthetics','IV Therapy':'Wellness & Aesthetics',
+  'Botox':'Wellness & Aesthetics','Facials':'Wellness & Aesthetics',
+  'Skin Care':'Wellness & Aesthetics','Laser Hair Removal':'Wellness & Aesthetics',
+  'Cosmetic Surgery':'Wellness & Aesthetics','Cosmetic Dentistry':'Wellness & Aesthetics',
+  'Lip Injections':'Wellness & Aesthetics','Acupuncture':'Wellness & Aesthetics',
+  'Plastic Surgeons':'Wellness & Aesthetics','Weight Loss Centers':'Wellness & Aesthetics',
+  'Nutritionists':'Wellness & Aesthetics','Wellness':'Wellness & Aesthetics',
+  'Cosmetic & Reconstructive Surgery':'Wellness & Aesthetics',
+  'Cosmetic Surgery & Procedures':'Wellness & Aesthetics',
+
+  /* Food & Drink */
+  'Restaurants':'Food & Drink','Restaurant':'Food & Drink',
+  'Food':'Food & Drink','Fast Food':'Food & Drink',
+  'Burgers':'Food & Drink','Pizza':'Food & Drink',
+  'Sandwiches':'Food & Drink','Tacos':'Food & Drink',
+  'Mexican':'Food & Drink','Italian':'Food & Drink',
+  'Seafood':'Food & Drink','Sushi Bars':'Food & Drink',
+  'Japanese':'Food & Drink','Korean':'Food & Drink',
+  'Chinese':'Food & Drink','Thai':'Food & Drink',
+  'Indian':'Food & Drink','Mediterranean':'Food & Drink',
+  'Barbeque':'Food & Drink','Steakhouses':'Food & Drink',
+  'Breakfast & Brunch':'Food & Drink','Buffets':'Food & Drink',
+  'Coffee':'Food & Drink','Coffee & Tea':'Food & Drink',
+  'Cafes':'Food & Drink','Cafe':'Food & Drink',
+  'Coffee Roasteries':'Food & Drink',
+  'Bakeries':'Food & Drink','Desserts':'Food & Drink',
+  'Ice Cream & Frozen Yogurt':'Food & Drink',
+  'Gelato':'Food & Drink','Bubble Tea':'Food & Drink',
+  'Juice Bars & Smoothies':'Food & Drink',
+  'Specialty Food':'Food & Drink',
+  'Food Delivery Services':'Food & Drink',
+
+  /* Eyewear & Vision */
+  'Optometrists':'Eyewear & Vision',
+  'Eyewear & Opticians':'Eyewear & Vision',
+  'Sunglasses':'Eyewear & Vision',
+  'Ophthalmologists':'Eyewear & Vision',
+};
+
+const FOOD_ALIASES = new Set([
+  'newamerican','tradamerican','burgers','hotdogs','chickenwings',
+  'comfortfood','diners','delis','soulfood','cajun','creole','southern','texmex','newmexican',
+  'french','italian','spanish','portuguese','greek','german','british',
+  'mediterranean','mideastern','lebanese','turkish','persian','afghani','moroccan','halal',
+  'japanese','korean','chinese','thai','indian','vietnamese','filipino','taiwanese',
+  'cambodian','mongolian','tibetan','singaporean','malaysian','bangladeshi','pakistani','himalayan',
+  'ramen','pho','sushi','dimsum','hotpot','izakaya','yakitori','noodles',
+  'mexican','latin','cuban','peruvian','brazilian','colombian','venezuelan',
+  'argentinean','dominican','puertorican','salvadoran','honduran','guatemalan',
+  'ethiopian','hawaiian',
+  'restaurants','food','fastfood','seafood','pizza','sandwiches','tacos',
+  'steak','bbq','steakhouses','barbeque','buffets','foodtrucks','foodstands',
+  'breakfastbrunch','brunch','waffles','pancakes','creperies','donuts','bagels',
+  'coffee','cafes','coffeeroasteries','tea','coffeeroasters',
+  'bakeries','desserts','icecream','gelato','bubbletea','juicebarsmoothies','juicebars',
+  'smoothies','acaibowls','shavedice','froyo','candy','chocolatiers','patisserie','cakeshop','macarons',
+  'vegan','vegetarian','glutenfree','poke','tapas','fondue',
+  'gastropubs','specialtyfood','fooddeliveryservices','chicken','chickenshop','chicken_shop'
+]);
+
+function categorizeBusinesses(cats) {
+  for (const c of (cats || [])) {
+    const mapped = CATEGORY_GROUPS[c.title];
+    if (mapped) return mapped;
+  }
+  for (const c of (cats || [])) {
+    const a = (c.alias || '').toLowerCase().replace(/[-_]/g, '');
+    if (FOOD_ALIASES.has(a)) return 'Food & Drink';
+  }
+  return (cats?.[0]?.title) || 'Business';
+}
+
+/* ── COLORS — same vivid Material 400-600 palette ─── */
+const COLORS = {
+  'Food & Drink':             '#F44336',
+  'Wellness & Aesthetics':    '#E91E63',  // Pink 500 — Scottsdale exports its standards south
+  'Restaurants':              '#F44336',
+  'Restaurant':               '#F44336',
+  'Food':                     '#EF5350',
+  'Fast Food':                '#FF7043',
+  'Burgers':                  '#FF5722',
+  'Pizza':                    '#E53935',
+  'Sandwiches':               '#FF8A65',
+  'Tacos':                    '#FF6D00',
+  'Mexican':                  '#FF9800',
+  'Italian':                  '#E53935',
+  'Seafood':                  '#42A5F5',
+  'Sushi Bars':               '#26A69A',
+  'Japanese':                 '#26C6DA',
+  'Korean':                   '#AB47BC',
+  'Chinese':                  '#EF5350',
+  'Thai':                     '#FFA726',
+  'Indian':                   '#FF9800',
+  'Mediterranean':            '#29B6F6',
+  'Barbeque':                 '#FF7043',
+  'Steakhouses':              '#EC407A',
+  'Breakfast & Brunch':       '#FFCA28',
+  'Buffets':                  '#A1887F',
+  'Coffee':                   '#795548',
+  'Coffee & Tea':             '#8D6E63',
+  'Cafes':                    '#A1887F',
+  'Cafe':                     '#A1887F',
+  'Bakeries':                 '#FF8A65',
+  'Desserts':                 '#EC407A',
+  'Ice Cream & Frozen Yogurt':'#29B6F6',
+  'Gelato':                   '#42A5F5',
+  'Bubble Tea':               '#AB47BC',
+  'Juice Bars & Smoothies':   '#66BB6A',
+  'Bars':                     '#9C27B0',
+  'Wine Bars':                '#7E57C2',
+  'Cocktail Bars':            '#AB47BC',
+  'Nightlife':                '#5C6BC0',
+  'Dance Clubs':              '#3F51B5',
+  'Karaoke':                  '#EC407A',
+  'Grocery':                  '#43A047',
+  'Grocery Stores':           '#43A047',
+  'Specialty Food':           '#66BB6A',
+  'Fruits & Veggies':         '#8BC34A',
+  'Farmers Market':           '#7CB342',
+  'Convenience Stores':       '#78909C',
+  'Water Stores':             '#00BCD4',
+  'Gyms':                     '#FF7043',
+  'Fitness & Instruction':    '#FF5722',
+  'Yoga':                     '#26A69A',
+  'Active Life':              '#66BB6A',
+  'Parks':                    '#4CAF50',
+  'Libraries':                '#8D6E63',
+  'Museums':                  '#42A5F5',
+  'Art Galleries':            '#AB47BC',
+  'Arts & Entertainment':     '#7E57C2',
+  'Culture':                  '#5C6BC0',
+  'Sports':                   '#26A69A',
+  'Sports Clubs':             '#26A69A',
+  'Zoos':                     '#66BB6A',
+  'Aquariums':                '#00BCD4',
+  'Hotels':                   '#FFCA28',
+  'Hotels & Travel':          '#FFCA28',
+  'Bed & Breakfast':          '#FFA726',
+  'Hostels':                  '#FF9800',
+  'Shopping':                 '#1E88E5',
+  'Fashion':                  '#EC407A',
+  'Shoes':                    '#AB47BC',
+  'Cosmetics':                '#F06292',
+  'Jewelry':                  '#FFCA28',
+  'Bookstores':               '#795548',
+  'Toy Stores':               '#FF9800',
+  'Electronics':              '#1E88E5',
+  'Health & Medical':         '#26A69A',
+  'Dental':                   '#29B6F6',
+  'MedSpa':                   '#00BCD4',
+  'Doctors':                  '#42A5F5',
+  'Pharmacy':                 '#66BB6A',
+  'Urgent Care':              '#EF5350',
+  'Eyewear & Vision':         '#29B6F6',
+  'Hair Salons':              '#EC407A',
+  'Beauty & Spas':            '#F06292',
+  'Nail Salons':              '#E91E63',
+  'Massage':                  '#AB47BC',
+  'Movie Theaters':           '#EF5350',
+  'Cinema':                   '#EF5350',
+  'Bowling':                  '#1E88E5',
+  'Escape Games':             '#7E57C2',
+  'Parking':                  '#78909C',
+  'Pet':                      '#66BB6A',
+  'Auto Repair':              '#78909C',
+  'Dry Cleaning':             '#00BCD4',
+  'Food Delivery Services':   '#FF7043',
+};
+
+const FALLBACK_POOL = [
+  '#F44336','#9C27B0','#3F51B5','#2196F3','#00BCD4',
+  '#4CAF50','#8BC34A','#FFCA28','#FF9800','#FF5722',
+  '#E91E63','#673AB7','#1976D2','#0097A7','#43A047',
+  '#F57C00','#EF5350','#EC407A','#7E57C2','#1E88E5',
+  '#26A69A','#66BB6A','#FFA726','#795548','#78909C',
+];
+let fallbackIdx = 0;
+function getFallbackColor() { return FALLBACK_POOL[fallbackIdx++ % FALLBACK_POOL.length]; }
+
+/* ── WIT COPY — Arizona edition ─── */
+const COPY = {
+  'Food & Drink':            'Phoenix has 7,000 restaurants. This is the good list. All Yelp 4.0+.',
+  'Wellness & Aesthetics':   "Scottsdale's aesthetic standards. South Mountain's prices.",
+  'Restaurants':             'Phoenix has 7,000 restaurants. This is the good list.',
+  'Food':                    'Something great is 5 minutes away. Flat.',
+  'Fast Food':               'When 299 sunny days make you lazy.',
+  'Coffee & Tea':            'Dutch Bros. Every corner. By design.',
+  'Cafes':                   'Morning sorted before the heat hits.',
+  'Juice Bars & Smoothies':  'The recovery drink for a desert lifestyle.',
+  'Bakeries':                'Yes, there are excellent bakeries in AZ.',
+  'Desserts':                'In 110° heat, ice cream is medicine.',
+  'Grocery':                 'Fry\'s, Sprouts, AJ\'s. You are covered.',
+  'Grocery Stores':          'Fry\'s, Sprouts, AJ\'s. You are covered.',
+  'Parks':                   'South Mountain Park. Largest municipal park in the USA.',
+  'Libraries':               'Laveen Branch. New. Quiet. Air-conditioned.',
+  'Museums':                 'Heard Museum. 1.5mi from the highway. Go.',
+  'Art Galleries':           'Phoenix Art Museum is 20 minutes. Real art.',
+  'Arts & Entertainment':    'Desert Botanical Garden at dusk. Once.',
+  'Sports':                  'Cardinals. Suns. Diamondbacks. Your backyard.',
+  'Active Life':             '4.4 acres. Then 30,000 acres of mountain trail.',
+  'Hotels':                  'Out-of-town buyers will appreciate this list.',
+  'Shopping':                'Desert Ridge. Scottsdale Fashion. Proximity counts.',
+  'Fashion':                 'You\'ll be shopping in Scottsdale in 25 minutes.',
+  'Bars':                    'AZ craft beer scene is legitimately excellent.',
+  'Wine Bars':               'AZ wine country is 2 hours. More than you think.',
+  'Nightlife':               'Old Town Scottsdale. The Valley\'s answer to Vegas.',
+  'Gyms':                    'Planet Fitness, LA Fitness, EōS. All nearby.',
+  'Fitness & Instruction':   'Year-round outdoor training. No excuses.',
+  'Movie Theaters':          'Harkins. An Arizona original since 1933.',
+  'Health & Medical':        'Dignity Health. Valleywise. Banner. You\'re covered.',
+  'Dental':                  'Probably more dentists per capita than anywhere.',
+  'Hair Salons':             'You live here now. Maintain the look.',
+  'Beauty & Spas':           'JW Marriott spa is 20 minutes. Treat yourself.',
+  'Seafood':                 'Landlocked? The sushi here disagrees.',
+  'Sushi Bars':              'Phoenix sushi chefs trained in Japan. True.',
+  'Shoes':                   'Scottsdale Fashion Square. 25 min. Done.',
+  'Nail Salons':             'More per square mile than you\'d expect.',
+  'Massage':                 'Sore from hiking South Mountain. Earned it.',
+  'Urgent Care':             'Banner Health. Valleywise. 10 minutes out.',
+  'Auto Repair':             'Every major chain. Every ZIP. Free parking.',
+  'Bowling':                 'Bowlero. Kids, dates, leagues. All here.',
+  'Escape Games':            'Phoenix has 40+ rooms. Seriously.',
+  'Parking':                 'Every parking lot is free. Every one.',
+  'Pet':                     'Arizona is dog country. 100%. No debate.',
+  'Eyewear & Vision':        'Desert sun is real. Scottsdale has the best optometrists.',
+};
+
+const ICONS = {
+  'Food & Drink':'🍽️',
+  'Wellness & Aesthetics':'✨',
+  'Restaurants':'🍽️','Food':'🍴','Fast Food':'🍔','Burgers':'🍔',
+  'Pizza':'🍕','Sandwiches':'🥪','Mexican':'🌮','Tacos':'🌮',
+  'Italian':'🍝','Seafood':'🦞','Sushi Bars':'🍣','Japanese':'🍣',
+  'Korean':'🍜','Chinese':'🍜','Thai':'🍜','Indian':'🍛',
+  'Mediterranean':'🫒','Breakfast & Brunch':'🍳',
+  'Bakeries':'🥐','Desserts':'🍰','Ice Cream & Frozen Yogurt':'🍦',
+  'Bubble Tea':'🧋','Juice Bars & Smoothies':'🥤',
+  'Coffee':'☕','Coffee & Tea':'☕','Cafes':'☕',
+  'Bars':'🍺','Wine Bars':'🍷','Nightlife':'🎶',
+  'Grocery':'🛒','Grocery Stores':'🛒','Specialty Food':'🧺',
+  'Gyms':'💪','Fitness & Instruction':'💪','Active Life':'🏃',
+  'Movie Theaters':'🎬','Cinema':'🎬',
+  'Arts & Entertainment':'🎭','Museums':'🖼️','Art Galleries':'🖼️',
+  'Culture':'🎨',
+  'Hotels':'🏨','Hotels & Travel':'🏨',
+  'Shopping':'🛍️','Fashion':'👗','Shoes':'👟',
+  'Health & Medical':'🏥','Dental':'🦷','MedSpa':'💆','Eyewear & Vision':'👓',
+  'Parks':'🌵','Libraries':'📚','Sports':'🏅','Sports Clubs':'🏅',
+  'Hair Salons':'✂️','Beauty & Spas':'💅',
+  'Parking':'🅿️','Pet':'🐾',
+};
+
+/* ── ARIZONA LIFE HIGHLIGHTS ─── */
+const HIGHLIGHTS = [
+  { icon:'☀️', name:'299 Sunny Days',   copy:'Per year. Laveen leads.',            color:'#F57C00' },
+  { icon:'🚗', name:'Waymo Phoenix',    copy:'First Waymo city. Your ZIP.',         color:'#1565C0' },
+  { icon:'🏔️', name:'South Mountain',  copy:'16,000 acres. Trails from your door.',color:'#388E3C' },
+  { icon:'🏈', name:'Cardinals + Suns', copy:'Both 20 minutes. Season tickets call.', color:'#B71C1C' },
+  { icon:'⚡', name:'Solar Ready',      copy:'4.4 acres. HOA-free. Net-zero possible.', color:'#F9A825' },
+  { icon:'🏜️', name:'Desert Botanical', copy:'Saguaros at sunset. A 20min drive.',  color:'#558B2F' },
+  { icon:'🚇', name:'Light Rail',       copy:'Valley Metro: 3.2 miles east.',        color:'#1976D2' },
+  { icon:'📐', name:'5,400 sq ft',      copy:"That's a starting lineup + guest rooms.", color:'#6A1B9A' },
+  { icon:'🌵', name:'Arizona Living',   copy:'The state that rewrote the American West.', color:'#2E7D32' },
+  { icon:'🏡', name:'No State Tax',     copy:'AZ income tax: 2.5%. Flat. Move here.', color:'#004D40' },
+];
+
+/* ── PROPERTY DATA — exact match to laveen.html PROP ─── */
+const PROP = {
+  images: [
+    '/assets/IMG_1490.jpeg','https://i.imgur.com/F0YLfoC.jpeg','https://i.imgur.com/ycRr5XE.jpeg',
+    'https://i.imgur.com/1MBjfkr.jpeg','https://i.imgur.com/uiikzzR.jpeg','https://i.imgur.com/1qQr4rf.jpeg',
+    'https://i.imgur.com/ubOV3jq.jpeg','https://i.imgur.com/DlP9Thj.jpeg','https://i.imgur.com/9Ti4py8.jpeg',
+    'https://i.imgur.com/0jwRIjB.jpeg','https://i.imgur.com/TE7zKJM.jpeg','https://i.imgur.com/ytIcEu5.jpeg',
+    'https://i.imgur.com/SI8gjc2.jpeg','https://i.imgur.com/Th4TUUP.jpeg','https://i.imgur.com/yCjxa3y.jpeg',
+    'https://i.imgur.com/R2qggs3.jpeg','https://i.imgur.com/ruUGtpV.jpeg','https://i.imgur.com/K7eReJW.jpeg',
+    'https://i.imgur.com/yoI9pMA.jpeg','https://i.imgur.com/yJKd4FM.jpeg','https://i.imgur.com/uJq82zM.jpeg',
+    'https://i.imgur.com/0M3jwXx.jpeg','https://i.imgur.com/4oX65PU.jpeg','https://i.imgur.com/UjNsMrN.jpeg',
+    'https://i.imgur.com/fJUhniW.jpeg'
+  ],
+  videos: [
+    {id:'wn9pZDkd6bo',title:'Desert Rain — Monsoon Season'},
+    {id:'lTk4aLK1MYo',title:"Nature's Light — Laveen"},
+    {id:'HmJqTSnu1e8',title:'Love & Desert Sky'},
+    {id:'Rp3JzD2jseY',title:'Kubla Khan — Desert Pleasuredome'},
+    {id:'jKe7eilvgHM',title:"Morrison's Desert"},
+    {id:'hrPKYsoz_0U',title:'Monsoon at South Mountain'},
+    {id:'KEuwFQn8bmA',title:'Desert Nature — Golden Hour'},
+    {id:'yKjrEa8IT9c',title:'Rain on the Mesa'},
+    {id:'M7MY9zNWY50',title:'Desert Light — Laveen Estate'},
+    {id:'ut67g0F1lXw',title:"Nature's Canvas — Arizona"},
+    {id:'YO1DPp3Bi8c',title:'The Green Estate — Monsoon'},
+    {id:'sJMBOYnNlgE',title:'Desert Love — South Mountain'},
+    {id:'sU1NmE_Bu6I',title:'Light & Shadow — Laveen'}
+  ]
+};
+
+/* ── PROPERTY PANEL ─────────────────────────────────────── */
+let _ppci = 0, _ppct = 0;
+
+function buildPropPanel() {
+  if (document.getElementById('pp-track').children.length) return;
+  _ppct = PROP.images.length;
+  document.getElementById('pp-track').innerHTML = PROP.images.map(u =>
+    `<div class="pp-slide"><img src="${u}" loading="lazy"></div>`).join('');
+  document.getElementById('pp-ccount').textContent = `1 / ${_ppct}`;
+  document.getElementById('pp-dots').innerHTML = PROP.images.map((_,i) =>
+    `<div class="pp-dot${i===0?' active':''}" onclick="ppGoTo(${i})"></div>`).join('');
+  document.getElementById('pp-vgrid').innerHTML = PROP.videos.map(v =>
+    `<div class="pp-vitem" onclick="ppPlayVideo(this,'${v.id}')">
+       <div class="pp-vthumb"><img src="https://img.youtube.com/vi/${v.id}/mqdefault.jpg" loading="lazy"><div class="pp-vplay">&#9654;</div></div>
+       <div class="pp-vtitle">${v.title}</div>
+     </div>`).join('');
+}
+
+function ppPlayVideo(el, id) {
+  const thumb = el.querySelector('.pp-vthumb');
+  thumb.innerHTML = `<iframe src="https://www.youtube.com/embed/${id}?autoplay=1&rel=0&modestbranding=1" allow="autoplay" allowfullscreen></iframe>`;
+}
+
+function ppMove(d) { _ppci = (_ppci + d + _ppct) % _ppct; ppRender(); }
+function ppGoTo(i) { _ppci = i; ppRender(); }
+function ppRender() {
+  document.getElementById('pp-track').style.transform = `translateX(-${_ppci * 100}%)`;
+  document.getElementById('pp-ccount').textContent = `${_ppci + 1} / ${_ppct}`;
+  document.querySelectorAll('.pp-dot').forEach((d,i) => d.classList.toggle('active', i === _ppci));
+}
+
+function openPropPanel() {
+  buildPropPanel();
+  closePanel();
+  document.getElementById('prop-panel').classList.add('open');
+}
+function closePropPanel() {
+  document.getElementById('prop-panel').classList.remove('open');
+}
+function switchPropTab(name) {
+  document.querySelectorAll('.pp-tab').forEach(t => {
+    const m = (t.getAttribute('onclick')||'').match(/switchPropTab\('(\w+)'\)/);
+    t.classList.toggle('active', !!m && m[1] === name);
+  });
+  document.querySelectorAll('.pp-pane').forEach(p => p.classList.toggle('active', p.id === 'ppt-' + name));
+  document.getElementById('pp-body').scrollTop = 0;
+}
+
+let allGroups = {};
+
+/* ── FETCH ALL AZ ZIPS IN PARALLEL ─── */
+async function fetchZip(zip) {
+  const urls = [
+    `/api/yelp?zip=${zip}&rating=${CONFIG.ratingMin}`,
+    `https://requation.com/api/yelp?zip=${zip}&rating=${CONFIG.ratingMin}`
+  ];
+  for (const url of urls) {
+    try {
+      const r = await fetch(url);
+      if (r.ok) {
+        const d = await r.json();
+        if (d.businesses?.length) return d.businesses;
+      }
+    } catch(_) {}
+  }
+  return [];
+}
+
+async function loadDirectory() {
+  const results = await Promise.all(CONFIG.zips.map(fetchZip));
+  renderCube(results.flat());
+}
+
+function renderCube(businesses) {
+  const seen = new Set();
+  const deduped = businesses.filter(b => {
+    const k = (b.name||'').toLowerCase().replace(/[^a-z0-9]/g,'').slice(0,22);
+    if (seen.has(k)) return false;
+    seen.add(k); return true;
+  });
+
+  const groups = {};
+  deduped.forEach(b => {
+    const rawCat = b.categories?.[0]?.title || 'Business';
+    const cat = categorizeBusinesses(b.categories);
+    allGroups[cat] = allGroups[cat] || [];
+    allGroups[cat].push({
+      n: b.name, r: b.rating || null,
+      url: b.url || null, addr: b.location?.address1 || '',
+      sub: rawCat !== cat ? rawCat : null
+    });
+    groups[cat] = allGroups[cat];
+  });
+
+  const cats = Object.entries(groups)
+    .sort((a,b) => b[1].length - a[1].length)
+    .slice(0, 24);
+
+  const needed = 24 - cats.length;
+  const padded = [
+    ...cats.map(([c,b],i) => buildYelpCell(c, b, i)),
+    ...HIGHLIGHTS.slice(0, needed).map((h,i) => buildHighlightCell(h, cats.length + i))
+  ];
+
+  const cube   = document.getElementById('cube');
+  const anchor = document.getElementById('anchor');
+
+  anchor.insertAdjacentHTML('beforebegin', padded.slice(0, 12).join(''));
+  anchor.insertAdjacentHTML('afterend',    padded.slice(12).join(''));
+
+  const totalBiz  = deduped.length;
+  const totalCats = cats.length;
+  if (totalBiz > 0) {
+    document.querySelector('.a-brand').insertAdjacentHTML('afterend',
+      `<div style="font-size:.3rem;letter-spacing:.1em;text-transform:uppercase;color:#bbb;margin-top:5px">${totalBiz} businesses · ${totalCats} categories</div>`
+    );
+    document.querySelector('.hd-stats').insertAdjacentHTML('beforebegin',
+      `<div style="background:#1b5e20;color:#fff;font-size:.38rem;letter-spacing:.12em;
+         text-transform:uppercase;padding:4px 12px;white-space:nowrap;flex-shrink:0;font-weight:600">
+         ${totalBiz} FREE Listings ★
+       </div>`
+    );
+  }
+
+  document.querySelectorAll('.cell').forEach(el => {
+    el.addEventListener('click', () => openPanel(el));
+  });
+  document.getElementById('anchor').addEventListener('click', openPropPanel);
+}
+
+function buildYelpCell(cat, bizs, idx) {
+  const bg   = COLORS[cat] || getFallbackColor();
+  const icon = ICONS[cat]  || '🏢';
+  const copy = COPY[cat]   || `${bizs.length} nearby`;
+  return `
+    <div class="cell" data-cat="${cat}" style="--i:${idx}; background:${bg}">
+      <span class="c-icon">${icon}</span>
+      <span class="c-name">${cat}</span>
+      <span class="c-count">${bizs.length}</span>
+      <span class="c-copy">${copy}</span>
+    </div>`;
+}
+
+function buildHighlightCell(h, idx) {
+  return `
+    <div class="cell highlight" data-hl="${h.name}" style="--i:${idx}; background:${h.color}">
+      <span class="c-icon">${h.icon}</span>
+      <span class="c-name">${h.name}</span>
+      <span class="c-copy">${h.copy}</span>
+    </div>`;
+}
+
+let activeEl = null;
+
+function openPanel(el) {
+  if (el.dataset.hl) return;
+  const cat  = el.dataset.cat;
+  const bizs = allGroups[cat] || [];
+  const bg   = el.style.background;
+
+  if (activeEl === el) { closePanel(); return; }
+  if (activeEl) activeEl.classList.remove('on');
+  activeEl = el;
+  el.classList.add('on');
+
+  document.getElementById('phn').textContent = cat.toUpperCase();
+  document.getElementById('phn').style.color = bg;
+  document.getElementById('phc').textContent = bizs.length + ' Yelp-rated nearby';
+
+  document.getElementById('plist').innerHTML = bizs.length
+    ? bizs.map(b => `
+        <div class="bi">
+          <div class="bin">${b.n}</div>
+          ${b.sub ? `<div class="bim" style="color:#c9a84c">${b.sub}</div>` : ''}
+          ${b.addr ? `<div class="bim">${b.addr}</div>` : ''}
+          <div class="bilinks">
+            ${b.r ? `<span style="font-size:.52rem;background:#FF6600;color:#fff;padding:2px 7px;font-weight:700">★ ${b.r}</span>` : ''}
+            ${b.url
+              ? `<a href="${b.url}" target="_blank" onclick="event.stopPropagation()"
+                   style="font-size:.54rem;background:#B22234;color:#fff;padding:3px 8px;text-decoration:none;font-weight:600">Yelp →</a>`
+              : ''}
+            <a href="https://maps.google.com/?q=${encodeURIComponent(b.n+' Phoenix AZ')}"
+               target="_blank" onclick="event.stopPropagation()"
+               style="font-size:.54rem;background:#1A73E8;color:#fff;padding:3px 8px;text-decoration:none;font-weight:600">Maps →</a>
+            ${b.addr ? `<a href="https://waymo.com/waymo-one/?destination=${encodeURIComponent(b.addr)}"
+               target="_blank" onclick="event.stopPropagation()"
+               style="font-size:.54rem;background:#1a1a1a;color:#fff;padding:3px 8px;text-decoration:none;font-weight:600">🚗 Waymo</a>` : ''}
+          </div>
+        </div>`).join('')
+    : `<div style="padding:20px;font-size:.5rem;color:#aaa;text-align:center">
+         This category didn't return Yelp listings within range.<br>
+         Check back as Yelp updates.
+       </div>`;
+
+  document.getElementById('panel').classList.add('open');
+}
+
+function closePanel() {
+  if (activeEl) { activeEl.classList.remove('on'); activeEl = null; }
+  document.getElementById('panel').classList.remove('open');
+}
+
+function sms() {
+  window.open('sms:+12132158870?body='+encodeURIComponent('Hi, I saw your Laveen property on Requation. Can we connect?'));
+}
+
+async function sendContact() {
+  const name  = (document.getElementById('ct-name').value || '').trim();
+  const phone = (document.getElementById('ct-phone').value || '').trim() || 'not provided';
+  const msg   = (document.getElementById('ct-msg').value || '').trim();
+  const st    = document.getElementById('ct-status');
+  if (!name || !msg) { st.textContent = 'Please enter your name and message.'; st.style.color='#c62828'; return; }
+  st.textContent = 'Sending…'; st.style.color = '#777';
+  try {
+    const r = await fetch('/api/twilio', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, phone, message: msg, subject: 'Urban Farmhouse — Requation Inquiry' })
+    });
+    if (!r.ok) throw new Error('api');
+    st.textContent = '✓ Message sent. Owner will respond within 24 hours.';
+    st.style.color = '#2e7d32';
+  } catch {
+    window.open('sms:+12132158870?body=' + encodeURIComponent('Hi, my name is ' + name + '. ' + msg));
+    st.textContent = 'Opening SMS as fallback.'; st.style.color = '#777';
+  }
+}
+
+loadDirectory();
+</script>
+</body>
+</html>

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>Requation · Urban Farmhouse · Laveen AZ</title>
+  <title>Laveen Village · Phoenix AZ 85339 · Requation Hyperlocal</title>
   <meta property="og:type"        content="website">
   <meta property="og:url"         content="https://requation.com/laveen">
   <meta property="og:title"       content="Urban Farmhouse — Requation Laveen AZ">
@@ -187,6 +187,15 @@
     .dir-addr { font-size:.67rem; color:var(--text-muted); margin-top:1px; }
     .dir-empty { padding:24px 20px; text-align:center; font-size:.75rem; color:var(--text-muted); font-style:italic; }
 
+    /* Claude's Cube */
+    #panel-cube{display:grid;grid-template-columns:repeat(5,1fr);gap:3px;padding:6px 10px 4px}
+    .pcell{border-radius:5px;padding:6px 2px;text-align:center;cursor:pointer;transition:filter .15s,transform .12s,outline .1s;user-select:none;color:#fff}
+    .pcell:hover{filter:brightness(1.2);transform:scale(1.06)}
+    .pcell.pactive{outline:2px solid var(--gold);outline-offset:1px;filter:brightness(1.25)}
+    .pcell-icon{font-size:.9rem;display:block;line-height:1.2}
+    .pcell-label{font-size:.3rem;font-family:'DM Mono',monospace;letter-spacing:.04em;text-transform:uppercase;margin-top:1px;color:rgba(255,255,255,.88);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    #cube-results{padding:0 8px;max-height:240px;overflow-y:auto}
+
     .waymo-section { margin:16px 20px; border:1px solid var(--waymo-border); overflow:hidden; background:var(--waymo-dim); }
     .waymo-header { background:rgba(26,115,232,.1); padding:13px 17px; display:flex; align-items:center; gap:12px; border-bottom:1px solid var(--waymo-border); }
     .waymo-icon { font-size:1.4rem; }
@@ -204,6 +213,10 @@
     .panel-cta { padding:13px 20px 18px; display:flex; flex-direction:column; gap:8px; border-top:2px solid var(--ink); flex-shrink:0; background:var(--cream); }
     .btn-primary { width:100%; padding:12px; background:var(--ink); color:var(--cream); border:none; font-family:'Source Serif 4',serif; font-size:.66rem; font-weight:600; letter-spacing:.18em; text-transform:uppercase; cursor:pointer; transition:background .2s; }
     .btn-secondary { width:100%; padding:11px; background:transparent; color:var(--ink); border:1px solid var(--rule-heavy); font-family:'Source Serif 4',serif; font-size:.66rem; letter-spacing:.18em; text-transform:uppercase; cursor:pointer; transition:background .2s; }
+    .panel-child-nav { display:flex; border:1px solid var(--rule-heavy); overflow:hidden; margin-bottom:2px; }
+    .pcn-link { flex:1; text-align:center; font-family:'DM Mono',monospace; font-size:.46rem; letter-spacing:.1em; text-transform:uppercase; color:var(--gold); text-decoration:none; padding:8px 2px; border-right:1px solid var(--rule-heavy); transition:background .15s,color .15s; }
+    .pcn-link:last-child { border-right:none; }
+    .pcn-link:hover { background:var(--ink); color:var(--cream); }
 
     .modal-overlay { display:none; position:fixed; inset:0; background:rgba(28,28,28,.55); z-index:200; align-items:center; justify-content:center; backdrop-filter:blur(3px); }
     .modal-overlay.active { display:flex; }
@@ -283,7 +296,6 @@
   </div>
   <nav>
     <button onclick="goHome()">Home</button>
-    <a href="/dtla">Los Angeles</a>
     <button onclick="openModal('about')">About</button>
     <button onclick="openModal('contact')">Contact</button>
   </nav>
@@ -293,6 +305,7 @@
   <iframe id="yt-frame-strip" src="" allow="autoplay; encrypted-media" allowfullscreen></iframe>
   <div id="yt-overlay" onclick="toggleStripSound()"></div>
   <div id="yt-label">▶ Loading…</div>
+  <a id="yt-events-link" href="#" target="_blank" style="display:none;position:absolute;top:7px;right:8px;font-family:'DM Mono',monospace;font-size:.40rem;letter-spacing:.1em;text-transform:uppercase;color:#fff;background:rgba(0,0,0,.55);padding:3px 7px;border-radius:2px;text-decoration:none;z-index:5">Events →</a>
 </div>
 
 <div id="panel">
@@ -303,7 +316,7 @@
     </div>
     <div class="panel-title" onclick="goHome()">Urban Farmhouse</div>
     <div class="panel-subtitle">11403 S 27th Dr · Laveen, AZ 85339</div>
-    <button id="panel-close" onclick="closePanel()" title="Close">
+    <button id="panel-close" onclick="window.location.href='/laveenlocal'" title="→ LaveenLocal map">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 115 100" width="26" height="26" style="display:block">
         <text x="4" y="42" font-family="EB Garamond,Georgia,serif" font-size="46" font-weight="700" font-style="italic" fill="#B22234">r</text>
         <line x1="31" y1="76" x2="50" y2="41" stroke="#7A7A7A" stroke-width="6" stroke-linecap="round"/>
@@ -371,9 +384,12 @@
       <div id="fav-list-laveen"></div>
     </div>
 
+    <!-- Directory — Claude's Cube -->
     <div class="tab-pane" id="tab-directory">
-      <input class="dir-search" id="dir-search" placeholder="Search businesses, categories…" oninput="filterDir()">
-      <div id="dir-list"><div class="dir-empty">Loading directory…</div></div>
+      <div style="padding:6px 12px 2px;font-family:'DM Mono',monospace;font-size:.4rem;letter-spacing:.14em;text-transform:uppercase;color:var(--gold)">Tap a category — All ZIPs</div>
+      <div id="panel-cube"></div>
+      <div id="cube-results"></div>
+      <div id="dir-list" style="display:none"></div>
     </div>
 
     <div class="tab-pane" id="tab-waymo">
@@ -401,15 +417,19 @@
         <p class="section-text">The autonomous vehicle era rewrites real estate value. Proximity to Waymo stops becomes the new walkability score — a quantifiable, searchable signal on Google Maps that surfaces your property to buyers who live AV-first.</p>
         <p class="section-text" style="margin-top:11px">Requation makes this visible — aerial, interactive, and discoverable at the exact moment a buyer is navigating their next neighborhood from above.</p>
         <div class="section-title" style="margin-top:18px">The Requation Vision</div>
-        <p class="section-text">A living 3D map where every listing, every business, and every Waymo stop is a connected, searchable data point — not a static pin. Real estate intelligence at the speed of Maps.</p>
+        <p class="section-text">A living 3D map where every listing, every business, and every Waymo stop is a connected, searchable data point — not a static pin. Hyperlocal intelligence at the speed of Maps.</p>
       </div>
       <div style="height:20px"></div>
     </div>
 
   </div>
   <div class="panel-cta">
+    <div class="panel-child-nav">
+      <a href="/desertlife" class="pcn-link">Desert Life</a>
+      <a href="/desertlife/phoenix" class="pcn-link">Phoenix</a>
+      <a href="/desertlife/scottsdale" class="pcn-link">Scottsdale</a>
+    </div>
     <button class="btn-primary" onclick="openModal('contact')">Contact Owner</button>
-    <button class="btn-secondary" onclick="openModal('about')">r/Σ — Our Mission</button>
   </div>
 </div>
 
@@ -419,7 +439,7 @@
   <div class="modal">
     <button class="modal-close" onclick="closeModal('about')">&#x2715;</button>
     <span class="modal-tag">Who We Are</span>
-    <div class="modal-title">Real Estate Intelligence</div>
+    <div class="modal-title">Hyperlocal</div>
     <div class="modal-body">I needed to sell my house. Not because I wanted to. Because I had to.<br><br>The MLS controls 80% of the American real estate market. It is a private, for-profit syndicate — not a public utility, not a cooperative, not a service. A corporation. Far away. Collecting both sides of every transaction through a doctrine called procuring cause, until 2024, when the courts finally said enough.<br><br>I said it sooner.<br><br>Requation is an effort to change the real estate equation — from MegaCorp to every American. Not a listing site. Not a portal. A map. Seen from above, in three dimensions, the way a city actually works. Every property in context. Every neighborhood alive with the intelligence that buyers deserve and sellers have been denied.<br><br>I have done this before. In White Center, Seattle — one of America's most forgotten neighborhoods — I once brought fruit to a food desert. Just showed up with produce where there was none. Nobody paid me. That is not the point. The point is that neighborhoods breathe. They need tending.<br><br>Requation tends them.<br><br>Not to disrupt. Not to raise a Series A. To sell my own properties first — and then to hand every American owner the same map that corporations have kept to themselves.<br><br>r/Σ = Real Estate as an Equation. Finally solved.</div>
     <div class="modal-divider"></div>
   </div>
@@ -490,13 +510,13 @@ const SB_KEY  = 'sb_publishable_T6XISHd9O2Ol0raPaEASqQ_klUXnyY3';
 const SB_HDRS = { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY };
 
 const STRIP_MONUMENTS = [
-  { name:'South Mountain Park', venue:'City of Phoenix · 16,000 Acres',      query:'South Mountain Park Phoenix hiking trails' },
+  { name:'South Mountain Park', venue:'City of Phoenix · 16,000 Acres',      query:'South Mountain Park Phoenix hiking trails',          eventsUrl:'https://www.phoenix.gov/parks/trails/locations/south-mountain' },
   { name:'Sky Harbor Airport',  venue:'Phoenix Sky Harbor International',     query:'Phoenix Sky Harbor Airport travel' },
-  { name:'Chase Field',         venue:'Arizona Diamondbacks · MLB',           query:'Arizona Diamondbacks baseball Chase Field' },
-  { name:'State Farm Stadium',  venue:'Arizona Cardinals · NFL',              query:'Arizona Cardinals football State Farm Stadium' },
-  { name:'Footprint Center',    venue:'Phoenix Suns · NBA',                   query:'Phoenix Suns basketball Footprint Center' },
-  { name:'Arizona Biltmore',    venue:'Historic Resort · Frank Lloyd Wright', query:'Arizona Biltmore resort luxury Phoenix' },
-  { name:'Desert Botanical',    venue:'Desert Botanical Garden · Phoenix',    query:'Desert Botanical Garden Phoenix flowers' }
+  { name:'Chase Field',         venue:'Arizona Diamondbacks · MLB',           query:'Arizona Diamondbacks baseball Chase Field',           eventsUrl:'https://www.mlb.com/dbacks/schedule' },
+  { name:'State Farm Stadium',  venue:'Arizona Cardinals · NFL',              query:'Arizona Cardinals football State Farm Stadium',       eventsUrl:'https://www.azcardinals.com/schedule/' },
+  { name:'Footprint Center',    venue:'Phoenix Suns · NBA',                   query:'Phoenix Suns basketball Footprint Center',            eventsUrl:'https://www.nba.com/suns/schedule' },
+  { name:'Arizona Biltmore',    venue:'Historic Resort · Frank Lloyd Wright', query:'Arizona Biltmore resort luxury Phoenix',              eventsUrl:'https://www.arizonabiltmore.com/events/' },
+  { name:'Desert Botanical',    venue:'Desert Botanical Garden · Phoenix',    query:'Desert Botanical Garden Phoenix flowers',             eventsUrl:'https://dbg.org/events/' }
 ];
 
 /* ── Carousel ── */
@@ -532,21 +552,26 @@ function switchTab(name) {
   });
   document.querySelectorAll('.tab-pane').forEach(p => p.classList.toggle('active', p.id === 'tab-' + name));
   document.getElementById('panel-body').scrollTop = 0;
-  if (name === 'directory') loadDirectory();
+  if (name === 'directory') {
+    renderPanelCube();
+    const res = document.getElementById('cube-results');
+    if (res && !dirLoaded) res.innerHTML = `<div class="dir-empty" style="font-size:.6rem">Tap a category above ↑</div>`;
+    loadDirectory();
+  }
   if (name === 'favorites') renderLaveenFavs();
 }
 
 /* ── Favorites ── */
 const LAVEEN_FAVS = [
-  { name: 'Los Dos Molinos',        slug: 'laveenlocal-los-dos-molinos',  cat: 'New Mexico Kitchen',          addr: '8646 S Central Ave, Phoenix AZ 85042',          lat: 33.3671, lng: -112.0739 },
-  { name: 'T-Bone Steakhouse',      slug: 'laveenlocal-tbone-steakhouse', cat: 'Steakhouse · South Mountain', addr: '10037 S 19th Ave, Phoenix AZ 85041',            lat: 33.3554, lng: -112.1004 },
-  { name: "Rooster's Roost",        slug: 'laveenlocal-roosters-roost',   cat: 'Bar · Live Music',             addr: '8383 S 48th St, Phoenix AZ 85044',              lat: 33.3703, lng: -111.9735 },
-  { name: 'Wild Horse Pass Casino', slug: 'laveenlocal-wild-horse-pass',  cat: 'Casino · Resort',              addr: '5040 W Wild Horse Pass Blvd, Chandler AZ 85226', lat: 33.2800, lng: -111.9700 },
-  { name: 'South Mountain Park',    slug: 'laveenlocal-south-mountain',   cat: 'Park · 16,000 acres',          addr: '10919 S Central Ave, Phoenix AZ 85042',         lat: 33.3310, lng: -112.0735 },
-  { name: 'In-N-Out Burger',        slug: 'laveenlocal-in-n-out',         cat: 'Burgers · Laveen',             addr: '5940 W Baseline Rd, Laveen AZ 85339',           lat: 33.3653, lng: -112.1573 },
-  { name: "Raising Cane's",         slug: 'laveenlocal-raising-canes',    cat: 'Chicken · Laveen',             addr: '5950 W Baseline Rd, Laveen AZ 85339',           lat: 33.3654, lng: -112.1575 },
-  { name: 'Paris Baguette',         slug: 'laveenlocal-paris-baguette',   cat: 'Bakery · Baseline',            addr: '3220 E Baseline Rd, Phoenix AZ 85042',          lat: 33.3650, lng: -112.0167 },
-  { name: 'Einstein Bros Bagels',   slug: 'laveenlocal-einstein-bagels',  cat: 'Bagels · Baseline',            addr: '3211 E Baseline Rd, Phoenix AZ 85042',          lat: 33.3650, lng: -112.0170 },
+  { name: 'Los Dos Molinos',        slug: 'laveenlocal-los-dos-molinos',  cat: 'New Mexico Kitchen',          addr: '8646 S Central Ave, Phoenix AZ 85042',           lat: 33.3671406, lng: -112.0738578 },
+  { name: 'T-Bone Steakhouse',      slug: 'laveenlocal-tbone-steakhouse', cat: 'Steakhouse · South Mountain', addr: '10037 S 19th Ave, Phoenix AZ 85041',             lat: 33.3554406, lng: -112.1004140 },
+  { name: "Rooster's Roost",        slug: 'laveenlocal-roosters-roost',   cat: 'Bar · Live Music',             addr: '8383 S 48th St, Phoenix AZ 85044',               lat: 33.3702977, lng: -111.9733725 },
+  { name: 'Wild Horse Pass Casino', slug: 'laveenlocal-wild-horse-pass',  cat: 'Casino · Resort',              addr: '5040 S Maricopa Rd, Chandler AZ 85226',          lat: 33.2815857, lng: -111.9737159 },
+  { name: 'South Mountain Park',    slug: 'laveenlocal-south-mountain',   cat: 'Park · 16,000 acres',          addr: '10919 S Central Ave, Phoenix AZ 85042',          lat: 33.3470300, lng: -112.0844480 },
+  { name: 'In-N-Out Burger',        slug: 'laveenlocal-in-n-out',         cat: 'Burgers · Laveen',             addr: '5940 W Baseline Rd, Laveen AZ 85339',            lat: 33.3779798, lng: -112.1866421 },
+  { name: "Raising Cane's",         slug: 'laveenlocal-raising-canes',    cat: 'Chicken · Laveen',             addr: '5950 W Baseline Rd, Laveen AZ 85339',            lat: 33.3780270, lng: -112.1874405 },
+  { name: 'Paris Baguette',         slug: 'laveenlocal-paris-baguette',   cat: 'Bakery · Baseline',            addr: '3220 E Baseline Rd, Phoenix AZ 85042',           lat: 33.3789130, lng: -112.0110059 },
+  { name: 'Einstein Bros Bagels',   slug: 'laveenlocal-einstein-bagels',  cat: 'Bagels · Baseline',            addr: '3211 E Baseline Rd, Phoenix AZ 85042',           lat: 33.3779285, lng: -112.0125085 },
 ];
 
 function flyToFav(lat, lng) {
@@ -563,29 +588,43 @@ function renderLaveenFavs() {
   const el = document.getElementById('fav-list-laveen');
   if (!el || el.dataset.loaded) return;
   el.dataset.loaded = '1';
-  el.innerHTML = `
-    <a href="/desertlife/phoenix" style="display:flex;align-items:center;justify-content:space-between;padding:13px 16px;background:var(--ink);text-decoration:none;">
-      <div style="font-family:'Source Serif 4',serif;font-size:.82rem;font-weight:600;color:var(--cream)">Explore Phoenix / Laveen →</div>
-      <div style="font-family:'DM Mono',monospace;font-size:.42rem;letter-spacing:.1em;text-transform:uppercase;color:var(--gold)">Live Map</div>
-    </a>` +
-  LAVEEN_FAVS.map(f => `
-    <div onclick="flyToFav(${f.lat}, ${f.lng})" style="cursor:pointer;display:flex;align-items:center;justify-content:space-between;padding:11px 16px;border-bottom:1px solid var(--rule);transition:background .15s;" onmouseover="this.style.background='var(--cream-2)'" onmouseout="this.style.background=''">
+  const pages = [
+    { href:'/laveenlocal',            label:"♥ LaveenLocal",         sub:"Vik's AZ favorites · Yelp · Google Maps 3D",  badge:'AZ' },
+    { href:'/desertlife/phoenix',     label:'Phoenix · South Mtn',   sub:'South Phoenix · Laveen corridor',              badge:'PHX' },
+    { href:'/desertlife/scottsdale',  label:'Old Town Scottsdale',   sub:'Scottsdale dining · arts · nightlife',          badge:'SDALE' },
+  ];
+  el.innerHTML = pages.map(p => `
+    <a href="${p.href}" style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1.5px solid var(--rule-heavy);text-decoration:none;transition:background .15s;" onmouseover="this.style.background='var(--cream-2)'" onmouseout="this.style.background=''">
       <div>
-        <div style="font-family:'Source Serif 4',Georgia,serif;font-size:.86rem;font-weight:600;color:var(--ink)">♥ ${f.name}</div>
-        <div style="font-family:'DM Mono',monospace;font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);margin-top:3px">${f.cat} · ${f.addr}</div>
+        <div style="font-family:'Source Serif 4',Georgia,serif;font-size:.86rem;font-weight:600;color:var(--ink)">${p.label}</div>
+        <div style="font-family:'DM Mono',monospace;font-size:.40rem;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted);margin-top:3px">${p.sub}</div>
       </div>
-      <div style="font-family:'DM Mono',monospace;font-size:.62rem;letter-spacing:.08em;color:var(--gold);flex-shrink:0;margin-left:12px">Fly to →</div>
-    </div>`).join('');
+      <div style="font-family:'DM Mono',monospace;font-size:.38rem;letter-spacing:.12em;text-transform:uppercase;background:var(--gold-dim);color:var(--gold);border:1px solid var(--gold-border);padding:3px 7px;border-radius:2px;white-space:nowrap;margin-left:12px">${p.badge}</div>
+    </a>`).join('');
 }
 
 /* ── Directory ── */
 const DIR_ICONS = {
-  'Grocery':'🛒','Hardware':'🔨','Coffee':'☕','Cafes':'☕','Cafe':'☕','Coffee & Tea':'☕',
-  'Bakeries':'🥐','Cinema':'🎬','Dental':'🦷','Gym':'💪','Fashion':'👗',
-  'FastFood':'🍔','Ice Cream & Frozen Yogurt':'🍦','Desserts':'🍦',
-  'Restaurants':'🍽️','restaurant':'🍽️','food':'🍴','bars':'🍺',
-  'gyms':'💪','grocery':'🛒','shopping':'🛍️','arts':'🎭',
-  'Museums':'🖼️','Fitness & Instruction':'💪','Juice Bars & Smoothies':'🥤'
+  'Restaurants':'🍽️','Restaurant':'🍽️','Food':'🍴','Fast Food':'🍔','FastFood':'🍔',
+  'Burgers':'🍔','Pizza':'🍕','Sandwiches':'🥪','Tacos':'🌮','Barbeque':'🥩',
+  'Steakhouses':'🥩','Seafood':'🦞','Sushi Bars':'🍣','Japanese':'🍣',
+  'Korean':'🍜','Chinese':'🍜','Thai':'🍜','Indian':'🍛','Italian':'🍝',
+  'Mexican':'🌮','Mediterranean':'🫒','Persian/Iranian':'🫒',
+  'Breakfast & Brunch':'🍳','Bakeries':'🥐','Desserts':'🍰',
+  'Ice Cream & Frozen Yogurt':'🍦','Gelato':'🍦','Shaved Ice':'🧊',
+  'Bubble Tea':'🧋','Juice Bars & Smoothies':'🥤','Coffee':'☕',
+  'Coffee & Tea':'☕','Cafes':'☕','Cafe':'☕',
+  'Bars':'🍺','Wine Bars':'🍷','Nightlife':'🎶',
+  'Grocery':'🛒','Grocery Stores':'🛒','Fruits & Veggies':'🥦',
+  'Specialty Food':'🧺','Farmers Market':'🌽',
+  'Gym':'💪','Gyms':'💪','Fitness & Instruction':'💪','Active Life':'🏃',
+  'Cinema':'🎬','Arts & Entertainment':'🎭',
+  'Hotels':'🏨','Hotels & Travel':'🏨',
+  'Shopping':'🛍️','Fashion':'👗','Shoes':'👟','Cosmetics':'💄',
+  'Dental':'🦷','MedSpa':'💆','Health & Medical':'🏥',
+  'Hardware':'🔨','Home Services':'🔧',
+  'Food Trucks':'🚚','Caterers':'👨‍🍳',
+  'Parks':'🌳','Pet':'🐾',
 };
 const DIR_ZIPS = '85339,85041,85042,85044';
 let dirData = [], dirLoaded = false;
@@ -595,36 +634,44 @@ function normName(s) { return (s||'').toLowerCase().replace(/[^a-z0-9]/g,'').sli
 async function loadDirectory() {
   if (dirLoaded) return;
   const el = document.getElementById('dir-list');
-  el.innerHTML = '<div class="dir-empty">Loading…</div>';
+  if (el) el.innerHTML = '<div class="dir-empty">Loading…</div>';
   try {
-    const [sbRes, yelpRes] = await Promise.allSettled([
-      fetch(`${SB_URL}/rest/v1/restaurants?select=name,category,address,zip,yelp_url,waymo_url&zip=in.(${DIR_ZIPS})&limit=500&order=name.asc`, { headers: SB_HDRS }).then(r => r.json()),
-      fetch(`/api/yelp?zip=85339&categories=food,shopping,active,arts&rating=3.5`).then(r => r.json())
-    ]);
-    const sbRaw   = (sbRes.status==='fulfilled' && Array.isArray(sbRes.value)) ? sbRes.value : [];
-    const yelpBiz = (yelpRes.status==='fulfilled' && yelpRes.value.businesses) ? yelpRes.value.businesses : [];
+    const r = await fetch(`/api/yelp?lat=${CENTER.lat}&lng=${CENTER.lng}&radius=8000&rating=4`);
+    const data = await r.json();
+    if (!data.businesses?.length) {
+      if (el) el.innerHTML = '<div class="dir-empty">No listings found for this area</div>';
+      return;
+    }
     const seen = new Set();
-    const fromSB = sbRaw
+    dirData = data.businesses
       .filter(b => { const k=normName(b.name); if(seen.has(k)) return false; seen.add(k); return true; })
-      .map(b => ({ name:b.name, category:b.category||'Business', address:b.address||b.zip||'', yelp_url:b.yelp_url||null, waymo_url:b.waymo_url||null, source:'sb', _norm:normName(b.name) }));
-    const sbSet = new Set(fromSB.map(b=>b._norm));
-    const fromYelp = yelpBiz
-      .filter(b => b.name && !sbSet.has(normName(b.name)))
-      .map(b => ({ name:b.name, category:(b.categories||[{}])[0].title||'Business', address:b.location?b.location.address1||'':'', rating:b.rating, yelp_url:b.url||null, waymo_url:null, source:'yelp', _norm:normName(b.name) }));
-    dirData = [...fromSB, ...fromYelp].sort((a,b) => a.name.localeCompare(b.name));
+      .map(b => ({
+        name:     b.name,
+        category: b.categories?.[0]?.title || 'Business',
+        address:  b.location?.address1 || '',
+        rating:   b.rating || null,
+        yelp_url: b.url || null,
+        waymo_url:'https://waymo.com/waymo-one/?destination=' + encodeURIComponent(b.location?.address1 || b.name),
+      }))
+      .sort((a,b) => a.name.localeCompare(b.name));
     dirLoaded = true;
     renderDir(dirData);
+    renderPanelCube();
+    if (pActiveCell) pActiveCell.click();
   } catch(e) {
-    document.getElementById('dir-list').innerHTML = '<div class="dir-empty">Could not load directory</div>';
+    if (el) el.innerHTML = '<div class="dir-empty">Could not load directory</div>';
+    const res = document.getElementById('cube-results');
+    if (res) res.innerHTML = `<div class="dir-empty">Yelp data unavailable — check connection</div>`;
   }
 }
 
 function renderDir(data) {
   const el = document.getElementById('dir-list');
+  if (!el) return;
   if (!data.length) { el.innerHTML = '<div class="dir-empty">No results</div>'; return; }
   el.innerHTML = data.map(b => {
     const icon = DIR_ICONS[b.category] || '🏢';
-    const ratingBadge = (b.source==='yelp'&&b.rating) ? `<span style="font-size:.52rem;background:#FF6600;color:#fff;padding:2px 6px;border-radius:2px;font-weight:600">★ ${b.rating}</span>` : '';
+    const ratingBadge = b.rating ? `<span style="font-size:.52rem;background:#FF6600;color:#fff;padding:2px 6px;border-radius:2px;font-weight:600">★ ${b.rating}</span>` : '';
     const yelpBtn = b.yelp_url ? `<a href="${b.yelp_url}" target="_blank" onclick="event.stopPropagation()" style="font-size:.58rem;background:#B22234;color:#fff;padding:3px 8px;border-radius:2px;text-decoration:none;font-weight:600">Yelp →</a>` : '';
     const waymoBtn = b.waymo_url ? `<a href="${b.waymo_url}" target="_blank" onclick="event.stopPropagation()" style="font-size:.58rem;background:#1A73E8;color:#fff;padding:3px 8px;border-radius:2px;text-decoration:none;font-weight:600">🚗 Waymo</a>` : '';
     const links = (yelpBtn||waymoBtn) ? `<div style="display:flex;gap:6px;margin-top:5px;align-items:center">${ratingBadge}${yelpBtn}${waymoBtn}</div>` : (ratingBadge ? `<div style="margin-top:4px">${ratingBadge}</div>` : '');
@@ -632,8 +679,93 @@ function renderDir(data) {
   }).join('');
 }
 function filterDir() {
-  const q = document.getElementById('dir-search').value.toLowerCase().trim();
+  const inp = document.getElementById('dir-search');
+  if (!inp) return;
+  const q = inp.value.toLowerCase().trim();
   renderDir(q ? dirData.filter(b => b.name.toLowerCase().includes(q)||b.category.toLowerCase().includes(q)) : dirData);
+}
+
+/* ── Claude's Cube ── */
+/* RULE: Food & Drink = master bucket (all food/drink except taco trucks)
+         Wellness & Aesthetics = master bucket (botox, facial, salon, hydration, spa, etc.) */
+const PCUBE_CATS = [
+  /* ── Master Buckets ── */
+  {icon:'🍽️',label:'Food & Drink',   color:'#8B2500',match:['restaurant','food','cafe','coffee','bar','juice','smoothie','vegan','vegetarian','delivery','takeout','boba','brewery','pub','bistro','diner','pizza','burger','sushi','sandwich','wine','cocktail','lounge','nightlife','italian','mexican','asian','american','buffet','brunch','bakery']},
+  {icon:'💆',label:'Wellness',        color:'#7B1D5A',match:['botox','facial','salon','hair','nail','spa','massage','hydration','aesthetic','beauty','skincare','wax','lash','medspa','blowout','barber','barbershop','iv therapy','vitamin','anti-aging','threading','brow','med spa','sugaring','microblading','eyelash','filler','treatment']},
+  /* ── Core Categories ── */
+  {icon:'🛒',label:'Grocery',         color:'#9A6B1F',match:['grocery','supermarket','whole foods','trader joe','market','convenience','bodega']},
+  {icon:'🏋️',label:'Fitness',        color:'#1E6B3C',match:['gym','yoga','pilates','crossfit','fitness','workout','sport','boxing','martial arts','dance','barre','cycling','spin']},
+  {icon:'🏥',label:'Medical',         color:'#0277BD',match:['doctor','dentist','medical','clinic','hospital','urgent care','optometrist','chiropractor','dermatologist','psychiatrist','therapy','mental health']},
+  {icon:'💊',label:'Pharmacy',        color:'#1A5C8A',match:['pharmacy','drugstore','cvs','walgreens','rite aid','compounding']},
+  {icon:'🛍️',label:'Shopping',       color:'#7A5C00',match:['shopping','clothing','boutique','retail','fashion','mall','apparel','shoes','accessories','jewelry','electronics','home goods']},
+  {icon:'🎭',label:'Arts',            color:'#5C1A3A',match:['museum','art','gallery','culture','concert','opera','ballet','performance','exhibit','theater','show']},
+  {icon:'🏨',label:'Hotels',          color:'#1B4F8A',match:['hotel','lodging','motel','inn','hostel','airbnb','resort','suites']},
+  {icon:'🌳',label:'Parks',           color:'#2D6A4F',match:['park','outdoor','nature','recreation','hiking','garden','beach','trail','campground']},
+  {icon:'🎬',label:'Film',            color:'#1A1F3A',match:['movie','cinema','film','theater','screening','imax','drive-in']},
+  {icon:'📚',label:'Library',         color:'#2C4A6E',match:['library','bookstore','book','reading','archive']},
+  {icon:'🐾',label:'Pets',            color:'#C0640A',match:['pet','veterinarian','vet','dog','cat','animal','grooming','kennel','aquarium','pet store']},
+  {icon:'🏦',label:'Finance',         color:'#0D3349',match:['bank','credit union','financial','atm','insurance','accounting','tax','investment','mortgage']},
+  {icon:'🅿️',label:'Parking',        color:'#455A64',match:['parking','garage','valet','lot']},
+  {icon:'🌮',label:'Taco Trucks',     color:'#C84B00',match:['taco truck','food truck','street food','lonchera','cart','mobile food','roach coach']},
+  {icon:'🎉',label:'Events',          color:'#6B2D7A',match:['event','venue','concert hall','banquet','wedding','party','festival','nightclub','club','lounge']},
+  {icon:'🏫',label:'Education',       color:'#4527A0',match:['school','tutoring','learning','academy','college','university','education','daycare','preschool','afterschool']},
+  {icon:'🛠️',label:'Services',       color:'#37474F',match:['auto','repair','plumber','electrician','cleaning','laundry','dry clean','locksmith','moving','storage','contractor']},
+  {icon:'🏪',label:'Corner Store',    color:'#7D2E23',match:['corner store','deli','bodega','liquor','convenience','news','tobacco']},
+  {icon:'🌿',label:'Cannabis',        color:'#33691E',match:['cannabis','dispensary','cbd','marijuana','weed','hemp','recreational','medical marijuana']},
+  {icon:'🚌',label:'Transit',         color:'#263238',match:['transit','bus','metro','rail','subway','train','station','commute','lyft','uber','taxi']},
+  {icon:'🏠',label:'Real Estate',     color:'#4E342E',match:['real estate','realty','property','apartment','rental','leasing','broker','realtor']},
+  {icon:'🤝',label:'Pro Services',    color:'#3E2723',match:['attorney','lawyer','notary','insurance','accountant','financial advisor','consultant','hr','staffing','recruitment']},
+  {icon:'🏢',label:'More',            color:'#212121',match:[]},
+];
+let pActiveCell = null, pActiveCellIdx = null;
+
+function renderPanelCube() {
+  const cube = document.getElementById('panel-cube');
+  if (!cube) return;
+  cube.innerHTML = PCUBE_CATS.map((c, i) =>
+    `<div class="pcell" style="background:${c.color}" onclick="selectPCell(this,${i})">` +
+    `<span class="pcell-icon">${c.icon}</span>` +
+    `<span class="pcell-label">${c.label}</span>` +
+    `</div>`
+  ).join('');
+  if (pActiveCellIdx !== null) {
+    const cells = cube.querySelectorAll('.pcell');
+    if (cells[pActiveCellIdx]) { cells[pActiveCellIdx].classList.add('pactive'); pActiveCell = cells[pActiveCellIdx]; }
+  }
+}
+
+function selectPCell(el, idx) {
+  if (pActiveCell) pActiveCell.classList.remove('pactive');
+  el.classList.add('pactive');
+  pActiveCell = el;
+  pActiveCellIdx = idx;
+  const cat = PCUBE_CATS[idx];
+  const res = document.getElementById('cube-results');
+  if (!res) return;
+  if (!dirLoaded) {
+    res.innerHTML = `<div class="dir-empty">Fetching Yelp data — one moment…</div>`;
+    return;
+  }
+  const words = cat.match.length ? cat.match : null;
+  const filtered = words
+    ? dirData.filter(b => words.some(w =>
+        b.category.toLowerCase().includes(w) || b.name.toLowerCase().includes(w)
+      ))
+    : dirData;
+  if (!filtered.length) {
+    res.innerHTML = `<div class="dir-empty">No ${cat.label} listings found nearby</div>`;
+    return;
+  }
+  res.innerHTML = filtered.map(b => {
+    const stars  = b.rating   ? `<span style="font-size:.5rem;background:#FF6600;color:#fff;padding:1px 4px;border-radius:2px;font-weight:700">★${b.rating}</span>` : '';
+    const yelp   = b.yelp_url ? `<a href="${b.yelp_url}" target="_blank" onclick="event.stopPropagation()" style="font-size:.52rem;background:#B22234;color:#fff;padding:2px 5px;border-radius:2px;text-decoration:none;font-weight:600">Yelp</a>` : '';
+    const waymo  = b.waymo_url? `<a href="${b.waymo_url}" target="_blank" onclick="event.stopPropagation()" style="font-size:.52rem;background:#1A73E8;color:#fff;padding:2px 5px;border-radius:2px;text-decoration:none;font-weight:600">🚗 Waymo</a>` : '';
+    return `<div class="dir-card"><div style="flex:1;min-width:0">` +
+      `<div class="dir-name">${b.name}</div>` +
+      (b.address ? `<div class="dir-addr">${b.address}</div>` : '') +
+      `<div style="display:flex;gap:4px;margin-top:3px;align-items:center">${stars}${yelp}${waymo}</div>` +
+      `</div></div>`;
+  }).join('');
 }
 
 /* ── Panel ── */
@@ -660,6 +792,11 @@ function showStrip(idx) {
   const vid = v ? v.id : 'wn9pZDkd6bo';
   document.getElementById('yt-frame-strip').src = `https://www.youtube.com/embed/${vid}?autoplay=1&mute=1&loop=1&playlist=${vid}&controls=0&showinfo=0&rel=0&modestbranding=1`;
   document.getElementById('yt-label').textContent = `▶ ${m.name} · ${m.venue} · Click to unmute`;
+  const evLink = document.getElementById('yt-events-link');
+  if (evLink) {
+    if (m.eventsUrl) { evLink.href = m.eventsUrl; evLink.style.display = 'block'; }
+    else { evLink.style.display = 'none'; }
+  }
   stripMuted = true;
 }
 function toggleStripSound() {

@@ -49,6 +49,9 @@ fs.mkdirSync('dist');
 const HTML_FILES = [
   'gm-landing.html', 'gm-dtla-v1.html', 'map-test.html', 'dtla.html', 'dtla-template.html', 'laveen.html',
   'dashboard.html', 'grid-demo.html', 'mylocal.html', 'laveenlocal.html', 'place.html',
+  'dtla-mall-map.html', 'laveen-mall-map.html',
+  'lalife.html', 'desertlife.html',
+  'cube-template.html',
 ];
 HTML_FILES.forEach(f => {
   if (!fs.existsSync(f)) return;

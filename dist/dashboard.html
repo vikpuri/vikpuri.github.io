@@ -6,8 +6,7 @@
 <title>Requation · Command Center</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Playfair+Display:wght@400;600&display=swap" rel="stylesheet">
-<link href="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.css" rel="stylesheet">
-<script src="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.js"></script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD7UMA5ILPXv9QK2_gvxPVth30MavRd2WQ&loading=async&libraries=marker"></script>
 <style>
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
 :root{
@@ -367,7 +366,7 @@ function rqCheck(pw){return rqHash(pw)===rqGetHash()}
         <div class="kpi-strip">
           <div class="kpi"><div class="kpi-n gold" id="kpi-pois">—</div><div class="kpi-l">POIs</div></div>
           <div class="kpi"><div class="kpi-n green">2</div><div class="kpi-l">Markets</div></div>
-          <div class="kpi"><div class="kpi-n cyan">7</div><div class="kpi-l">Pages</div></div>
+          <div class="kpi"><div class="kpi-n cyan">14</div><div class="kpi-l">Pages</div></div>
         </div>
       </div>
 
@@ -375,7 +374,7 @@ function rqCheck(pw){return rqHash(pw)===rqGetHash()}
       <div>
         <div class="sec-lbl">API Health</div>
         <div class="health-grid">
-          <div class="hrow"><div class="hdot ok"></div><div class="hname">CesiumJS 1.140</div><div class="hnote">Google 3D Tiles · live</div></div>
+          <div class="hrow"><div class="hdot ok"></div><div class="hname">Google Maps JS API</div><div class="hnote">Map ID 96844e6a7bb74a7d5514d3a5</div></div>
           <div class="hrow"><div class="hdot ok" id="h-sb-dot"></div><div class="hname">Supabase DB</div><div class="hnote" id="h-sb-note">querying…</div></div>
           <div class="hrow"><div class="hdot ok"></div><div class="hname">Google Places API</div><div class="hnote" id="h-places-note">⚠ dots desktop-only</div></div>
           <div class="hrow"><div class="hdot ok"></div><div class="hname">Yelp Fusion</div><div class="hnote">POI data</div></div>
@@ -392,13 +391,20 @@ function rqCheck(pw){return rqHash(pw)===rqGetHash()}
       <div>
         <div class="sec-lbl">Pages</div>
         <div class="pages-grid">
-          <a class="prow" href="/" target="_blank"><div class="pdot"></div><div class="purl">/ — Home</div><div class="ptag">INDEX</div></a>
-          <a class="prow" href="/dtla" target="_blank"><div class="pdot"></div><div class="purl">/dtla — South Park</div><div class="ptag">CA</div></a>
-          <a class="prow" href="/lalife" target="_blank"><div class="pdot"></div><div class="purl">/lalife — LA Life</div><div class="ptag">CA</div></a>
+          <a class="prow" href="/" target="_blank"><div class="pdot"></div><div class="purl">/ — Home · Landing</div><div class="ptag">INDEX</div></a>
+          <a class="prow" href="/dtla" target="_blank"><div class="pdot"></div><div class="purl">/dtla — South Park DTLA</div><div class="ptag">CA</div></a>
+          <a class="prow" href="/mylocal" target="_blank"><div class="pdot"></div><div class="purl">/mylocal — DTLA Favorites</div><div class="ptag">CA</div></a>
+          <a class="prow" href="/lalife" target="_blank"><div class="pdot"></div><div class="purl">/lalife — LA Life RPOI</div><div class="ptag">CA</div></a>
+          <a class="prow" href="/lalife/broadway" target="_blank"><div class="pdot"></div><div class="purl">/lalife/broadway</div><div class="ptag">CA</div></a>
+          <a class="prow" href="/lalife/venice" target="_blank"><div class="pdot"></div><div class="purl">/lalife/venice</div><div class="ptag">CA</div></a>
+          <a class="prow" href="/lalife/weho" target="_blank"><div class="pdot"></div><div class="purl">/lalife/weho</div><div class="ptag">CA</div></a>
           <a class="prow" href="/laveen" target="_blank"><div class="pdot"></div><div class="purl">/laveen — Laveen AZ</div><div class="ptag">AZ</div></a>
-          <a class="prow" href="/desertlife" target="_blank"><div class="pdot"></div><div class="purl">/desertlife — Desert Life</div><div class="ptag">AZ</div></a>
-          <a class="prow" href="/dashboard" target="_blank"><div class="pdot" style="background:var(--gold);box-shadow:0 0 5px var(--gold)"></div><div class="purl">/dashboard — This page</div><div class="ptag">ADMIN</div></a>
-          <a class="prow" href="/grid-demo.html" target="_blank"><div class="pdot" style="background:var(--cyan);box-shadow:0 0 5px var(--cyan)"></div><div class="purl">/grid-demo.html — Grid Ref</div><div class="ptag">TOOL</div></a>
+          <a class="prow" href="/laveenlocal" target="_blank"><div class="pdot"></div><div class="purl">/laveenlocal — Laveen Favorites</div><div class="ptag">AZ</div></a>
+          <a class="prow" href="/desertlife" target="_blank"><div class="pdot"></div><div class="purl">/desertlife — Desert Life RPOI</div><div class="ptag">AZ</div></a>
+          <a class="prow" href="/desertlife/phoenix" target="_blank"><div class="pdot"></div><div class="purl">/desertlife/phoenix</div><div class="ptag">AZ</div></a>
+          <a class="prow" href="/desertlife/scottsdale" target="_blank"><div class="pdot"></div><div class="purl">/desertlife/scottsdale</div><div class="ptag">AZ</div></a>
+          <a class="prow" href="/place" target="_blank"><div class="pdot"></div><div class="purl">/place — Place Detail</div><div class="ptag">BOTH</div></a>
+          <a class="prow" href="/dashboard" target="_blank"><div class="pdot" style="background:var(--gold);box-shadow:0 0 5px var(--gold)"></div><div class="purl">/dashboard — Command Center</div><div class="ptag">ADMIN</div></a>
         </div>
       </div>
 
@@ -418,7 +424,7 @@ function rqCheck(pw){return rqHash(pw)===rqGetHash()}
       <div class="map-badge">
         <strong>DTLA</strong> 34.0455 · -118.2587<br>
         <strong>Laveen</strong> 33.3428 · -112.1181<br>
-        <span style="color:var(--t4)">CesiumJS 1.140 · Google Photorealistic 3D Tiles · Vercel</span>
+        <span style="color:var(--t4)">Google Maps JS API · Map ID 96844e6a7bb74a7d5514d3a5 · Vercel</span>
       </div>
     </div>
 
@@ -431,15 +437,15 @@ function rqCheck(pw){return rqHash(pw)===rqGetHash()}
 
     <div class="arch-head">
       <div class="arch-title">Platform Architecture</div>
-      <div class="arch-sub">Requation · CesiumJS + Google Photorealistic 3D · Vercel serverless · Supabase · requation.com</div>
+      <div class="arch-sub">Requation · Google Maps JS API · AdvancedMarkerElement · Vercel serverless · Supabase · requation.com</div>
     </div>
 
     <!-- STAT ROW -->
     <div class="stat-row">
       <div class="stat-box"><div class="stat-n" id="arch-pois">—</div><div class="stat-l">POIs in DB</div></div>
       <div class="stat-box"><div class="stat-n" style="color:var(--green)">2</div><div class="stat-l">Markets Live</div></div>
-      <div class="stat-box"><div class="stat-n" style="color:var(--cyan)">7</div><div class="stat-l">Pages</div></div>
-      <div class="stat-box"><div class="stat-n" style="color:var(--violet)">11</div><div class="stat-l">API Integrations</div></div>
+      <div class="stat-box"><div class="stat-n" style="color:var(--cyan)">14</div><div class="stat-l">Pages</div></div>
+      <div class="stat-box"><div class="stat-n" style="color:var(--violet)">12</div><div class="stat-l">API Integrations</div></div>
       <div class="stat-box"><div class="stat-n" style="color:var(--t3);font-size:1.1rem">33M</div><div class="stat-l">US Licensed Biz (target)</div></div>
     </div>
 
@@ -516,13 +522,13 @@ function rqCheck(pw){return rqHash(pw)===rqGetHash()}
 
       <div class="layer-col">
         <div class="layer-head pres">④ Presentation Layer</div>
-        <div class="layer-box" style="opacity:.5;border-style:dashed">
+        <div class="layer-box" style="opacity:.45;border-style:dashed">
           <div class="lb-title" style="color:var(--t3)">Mapbox GL JS (retired)</div>
-          <div class="lb-body">Standard style · Prototype only.<br>Replaced 2026-04-25.<br>Repo: vikpuri.github.io</div>
+          <div class="lb-body">Prototype only. Replaced 2026-04-25.</div>
         </div>
         <div class="layer-box hi">
-          <div class="lb-title">✓ CesiumJS 1.140 — LIVE</div>
-          <div class="lb-body">Google Photorealistic 3D Tiles<br>DOM overlay pins · postRender<br>flyTo / setView camera<br>Property pages + landing globe</div>
+          <div class="lb-title">✓ Google Maps JS API — LIVE</div>
+          <div class="lb-body">Map ID: <code>96844e6a7bb74a7d5514d3a5</code><br>AdvancedMarkerElement pins<br>moveCamera cinematic reveal<br>Street View + Aerial View tabs</div>
         </div>
         <div class="layer-box">
           <div class="lb-title">NEON MAPS Ad Layer</div>
@@ -530,7 +536,7 @@ function rqCheck(pw){return rqHash(pw)===rqGetHash()}
         </div>
         <div class="layer-box">
           <div class="lb-title">UI Components</div>
-          <div class="lb-body">Property panel · Directory tab<br>Events tab · Radio console<br>YT Billboard · Contact modal<br>Yelp POI cards · RPOI discs</div>
+          <div class="lb-body">Property panel · Directory tab<br>Events strip · Radio console<br>YT Billboard · Yelp favorites<br>Contact modal · Waymo tab</div>
         </div>
       </div>
 
@@ -587,22 +593,22 @@ rows.forEach(b =&gt; {
         <div class="mig-body">Concept proven. 2 markets. 47+ POIs. NEON MAPS layer built. Netlify pipeline. Retired 2026-04-25.</div>
       </div>
       <div class="mig-arr">→</div>
-      <div class="mig-step" style="opacity:.55">
-        <div class="mig-lbl" style="color:var(--t3)">✓ Complete · Phase 2</div>
-        <div class="mig-title" style="color:var(--t3)">Google Maps JS API</div>
-        <div class="mig-body">Maps JS + Places API + <code style="color:var(--cyan);font-size:.46rem">AdvancedMarkerElement</code>. Street View + Aerial View tabs on property card. Cinematic moveCamera on load.</div>
+      <div class="mig-step">
+        <div class="mig-lbl now">● Now · Phase 2</div>
+        <div class="mig-title">Google Maps JS API</div>
+        <div class="mig-body">Maps JS + <code style="color:var(--cyan);font-size:.46rem">AdvancedMarkerElement</code>. Cinematic moveCamera. Street View + Aerial View. Yelp favorites. Events strip. Hyperlocal branding. 14 pages live. 2026-04-28.</div>
       </div>
       <div class="mig-arr">→</div>
       <div class="mig-step">
-        <div class="mig-lbl now">● Now · Phase 3</div>
-        <div class="mig-title">CesiumJS + Google 3D Tiles</div>
-        <div class="mig-body"><code style="color:var(--cyan);font-size:.46rem">createGooglePhotorealistic3DTileset()</code>. DOM overlay pins. Landing globe. /dtla + /laveen on Vercel. Google Places colored dot markers. 2026-04-25.</div>
+        <div class="mig-lbl future">Next · Phase 3</div>
+        <div class="mig-title">Google Maps Partner Pitch</div>
+        <div class="mig-body">Food trucks + trees layer. CRM + PRO contacts. qanbes.com live. Cloudflare DNS. Dashboard pitch tab. CarPlay / LIVE Maps integration proposal.</div>
       </div>
       <div class="mig-arr">→</div>
       <div class="mig-step">
         <div class="mig-lbl future">Vision · Phase 4</div>
-        <div class="mig-title">33M US Businesses</div>
-        <div class="mig-body">Every licensed business = 1 DB row = 1 3D map object. <code style="color:var(--gold);font-size:.46rem">neon_tier</code> field controls NEON MAPS ad template. Google Places → Supabase with Yelp dedup.</div>
+        <div class="mig-title">33M US Businesses · $1/day</div>
+        <div class="mig-body">Every licensed business = 1 DB row = 1 map pin. <code style="color:var(--gold);font-size:.46rem">neon_tier</code> controls NEON MAPS tier. Google Photos + YT + Pay on every marker. Waymo ride zone economics.</div>
       </div>
     </div>
 
@@ -645,7 +651,7 @@ rows.forEach(b =&gt; {
         <div class="ap-title">Tech Stack</div>
         <div class="ap-body">
           <strong>Frontend</strong> — Vanilla HTML / CSS / JavaScript. No React, no Vue, no webpack. Intentional: fast load, zero dependency rot.<br><br>
-          <strong>Maps</strong> — CesiumJS 1.140 + Google Photorealistic 3D Tiles (<code>createGooglePhotorealistic3DTileset</code>). Landing page: CesiumJS globe. Property pages: street-level 3D flyTo. Google Maps JS API used for Street View + Aerial View tabs.<br><br>
+          <strong>Maps</strong> — Google Maps JS API. Map ID <code>96844e6a7bb74a7d5514d3a5</code> (vector). AdvancedMarkerElement pins. Cinematic moveCamera reveal. Street View + Aerial View on property card. Yelp favorites + events strip on /dtla and /laveen.<br><br>
           <strong>Database</strong> — Supabase PostgreSQL. PostgREST REST. Publishable anon key (safe to embed in client HTML).<br><br>
           <strong>Serverless</strong> — Vercel Functions, Node.js 18. <code>api/</code> dir → <code>/api/*</code> routes. Secrets in Vercel env vars — never in client HTML.<br><br>
           <strong>Deploy</strong> — GitHub push → Vercel auto-build (~10s) → <code>node build.js</code> → <code>dist/</code> → CDN. vercel.json controls clean URLs.<br><br>
@@ -724,43 +730,40 @@ function switchView(v){
 }
 
 // ── MAP
-mapboxgl.accessToken='pk.eyJ1IjoidmlranB1cmkiLCJhIjoiY20zcm1yZ2ozMGNyZjJrcHZ6bHc2YnpuMCJ9.xxbsRqbDz7MHFHPpLJKNEA';
+const GM_KEY='AIzaSyD7UMA5ILPXv9QK2_gvxPVth30MavRd2WQ';
+const GM_MAP_ID='96844e6a7bb74a7d5514d3a5';
 let cmdMap=null;
 
-function initMap(){
+async function initMap(){
   if(cmdMap)return;
-  cmdMap=new mapboxgl.Map({
-    container:'cmd-map',
-    style:'mapbox://styles/mapbox/standard',
-    center:[-115.5,33.9],
-    zoom:5.5,
-    pitch:45,
-    bearing:-10,
-    hash:false
+  const{Map}=await google.maps.importLibrary('maps');
+  const{AdvancedMarkerElement}=await google.maps.importLibrary('marker');
+  cmdMap=new Map(document.getElementById('cmd-map'),{
+    center:{lat:33.9,lng:-115.5},
+    zoom:6,
+    mapId:GM_MAP_ID,
+    tilt:45,
+    heading:-10,
+    disableDefaultUI:false
   });
-  cmdMap.on('load',()=>{
-    try{cmdMap.setConfigProperty('basemap','lightPreset','night');}catch(e){}
-    try{cmdMap.setConfigProperty('basemap','show3dObjects',true);}catch(e){}
-    try{cmdMap.setFog({'range':[2,14],'color':'rgba(10,10,25,.6)','high-color':'#080818','horizon-blend':0.06});}catch(e){}
-    addMapMarker([-118.2587,34.0455],'#B22234','DTLA · South Park');
-    addMapMarker([-112.1181,33.3428],'#C9A84C','Laveen · Phoenix AZ');
-  });
+  addMapMarker({lat:34.0455,lng:-118.2587},'#B22234','DTLA · South Park');
+  addMapMarker({lat:33.3428,lng:-112.1181},'#C9A84C','Laveen · Phoenix AZ');
 }
 
-function addMapMarker(coords,color,label){
+function addMapMarker(position,color,label){
   const el=document.createElement('div');
   el.style.cssText=`width:14px;height:14px;border-radius:50%;background:${color};border:2px solid rgba(255,255,255,.85);box-shadow:0 0 14px ${color},0 0 28px ${color}55;cursor:pointer`;
   el.title=label;
-  new mapboxgl.Marker({element:el,anchor:'center'}).setLngLat(coords).addTo(cmdMap);
+  new google.maps.marker.AdvancedMarkerElement({position,map:cmdMap,content:el});
 }
 
 function flyTo(market){
   if(!cmdMap)return;
   const t={
-    dtla:{center:[-118.2587,34.0455],zoom:15.5,pitch:62,bearing:200},
-    laveen:{center:[-112.1181,33.3428],zoom:13.5,pitch:50,bearing:30}
+    dtla:{center:{lat:34.0455,lng:-118.2587},zoom:15},
+    laveen:{center:{lat:33.3428,lng:-112.1181},zoom:13}
   }[market];
-  if(t)cmdMap.flyTo({...t,duration:2000,essential:true});
+  if(t){cmdMap.panTo(t.center);cmdMap.setZoom(t.zoom);}
 }
 
 // ── SUPABASE
@@ -792,7 +795,7 @@ async function loadKPIs(){
 async function checkYT(){
   try{
     const key='AIzaSyD7UMA5ILPXv9QK2_gvxPVth30MavRd2WQ';
-    const r=await fetch(`https://www.googleapis.com/youtube/v3/videos?id=HrxX9TBj2zY&key=${key}&part=id`);
+    const r=await fetch(`https://www.googleapis.com/youtube/v3/videos?id=TXgFRbEJqR4&key=${key}&part=id`);
     const ok=r.ok;
     document.getElementById('h-yt-dot').className='hdot '+(ok?'ok':'warn');
     document.getElementById('h-yt-note').textContent=ok?'ok · Data v3':'quota / key check';

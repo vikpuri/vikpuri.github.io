@@ -15,6 +15,9 @@
     { "source": "/laveenlocal",           "destination": "/laveenlocal.html" },
     { "source": "/desertlife/phoenix",    "destination": "/desertlife/phoenix.html" },
     { "source": "/desertlife/scottsdale", "destination": "/desertlife/scottsdale.html" },
-    { "source": "/dashboard",             "destination": "/dashboard.html" }
+    { "source": "/dashboard",             "destination": "/dashboard.html" },
+    { "source": "/dtla-mall-map",         "destination": "/dtla-mall-map.html" },
+    { "source": "/laveen-mall-map",       "destination": "/laveen-mall-map.html" },
+    { "source": "/cube-template",         "destination": "/cube-template.html" }
   ]
 }

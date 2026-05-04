@@ -187,6 +187,15 @@
     .dir-addr { font-size:.67rem; color:var(--text-muted); margin-top:1px; }
     .dir-empty { padding:24px 20px; text-align:center; font-size:.75rem; color:var(--text-muted); font-style:italic; }
 
+    /* Claude's Cube */
+    #panel-cube{display:grid;grid-template-columns:repeat(5,1fr);gap:3px;padding:6px 10px 4px}
+    .pcell{border-radius:5px;padding:6px 2px;text-align:center;cursor:pointer;transition:filter .15s,transform .12s,outline .1s;user-select:none;color:#fff}
+    .pcell:hover{filter:brightness(1.2);transform:scale(1.06)}
+    .pcell.pactive{outline:2px solid var(--gold);outline-offset:1px;filter:brightness(1.25)}
+    .pcell-icon{font-size:.9rem;display:block;line-height:1.2}
+    .pcell-label{font-size:.3rem;font-family:'DM Mono',monospace;letter-spacing:.04em;text-transform:uppercase;margin-top:1px;color:rgba(255,255,255,.88);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    #cube-results{padding:0 8px;max-height:240px;overflow-y:auto}
+
     .waymo-section { margin:16px 20px; border:1px solid var(--waymo-border); overflow:hidden; background:var(--waymo-dim); }
     .waymo-header { background:rgba(26,115,232,.1); padding:13px 17px; display:flex; align-items:center; gap:12px; border-bottom:1px solid var(--waymo-border); }
     .waymo-icon { font-size:1.4rem; }
@@ -204,6 +213,10 @@
     .panel-cta { padding:13px 20px 18px; display:flex; flex-direction:column; gap:8px; border-top:2px solid var(--ink); flex-shrink:0; background:var(--cream); }
     .btn-primary { width:100%; padding:12px; background:var(--ink); color:var(--cream); border:none; font-family:'Source Serif 4',serif; font-size:.66rem; font-weight:600; letter-spacing:.18em; text-transform:uppercase; cursor:pointer; transition:background .2s; }
     .btn-secondary { width:100%; padding:11px; background:transparent; color:var(--ink); border:1px solid var(--rule-heavy); font-family:'Source Serif 4',serif; font-size:.66rem; letter-spacing:.18em; text-transform:uppercase; cursor:pointer; transition:background .2s; }
+    .panel-child-nav { display:flex; border:1px solid var(--rule-heavy); overflow:hidden; margin-bottom:2px; }
+    .pcn-link { flex:1; text-align:center; font-family:'DM Mono',monospace; font-size:.46rem; letter-spacing:.1em; text-transform:uppercase; color:var(--gold); text-decoration:none; padding:8px 2px; border-right:1px solid var(--rule-heavy); transition:background .15s,color .15s; }
+    .pcn-link:last-child { border-right:none; }
+    .pcn-link:hover { background:var(--ink); color:var(--cream); }
 
     .modal-overlay { display:none; position:fixed; inset:0; background:rgba(28,28,28,.55); z-index:200; align-items:center; justify-content:center; backdrop-filter:blur(3px); }
     .modal-overlay.active { display:flex; }
@@ -283,7 +296,6 @@
   </div>
   <nav>
     <button onclick="goHome()">Home</button>
-    <a href="/dtla">Los Angeles</a>
     <button onclick="openModal('about')">About</button>
     <button onclick="openModal('contact')">Contact</button>
   </nav>
@@ -372,9 +384,12 @@
       <div id="fav-list-laveen"></div>
     </div>
 
+    <!-- Directory — Claude's Cube -->
     <div class="tab-pane" id="tab-directory">
-      <input class="dir-search" id="dir-search" placeholder="Search businesses, categories…" oninput="filterDir()">
-      <div id="dir-list"><div class="dir-empty">Loading directory…</div></div>
+      <div style="padding:6px 12px 2px;font-family:'DM Mono',monospace;font-size:.4rem;letter-spacing:.14em;text-transform:uppercase;color:var(--gold)">Tap a category — All ZIPs</div>
+      <div id="panel-cube"></div>
+      <div id="cube-results"></div>
+      <div id="dir-list" style="display:none"></div>
     </div>
 
     <div class="tab-pane" id="tab-waymo">
@@ -409,8 +424,12 @@
 
   </div>
   <div class="panel-cta">
+    <div class="panel-child-nav">
+      <a href="/desertlife" class="pcn-link">Desert Life</a>
+      <a href="/desertlife/phoenix" class="pcn-link">Phoenix</a>
+      <a href="/desertlife/scottsdale" class="pcn-link">Scottsdale</a>
+    </div>
     <button class="btn-primary" onclick="openModal('contact')">Contact Owner</button>
-    <button class="btn-secondary" onclick="openModal('about')">r/Σ — Our Mission</button>
   </div>
 </div>
 
@@ -533,7 +552,12 @@ function switchTab(name) {
   });
   document.querySelectorAll('.tab-pane').forEach(p => p.classList.toggle('active', p.id === 'tab-' + name));
   document.getElementById('panel-body').scrollTop = 0;
-  if (name === 'directory') loadDirectory();
+  if (name === 'directory') {
+    renderPanelCube();
+    const res = document.getElementById('cube-results');
+    if (res && !dirLoaded) res.innerHTML = `<div class="dir-empty" style="font-size:.6rem">Tap a category above ↑</div>`;
+    loadDirectory();
+  }
   if (name === 'favorites') renderLaveenFavs();
 }
 
@@ -610,12 +634,12 @@ function normName(s) { return (s||'').toLowerCase().replace(/[^a-z0-9]/g,'').sli
 async function loadDirectory() {
   if (dirLoaded) return;
   const el = document.getElementById('dir-list');
-  el.innerHTML = '<div class="dir-empty">Loading…</div>';
+  if (el) el.innerHTML = '<div class="dir-empty">Loading…</div>';
   try {
     const r = await fetch(`/api/yelp?lat=${CENTER.lat}&lng=${CENTER.lng}&radius=8000&rating=4`);
     const data = await r.json();
     if (!data.businesses?.length) {
-      el.innerHTML = '<div class="dir-empty">No listings found for this area</div>';
+      if (el) el.innerHTML = '<div class="dir-empty">No listings found for this area</div>';
       return;
     }
     const seen = new Set();
@@ -632,13 +656,18 @@ async function loadDirectory() {
       .sort((a,b) => a.name.localeCompare(b.name));
     dirLoaded = true;
     renderDir(dirData);
+    renderPanelCube();
+    if (pActiveCell) pActiveCell.click();
   } catch(e) {
-    el.innerHTML = '<div class="dir-empty">Could not load directory</div>';
+    if (el) el.innerHTML = '<div class="dir-empty">Could not load directory</div>';
+    const res = document.getElementById('cube-results');
+    if (res) res.innerHTML = `<div class="dir-empty">Yelp data unavailable — check connection</div>`;
   }
 }
 
 function renderDir(data) {
   const el = document.getElementById('dir-list');
+  if (!el) return;
   if (!data.length) { el.innerHTML = '<div class="dir-empty">No results</div>'; return; }
   el.innerHTML = data.map(b => {
     const icon = DIR_ICONS[b.category] || '🏢';
@@ -650,8 +679,93 @@ function renderDir(data) {
   }).join('');
 }
 function filterDir() {
-  const q = document.getElementById('dir-search').value.toLowerCase().trim();
+  const inp = document.getElementById('dir-search');
+  if (!inp) return;
+  const q = inp.value.toLowerCase().trim();
   renderDir(q ? dirData.filter(b => b.name.toLowerCase().includes(q)||b.category.toLowerCase().includes(q)) : dirData);
+}
+
+/* ── Claude's Cube ── */
+/* RULE: Food & Drink = master bucket (all food/drink except taco trucks)
+         Wellness & Aesthetics = master bucket (botox, facial, salon, hydration, spa, etc.) */
+const PCUBE_CATS = [
+  /* ── Master Buckets ── */
+  {icon:'🍽️',label:'Food & Drink',   color:'#8B2500',match:['restaurant','food','cafe','coffee','bar','juice','smoothie','vegan','vegetarian','delivery','takeout','boba','brewery','pub','bistro','diner','pizza','burger','sushi','sandwich','wine','cocktail','lounge','nightlife','italian','mexican','asian','american','buffet','brunch','bakery']},
+  {icon:'💆',label:'Wellness',        color:'#7B1D5A',match:['botox','facial','salon','hair','nail','spa','massage','hydration','aesthetic','beauty','skincare','wax','lash','medspa','blowout','barber','barbershop','iv therapy','vitamin','anti-aging','threading','brow','med spa','sugaring','microblading','eyelash','filler','treatment']},
+  /* ── Core Categories ── */
+  {icon:'🛒',label:'Grocery',         color:'#9A6B1F',match:['grocery','supermarket','whole foods','trader joe','market','convenience','bodega']},
+  {icon:'🏋️',label:'Fitness',        color:'#1E6B3C',match:['gym','yoga','pilates','crossfit','fitness','workout','sport','boxing','martial arts','dance','barre','cycling','spin']},
+  {icon:'🏥',label:'Medical',         color:'#0277BD',match:['doctor','dentist','medical','clinic','hospital','urgent care','optometrist','chiropractor','dermatologist','psychiatrist','therapy','mental health']},
+  {icon:'💊',label:'Pharmacy',        color:'#1A5C8A',match:['pharmacy','drugstore','cvs','walgreens','rite aid','compounding']},
+  {icon:'🛍️',label:'Shopping',       color:'#7A5C00',match:['shopping','clothing','boutique','retail','fashion','mall','apparel','shoes','accessories','jewelry','electronics','home goods']},
+  {icon:'🎭',label:'Arts',            color:'#5C1A3A',match:['museum','art','gallery','culture','concert','opera','ballet','performance','exhibit','theater','show']},
+  {icon:'🏨',label:'Hotels',          color:'#1B4F8A',match:['hotel','lodging','motel','inn','hostel','airbnb','resort','suites']},
+  {icon:'🌳',label:'Parks',           color:'#2D6A4F',match:['park','outdoor','nature','recreation','hiking','garden','beach','trail','campground']},
+  {icon:'🎬',label:'Film',            color:'#1A1F3A',match:['movie','cinema','film','theater','screening','imax','drive-in']},
+  {icon:'📚',label:'Library',         color:'#2C4A6E',match:['library','bookstore','book','reading','archive']},
+  {icon:'🐾',label:'Pets',            color:'#C0640A',match:['pet','veterinarian','vet','dog','cat','animal','grooming','kennel','aquarium','pet store']},
+  {icon:'🏦',label:'Finance',         color:'#0D3349',match:['bank','credit union','financial','atm','insurance','accounting','tax','investment','mortgage']},
+  {icon:'🅿️',label:'Parking',        color:'#455A64',match:['parking','garage','valet','lot']},
+  {icon:'🌮',label:'Taco Trucks',     color:'#C84B00',match:['taco truck','food truck','street food','lonchera','cart','mobile food','roach coach']},
+  {icon:'🎉',label:'Events',          color:'#6B2D7A',match:['event','venue','concert hall','banquet','wedding','party','festival','nightclub','club','lounge']},
+  {icon:'🏫',label:'Education',       color:'#4527A0',match:['school','tutoring','learning','academy','college','university','education','daycare','preschool','afterschool']},
+  {icon:'🛠️',label:'Services',       color:'#37474F',match:['auto','repair','plumber','electrician','cleaning','laundry','dry clean','locksmith','moving','storage','contractor']},
+  {icon:'🏪',label:'Corner Store',    color:'#7D2E23',match:['corner store','deli','bodega','liquor','convenience','news','tobacco']},
+  {icon:'🌿',label:'Cannabis',        color:'#33691E',match:['cannabis','dispensary','cbd','marijuana','weed','hemp','recreational','medical marijuana']},
+  {icon:'🚌',label:'Transit',         color:'#263238',match:['transit','bus','metro','rail','subway','train','station','commute','lyft','uber','taxi']},
+  {icon:'🏠',label:'Real Estate',     color:'#4E342E',match:['real estate','realty','property','apartment','rental','leasing','broker','realtor']},
+  {icon:'🤝',label:'Pro Services',    color:'#3E2723',match:['attorney','lawyer','notary','insurance','accountant','financial advisor','consultant','hr','staffing','recruitment']},
+  {icon:'🏢',label:'More',            color:'#212121',match:[]},
+];
+let pActiveCell = null, pActiveCellIdx = null;
+
+function renderPanelCube() {
+  const cube = document.getElementById('panel-cube');
+  if (!cube) return;
+  cube.innerHTML = PCUBE_CATS.map((c, i) =>
+    `<div class="pcell" style="background:${c.color}" onclick="selectPCell(this,${i})">` +
+    `<span class="pcell-icon">${c.icon}</span>` +
+    `<span class="pcell-label">${c.label}</span>` +
+    `</div>`
+  ).join('');
+  if (pActiveCellIdx !== null) {
+    const cells = cube.querySelectorAll('.pcell');
+    if (cells[pActiveCellIdx]) { cells[pActiveCellIdx].classList.add('pactive'); pActiveCell = cells[pActiveCellIdx]; }
+  }
+}
+
+function selectPCell(el, idx) {
+  if (pActiveCell) pActiveCell.classList.remove('pactive');
+  el.classList.add('pactive');
+  pActiveCell = el;
+  pActiveCellIdx = idx;
+  const cat = PCUBE_CATS[idx];
+  const res = document.getElementById('cube-results');
+  if (!res) return;
+  if (!dirLoaded) {
+    res.innerHTML = `<div class="dir-empty">Fetching Yelp data — one moment…</div>`;
+    return;
+  }
+  const words = cat.match.length ? cat.match : null;
+  const filtered = words
+    ? dirData.filter(b => words.some(w =>
+        b.category.toLowerCase().includes(w) || b.name.toLowerCase().includes(w)
+      ))
+    : dirData;
+  if (!filtered.length) {
+    res.innerHTML = `<div class="dir-empty">No ${cat.label} listings found nearby</div>`;
+    return;
+  }
+  res.innerHTML = filtered.map(b => {
+    const stars  = b.rating   ? `<span style="font-size:.5rem;background:#FF6600;color:#fff;padding:1px 4px;border-radius:2px;font-weight:700">★${b.rating}</span>` : '';
+    const yelp   = b.yelp_url ? `<a href="${b.yelp_url}" target="_blank" onclick="event.stopPropagation()" style="font-size:.52rem;background:#B22234;color:#fff;padding:2px 5px;border-radius:2px;text-decoration:none;font-weight:600">Yelp</a>` : '';
+    const waymo  = b.waymo_url? `<a href="${b.waymo_url}" target="_blank" onclick="event.stopPropagation()" style="font-size:.52rem;background:#1A73E8;color:#fff;padding:2px 5px;border-radius:2px;text-decoration:none;font-weight:600">🚗 Waymo</a>` : '';
+    return `<div class="dir-card"><div style="flex:1;min-width:0">` +
+      `<div class="dir-name">${b.name}</div>` +
+      (b.address ? `<div class="dir-addr">${b.address}</div>` : '') +
+      `<div style="display:flex;gap:4px;margin-top:3px;align-items:center">${stars}${yelp}${waymo}</div>` +
+      `</div></div>`;
+  }).join('');
 }
 
 /* ── Panel ── */

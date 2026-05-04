@@ -1,0 +1,1064 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>DTLA South Park — Neighborhood Directory</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=EB+Garamond:ital,wght@1,700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --cream:#f5f0e8;
+  --parchment:#ede5d0;
+  --ink:#1a1a1a;
+  --gold:#c9a84c;
+}
+
+/* The dark background IS the grid lines — Rubik's cube grout */
+html,body{
+  height:100%;overflow:hidden;
+  background:#0a0a0a;
+  font-family:'DM Mono',monospace;
+}
+
+/* ══ OUTER SHELL ═══════════════════════════════════════ */
+#shell{display:flex;flex-direction:column;height:100%}
+
+/* ══ HEADER ════════════════════════════════════════════ */
+#hd{
+  flex-shrink:0;
+  background:var(--cream);
+  border-bottom:3px solid var(--gold);
+  border-top:5px solid var(--gold);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:9px 18px;gap:14px;
+}
+.hd-prop{flex:1;min-width:0}
+.hd-title{
+  font-family:'EB Garamond',serif;font-style:italic;font-weight:700;
+  font-size:1.05rem;color:var(--ink);line-height:1;
+}
+.hd-addr{font-size:.36rem;letter-spacing:.14em;text-transform:uppercase;color:#aaa;margin-top:3px}
+.hd-badge{
+  background:var(--ink);
+  color:var(--gold);
+  font-family:'EB Garamond',serif;font-style:italic;font-weight:700;
+  font-size:.78rem;letter-spacing:.03em;text-transform:none;
+  padding:5px 18px;white-space:nowrap;flex-shrink:0;
+  border:1.5px solid var(--gold);
+  box-shadow:0 0 14px rgba(201,168,76,.45),inset 0 0 18px rgba(201,168,76,.07);
+  transition:box-shadow .2s;
+}
+.hd-badge:hover{box-shadow:0 0 28px rgba(201,168,76,.7),inset 0 0 24px rgba(201,168,76,.12)}
+.hb-heart{
+  display:inline-block;color:#ff6b8a;
+  animation:heartPulse 1.6s ease-in-out infinite;
+  font-style:normal;
+}
+@keyframes heartPulse{
+  0%,100%{transform:scale(1)}
+  12%    {transform:scale(1.32)}
+  24%    {transform:scale(1)}
+  36%    {transform:scale(1.18)}
+  60%    {transform:scale(1)}
+}
+.hd-stats{display:flex;gap:14px;flex-shrink:0}
+.hs{text-align:right}
+.hs-v{font-size:.78rem;font-weight:500;color:var(--ink);line-height:1}
+.hs-l{font-size:.32rem;letter-spacing:.13em;text-transform:uppercase;color:#aaa;margin-top:2px}
+
+/* ══ THE CUBE — 5×5 grid ═══════════════════════════════
+   25 cells: center (row 3, col 3) = property anchor.
+   All 24 others = Yelp categories or DTLA highlights.
+   Gap = the dark background showing through = grout lines.  */
+#cube{
+  flex:1;overflow:hidden;
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  grid-template-rows:repeat(5,1fr);
+  gap:2px;padding:2px;
+}
+
+/* ── Property anchor — always at grid center ── */
+#anchor{
+  grid-column:3;grid-row:3;
+  background:var(--cream);
+  border:3px solid var(--gold);
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  text-align:center;padding:10px 8px;
+  animation:anchorIn .5s .1s both;
+  position:relative;
+  overflow:hidden;
+}
+#anchor::before{
+  content:'';
+  position:absolute;inset:0;
+  background:radial-gradient(circle,rgba(201,168,76,.12) 0%,transparent 70%);
+  animation:pulse 3s ease-in-out infinite;
+  pointer-events:none;
+}
+@keyframes pulse{0%,100%{opacity:.4}50%{opacity:1}}
+@keyframes anchorIn{
+  from{transform:scale(.7);opacity:0}
+  to{transform:scale(1);opacity:1}
+}
+.a-you{
+  font-size:.32rem;letter-spacing:.24em;text-transform:uppercase;
+  background:var(--ink);color:var(--gold);
+  padding:3px 10px;margin-bottom:6px;display:inline-block;
+}
+.a-star{font-size:1.4rem;color:var(--gold);line-height:1;margin-bottom:3px}
+.a-name{
+  font-family:'EB Garamond',serif;font-style:italic;font-weight:700;
+  font-size:.9rem;color:var(--ink);line-height:1.25;margin-bottom:6px;
+}
+.a-stats{
+  font-size:.35rem;letter-spacing:.04em;
+  color:#666;line-height:2;margin-bottom:8px;
+}
+.a-sms{
+  background:var(--ink);color:var(--cream);border:none;
+  font-family:'DM Mono',monospace;
+  font-size:.4rem;letter-spacing:.14em;text-transform:uppercase;
+  padding:7px 10px;cursor:pointer;width:100%;margin-bottom:4px;
+}
+.a-sms:hover{background:var(--gold);color:var(--ink)}
+.a-brand{
+  font-family:'EB Garamond',serif;font-style:italic;
+  font-size:.55rem;color:var(--gold);
+}
+
+/* ── Category cells ── */
+.cell{
+  overflow:hidden;cursor:pointer;
+  padding:8px;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  text-align:center;
+  /* pop-in animation, staggered by --i */
+  animation:popIn .32s ease both;
+  animation-delay:calc(var(--i,0) * 0.028s);
+  transition:filter .14s,transform .14s,outline .1s;
+  position:relative;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.2);
+}
+/* Lightbox gloss overlay */
+.cell::after{
+  content:'';
+  position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(255,255,255,.18) 0%,transparent 55%);
+  pointer-events:none;
+}
+.cell:hover{filter:brightness(1.22);transform:scale(1.04);z-index:10}
+.cell.on{outline:3px solid rgba(255,255,255,.7);filter:brightness(1.25);z-index:11}
+@keyframes popIn{
+  from{transform:scale(.78) rotate(-4deg);opacity:0}
+  60%{transform:scale(1.04) rotate(1deg)}
+  to{transform:scale(1) rotate(0deg);opacity:1}
+}
+
+/* cell content */
+.c-icon{font-size:1.5rem;line-height:1;margin-bottom:3px}
+.c-name{
+  font-size:.48rem;font-weight:500;
+  letter-spacing:.16em;text-transform:uppercase;
+  color:rgba(255,255,255,.95);
+  line-height:1.2;margin-bottom:3px;
+}
+.c-count{
+  font-size:.38rem;letter-spacing:.08em;
+  background:rgba(0,0,0,.3);
+  color:rgba(255,255,255,.9);
+  padding:1px 7px;display:inline-block;margin-bottom:4px;
+}
+.c-copy{
+  font-size:.38rem;
+  color:rgba(255,255,255,.6);
+  font-style:italic;line-height:1.4;
+  max-height:2.8em;overflow:hidden;
+}
+
+/* ── Highlight cells (DTLA facts, not Yelp) ──
+   Slightly darker, different feel — the "wild card" face */
+.highlight .c-name{font-size:.44rem;letter-spacing:.12em}
+.highlight .c-copy{color:rgba(255,255,255,.5);font-style:normal}
+
+/* ══ DETAIL PANEL ══════════════════════════════════════ */
+#panel{
+  position:fixed;top:0;right:-300px;bottom:0;width:290px;
+  background:var(--cream);border-left:3px solid var(--ink);
+  z-index:200;transition:right .22s cubic-bezier(.4,0,.2,1);
+  display:flex;flex-direction:column;
+}
+#panel.open{right:0}
+#ph{
+  background:var(--ink);padding:13px 14px 11px;
+  display:flex;justify-content:space-between;align-items:flex-start;flex-shrink:0;
+}
+.phn{font-size:.66rem;letter-spacing:.16em;text-transform:uppercase;font-weight:500;color:var(--cream)}
+.phc{font-size:.38rem;letter-spacing:.1em;text-transform:uppercase;color:#888;margin-top:3px}
+#pclose{background:none;border:none;font-size:1.1rem;cursor:pointer;color:#777;padding:0;flex-shrink:0}
+#pclose:hover{color:var(--cream)}
+#plist{flex:1;overflow-y:auto;padding:4px 0}
+#plist::-webkit-scrollbar{width:3px}
+#plist::-webkit-scrollbar-thumb{background:#d4c9b0}
+.bi{padding:10px 14px;border-bottom:1px solid #d4c9b0}
+.bi:hover{background:var(--parchment)}
+.bin{font-size:.72rem;font-weight:500;color:var(--ink);margin-bottom:2px}
+.bim{font-size:.41rem;letter-spacing:.06em;text-transform:uppercase;color:#999}
+.bilinks{display:flex;gap:5px;margin-top:6px;flex-wrap:wrap}
+.bl{
+  font-size:.41rem;letter-spacing:.1em;text-transform:uppercase;
+  padding:3px 9px;border:1px solid;text-decoration:none;transition:opacity .15s;
+}
+.bl:hover{opacity:.65}
+
+/* ══ FOOTER ════════════════════════════════════════════ */
+#ftr{
+  position:fixed;bottom:0;left:0;right:0;height:32px;
+  background:var(--cream);border-top:2px solid var(--ink);
+  display:flex;align-items:center;overflow-x:auto;z-index:100;
+}
+.fl{
+  font-size:.38rem;letter-spacing:.14em;text-transform:uppercase;
+  color:#aaa;text-decoration:none;
+  padding:0 11px;border-right:1px solid #d4c9b0;
+  white-space:nowrap;line-height:32px;flex-shrink:0;transition:color .14s;
+}
+.fl:hover{color:var(--gold)}
+.fl.here{color:var(--gold);pointer-events:none}
+
+/* ══ PROPERTY PANEL (slides from left) ════════════════ */
+#prop-panel{
+  position:fixed;top:0;left:-345px;bottom:0;width:335px;
+  background:var(--cream);border-right:3px solid var(--ink);
+  z-index:300;transition:left .22s cubic-bezier(.4,0,.2,1);
+  display:flex;flex-direction:column;
+}
+#prop-panel.open{left:0}
+#pp-hd{
+  background:var(--ink);padding:12px 14px 10px;
+  display:flex;justify-content:space-between;align-items:flex-start;flex-shrink:0;
+}
+.pp-htag{font-size:.34rem;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin-bottom:3px}
+.pp-htitle{font-family:'EB Garamond',serif;font-style:italic;font-weight:700;font-size:.92rem;color:var(--cream);line-height:1.2}
+.pp-hsub{font-size:.36rem;letter-spacing:.08em;text-transform:uppercase;color:#888;margin-top:2px}
+#pp-close{background:none;border:none;font-size:1.1rem;cursor:pointer;color:#777;padding:0;flex-shrink:0}
+#pp-close:hover{color:var(--cream)}
+#pp-tabs{display:flex;border-bottom:2px solid var(--ink);flex-shrink:0;background:var(--cream)}
+.pp-tab{flex:1;font-family:'DM Mono',monospace;font-size:.38rem;letter-spacing:.1em;
+  text-transform:uppercase;padding:8px 4px;background:none;border:none;cursor:pointer;
+  color:#aaa;border-bottom:3px solid transparent;transition:color .14s}
+.pp-tab.active{color:var(--ink);border-bottom-color:var(--ink);font-weight:500}
+#pp-body{flex:1;overflow-y:auto;scrollbar-width:thin;scrollbar-color:#d4c9b0 transparent}
+#pp-body::-webkit-scrollbar{width:3px}
+#pp-body::-webkit-scrollbar-thumb{background:#d4c9b0}
+.pp-pane{display:none}
+.pp-pane.active{display:block}
+.pp-carousel{position:relative;width:100%;height:175px;overflow:hidden;background:#222}
+.pp-track{display:flex;height:100%;transition:transform .3s ease}
+.pp-slide{min-width:100%;height:100%}
+.pp-slide img{width:100%;height:100%;object-fit:cover}
+.pp-cbtn{position:absolute;top:50%;transform:translateY(-50%);
+  background:rgba(0,0,0,.5);color:#fff;border:none;cursor:pointer;
+  font-size:1.3rem;padding:5px 9px;z-index:5;line-height:1}
+.pp-cbtn.prev{left:0}.pp-cbtn.next{right:0}
+.pp-ccount{position:absolute;bottom:5px;right:7px;
+  font-family:'DM Mono',monospace;font-size:.34rem;
+  background:rgba(0,0,0,.55);color:#fff;padding:2px 6px;letter-spacing:.06em}
+.pp-dots{display:flex;gap:3px;justify-content:center;padding:5px 0;flex-wrap:wrap}
+.pp-dot{width:5px;height:5px;border-radius:50%;background:#d4c9b0;cursor:pointer;flex-shrink:0}
+.pp-dot.active{background:var(--ink)}
+.pp-stats{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:#ccc}
+.pp-stat{background:var(--cream);padding:10px 12px}
+.pp-stat-lbl{font-family:'DM Mono',monospace;font-size:.35rem;letter-spacing:.12em;text-transform:uppercase;color:#999;margin-bottom:3px}
+.pp-stat-val{font-family:'DM Mono',monospace;font-size:.88rem;font-weight:500;color:var(--ink)}
+.pp-stitle{font-family:'DM Mono',monospace;font-size:.42rem;letter-spacing:.18em;
+  text-transform:uppercase;color:var(--ink);padding:12px 14px 4px;margin-top:4px}
+.pp-text{font-size:.72rem;line-height:1.65;color:#555;padding:2px 14px 10px}
+.pp-tags{display:flex;flex-wrap:wrap;gap:5px;padding:4px 14px 14px}
+.pp-tag-item{font-family:'DM Mono',monospace;font-size:.33rem;letter-spacing:.1em;
+  text-transform:uppercase;background:var(--parchment);color:var(--ink);padding:3px 7px}
+.pp-vgrid{display:grid;grid-template-columns:1fr 1fr;gap:3px;padding:2px 14px 14px}
+.pp-vitem{cursor:pointer;overflow:hidden}
+.pp-vthumb{position:relative;padding-bottom:56.25%;background:#111;overflow:hidden}
+.pp-vthumb img,.pp-vthumb iframe{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border:none}
+.pp-vplay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  background:rgba(0,0,0,.2);font-size:1rem;color:#fff;pointer-events:none}
+.pp-vtitle{font-family:'DM Mono',monospace;font-size:.32rem;letter-spacing:.05em;
+  text-transform:uppercase;color:#888;margin-top:3px;line-height:1.3;text-align:center}
+.pp-idx-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:#ccc}
+.pp-idx-cell{background:var(--cream);padding:11px 12px}
+.pp-idx-val{font-family:'DM Mono',monospace;font-size:.95rem;font-weight:500;color:var(--ink)}
+.pp-idx-lbl{font-family:'DM Mono',monospace;font-size:.38rem;letter-spacing:.1em;text-transform:uppercase;color:#999;margin-top:2px}
+.pp-idx-gold{color:var(--gold)}
+#pp-cta{padding:9px 14px;border-top:2px solid var(--ink);background:var(--cream);flex-shrink:0;display:flex;gap:6px}
+.pp-btn-p{flex:1;background:var(--ink);color:var(--cream);border:none;
+  font-family:'DM Mono',monospace;font-size:.4rem;letter-spacing:.14em;
+  text-transform:uppercase;padding:9px 6px;cursor:pointer}
+.pp-btn-p:hover{background:var(--gold);color:var(--ink)}
+</style>
+</head>
+<body>
+
+<div id="shell">
+
+  <!-- HEADER -->
+  <div id="hd">
+    <div class="hd-prop">
+      <div class="hd-title">South Park Brutalist</div>
+      <div class="hd-addr">801 S Grand Ave · Unit 1612 · Los Angeles CA 90017</div>
+    </div>
+    <div class="hd-badge" onclick="window.open('/mylocal.html','_blank')" style="cursor:pointer"><span class="hb-heart">♥</span> Favorites</div>
+    <div class="hd-stats">
+      <div class="hs"><div class="hs-v">$885K</div><div class="hs-l">Asking</div></div>
+      <div class="hs"><div class="hs-v">2BR/2BA</div><div class="hs-l">1,300 SF</div></div>
+      <div class="hs"><div class="hs-v">98</div><div class="hs-l">Walk Score</div></div>
+      <div class="hs"><div class="hs-v">2028</div><div class="hs-l">Olympics</div></div>
+      <div class="hs" onclick="openPropPanel();switchPropTab('index')" style="cursor:pointer;border-bottom:2px solid var(--gold)"><div class="hs-v" style="color:var(--gold)">Index</div><div class="hs-l">Market ↗</div></div>
+      <div class="hs" onclick="openPropPanel();switchPropTab('waymo')" style="cursor:pointer;border-bottom:2px solid var(--gold)"><div class="hs-v" style="color:var(--gold)">Waymo</div><div class="hs-l">Ready ↗</div></div>
+      <div class="hs" onclick="openPropPanel();switchPropTab('contact')" style="cursor:pointer;border-bottom:2px solid var(--gold)"><div class="hs-v" style="color:var(--gold)">Contact</div><div class="hs-l">Owner ↗</div></div>
+    </div>
+  </div>
+
+  <!-- THE CUBE — anchor injected by JS at grid center -->
+  <div id="cube">
+    <div id="anchor" onclick="openPropPanel()">
+      <div class="a-you">♥ Favorites</div>
+      <div class="a-star">★</div>
+      <div class="a-name">South Park<br>Brutalist</div>
+      <div class="a-stats">
+        $885,000 &nbsp;·&nbsp; 2 BR &nbsp;·&nbsp; 2 BA<br>
+        1,300 SF &nbsp;·&nbsp; 16th Floor<br>
+        Walk Score: 98 / 100
+      </div>
+      <button class="a-sms" onclick="event.stopPropagation();sms()">📱 Text Owner</button>
+      <div class="a-brand">r/Σ Requation</div>
+    </div>
+  </div>
+
+</div><!-- /shell -->
+
+<!-- DETAIL PANEL -->
+<div id="panel">
+  <div id="ph">
+    <div><div class="phn" id="phn">—</div><div class="phc" id="phc"></div></div>
+    <button id="pclose" onclick="closePanel()">✕</button>
+  </div>
+  <div id="plist"></div>
+</div>
+
+<!-- PROPERTY DETAIL PANEL -->
+<div id="prop-panel">
+  <div id="pp-hd">
+    <div>
+      <div class="pp-htag">For Sale By Owner · ⟴ Waymo Ready</div>
+      <div class="pp-htitle">South Park Brutalist</div>
+      <div class="pp-hsub">801 S Grand Ave, Unit 1612 · Los Angeles CA 90017</div>
+    </div>
+    <button id="pp-close" onclick="closePropPanel()">✕</button>
+  </div>
+  <div id="pp-tabs">
+    <button class="pp-tab active" onclick="switchPropTab('property')">Property</button>
+    <button class="pp-tab" onclick="switchPropTab('index')">Index</button>
+    <button class="pp-tab" onclick="switchPropTab('waymo')">Waymo</button>
+    <button class="pp-tab" onclick="switchPropTab('contact')">Contact</button>
+  </div>
+  <div id="pp-body">
+
+    <!-- Property -->
+    <div class="pp-pane active" id="ppt-property">
+      <div class="pp-carousel">
+        <div class="pp-track" id="pp-track"></div>
+        <button class="pp-cbtn prev" onclick="ppMove(-1)">&#8249;</button>
+        <button class="pp-cbtn next" onclick="ppMove(1)">&#8250;</button>
+        <div class="pp-ccount" id="pp-ccount">1 / 24</div>
+      </div>
+      <div class="pp-dots" id="pp-dots"></div>
+      <div class="pp-stats">
+        <div class="pp-stat"><div class="pp-stat-lbl">Price</div><div class="pp-stat-val">$885,000</div></div>
+        <div class="pp-stat"><div class="pp-stat-lbl">Type</div><div class="pp-stat-val" style="font-size:.78rem">High-Rise Condo</div></div>
+        <div class="pp-stat"><div class="pp-stat-lbl">Beds / Baths</div><div class="pp-stat-val">2BR / 2BA</div></div>
+        <div class="pp-stat"><div class="pp-stat-lbl">Size</div><div class="pp-stat-val">1,300 SF</div></div>
+      </div>
+      <div class="pp-stitle">About This Property</div>
+      <p class="pp-text">A brutalist icon 25 feet from Whole Foods, 100 feet from Philz Coffee, and less than a mile from Roy Lichtenstein at The Broad and symphonies at Walt Disney Concert Hall. Unit 1612 at 801 S Grand — 2BR/2BA, 1,300 sqft on the 16th floor of South Park DTLA.</p>
+      <div class="pp-stitle">Market Tags</div>
+      <div class="pp-tags">
+        <span class="pp-tag-item">South Park DTLA</span><span class="pp-tag-item">High-Rise</span>
+        <span class="pp-tag-item">Brutalist</span><span class="pp-tag-item">Walk Score 98</span>
+        <span class="pp-tag-item">FSBO</span><span class="pp-tag-item">Waymo Corridor</span>
+      </div>
+      <div class="pp-stitle">Documentary — South Park Brutalist</div>
+      <div class="pp-vgrid" id="pp-vgrid"></div>
+      <div style="height:16px"></div>
+    </div>
+
+    <!-- Index -->
+    <div class="pp-pane" id="ppt-index">
+      <div class="pp-idx-grid">
+        <div class="pp-idx-cell"><div class="pp-idx-val">330+</div><div class="pp-idx-lbl">Active Listings</div></div>
+        <div class="pp-idx-cell"><div class="pp-idx-val">$750K</div><div class="pp-idx-lbl">Entry Luxury</div></div>
+        <div class="pp-idx-cell"><div class="pp-idx-val">98</div><div class="pp-idx-lbl">Walk Score</div></div>
+        <div class="pp-idx-cell"><div class="pp-idx-val pp-idx-gold">2028</div><div class="pp-idx-lbl">Olympics</div></div>
+      </div>
+      <div style="padding:14px">
+        <p style="font-size:.76rem;line-height:1.7;color:#777;margin-bottom:12px"><strong style="color:var(--ink)">The Market</strong><br>330 active luxury condos across 15 ZIP codes. Combined asking value exceeding $480 million. The most realistically attainable luxury addresses on earth for 95% of Americans.</p>
+        <p style="font-size:.76rem;line-height:1.7;color:#777;margin-bottom:12px"><strong style="color:var(--ink)">The Brands</strong><br>Whole Foods. Equinox. Apple. Tesla. Regal Cinemas. Bottega Louie. Philz Coffee. LA Live — a $2.5 billion entertainment complex that hosts the Grammys and the NBA Finals.</p>
+        <p style="font-size:.76rem;line-height:1.7;color:#777;margin-bottom:12px"><strong style="color:var(--ink)">The Institutions</strong><br>USC — 1 mile. UCLA — 30 min by Metro. Cedars-Sinai — top 10 hospital in America. The Broad. Walt Disney Concert Hall. MOCA.</p>
+        <p style="font-size:.76rem;line-height:1.7;color:#777;margin-bottom:12px"><strong style="color:var(--ink)">The Infrastructure</strong><br>6 Metro rail lines. Waymo operational. FIFA World Cup 2026. Olympics 2028. The infrastructure of a world capital, priced like a regional city.</p>
+        <p style="font-size:.76rem;line-height:1.7;color:var(--gold);font-style:italic">Requation mapped it first.</p>
+      </div>
+    </div>
+
+    <!-- Waymo -->
+    <div class="pp-pane" id="ppt-waymo">
+      <div style="padding:16px 14px 12px">
+        <div style="font-size:1.6rem;margin-bottom:8px">🚗</div>
+        <div style="font-family:'EB Garamond',serif;font-style:italic;font-size:.92rem;font-weight:700;color:var(--ink);margin-bottom:3px">Waymo Last-Mile Hub</div>
+        <div style="font-family:'DM Mono',monospace;font-size:.38rem;letter-spacing:.1em;text-transform:uppercase;color:#999;margin-bottom:14px">Autonomous Vehicle Ready · Requation Network</div>
+        <p style="font-size:.74rem;line-height:1.65;color:#555;margin-bottom:10px">Requation positions every listing as a <strong>node in the Waymo autonomous vehicle network</strong> — the missing link between where people live and where they want to go.</p>
+        <p style="font-size:.74rem;line-height:1.65;color:#555;margin-bottom:10px">This property sits within a Waymo-serviceable corridor. Requation is building the <strong>3D Yellow Pages on Maps</strong> — every home, every business, every stop, discoverable from above.</p>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:#ccc;margin:14px 0">
+          <div style="background:var(--cream);padding:10px 8px;text-align:center"><div style="font-family:'DM Mono',monospace;font-size:.88rem;font-weight:500;color:var(--ink)">&lt;0.3mi</div><div style="font-family:'DM Mono',monospace;font-size:.34rem;letter-spacing:.1em;text-transform:uppercase;color:#999;margin-top:2px">Waymo Stop</div></div>
+          <div style="background:var(--cream);padding:10px 8px;text-align:center"><div style="font-family:'DM Mono',monospace;font-size:.88rem;font-weight:500;color:var(--ink)">24/7</div><div style="font-family:'DM Mono',monospace;font-size:.34rem;letter-spacing:.1em;text-transform:uppercase;color:#999;margin-top:2px">AV Coverage</div></div>
+          <div style="background:var(--cream);padding:10px 8px;text-align:center"><div style="font-family:'DM Mono',monospace;font-size:.88rem;font-weight:500;color:var(--ink)">3D</div><div style="font-family:'DM Mono',monospace;font-size:.34rem;letter-spacing:.1em;text-transform:uppercase;color:#999;margin-top:2px">Map Ready</div></div>
+        </div>
+        <p style="font-size:.74rem;line-height:1.65;color:#555">The autonomous vehicle era rewrites real estate value. Proximity to Waymo stops becomes the new walkability score — a quantifiable, searchable signal on Google Maps.</p>
+      </div>
+      <div style="height:16px"></div>
+    </div>
+
+    <!-- Contact / Twilio -->
+    <div class="pp-pane" id="ppt-contact">
+      <div style="padding:16px 14px 12px">
+        <div style="font-size:1.4rem;margin-bottom:6px">📱</div>
+        <div style="font-family:'EB Garamond',serif;font-style:italic;font-size:.92rem;font-weight:700;color:var(--ink);margin-bottom:2px">Contact Owner Directly</div>
+        <div style="font-family:'DM Mono',monospace;font-size:.34rem;letter-spacing:.1em;text-transform:uppercase;color:#999;margin-bottom:16px">For Sale By Owner · Requation Verified</div>
+        <input id="ct-name" type="text" placeholder="Your name" style="display:block;width:100%;box-sizing:border-box;font-family:'DM Mono',monospace;font-size:.72rem;padding:8px 10px;border:1px solid #d4c9b0;background:var(--cream);color:var(--ink);margin-bottom:8px;outline:none">
+        <input id="ct-phone" type="tel" placeholder="Your phone (optional)" style="display:block;width:100%;box-sizing:border-box;font-family:'DM Mono',monospace;font-size:.72rem;padding:8px 10px;border:1px solid #d4c9b0;background:var(--cream);color:var(--ink);margin-bottom:8px;outline:none">
+        <textarea id="ct-msg" rows="3" style="display:block;width:100%;box-sizing:border-box;font-family:'DM Mono',monospace;font-size:.72rem;padding:8px 10px;border:1px solid #d4c9b0;background:var(--cream);color:var(--ink);resize:none;margin-bottom:10px;outline:none">Hi, I saw this DTLA condo on Requation. I'd like to schedule a showing.</textarea>
+        <button onclick="sendContact()" style="display:block;width:100%;font-family:'DM Mono',monospace;font-size:.38rem;letter-spacing:.12em;text-transform:uppercase;background:var(--ink);color:var(--cream);border:none;padding:10px;cursor:pointer;margin-bottom:6px">Send via Requation</button>
+        <div id="ct-status" style="font-family:'DM Mono',monospace;font-size:.68rem;color:#777;min-height:18px;text-align:center"></div>
+        <div style="margin-top:14px;border-top:1px solid #d4c9b0;padding-top:12px">
+          <div style="font-family:'DM Mono',monospace;font-size:.34rem;letter-spacing:.1em;text-transform:uppercase;color:#aaa;margin-bottom:6px">Direct Line</div>
+          <a href="sms:+12132158870" style="display:block;font-family:'DM Mono',monospace;font-size:.76rem;color:var(--gold);text-decoration:none">📱 (213) 215-8870</a>
+        </div>
+      </div>
+      <div style="height:16px"></div>
+    </div>
+
+  </div>
+  <div id="pp-cta">
+    <button class="pp-btn-p" onclick="sms()">📱 Text Owner</button>
+    <button class="pp-btn-p" style="background:var(--gold);color:var(--ink)" onclick="window.open('https://requation.com/dtla','_blank')">View on Map ↗</button>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<div id="ftr">
+  <a class="fl here" href="https://requation.com/dtla"            style="color:#c9a84c">★ DTLA</a>
+  <a class="fl"      href="https://requation.com/mylocal"         style="color:#E07B39">DTLA Local</a>
+  <a class="fl"      href="https://requation.com/lalife/broadway" style="color:#C62828">Broadway</a>
+  <a class="fl"      href="https://requation.com/lalife/weho"     style="color:#AD1457">WeHo</a>
+  <a class="fl"      href="https://requation.com/lalife/venice"   style="color:#00838F">Venice</a>
+</div>
+
+<script>
+/* ──────────────────────────────────────────────────────
+   THE RUBIK'S CUBE MALL MAP
+   25 cells. Center = property. 24 = Yelp + DTLA life.
+   ────────────────────────────────────────────────────── */
+
+const CONFIG = {
+  zips: ['90017','90015','90013','90014','90021','90012','90007','90005','90006','90019','90036','90025','90024','90049','90069','90402'],
+  ratingMin: 3.5,
+  center: { lat: 34.0430, lng: -118.2673 }
+};
+
+/* ── CATEGORY NORMALIZATION — map Yelp sub-categories to master buckets ──
+   Yelp returns "Korean", "Coffee Roasteries", "Cafes", etc. as separate
+   categories. This normalizes them into display buckets so similar
+   things share one cell instead of fragmenting across 20 tiny cells. ── */
+const CATEGORY_GROUPS = {
+  /* Wellness & Aesthetics — IV, Botox, facials, medspa */
+  'MedSpa':'Wellness & Aesthetics','Med Spa':'Wellness & Aesthetics',
+  'IV Hydration':'Wellness & Aesthetics','IV Therapy':'Wellness & Aesthetics',
+  'Botox':'Wellness & Aesthetics','Facials':'Wellness & Aesthetics',
+  'Skin Care':'Wellness & Aesthetics','Laser Hair Removal':'Wellness & Aesthetics',
+  'Cosmetic Surgery':'Wellness & Aesthetics','Cosmetic Dentistry':'Wellness & Aesthetics',
+  'Lip Injections':'Wellness & Aesthetics','Acupuncture':'Wellness & Aesthetics',
+  'Plastic Surgeons':'Wellness & Aesthetics','Weight Loss Centers':'Wellness & Aesthetics',
+  'Nutritionists':'Wellness & Aesthetics','Wellness':'Wellness & Aesthetics',
+  'Cosmetic & Reconstructive Surgery':'Wellness & Aesthetics',
+  'Cosmetic Surgery & Procedures':'Wellness & Aesthetics',
+
+  /* Food & Drink — all restaurants, cafes, coffee, food */
+  'Restaurants':'Food & Drink','Restaurant':'Food & Drink',
+  'Food':'Food & Drink','Fast Food':'Food & Drink',
+  'Burgers':'Food & Drink','Pizza':'Food & Drink',
+  'Sandwiches':'Food & Drink','Tacos':'Food & Drink',
+  'Mexican':'Food & Drink','Italian':'Food & Drink',
+  'Seafood':'Food & Drink','Sushi Bars':'Food & Drink',
+  'Japanese':'Food & Drink','Korean':'Food & Drink',
+  'Chinese':'Food & Drink','Thai':'Food & Drink',
+  'Indian':'Food & Drink','Mediterranean':'Food & Drink',
+  'Barbeque':'Food & Drink','Steakhouses':'Food & Drink',
+  'Breakfast & Brunch':'Food & Drink','Buffets':'Food & Drink',
+  'Coffee':'Food & Drink','Coffee & Tea':'Food & Drink',
+  'Cafes':'Food & Drink','Cafe':'Food & Drink',
+  'Coffee Roasteries':'Food & Drink',
+  'Bakeries':'Food & Drink','Desserts':'Food & Drink',
+  'Ice Cream & Frozen Yogurt':'Food & Drink',
+  'Gelato':'Food & Drink','Bubble Tea':'Food & Drink',
+  'Juice Bars & Smoothies':'Food & Drink',
+  'Specialty Food':'Food & Drink',
+  'Food Delivery Services':'Food & Drink',
+
+  /* Eyewear & Vision */
+  'Optometrists':'Eyewear & Vision',
+  'Eyewear & Opticians':'Eyewear & Vision',
+  'Sunglasses':'Eyewear & Vision',
+  'Ophthalmologists':'Eyewear & Vision',
+};
+
+/* ── FOOD_ALIASES — Yelp API aliases (not titles) for every food/drink sub-category.
+   Pass 2 fallback: if no title matches CATEGORY_GROUPS, check whether ANY alias
+   on the business belongs to this set. Strips dashes/underscores before comparing
+   so "juice_bars_smoothies" and "juicebars" both match.                           ── */
+const FOOD_ALIASES = new Set([
+  /* American */ 'newamerican','tradamerican','burgers','hotdogs','chickenwings',
+  'comfortfood','diners','delis','soulfood','cajun','creole','southern','texmex','newmexican',
+  /* European / Middle East */ 'french','italian','spanish','portuguese','greek','german','british',
+  'mediterranean','mideastern','lebanese','turkish','persian','afghani','moroccan','halal',
+  /* Asian */ 'japanese','korean','chinese','thai','indian','vietnamese','filipino','taiwanese',
+  'cambodian','mongolian','tibetan','singaporean','malaysian','bangladeshi','pakistani','himalayan',
+  'ramen','pho','sushi','dimsum','hotpot','izakaya','yakitori','noodles',
+  /* Latin America */ 'mexican','latin','cuban','peruvian','brazilian','colombian','venezuelan',
+  'argentinean','dominican','puertorican','salvadoran','honduran','guatemalan',
+  /* Other */ 'ethiopian','hawaiian',
+  /* Core Yelp food aliases */ 'restaurants','food','fastfood','seafood','pizza','sandwiches','tacos',
+  'steak','bbq','steakhouses','barbeque','buffets','foodtrucks','foodstands',
+  /* Breakfast & brunch */ 'breakfastbrunch','brunch','waffles','pancakes','creperies','donuts','bagels',
+  /* Coffee & tea */ 'coffee','cafes','coffeeroasteries','tea','coffeeroasters',
+  /* Sweets */ 'bakeries','desserts','icecream','gelato','bubbletea','juicebarsmoothies','juicebars',
+  'smoothies','acaibowls','shavedice','froyo','candy','chocolatiers','patisserie','cakeshop','macarons',
+  /* Dietary / other */ 'vegan','vegetarian','glutenfree','poke','tapas','fondue',
+  'gastropubs','specialtyfood','fooddeliveryservices','chicken','chickenshop','chicken_shop'
+]);
+
+/* Check ALL category titles then ALL aliases — so Paper 8 (New American), Blue Moon,
+   Chick-fil-A (Chicken Wings alias), Bottega Louie (Patisserie alias) all land correctly. */
+function categorizeBusinesses(cats) {
+  for (const c of (cats || [])) {
+    const mapped = CATEGORY_GROUPS[c.title];
+    if (mapped) return mapped;
+  }
+  for (const c of (cats || [])) {
+    const a = (c.alias || '').toLowerCase().replace(/[-_]/g, '');
+    if (FOOD_ALIASES.has(a)) return 'Food & Drink';
+  }
+  return (cats?.[0]?.title) || 'Business';
+}
+
+/* ── ONE UNIQUE COLOR PER CATEGORY — Material Design 400–600, vivid ── */
+const COLORS = {
+  /* ── Master buckets (shown on cube cells) ── */
+  'Food & Drink':             '#F44336',  // Red 500
+  'Wellness & Aesthetics':    '#E91E63',  // Pink 500 — IV, Botox, facials, medspa
+
+  /* Food & Dining */
+  'Restaurants':              '#F44336',  // Red 500
+  'Restaurant':               '#F44336',
+  'Food':                     '#EF5350',  // Red 400
+  'Fast Food':                '#FF7043',  // Deep Orange 400
+  'Burgers':                  '#FF5722',  // Deep Orange 500
+  'Pizza':                    '#E53935',  // Red 600
+  'Sandwiches':               '#FF8A65',  // Deep Orange 300
+  'Tacos':                    '#FF6D00',  // Orange A700
+  'Mexican':                  '#FF9800',  // Orange 500
+  'Italian':                  '#E53935',  // Red 600
+  'Seafood':                  '#42A5F5',  // Blue 400
+  'Sushi Bars':               '#26A69A',  // Teal 400
+  'Japanese':                 '#26C6DA',  // Cyan 400
+  'Korean':                   '#AB47BC',  // Purple 400
+  'Chinese':                  '#EF5350',  // Red 400
+  'Thai':                     '#FFA726',  // Orange 400
+  'Indian':                   '#FF9800',  // Orange 500
+  'Mediterranean':            '#29B6F6',  // Light Blue 400
+  'Barbeque':                 '#FF7043',  // Deep Orange 400
+  'Steakhouses':              '#EC407A',  // Pink 400
+  'Breakfast & Brunch':       '#FFCA28',  // Amber 400
+  'Buffets':                  '#A1887F',  // Brown 300
+
+  /* Coffee & Sweets */
+  'Coffee':                   '#795548',  // Brown 500
+  'Coffee & Tea':             '#8D6E63',  // Brown 400
+  'Cafes':                    '#A1887F',  // Brown 300
+  'Cafe':                     '#A1887F',
+  'Bakeries':                 '#FF8A65',  // Deep Orange 300
+  'Desserts':                 '#EC407A',  // Pink 400
+  'Ice Cream & Frozen Yogurt':'#29B6F6',  // Light Blue 400
+  'Gelato':                   '#42A5F5',  // Blue 400
+  'Bubble Tea':               '#AB47BC',  // Purple 400
+  'Juice Bars & Smoothies':   '#66BB6A',  // Green 400
+
+  /* Bars & Nightlife */
+  'Bars':                     '#9C27B0',  // Purple 500
+  'Wine Bars':                '#7E57C2',  // Deep Purple 400
+  'Cocktail Bars':            '#AB47BC',  // Purple 400
+  'Nightlife':                '#5C6BC0',  // Indigo 400
+  'Dance Clubs':              '#3F51B5',  // Indigo 500
+  'Karaoke':                  '#EC407A',  // Pink 400
+
+  /* Grocery & Specialty */
+  'Grocery':                  '#43A047',  // Green 600
+  'Grocery Stores':           '#43A047',
+  'Specialty Food':           '#66BB6A',  // Green 400
+  'Fruits & Veggies':         '#8BC34A',  // Light Green 500
+  'Farmers Market':           '#7CB342',  // Light Green 600
+  'Convenience Stores':       '#78909C',  // Blue Grey 400
+  'Water Stores':             '#00BCD4',  // Cyan 500
+
+  /* Fitness */
+  'Gyms':                     '#FF7043',  // Deep Orange 400
+  'Fitness & Instruction':    '#FF5722',  // Deep Orange 500
+  'Yoga':                     '#26A69A',  // Teal 400
+  'Active Life':              '#66BB6A',  // Green 400
+
+  /* Culture & Civic */
+  'Parks':                    '#4CAF50',  // Green 500
+  'Libraries':                '#8D6E63',  // Brown 400
+  'Museums':                  '#42A5F5',  // Blue 400
+  'Art Galleries':            '#AB47BC',  // Purple 400
+  'Arts & Entertainment':     '#7E57C2',  // Deep Purple 400
+  'Culture':                  '#5C6BC0',  // Indigo 400
+  'Sports':                   '#26A69A',  // Teal 400
+  'Sports Clubs':             '#26A69A',
+  'Zoos':                     '#66BB6A',  // Green 400
+  'Aquariums':                '#00BCD4',  // Cyan 500
+
+  /* Hotels & Travel */
+  'Hotels':                   '#FFCA28',  // Amber 400
+  'Hotels & Travel':          '#FFCA28',
+  'Bed & Breakfast':          '#FFA726',  // Orange 400
+  'Hostels':                  '#FF9800',  // Orange 500
+
+  /* Shopping */
+  'Shopping':                 '#1E88E5',  // Blue 600
+  'Fashion':                  '#EC407A',  // Pink 400
+  'Shoes':                    '#AB47BC',  // Purple 400
+  'Cosmetics':                '#F06292',  // Pink 300
+  'Jewelry':                  '#FFCA28',  // Amber 400
+  'Bookstores':               '#795548',  // Brown 500
+  'Toy Stores':               '#FF9800',  // Orange 500
+  'Electronics':              '#1E88E5',  // Blue 600
+
+  /* Health */
+  'Health & Medical':         '#26A69A',  // Teal 400
+  'Dental':                   '#29B6F6',  // Light Blue 400
+  'MedSpa':                   '#00BCD4',  // Cyan 500
+  'Doctors':                  '#42A5F5',  // Blue 400
+  'Pharmacy':                 '#66BB6A',  // Green 400
+  'Urgent Care':              '#EF5350',  // Red 400
+  'Eyewear & Vision':         '#29B6F6',  // Light Blue 400
+
+  /* Beauty */
+  'Hair Salons':              '#EC407A',  // Pink 400
+  'Beauty & Spas':            '#F06292',  // Pink 300
+  'Nail Salons':              '#E91E63',  // Pink 500
+  'Massage':                  '#AB47BC',  // Purple 400
+
+  /* Entertainment */
+  'Movie Theaters':           '#EF5350',  // Red 400
+  'Cinema':                   '#EF5350',
+  'Bowling':                  '#1E88E5',  // Blue 600
+  'Escape Games':             '#7E57C2',  // Deep Purple 400
+
+  /* Services */
+  'Parking':                  '#78909C',  // Blue Grey 400
+  'Pet':                      '#66BB6A',  // Green 400
+  'Auto Repair':              '#78909C',  // Blue Grey 400
+  'Dry Cleaning':             '#00BCD4',  // Cyan 500
+  'Food Delivery Services':   '#FF7043',  // Deep Orange 400
+};
+/* Fallback pool — vivid Material 400-600 colors for unknown Yelp categories.
+   Round-robin ensures no two unknowns share a color. */
+const FALLBACK_POOL = [
+  '#F44336','#9C27B0','#3F51B5','#2196F3','#00BCD4',
+  '#4CAF50','#8BC34A','#FFCA28','#FF9800','#FF5722',
+  '#E91E63','#673AB7','#1976D2','#0097A7','#43A047',
+  '#F57C00','#EF5350','#EC407A','#7E57C2','#1E88E5',
+  '#26A69A','#66BB6A','#FFA726','#795548','#78909C',
+];
+let fallbackIdx = 0;
+function getFallbackColor() { return FALLBACK_POOL[fallbackIdx++ % FALLBACK_POOL.length]; }
+
+/* ── WIT COPY — what I would say if I ran this mall ──── */
+const COPY = {
+  'Food & Drink':            'Every cuisine. Every roastery. Every block. All Yelp 4.0+.',
+  'Wellness & Aesthetics':   'Botox. IV drips. Facials. Walk Score 98. Recovery is also local.',
+  'Restaurants':             'Every cuisine. Every block.',
+  'Food':                    'Something amazing is 400 feet away.',
+  'Fast Food':               'When the Michelin recs feel ambitious.',
+  'Coffee & Tea':            'Philz is literally in this building.',
+  'Cafes':                   'Your morning is already sorted.',
+  'Juice Bars & Smoothies':  'Post-gym fuel. Pre-everything fuel.',
+  'Bakeries':                'The croissants forgive every sin.',
+  'Desserts':                'Life is short. There is gelato.',
+  'Grocery':                 'Whole Foods. 25 feet. That happened.',
+  'Grocery Stores':          'Whole Foods. 25 feet. That happened.',
+  'Parks':                   'Grand Park exists. Use it.',
+  'Libraries':               'The original internet. Still free.',
+  'Museums':                 'The Broad is 0.8mi and mind-bending.',
+  'Art Galleries':           'Real art. Real walls. No filter needed.',
+  'Arts & Entertainment':    'Disney Hall is why people move here.',
+  'Sports':                  '3 pro teams inside 1 mile.',
+  'Active Life':             'Griffith is 8mi. Grand Park is 3 blocks.',
+  'Hotels':                  'Your guests arrive in actual luxury.',
+  'Shopping':                'Apple. Grand Central Market. Done.',
+  'Fashion':                 'Broadway has the shoes. And the deals.',
+  'Bars':                    'Happy hour at Perch starts at 4.',
+  'Wine Bars':               'Because sometimes you deserve it.',
+  'Nightlife':               'LA nights run till 2. Or 6. Your choice.',
+  'Gyms':                    'Equinox is basically downstairs.',
+  'Fitness & Instruction':   "Barry's will humble you. Then fix you.",
+  'Movie Theaters':          'Alamo Drafthouse has burgers. In the seats.',
+  'Health & Medical':        'One Medical. For when you overdo it.',
+  'Dental':                  'Smile maintenance. For the new headshots.',
+  'Hair Salons':             'Because you live here now. Look it.',
+  'Beauty & Spas':           'This is LA. Standards are real.',
+  'Parking':                 "You won't need it. Walk Score 98.",
+  'Pet':                     'Yes, DTLA is dog-friendly. Very.',
+  'Seafood':                 'Pacific Ocean is 15mi. Still fresh.',
+  'Sushi Bars':              'Half the chefs trained in Japan. Half.',
+  'Eyewear & Vision':        'Oliver Peoples is local. So is your prescription.',
+};
+
+const ICONS = {
+  'Food & Drink':'🍽️',
+  'Wellness & Aesthetics':'✨',
+  'Restaurants':'🍽️','Food':'🍴','Fast Food':'🍔','Burgers':'🍔',
+  'Pizza':'🍕','Sandwiches':'🥪','Mexican':'🌮','Tacos':'🌮',
+  'Italian':'🍝','Seafood':'🦞','Sushi Bars':'🍣','Japanese':'🍣',
+  'Korean':'🍜','Chinese':'🍜','Thai':'🍜','Indian':'🍛',
+  'Mediterranean':'🫒','Breakfast & Brunch':'🍳',
+  'Bakeries':'🥐','Desserts':'🍰','Ice Cream & Frozen Yogurt':'🍦',
+  'Bubble Tea':'🧋','Juice Bars & Smoothies':'🥤',
+  'Coffee':'☕','Coffee & Tea':'☕','Cafes':'☕',
+  'Bars':'🍺','Wine Bars':'🍷','Nightlife':'🎶',
+  'Grocery':'🛒','Grocery Stores':'🛒','Specialty Food':'🧺',
+  'Gyms':'💪','Fitness & Instruction':'💪','Active Life':'🏃',
+  'Movie Theaters':'🎬','Cinema':'🎬',
+  'Arts & Entertainment':'🎭','Museums':'🖼️','Art Galleries':'🖼️',
+  'Culture':'🎨',
+  'Hotels':'🏨','Hotels & Travel':'🏨',
+  'Shopping':'🛍️','Fashion':'👗','Shoes':'👟',
+  'Health & Medical':'🏥','Dental':'🦷','MedSpa':'💆','Eyewear & Vision':'👓',
+  'Parks':'🌳','Libraries':'📚','Sports':'🏅','Sports Clubs':'🏅',
+  'Hair Salons':'✂️','Beauty & Spas':'💅',
+  'Parking':'🅿️','Pet':'🐾',
+};
+
+/* ── DTLA LIFE HIGHLIGHTS — the 24th cell and beyond ─── */
+const HIGHLIGHTS = [
+  { icon:'🌞', name:'284 Sunny Days',  copy:"Per year. In your future backyard.", color:'#b7950b' },
+  { icon:'🚇', name:'Metro at Door',   copy:'A, B/D, E lines — 3 min walk.',     color:'#1f618d' },
+  { icon:'🏅', name:'2028 Olympics',   copy:'Events are walkable from here.',      color:'#922b21' },
+  { icon:'🌮', name:'200+ Restaurants',copy:'Within one mile. Not an exaggeration.', color:'#a93226' },
+  { icon:'💧', name:'Whole Foods',     copy:'25 feet below. Prices included.',     color:'#196f3d' },
+  { icon:'🎬', name:'Film Capital',    copy:'Hollywood HQ: 8 miles north.',        color:'#5b2c6f' },
+  { icon:'🏙️', name:'DTLA Listings',  copy:'330+ active listings, your neighbors.',color:'#2c3e50' },
+  { icon:'⚡', name:'Walk Score 98',   copy:'You barely need a car. Barely.',      color:'#117a65' },
+  { icon:'🌉', name:'City of Angels',  copy:'The one that was always here.',       color:'#1a5276' },
+  { icon:'📐', name:'1,300 sq ft',     copy:"That's a 2-car garage in most cities.", color:'#6c3483' },
+];
+
+/* ── PROPERTY DATA — exact match to dtla.html PROP ─────── */
+const PROP = {
+  name: 'South Park Brutalist',
+  tag:  'For Sale By Owner',
+  subtitle: '801 S Grand Ave, Unit 1612 · Los Angeles CA 90017',
+  images: [
+    'https://i.imgur.com/GSbSrYM.jpeg',
+    'https://i.imgur.com/YIN8O41.jpeg','https://i.imgur.com/C2uei3w.jpeg','https://i.imgur.com/yhnjPo6.jpeg',
+    'https://i.imgur.com/JQsQZmA.jpeg','https://i.imgur.com/N4s3BiK.jpeg','https://i.imgur.com/NKGvYiS.jpeg',
+    'https://i.imgur.com/uSjnr0A.jpeg','https://i.imgur.com/F71ADpi.jpeg','https://i.imgur.com/HBNlkj8.jpeg',
+    'https://i.imgur.com/PCwZVOS.jpeg','https://i.imgur.com/WpmEw8f.jpeg','https://i.imgur.com/ChMBKSr.jpeg',
+    'https://i.imgur.com/sofwRew.jpeg','https://i.imgur.com/jfOae1A.jpeg','https://i.imgur.com/cLSYiDl.jpeg',
+    'https://i.imgur.com/4idl4U9.jpeg','https://i.imgur.com/fl1ZFd6.jpeg','https://i.imgur.com/tbFhHcl.jpeg',
+    'https://i.imgur.com/UHJ2hM2.jpeg','https://i.imgur.com/3rFddwE.jpeg','https://i.imgur.com/yvAxOaD.jpeg',
+    'https://i.imgur.com/yXh2Ywf.jpeg','https://i.imgur.com/D2GRI06.jpeg'
+  ],
+  videos: [
+    {id:'GFD0WG60c6Q',title:'Urban Light — South Park'},
+    {id:'1mXG5MJ6i1U',title:'City Views — 16th Floor'},
+    {id:'nig4DmfKW_I',title:'The Walkable City'},
+    {id:'FR8hkxtha9A',title:'DTLA — Night'},
+    {id:'oH3JefYb6YM',title:'City of Angels — Dawn'},
+    {id:'Ny_5OMGToC4',title:'South Park — Urban Living'}
+  ]
+};
+
+/* ── PROPERTY PANEL ─────────────────────────────────────── */
+let _ppci = 0, _ppct = 0;
+
+function buildPropPanel() {
+  if (document.getElementById('pp-track').children.length) return; /* already built */
+  _ppct = PROP.images.length;
+  document.getElementById('pp-track').innerHTML = PROP.images.map(u =>
+    `<div class="pp-slide"><img src="${u}" loading="lazy"></div>`).join('');
+  document.getElementById('pp-ccount').textContent = `1 / ${_ppct}`;
+  document.getElementById('pp-dots').innerHTML = PROP.images.map((_,i) =>
+    `<div class="pp-dot${i===0?' active':''}" onclick="ppGoTo(${i})"></div>`).join('');
+  document.getElementById('pp-vgrid').innerHTML = PROP.videos.map(v =>
+    `<div class="pp-vitem" onclick="ppPlayVideo(this,'${v.id}')">
+       <div class="pp-vthumb"><img src="https://img.youtube.com/vi/${v.id}/mqdefault.jpg" loading="lazy"><div class="pp-vplay">&#9654;</div></div>
+       <div class="pp-vtitle">${v.title}</div>
+     </div>`).join('');
+}
+
+function ppPlayVideo(el, id) {
+  const thumb = el.querySelector('.pp-vthumb');
+  thumb.innerHTML = `<iframe src="https://www.youtube.com/embed/${id}?autoplay=1&rel=0&modestbranding=1" allow="autoplay" allowfullscreen></iframe>`;
+}
+
+function ppMove(d) { _ppci = (_ppci + d + _ppct) % _ppct; ppRender(); }
+function ppGoTo(i) { _ppci = i; ppRender(); }
+function ppRender() {
+  document.getElementById('pp-track').style.transform = `translateX(-${_ppci * 100}%)`;
+  document.getElementById('pp-ccount').textContent = `${_ppci + 1} / ${_ppct}`;
+  document.querySelectorAll('.pp-dot').forEach((d,i) => d.classList.toggle('active', i === _ppci));
+}
+
+function openPropPanel() {
+  buildPropPanel();
+  closePanel();
+  document.getElementById('prop-panel').classList.add('open');
+}
+function closePropPanel() {
+  document.getElementById('prop-panel').classList.remove('open');
+}
+function switchPropTab(name) {
+  document.querySelectorAll('.pp-tab').forEach(t => {
+    const m = (t.getAttribute('onclick')||'').match(/switchPropTab\('(\w+)'\)/);
+    t.classList.toggle('active', !!m && m[1] === name);
+  });
+  document.querySelectorAll('.pp-pane').forEach(p => p.classList.toggle('active', p.id === 'ppt-' + name));
+  document.getElementById('pp-body').scrollTop = 0;
+}
+
+/* ── DATA STORE (populated by Yelp fetch) ─────────────── */
+let allGroups = {};
+
+/* ──────────────────────────────────────────────────────
+   LOAD — parallel fetch ALL ZIPs simultaneously.
+   Each ZIP returns up to 50 businesses. 11 ZIPs =
+   up to 550 businesses total before dedup.
+   ────────────────────────────────────────────────────── */
+async function fetchZip(zip) {
+  const urls = [
+    `/api/yelp?zip=${zip}&rating=${CONFIG.ratingMin}`,
+    `https://requation.com/api/yelp?zip=${zip}&rating=${CONFIG.ratingMin}`
+  ];
+  for (const url of urls) {
+    try {
+      const r = await fetch(url);
+      if (r.ok) {
+        const d = await r.json();
+        if (d.businesses?.length) return d.businesses;
+      }
+    } catch(_) {}
+  }
+  return [];
+}
+
+async function loadDirectory() {
+  const results = await Promise.all(CONFIG.zips.map(fetchZip));
+  renderCube(results.flat());
+}
+
+/* ──────────────────────────────────────────────────────
+   RENDER — build 24 cells that surround the anchor
+   ────────────────────────────────────────────────────── */
+function renderCube(businesses) {
+  /* Deduplicate */
+  const seen = new Set();
+  const deduped = businesses.filter(b => {
+    const k = (b.name||'').toLowerCase().replace(/[^a-z0-9]/g,'').slice(0,22);
+    if (seen.has(k)) return false;
+    seen.add(k); return true;
+  });
+
+  /* Group by normalized master category */
+  const groups = {};
+  deduped.forEach(b => {
+    const rawCat = b.categories?.[0]?.title || 'Business';
+    const cat = categorizeBusinesses(b.categories);
+    allGroups[cat] = allGroups[cat] || [];
+    allGroups[cat].push({
+      n: b.name, r: b.rating || null,
+      url: b.url || null, addr: b.location?.address1 || '',
+      sub: rawCat !== cat ? rawCat : null  /* raw sub-category label for panel */
+    });
+    groups[cat] = allGroups[cat];
+  });
+
+  /* Sort categories by count desc, take up to 24 */
+  const cats = Object.entries(groups)
+    .sort((a,b) => b[1].length - a[1].length)
+    .slice(0, 24);
+
+  /* Pad remaining 24 slots with DTLA highlights */
+  const needed = 24 - cats.length;
+  const padded = [
+    ...cats.map(([c,b],i) => buildYelpCell(c, b, i)),
+    ...HIGHLIGHTS.slice(0, needed).map((h,i) => buildHighlightCell(h, cats.length + i))
+  ];
+
+  /* The anchor is already in the DOM at grid-column:3; grid-row:3
+     Position 13 in a 25-cell 5×5 grid.
+     Insert 12 cells BEFORE anchor, 12 AFTER. */
+  const cube   = document.getElementById('cube');
+  const anchor = document.getElementById('anchor');
+
+  const before = padded.slice(0, 12).join('');
+  const after  = padded.slice(12).join('');
+
+  /* Prepend 12 cells before anchor */
+  anchor.insertAdjacentHTML('beforebegin', before);
+  /* Append 12 cells after anchor */
+  anchor.insertAdjacentHTML('afterend', after);
+
+  /* Show total — in anchor AND in header as marketing stat */
+  const totalBiz = deduped.length;
+  const totalCats = cats.length;
+  if (totalBiz > 0) {
+    document.querySelector('.a-brand').insertAdjacentHTML('afterend',
+      `<div style="font-size:.3rem;letter-spacing:.1em;text-transform:uppercase;color:#bbb;margin-top:5px">${totalBiz} businesses · ${totalCats} categories</div>`
+    );
+    /* Add marketing counter to header */
+    document.querySelector('.hd-stats').insertAdjacentHTML('beforebegin',
+      `<div style="background:#1b5e20;color:#fff;font-size:.38rem;letter-spacing:.12em;
+         text-transform:uppercase;padding:4px 12px;white-space:nowrap;flex-shrink:0;font-weight:600">
+         ${totalBiz} FREE Listings ★
+       </div>`
+    );
+  }
+
+  /* Yelp category cell handlers */
+  document.querySelectorAll('.cell').forEach(el => {
+    el.addEventListener('click', () => openPanel(el));
+  });
+  /* Property anchor — opens property detail panel */
+  document.getElementById('anchor').addEventListener('click', openPropPanel);
+}
+
+/* ── BUILD ONE YELP CATEGORY CELL ──────────────────────── */
+function buildYelpCell(cat, bizs, idx) {
+  const bg    = COLORS[cat] || getFallbackColor();
+  const icon  = ICONS[cat]  || '🏢';
+  const copy  = COPY[cat]   || `${bizs.length} nearby`;
+  return `
+    <div class="cell" data-cat="${cat}" style="--i:${idx}; background:${bg}">
+      <span class="c-icon">${icon}</span>
+      <span class="c-name">${cat}</span>
+      <span class="c-count">${bizs.length}</span>
+      <span class="c-copy">${copy}</span>
+    </div>`;
+}
+
+/* ── BUILD ONE HIGHLIGHT (DTLA LIFE) CELL ────────────────── */
+function buildHighlightCell(h, idx) {
+  return `
+    <div class="cell highlight" data-hl="${h.name}" style="--i:${idx}; background:${h.color}">
+      <span class="c-icon">${h.icon}</span>
+      <span class="c-name">${h.name}</span>
+      <span class="c-copy">${h.copy}</span>
+    </div>`;
+}
+
+/* ──────────────────────────────────────────────────────
+   PANEL — slide in with ALL businesses for clicked category
+   ────────────────────────────────────────────────────── */
+let activeEl = null;
+
+function openPanel(el) {
+  if (el.dataset.hl) return; /* highlights don't open a panel */
+  const cat  = el.dataset.cat;
+  const bizs = allGroups[cat] || [];
+  const bg   = el.style.background;
+
+  if (activeEl === el) { closePanel(); return; }
+  if (activeEl) activeEl.classList.remove('on');
+  activeEl = el;
+  el.classList.add('on');
+
+  document.getElementById('phn').textContent = cat.toUpperCase();
+  document.getElementById('phn').style.color = bg;
+  document.getElementById('phc').textContent = bizs.length + ' Yelp-rated nearby';
+
+  document.getElementById('plist').innerHTML = bizs.length
+    ? bizs.map(b => `
+        <div class="bi">
+          <div class="bin">${b.n}</div>
+          ${b.sub ? `<div class="bim" style="color:#c9a84c">${b.sub}</div>` : ''}
+          ${b.addr ? `<div class="bim">${b.addr}</div>` : ''}
+          <div class="bilinks">
+            ${b.r ? `<span style="font-size:.52rem;background:#FF6600;color:#fff;padding:2px 7px;font-weight:700">★ ${b.r}</span>` : ''}
+            ${b.url
+              ? `<a href="${b.url}" target="_blank" onclick="event.stopPropagation()"
+                   style="font-size:.54rem;background:#B22234;color:#fff;padding:3px 8px;text-decoration:none;font-weight:600">Yelp →</a>`
+              : ''}
+            <a href="https://maps.google.com/?q=${encodeURIComponent(b.n+' Los Angeles')}"
+               target="_blank" onclick="event.stopPropagation()"
+               style="font-size:.54rem;background:#1A73E8;color:#fff;padding:3px 8px;text-decoration:none;font-weight:600">Maps →</a>
+            ${b.addr ? `<a href="https://waymo.com/waymo-one/?destination=${encodeURIComponent(b.addr)}"
+               target="_blank" onclick="event.stopPropagation()"
+               style="font-size:.54rem;background:#1a1a1a;color:#fff;padding:3px 8px;text-decoration:none;font-weight:600">🚗 Waymo</a>` : ''}
+          </div>
+        </div>`).join('')
+    : `<div style="padding:20px;font-size:.5rem;color:#aaa;text-align:center">
+         This category didn't return Yelp listings within range.<br>
+         Try expanding search radius or check back as Yelp updates.
+       </div>`;
+
+  document.getElementById('panel').classList.add('open');
+}
+
+function closePanel() {
+  if (activeEl) { activeEl.classList.remove('on'); activeEl = null; }
+  document.getElementById('panel').classList.remove('open');
+}
+
+function sms() {
+  window.open('sms:+12132158870?body='+encodeURIComponent('Hi, I saw your DTLA listing on Requation. Can we connect?'));
+}
+
+async function sendContact() {
+  const name  = (document.getElementById('ct-name').value || '').trim();
+  const phone = (document.getElementById('ct-phone').value || '').trim() || 'not provided';
+  const msg   = (document.getElementById('ct-msg').value || '').trim();
+  const st    = document.getElementById('ct-status');
+  if (!name || !msg) { st.textContent = 'Please enter your name and message.'; st.style.color='#c62828'; return; }
+  st.textContent = 'Sending…'; st.style.color = '#777';
+  try {
+    const r = await fetch('/api/twilio', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, phone, message: msg, subject: 'DTLA Condo — Requation Inquiry' })
+    });
+    if (!r.ok) throw new Error('api');
+    st.textContent = '✓ Message sent. Owner will respond within 24 hours.';
+    st.style.color = '#2e7d32';
+  } catch {
+    window.open('sms:+12132158870?body=' + encodeURIComponent('Hi, my name is ' + name + '. ' + msg));
+    st.textContent = 'Opening SMS as fallback.'; st.style.color = '#777';
+  }
+}
+
+loadDirectory();
+</script>
+</body>
+</html>

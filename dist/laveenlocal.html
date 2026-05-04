@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>Requation · LaveenLocal · Urban Farmhouse — Vik's Favorites</title>
+  <title>LaveenLocal · Laveen AZ 85339 · Requation Hyperlocal</title>
   <meta name="description" content="HyperLocal Laveen AZ — the places Vik actually goes. Street-level 3D map with Waymo rides to every spot along Baseline Road and South Mountain.">
   <meta property="og:title" content="LaveenLocal — Requation HyperLocal AZ">
   <meta property="og:image" content="https://i.imgur.com/0aYf87y.jpeg">
@@ -22,11 +22,12 @@
       --header-h:56px; --route-h:36px;
     }
     *,::before,::after { box-sizing:border-box; margin:0; padding:0; }
-    html { height:100%; }
-    body { height:100%; background:#1a1510; color:var(--ink);
-           font-family:'Source Serif 4',Georgia,serif; overflow:hidden; }
+    html, body { height:100%; margin:0; }
+    body { background:#1a1510; color:var(--ink);
+           font-family:'Source Serif 4',Georgia,serif; }
 
-    #map { position:fixed; inset:0; z-index:0; }
+    /* Rule 1 — explicit dimensions, no fixed on #map */
+    #map { width:100%; height:100%; }
 
     header {
       position:fixed; top:0; left:0; right:0; height:var(--header-h); z-index:100;
@@ -62,6 +63,23 @@
     }
     .heart-pin:hover { transform:scale(1.08); }
 
+    /* ── Property label above pin ── */
+    #prop-label {
+      position:fixed; z-index:21; background:var(--ink); color:var(--cream);
+      font-family:'DM Mono',monospace; font-size:.38rem; letter-spacing:.1em;
+      text-transform:uppercase; padding:3px 8px; border-radius:2px;
+      white-space:nowrap; display:none; transform:translate(-50%,-100%);
+      pointer-events:none;
+    }
+
+    /* ── RPOI listing price pins ── */
+    .rpoi-pin { background:#fff; border:2px solid var(--gold); border-radius:6px;
+                padding:4px 8px; box-shadow:0 2px 10px rgba(0,0,0,.25);
+                cursor:pointer; transition:transform .15s; min-width:58px; text-align:center; }
+    .rpoi-pin:hover { transform:scale(1.08); }
+    .rpoi-price { font-family:'DM Mono',monospace; font-size:11px; font-weight:500; color:var(--ink); line-height:1.3; }
+    .rpoi-beds  { font-family:'DM Mono',monospace; font-size:9px; color:var(--text-muted); }
+
     #info-card {
       position:fixed; bottom:calc(var(--route-h) + 12px); left:50%;
       transform:translateX(-50%);
@@ -83,7 +101,7 @@
     .card-btn-yt    { background:#FF0000; color:#fff; }
     .card-btn-yelp  { background:#FF1A1A; color:#fff; }
     .card-btn-view  { background:#2d2d2d; color:#f5e6c8; border:1px solid #c9a84c; }
-    .yelp-pin { width:9px; height:9px; border-radius:50%; background:#FF6B35; border:2px solid #fff; cursor:pointer; box-shadow:0 1px 4px rgba(0,0,0,.35); }
+    .yelp-pin { width:14px; height:14px; border-radius:50%; background:#FF6B35; border:2px solid #fff; cursor:pointer; box-shadow:0 2px 6px rgba(0,0,0,.4); }
     #card-yt { width:100%; aspect-ratio:16/9; border:none; display:none; }
 
     #route-nav {
@@ -114,16 +132,18 @@
 <body>
 
 <div id="map"></div>
-<div id="prop-pin"></div>
+<div id="prop-pin" title="← Return to Laveen property"></div>
+<div id="prop-label">← Property</div>
 
 <header>
   <a class="logo-wrap" href="/">
-    <svg width="28" height="28" viewBox="0 0 60 60" fill="none">
-      <text x="4" y="46" font-family="EB Garamond" font-style="italic" font-weight="700" font-size="52" fill="#1C1C1C">r</text>
-      <line x1="18" y1="48" x2="44" y2="12" stroke="#C9A84C" stroke-width="2.2"/>
-      <text x="38" y="28" font-family="EB Garamond" font-style="italic" font-weight="700" font-size="26" fill="#C9A84C">Σ</text>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 440 100" height="52" preserveAspectRatio="xMinYMid meet" aria-label="Requation">
+      <defs><filter id="gb"><feGaussianBlur stdDeviation="1.2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+      <text x="6" y="42" font-family="EB Garamond,Georgia,serif" font-size="46" font-weight="700" font-style="italic" fill="#B22234">r</text>
+      <line x1="31" y1="76" x2="50" y2="41" stroke="#7A7A7A" stroke-width="5" stroke-linecap="round"/>
+      <text x="56" y="88" font-family="Raleway,Arial,sans-serif" font-size="92" font-weight="600" fill="#4F6FB8">Σ</text>
+      <text x="122" y="88" font-family="Raleway,Arial,sans-serif" font-size="24" font-weight="600" font-style="italic" fill="#D4A843" opacity="0.8" filter="url(#gb)" letter-spacing="2">quation</text>
     </svg>
-    <span style="font-family:'Raleway',sans-serif;font-size:.85rem;font-weight:600;letter-spacing:.04em">quation</span>
     <span class="logo-addr">LaveenLocal · 11403 S 27th Dr · AZ</span>
   </a>
   <span class="header-tag">♥ 6 AZ Favorites</span>
@@ -159,7 +179,7 @@ const CENTER = { lat: 33.34284751970459, lng: -112.11814600203087 }; // CONFIRM 
 const SB_URL  = 'https://mpmprnjhunjfeacikgml.supabase.co';
 const SB_KEY  = 'sb_publishable_T6XISHd9O2Ol0raPaEASqQ_klUXnyY3';
 const SB_HDRS = { apikey: SB_KEY, Authorization: 'Bearer ' + SB_KEY };
-const LAVEEN_ZIPS = ['85339','85041','85042','85040'];
+const LAVEEN_ZIPS = ['85339','85041','85042','85040','85044'];
 
 // 6 ♥ Laveen / South Mountain favorites — coords // CONFIRM pending Geocoding API
 const HEARTS = [
@@ -259,15 +279,16 @@ async function initMap() {
   });
 
   initPropPin();
+  await loadRPOI();
   await loadYelp();
   loadHearts();
 }
 
-async function loadYelp() {
+/* ── Redfin RPOI listing pins ── */
+async function loadRPOI() {
   try {
-    const zips = LAVEEN_ZIPS.join(',');
     const r = await fetch(
-      `${SB_URL}/rest/v1/restaurants?zip=in.(${zips})&select=name,category,lat,lng,zip,rating,yelp_url,waymo_url,address&order=rating.desc&limit=200`,
+      `${SB_URL}/rest/v1/properties?zip=in.(${LAVEEN_ZIPS.join(',')})&mls_status=eq.active&select=address,neighborhood,zip,lat,lng,price,beds,baths,sqft,redfin_url&order=price.asc&limit=200`,
       { headers: SB_HDRS }
     );
     const rows = await r.json();
@@ -275,49 +296,84 @@ async function loadYelp() {
     rows.forEach(p => {
       if (!p.lat || !p.lng) return;
       const el = document.createElement('div');
-      el.className = 'yelp-pin';
-      el.title = p.name + (p.rating ? ' ★' + p.rating : '');
-      const m = new advMarker({ position: { lat: p.lat, lng: p.lng }, map, content: el, zIndex: 5 });
+      el.className = 'rpoi-pin';
+      const priceK = p.price ? '$' + Math.round(p.price / 1000) + 'K' : '—';
+      el.innerHTML = `<div class="rpoi-price">${priceK}</div>${p.beds ? `<div class="rpoi-beds">${p.beds} bd</div>` : ''}`;
+      const m = new advMarker({ position: { lat: p.lat, lng: p.lng }, map, content: el, title: p.address });
       m.addListener('click', () => {
         map.panTo({ lat: p.lat, lng: p.lng });
         showCard({
-          tag: (p.rating ? '★ ' + p.rating + ' · ' : '') + (p.category || 'Yelp'),
-          name: p.name, addr: p.address || '', cat: p.category,
-          waymo: p.waymo_url || ('https://waymo.com/waymo-one/?destination=' + encodeURIComponent(p.address || '')),
-          yelpUrl: p.yelp_url,
+          tag:   p.neighborhood || 'Laveen Listing',
+          name:  p.address,
+          addr:  priceK + (p.beds ? ' · ' + p.beds + ' BD / ' + p.baths + ' BA' : ''),
+          cat:   (p.sqft || '—') + ' sqft',
+          waymo: 'https://waymo.com/waymo-one/?destination=' + encodeURIComponent(p.address),
+          slug:  null,
+        });
+        if (p.redfin_url) {
+          const btn = Object.assign(document.createElement('a'), {
+            className:'card-btn card-btn-view', textContent:'Redfin →',
+            href:p.redfin_url, target:'_blank',
+          });
+          document.getElementById('card-actions').appendChild(btn);
+        }
+      });
+    });
+  } catch(e) { console.warn('RPOI load failed:', e.message); }
+}
+
+/* ── Yelp businesses — live from Yelp Fusion API ── */
+async function loadYelp() {
+  try {
+    const r = await fetch(`/api/yelp?lat=${CENTER.lat}&lng=${CENTER.lng}&radius=8000&rating=4`);
+    const data = await r.json();
+    if (!data.businesses?.length) return;
+    data.businesses.forEach(b => {
+      if (!b.coordinates?.latitude || !b.coordinates?.longitude) return;
+      const el = document.createElement('div');
+      el.className = 'yelp-pin';
+      el.title = b.name + (b.rating ? ' ★' + b.rating : '');
+      const m = new advMarker({ position: { lat: b.coordinates.latitude, lng: b.coordinates.longitude }, map, content: el, zIndex: 5 });
+      m.addListener('click', () => {
+        map.panTo({ lat: b.coordinates.latitude, lng: b.coordinates.longitude });
+        showCard({
+          tag:     (b.rating ? '★ ' + b.rating + ' · ' : '') + (b.categories?.[0]?.title || 'Yelp'),
+          name:    b.name,
+          addr:    b.location?.address1 || '',
+          cat:     b.categories?.[0]?.title || '',
+          waymo:   'https://waymo.com/waymo-one/?destination=' + encodeURIComponent(b.location?.address1 || b.name),
+          yelpUrl: b.url,
         });
       });
     });
-    console.log('Yelp loaded:', rows.length);
-  } catch (e) { console.warn('Yelp load failed:', e.message); }
+    console.log('Yelp loaded:', data.businesses.length, 'businesses');
+  } catch(e) { console.warn('Yelp load failed:', e.message); }
 }
 
+/* ── Property pin — click returns to /laveen ── */
 function initPropPin() {
-  const pin = document.getElementById('prop-pin');
-  let active = false;
-  setTimeout(() => { active = true; pin.style.display = 'block'; }, 1200);
-  pin.addEventListener('click', () => {
-    showCard({
-      tag:      'Your Property',
-      name:     '11403 S 27th Dr',
-      addr:     'Laveen Village · AZ 85339 · 4BD/4.5BA · $2,000,000',
-      cat:      '5,400 sqft · 4.4 acres · Solar',
-      ytSearch: 'Laveen Village Arizona desert home',
-      waymo:    null,
-    });
-  });
+  const pin   = document.getElementById('prop-pin');
+  const label = document.getElementById('prop-label');
+  let pinActive = false;
+  setTimeout(() => { pinActive = true; pin.style.display = 'block'; label.style.display = 'block'; }, 1200);
+  pin.addEventListener('click', () => { window.location.href = '/laveen'; });
+
   map.addListener('bounds_changed', () => {
-    if (!active) return;
+    if (!pinActive) return;
     const proj = map.getProjection();
     if (!proj) return;
-    const pt  = proj.fromLatLngToPoint(new google.maps.LatLng(CENTER.lat, CENTER.lng));
-    const bnd = map.getBounds();
-    if (!bnd) return;
-    const ne = proj.fromLatLngToPoint(bnd.getNorthEast());
-    const sw = proj.fromLatLngToPoint(bnd.getSouthWest());
-    const sc = Math.pow(2, map.getZoom());
-    pin.style.left = (pt.x - sw.x) * sc + 'px';
-    pin.style.top  = (pt.y - ne.y) * sc + 'px';
+    const point  = proj.fromLatLngToPoint(new google.maps.LatLng(CENTER.lat, CENTER.lng));
+    const bounds = map.getBounds();
+    if (!bounds) return;
+    const ne    = proj.fromLatLngToPoint(bounds.getNorthEast());
+    const sw    = proj.fromLatLngToPoint(bounds.getSouthWest());
+    const scale = Math.pow(2, map.getZoom());
+    const x = (point.x - sw.x) * scale;
+    const y = (point.y - ne.y) * scale;
+    pin.style.left   = x + 'px';
+    pin.style.top    = y + 'px';
+    label.style.left = x + 'px';
+    label.style.top  = (y - 36) + 'px';
   });
 }
 
@@ -336,26 +392,32 @@ function loadHearts() {
         cat:      h.cat,
         ytSearch: h.ytSearch,
         waymo:    'https://waymo.com/waymo-one/?destination=' + encodeURIComponent(h.addr),
-        slug:     h.slug || null,
+        mapsUrl:  `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(h.name + ' ' + h.addr)}`,
       });
     });
   });
 }
 
-function showCard({ tag, name, addr, cat, ytSearch, waymo, slug, yelpUrl }) {
+function showCard({ tag, name, addr, cat, ytSearch, waymo, mapsUrl, yelpUrl }) {
   document.getElementById('card-tag').textContent  = tag;
   document.getElementById('card-name').textContent = name;
   document.getElementById('card-addr').textContent = addr + (cat ? ' · ' + cat : '');
   const act = document.getElementById('card-actions');
   act.innerHTML = '';
-  if (slug) act.appendChild(Object.assign(document.createElement('a'), { className:'card-btn card-btn-view', textContent:'View page →', href:'/place?id=' + slug }));
+  if (mapsUrl) act.appendChild(Object.assign(document.createElement('a'), { className:'card-btn card-btn-view', textContent:'Maps →', href:mapsUrl, target:'_blank' }));
   if (yelpUrl) act.appendChild(Object.assign(document.createElement('a'), { className:'card-btn card-btn-yelp', textContent:'Yelp →', href:yelpUrl, target:'_blank' }));
   if (ytSearch) {
     const ytBtn = Object.assign(document.createElement('button'), { className:'card-btn card-btn-yt', textContent:'▶ YouTube' });
-    ytBtn.onclick = () => {
+    ytBtn.onclick = async () => {
       const f = document.getElementById('card-yt');
       f.style.display = 'block';
-      f.src = 'https://www.youtube.com/embed?listType=search&list=' + encodeURIComponent(ytSearch) + '&autoplay=1';
+      f.src = '';
+      let vid = 'TXgFRbEJqR4';
+      try {
+        const r = await fetch(`/api/youtube?q=${encodeURIComponent(ytSearch)}&maxResults=1`);
+        if (r.ok) { const d = await r.json(); const v = (d.videos||[])[0]; if (v?.id) vid = v.id; }
+      } catch(e) {}
+      f.src = `https://www.youtube.com/embed/${vid}?autoplay=1&rel=0&modestbranding=1`;
     };
     act.appendChild(ytBtn);
   }

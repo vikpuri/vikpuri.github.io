@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Claude's Cube — Directory Template</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&family=EB+Garamond:ital,wght@0,700;1,700&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --ink:#1c1c1c; --ink-3:#3a3a3a; --cream:#faf8f4; --cream-2:#f3f0ea;
+    --sand:#e8e3d8; --rule:#ddd8cc; --rule-heavy:#bfb8a8;
+    --gold:#c9a84c; --text-muted:#888;
+  }
+  *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+  html, body { height:100%; font-family:'Source Serif 4',Georgia,serif; background:var(--cream-2); }
+
+  /* ── Shell ── */
+  .shell {
+    max-width:380px; margin:24px auto; background:var(--cream);
+    border:1px solid var(--rule-heavy); display:flex; flex-direction:column;
+    height:calc(100vh - 48px); overflow:hidden;
+  }
+
+  /* ── Header ── */
+  .shell-hd {
+    background:var(--ink); color:var(--cream); padding:12px 16px;
+    font-family:'EB Garamond',serif; font-size:1.1rem; font-style:italic; font-weight:700;
+    display:flex; align-items:center; justify-content:space-between; flex-shrink:0;
+  }
+  .shell-hd-sub { font-family:'DM Mono',monospace; font-size:.38rem; letter-spacing:.14em;
+    text-transform:uppercase; color:var(--gold); margin-top:2px; }
+
+  /* ── Tabs ── */
+  .panel-tabs {
+    display:flex; border-bottom:2px solid var(--ink); flex-shrink:0;
+    background:var(--cream-2);
+  }
+  .panel-tab {
+    flex:1; padding:9px 4px; border:none; background:transparent; cursor:pointer;
+    font-family:'DM Mono',monospace; font-size:.42rem; letter-spacing:.1em;
+    text-transform:uppercase; color:var(--text-muted); transition:color .15s,background .15s;
+    border-right:1px solid var(--rule);
+  }
+  .panel-tab:last-child { border-right:none; }
+  .panel-tab.active { background:var(--cream); color:var(--ink); font-weight:500; border-bottom:2px solid var(--cream); margin-bottom:-2px; }
+
+  /* ── Body ── */
+  .panel-body { flex:1; overflow-y:auto; }
+  .tab-pane { display:none; }
+  .tab-pane.active { display:block; }
+
+  /* ── Claude's Cube ── */
+  .cube-label {
+    padding:6px 12px 2px; font-family:'DM Mono',monospace; font-size:.4rem;
+    letter-spacing:.14em; text-transform:uppercase; color:var(--gold);
+  }
+  #panel-cube {
+    display:grid; grid-template-columns:repeat(5,1fr);
+    gap:3px; padding:6px 10px 4px;
+  }
+  .pcell {
+    border-radius:5px; padding:6px 2px; text-align:center; cursor:pointer;
+    transition:filter .15s,transform .12s; user-select:none; color:#fff;
+  }
+  .pcell:hover { filter:brightness(1.2); transform:scale(1.06); }
+  .pcell.pactive { outline:2px solid var(--gold); outline-offset:1px; filter:brightness(1.25); }
+  .pcell-icon { font-size:.9rem; display:block; line-height:1.2; }
+  .pcell-label {
+    font-size:.3rem; font-family:'DM Mono',monospace; letter-spacing:.04em;
+    text-transform:uppercase; margin-top:1px; color:rgba(255,255,255,.88);
+    overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+  }
+  #cube-results { padding:0 8px; max-height:260px; overflow-y:auto; }
+
+  /* ── Directory cards ── */
+  .dir-card {
+    display:flex; align-items:flex-start; gap:10px;
+    padding:9px 12px; border-bottom:1px solid var(--rule);
+    transition:background .15s;
+  }
+  .dir-card:hover { background:var(--cream-2); }
+  .dir-name { font-family:'Source Serif 4',serif; font-size:.82rem; color:var(--ink); margin-bottom:1px; }
+  .dir-addr { font-size:.67rem; color:var(--text-muted); margin-top:1px; }
+  .dir-empty { padding:20px; text-align:center; font-size:.75rem; color:var(--text-muted); font-style:italic; }
+
+  /* ── Child nav ── */
+  .panel-child-nav {
+    display:flex; border:1px solid var(--rule-heavy); overflow:hidden; margin-bottom:2px;
+  }
+  .pcn-link {
+    flex:1; text-align:center; font-family:'DM Mono',monospace; font-size:.46rem;
+    letter-spacing:.1em; text-transform:uppercase; color:var(--gold); text-decoration:none;
+    padding:8px 2px; border-right:1px solid var(--rule-heavy);
+    transition:background .15s,color .15s;
+  }
+  .pcn-link:last-child { border-right:none; }
+  .pcn-link:hover { background:var(--ink); color:var(--cream); }
+
+  /* ── CTA ── */
+  .panel-cta {
+    padding:13px 16px 18px; display:flex; flex-direction:column; gap:8px;
+    border-top:2px solid var(--ink); flex-shrink:0; background:var(--cream);
+  }
+  .btn-primary {
+    width:100%; padding:12px; background:var(--ink); color:var(--cream); border:none;
+    font-family:'Source Serif 4',serif; font-size:.66rem; font-weight:600;
+    letter-spacing:.18em; text-transform:uppercase; cursor:pointer;
+  }
+
+  /* ── Property stub tab ── */
+  .prop-field { padding:10px 16px; border-bottom:1px solid var(--rule); }
+  .prop-field-lbl { font-family:'DM Mono',monospace; font-size:.4rem; letter-spacing:.14em; text-transform:uppercase; color:var(--text-muted); margin-bottom:3px; }
+  .prop-field-val { font-family:'Source Serif 4',serif; font-size:.88rem; color:var(--ink); }
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <!-- Header -->
+  <div class="shell-hd">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 440 100" height="38" preserveAspectRatio="xMinYMid meet" aria-label="Requation">
+      <defs><filter id="gb"><feGaussianBlur stdDeviation="1.2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+      <text x="6" y="42" font-family="EB Garamond,Georgia,serif" font-size="46" font-weight="700" font-style="italic" fill="#B22234">r</text>
+      <line x1="31" y1="76" x2="50" y2="41" stroke="#7A7A7A" stroke-width="5" stroke-linecap="round"/>
+      <text x="56" y="88" font-family="Raleway,Arial,sans-serif" font-size="92" font-weight="600" fill="#4F6FB8">Σ</text>
+      <text x="122" y="88" font-family="Raleway,Arial,sans-serif" font-size="24" font-weight="600" font-style="italic" fill="#D4A843" opacity="0.8" filter="url(#gb)" letter-spacing="2">quation</text>
+    </svg>
+    <span style="color:var(--gold);font-size:.9rem;margin-left:auto">♥</span>
+  </div>
+
+  <!-- Tabs -->
+  <div class="panel-tabs">
+    <button class="panel-tab" onclick="switchTab('property')">Property</button>
+    <button class="panel-tab" onclick="switchTab('index')">Index</button>
+    <button class="panel-tab" onclick="switchTab('favorites')">♥ Favs</button>
+    <button class="panel-tab active" onclick="switchTab('directory')">Directory</button>
+    <button class="panel-tab" onclick="switchTab('waymo')">Waymo</button>
+  </div>
+
+  <!-- Body -->
+  <div class="panel-body" id="panel-body">
+
+    <!-- Property stub -->
+    <div class="tab-pane" id="tab-property">
+      <div class="prop-field"><div class="prop-field-lbl">Address</div><div class="prop-field-val">843 S Grand Ave · DTLA CA 90017</div></div>
+      <div class="prop-field"><div class="prop-field-lbl">Asking</div><div class="prop-field-val">$2,450,000</div></div>
+      <div class="prop-field"><div class="prop-field-lbl">Details</div><div class="prop-field-val">3 BR / 2.5 BA · 2,200 SF</div></div>
+    </div>
+
+    <!-- Index stub -->
+    <div class="tab-pane" id="tab-index">
+      <div class="dir-empty">Market Index — live on requation.com/dtla</div>
+    </div>
+
+    <!-- Favorites stub -->
+    <div class="tab-pane" id="tab-favorites">
+      <div class="dir-empty">♥ MyLocal favorites fly-in — live on requation.com/dtla</div>
+    </div>
+
+    <!-- Directory — Claude's Cube -->
+    <div class="tab-pane active" id="tab-directory">
+      <div class="cube-label">Tap a category — All ZIPs</div>
+      <div id="panel-cube"></div>
+      <div id="cube-results">
+        <div class="dir-empty" style="font-size:.6rem">Tap a category above ↑</div>
+      </div>
+      <div id="dir-list" style="display:none"></div>
+    </div>
+
+    <!-- Waymo stub -->
+    <div class="tab-pane" id="tab-waymo">
+      <div class="dir-empty">Waymo — live on requation.com/dtla</div>
+    </div>
+
+  </div><!-- /panel-body -->
+
+  <!-- Footer -->
+  <div class="panel-cta">
+    <div class="panel-child-nav" id="child-nav"></div>
+    <button class="btn-primary">Contact Owner</button>
+  </div>
+
+</div><!-- /shell -->
+
+<script>
+/* ── Config: set MARKET to 'dtla' or 'laveen' ── */
+const MARKET = 'dtla';
+
+const CONFIG = {
+  dtla: {
+    childLinks: [
+      {label:'LA Life', href:'/lalife'},
+      {label:'WeHo',    href:'/lalife/weho'},
+      {label:'Venice',  href:'/lalife/venice'},
+      {label:'Broadway',href:'/lalife/broadway'},
+    ],
+    mockData: [
+      {name:'Bottega Louie',    category:'Restaurants',  address:'700 S Grand Ave',       rating:4.3, yelp_url:'https://www.yelp.com/biz/bottega-louie-los-angeles',         waymo_url:'https://waymo.com/waymo-one/?destination=700+S+Grand+Ave'},
+      {name:'Perch LA',         category:'Bars',         address:'448 S Hill St',          rating:4.2, yelp_url:'https://www.yelp.com/biz/perch-los-angeles',                 waymo_url:'https://waymo.com/waymo-one/?destination=448+S+Hill+St'},
+      {name:'Philz Coffee',     category:'Coffee',       address:'801 S Grand Ave',        rating:4.5, yelp_url:'https://www.yelp.com/biz/philz-coffee-los-angeles-10',       waymo_url:'https://waymo.com/waymo-one/?destination=801+S+Grand+Ave'},
+      {name:'Whole Foods DTLA', category:'Grocery',      address:'788 S Grand Ave',        rating:4.1, yelp_url:'https://www.yelp.com/biz/whole-foods-market-los-angeles-12', waymo_url:'https://waymo.com/waymo-one/?destination=788+S+Grand+Ave'},
+      {name:'The Broad',        category:'Arts',         address:'221 S Grand Ave',        rating:4.6, yelp_url:'https://www.yelp.com/biz/the-broad-los-angeles',             waymo_url:'https://waymo.com/waymo-one/?destination=221+S+Grand+Ave'},
+      {name:'Equinox DTLA',     category:'Gyms',         address:'755 S Figueroa St',      rating:4.2, yelp_url:'https://www.yelp.com/biz/equinox-los-angeles-4',             waymo_url:'https://waymo.com/waymo-one/?destination=755+S+Figueroa+St'},
+      {name:'Grand Central Mkt',category:'Shopping',     address:'317 S Broadway',         rating:4.4, yelp_url:'https://www.yelp.com/biz/grand-central-market-los-angeles',  waymo_url:'https://waymo.com/waymo-one/?destination=317+S+Broadway'},
+      {name:'Regal LA Live',    category:'Movie Theaters',address:'1000 W Olympic Blvd',  rating:4.0, yelp_url:'https://www.yelp.com/biz/regal-la-live-stadium-14-los-angeles',waymo_url:'https://waymo.com/waymo-one/?destination=1000+W+Olympic+Blvd'},
+      {name:'Grand Park',       category:'Parks',        address:'200 N Grand Ave',        rating:4.5, yelp_url:'https://www.yelp.com/biz/grand-park-los-angeles',             waymo_url:'https://waymo.com/waymo-one/?destination=200+N+Grand+Ave'},
+      {name:'LA Central Library',category:'Libraries',   address:'630 W 5th St',           rating:4.7, yelp_url:'https://www.yelp.com/biz/los-angeles-public-library-los-angeles-2',waymo_url:'https://waymo.com/waymo-one/?destination=630+W+5th+St'},
+      {name:"Rudy's Barbershop",category:'Hair Salons',  address:'500 S Flower St',        rating:4.3, yelp_url:'https://www.yelp.com/biz/rudys-barbershop-los-angeles-5',    waymo_url:'https://waymo.com/waymo-one/?destination=500+S+Flower+St'},
+      {name:'Joe Auto Parks',   category:'Parking',      address:'633 S Olive St',         rating:3.8, yelp_url:'https://www.yelp.com/biz/joe-auto-parks-los-angeles',        waymo_url:'https://waymo.com/waymo-one/?destination=633+S+Olive+St'},
+      {name:'Downtown Dog Lounge',category:'Pet',        address:'818 S Olive St',         rating:4.5, yelp_url:'https://www.yelp.com/biz/downtown-dog-lounge-los-angeles',   waymo_url:'https://waymo.com/waymo-one/?destination=818+S+Olive+St'},
+      {name:'Broken Spanish',   category:'Restaurants',  address:'1050 S Flower St',       rating:4.4, yelp_url:'https://www.yelp.com/biz/broken-spanish-los-angeles',        waymo_url:'https://waymo.com/waymo-one/?destination=1050+S+Flower+St'},
+      {name:'Blue Bottle Coffee',category:'Coffee',      address:'582 Mateo St',           rating:4.4, yelp_url:'https://www.yelp.com/biz/blue-bottle-coffee-los-angeles-8',  waymo_url:'https://waymo.com/waymo-one/?destination=582+Mateo+St'},
+      {name:'InterContinental', category:'Hotels',       address:'900 Wilshire Blvd',      rating:4.3, yelp_url:'https://www.yelp.com/biz/intercontinental-los-angeles-downtown',waymo_url:'https://waymo.com/waymo-one/?destination=900+Wilshire+Blvd'},
+      {name:'MOCA Grand Ave',   category:'Arts',         address:'250 S Grand Ave',        rating:4.5, yelp_url:'https://www.yelp.com/biz/the-museum-of-contemporary-art-los-angeles',waymo_url:'https://waymo.com/waymo-one/?destination=250+S+Grand+Ave'},
+      {name:'Groundwork Coffee',category:'Coffee',       address:'350 S Grand Ave',        rating:4.4, yelp_url:'https://www.yelp.com/biz/groundwork-coffee-los-angeles-3',   waymo_url:'https://waymo.com/waymo-one/?destination=350+S+Grand+Ave'},
+    ],
+  },
+  laveen: {
+    childLinks: [
+      {label:'Desert Life',  href:'/desertlife'},
+      {label:'Phoenix',      href:'/desertlife/phoenix'},
+      {label:'Scottsdale',   href:'/desertlife/scottsdale'},
+    ],
+    mockData: [
+      {name:'Laveen Village Market',  category:'Grocery',     address:'5055 W Baseline Rd', rating:4.0, yelp_url:'https://www.yelp.com/search?find_desc=grocery&find_loc=Laveen+AZ',       waymo_url:'https://waymo.com/waymo-one/?destination=5055+W+Baseline+Rd+Laveen'},
+      {name:'Desert Espresso',        category:'Coffee',      address:'4747 W Dobbins Rd',  rating:4.3, yelp_url:'https://www.yelp.com/search?find_desc=coffee&find_loc=Laveen+AZ',       waymo_url:'https://waymo.com/waymo-one/?destination=4747+W+Dobbins+Rd+Laveen'},
+      {name:'South Mountain Park',    category:'Parks',       address:'10919 S Central Ave', rating:4.8, yelp_url:'https://www.yelp.com/biz/south-mountain-park-phoenix',                 waymo_url:'https://waymo.com/waymo-one/?destination=10919+S+Central+Ave+Phoenix'},
+      {name:'Laveen Urgent Care',     category:'Health',      address:'4727 W Baseline Rd', rating:4.1, yelp_url:'https://www.yelp.com/search?find_desc=urgent+care&find_loc=Laveen+AZ', waymo_url:'https://waymo.com/waymo-one/?destination=4727+W+Baseline+Rd+Laveen'},
+      {name:'AZ Mills Mall',          category:'Shopping',    address:'5000 S Arizona Mills Cir',rating:4.0,yelp_url:'https://www.yelp.com/biz/arizona-mills-tempe',                   waymo_url:'https://waymo.com/waymo-one/?destination=5000+S+Arizona+Mills+Cir'},
+      {name:'Filibertos',             category:'Restaurants', address:'4575 W Baseline Rd', rating:4.0, yelp_url:'https://www.yelp.com/search?find_desc=mexican+food&find_loc=Laveen+AZ',waymo_url:'https://waymo.com/waymo-one/?destination=4575+W+Baseline+Rd+Laveen'},
+      {name:'Planet Fitness Laveen',  category:'Gyms',        address:'4747 W Baseline Rd', rating:4.1, yelp_url:'https://www.yelp.com/search?find_desc=gym&find_loc=Laveen+AZ',        waymo_url:'https://waymo.com/waymo-one/?destination=4747+W+Baseline+Rd+Laveen'},
+    ],
+  },
+};
+
+/* RULE: Food & Drink = master bucket (all food/drink except taco trucks)
+         Wellness & Aesthetics = master bucket (botox, facial, salon, hydration, spa, etc.) */
+const PCUBE_CATS = [
+  /* ── Master Buckets ── */
+  {icon:'🍽️',label:'Food & Drink',   color:'#8B2500',match:['restaurant','food','cafe','coffee','bar','juice','smoothie','vegan','vegetarian','delivery','takeout','boba','brewery','pub','bistro','diner','pizza','burger','sushi','sandwich','wine','cocktail','lounge','nightlife','italian','mexican','asian','american','buffet','brunch','bakery']},
+  {icon:'💆',label:'Wellness',        color:'#7B1D5A',match:['botox','facial','salon','hair','nail','spa','massage','hydration','aesthetic','beauty','skincare','wax','lash','medspa','blowout','barber','barbershop','iv therapy','vitamin','anti-aging','threading','brow','med spa','sugaring','microblading','eyelash','filler','treatment']},
+  /* ── Core Categories ── */
+  {icon:'🛒',label:'Grocery',         color:'#9A6B1F',match:['grocery','supermarket','whole foods','trader joe','market','convenience','bodega']},
+  {icon:'🏋️',label:'Fitness',        color:'#1E6B3C',match:['gym','yoga','pilates','crossfit','fitness','workout','sport','boxing','martial arts','dance','barre','cycling','spin']},
+  {icon:'🏥',label:'Medical',         color:'#0277BD',match:['doctor','dentist','medical','clinic','hospital','urgent care','optometrist','chiropractor','dermatologist','psychiatrist','therapy','mental health']},
+  {icon:'💊',label:'Pharmacy',        color:'#1A5C8A',match:['pharmacy','drugstore','cvs','walgreens','rite aid','compounding']},
+  {icon:'🛍️',label:'Shopping',       color:'#7A5C00',match:['shopping','clothing','boutique','retail','fashion','mall','apparel','shoes','accessories','jewelry','electronics','home goods']},
+  {icon:'🎭',label:'Arts',            color:'#5C1A3A',match:['museum','art','gallery','culture','concert','opera','ballet','performance','exhibit','theater','show']},
+  {icon:'🏨',label:'Hotels',          color:'#1B4F8A',match:['hotel','lodging','motel','inn','hostel','airbnb','resort','suites']},
+  {icon:'🌳',label:'Parks',           color:'#2D6A4F',match:['park','outdoor','nature','recreation','hiking','garden','beach','trail','campground']},
+  {icon:'🎬',label:'Film',            color:'#1A1F3A',match:['movie','cinema','film','theater','screening','imax','drive-in']},
+  {icon:'📚',label:'Library',         color:'#2C4A6E',match:['library','bookstore','book','reading','archive']},
+  {icon:'🐾',label:'Pets',            color:'#C0640A',match:['pet','veterinarian','vet','dog','cat','animal','grooming','kennel','pet store']},
+  {icon:'🏦',label:'Finance',         color:'#0D3349',match:['bank','credit union','financial','atm','insurance','accounting','tax','investment']},
+  {icon:'🅿️',label:'Parking',        color:'#455A64',match:['parking','garage','valet','lot']},
+  {icon:'🌮',label:'Taco Trucks',     color:'#C84B00',match:['taco truck','food truck','street food','lonchera','cart','mobile food']},
+  {icon:'🎉',label:'Events',          color:'#6B2D7A',match:['event','venue','concert hall','banquet','wedding','party','festival','nightclub','club']},
+  {icon:'🏫',label:'Education',       color:'#4527A0',match:['school','tutoring','learning','academy','college','university','education','daycare','preschool']},
+  {icon:'🛠️',label:'Services',       color:'#37474F',match:['auto','repair','plumber','electrician','cleaning','laundry','dry clean','locksmith','moving','storage']},
+  {icon:'🏪',label:'Corner Store',    color:'#7D2E23',match:['corner store','deli','bodega','liquor','convenience','news','tobacco']},
+  {icon:'🌿',label:'Cannabis',        color:'#33691E',match:['cannabis','dispensary','cbd','marijuana','weed','hemp','recreational']},
+  {icon:'🚌',label:'Transit',         color:'#263238',match:['transit','bus','metro','rail','subway','train','station']},
+  {icon:'🏠',label:'Real Estate',     color:'#4E342E',match:['real estate','realty','property','apartment','rental','leasing','broker','realtor']},
+  {icon:'🤝',label:'Pro Services',    color:'#3E2723',match:['attorney','lawyer','notary','accountant','consultant','hr','staffing']},
+  {icon:'🏢',label:'More',            color:'#212121',match:[]},
+];
+
+let dirData = CONFIG[MARKET].mockData;
+let pActiveCell = null, pActiveCellIdx = null;
+
+/* ── Init ── */
+function init() {
+  /* Child nav */
+  const nav = document.getElementById('child-nav');
+  CONFIG[MARKET].childLinks.forEach(l => {
+    const a = document.createElement('a');
+    a.href = l.href; a.className = 'pcn-link'; a.textContent = l.label;
+    nav.appendChild(a);
+  });
+  /* Cube */
+  renderPanelCube();
+}
+
+function switchTab(name) {
+  document.querySelectorAll('.panel-tab').forEach(t => {
+    const m = (t.getAttribute('onclick') || '').match(/switchTab\('(\w+)'\)/);
+    t.classList.toggle('active', !!m && m[1] === name);
+  });
+  document.querySelectorAll('.tab-pane').forEach(p => p.classList.toggle('active', p.id === 'tab-' + name));
+  document.getElementById('panel-body').scrollTop = 0;
+  if (name === 'directory') {
+    renderPanelCube();
+    const res = document.getElementById('cube-results');
+    if (res && !pActiveCellIdx) res.innerHTML = `<div class="dir-empty" style="font-size:.6rem">Tap a category above ↑</div>`;
+  }
+}
+
+function renderPanelCube() {
+  const cube = document.getElementById('panel-cube');
+  if (!cube) return;
+  cube.innerHTML = PCUBE_CATS.map((c, i) =>
+    `<div class="pcell" style="background:${c.color}" onclick="selectPCell(this,${i})">` +
+    `<span class="pcell-icon">${c.icon}</span>` +
+    `<span class="pcell-label">${c.label}</span>` +
+    `</div>`
+  ).join('');
+  if (pActiveCellIdx !== null) {
+    const cells = cube.querySelectorAll('.pcell');
+    if (cells[pActiveCellIdx]) { cells[pActiveCellIdx].classList.add('pactive'); pActiveCell = cells[pActiveCellIdx]; }
+  }
+}
+
+function selectPCell(el, idx) {
+  if (pActiveCell) pActiveCell.classList.remove('pactive');
+  el.classList.add('pactive');
+  pActiveCell = el; pActiveCellIdx = idx;
+  const cat = PCUBE_CATS[idx];
+  const res = document.getElementById('cube-results');
+  if (!res) return;
+  const words = cat.match.length ? cat.match : null;
+  const filtered = words
+    ? dirData.filter(b => words.some(w =>
+        b.category.toLowerCase().includes(w) || b.name.toLowerCase().includes(w)
+      ))
+    : dirData;
+  if (!filtered.length) {
+    res.innerHTML = `<div class="dir-empty">No ${cat.label} listings found</div>`;
+    return;
+  }
+  res.innerHTML = filtered.map(b => {
+    const stars = b.rating  ? `<span style="font-size:.5rem;background:#FF6600;color:#fff;padding:1px 4px;border-radius:2px;font-weight:700">★${b.rating}</span>` : '';
+    const yelp  = b.yelp_url? `<a href="${b.yelp_url}" target="_blank" onclick="event.stopPropagation()" style="font-size:.52rem;background:#B22234;color:#fff;padding:2px 5px;border-radius:2px;text-decoration:none;font-weight:600">Yelp</a>` : '';
+    const waymo = b.waymo_url?`<a href="${b.waymo_url}" target="_blank" onclick="event.stopPropagation()" style="font-size:.52rem;background:#1A73E8;color:#fff;padding:2px 5px;border-radius:2px;text-decoration:none;font-weight:600">🚗 Waymo</a>` : '';
+    return `<div class="dir-card"><div style="flex:1;min-width:0">` +
+      `<div class="dir-name">${b.name}</div>` +
+      (b.address ? `<div class="dir-addr">${b.address}</div>` : '') +
+      `<div style="display:flex;gap:4px;margin-top:3px;align-items:center">${stars}${yelp}${waymo}</div>` +
+      `</div></div>`;
+  }).join('');
+}
+
+window.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
