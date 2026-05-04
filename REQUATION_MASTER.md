@@ -2,11 +2,13 @@
 
 ---
 
-## 0. System Architecture Schematic
+## 0. System Architecture Schematic — v1.A (2026-05-03)
+
+> Stack migrated from Netlify + Mapbox → Vercel + CesiumJS (2026-04-25)
 
 ```
 ╔══════════════════════════════════════════════════════════════════════════╗
-║                    REQUATION PLATFORM ARCHITECTURE                       ║
+║              REQUATION — HyperlocalGPS · v1.A Architecture              ║
 ║                         requation.com                                    ║
 ╠══════════════════════════════════════════════════════════════════════════╣
 ║                                                                          ║
@@ -16,48 +18,152 @@
 ║  └─────────────────────┬────────────────────────┘                       ║
 ║                         │ HTTPS request                                  ║
 ║  ┌──────────────────────▼─────────────────────────────────────────────┐ ║
-║  │                  NETLIFY CDN · Global Edge                          │ ║
-║  │  /index  /dtla  /lalife  /laveen  /desertlife  /dashboard           │ ║
-║  │  netlify.toml redirects · Let's Encrypt HTTPS · Auto-deploy         │ ║
-║  │  ┌───────────────────────┐                                          │ ║
-║  │  │  NETLIFY FUNCTIONS     │  /.netlify/functions/youtube             │ ║
-║  │  │  (Node.js · esbuild)  │  /.netlify/functions/yelp                │ ║
-║  │  └───────────────────────┘                                          │ ║
-║  └──────┬───────────────────┬──────────────────────────┬──────────────┘ ║
-║         │ REST API           │ REST API (PostgREST)      │ JS SDK        ║
-║  ┌──────▼───────┐   ┌────────▼──────────────────┐  ┌───▼────────────┐  ║
-║  │   YOUTUBE    │   │   SUPABASE POSTGRESQL      │  │  MAPBOX GL JS  │  ║
-║  │  Data API v3 │   │   mpmprnjhunjfeacikgml     │  │  v3.3.0        │  ║
-║  │  Video search│   │  ┌──────────┐ ┌──────────┐ │  │  Standard style│  ║
-║  │  Markers     │   │  │restaurants│ │properties│ │  │  3D buildings  │  ║
-║  │  Billboard   │   │  │  table   │ │  table   │ │  │  Fog · Cinematic│ ║
-║  └──────────────┘   │  └──────────┘ └──────────┘ │  │  HTML markers  │  ║
-║                     │  Row-level security          │  └────────────────┘  ║
-║                     └────────────────────────────┘                       ║
+║  │                  VERCEL · Global Edge CDN                           │ ║
+║  │  GitHub master → auto-build (node build.js → dist/) → deploy ~10s  │ ║
+║  │  vercel.json: clean URL rewrites · HTTPS · env vars                 │ ║
+║  │  ┌─────────────────────────────────────────────────────────────┐   │ ║
+║  │  │  VERCEL SERVERLESS FUNCTIONS  /api/*                        │   │ ║
+║  │  │  yelp.js · places.js · aerialview.js · contact.js           │   │ ║
+║  │  │  espn.js · twilio.js                                        │   │ ║
+║  │  └─────────────────────────────────────────────────────────────┘   │ ║
+║  └──────┬──────────────────┬─────────────────────────┬───────────────┘ ║
+║         │                  │ PostgREST                │ CDN             ║
+║  ┌──────▼──────┐  ┌────────▼──────────────────┐  ┌───▼────────────┐   ║
+║  │   YOUTUBE   │  │   SUPABASE POSTGRESQL      │  │  CESIUMJS      │   ║
+║  │ Data API v3 │  │   mpmprnjhunjfeacikgml     │  │  + Google      │   ║
+║  │ YT strip    │  │  ┌──────────┐ ┌──────────┐ │  │  Photorealistic│   ║
+║  │ Markers     │  │  │restaurants│ │properties│ │  │  3D Tiles      │   ║
+║  └─────────────┘  │  └──────────┘ └──────────┘ │  │  sampleHeight  │   ║
+║                   │  AZ / CA isolated            │  │  postRender    │   ║
+║                   └────────────────────────────┘  └────────────────┘   ║
 ║                                                                          ║
 ║  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐  ┌─────────────┐ ║
-║  │  YELP FUSION │  │    RESEND    │  │    STRIPE    │  │STREAMTHEWORLD│ ║
-║  │ Business POI │  │    Email     │  │   Payments   │  │ KLOS 99.5FM │ ║
-║  │ Netlify proxy│  │ Notifications│  │  (test mode) │  │ 99.5 Mountain│ ║
+║  │  YELP FUSION │  │    RESEND    │  │    STRIPE    │  │  AUDIO CDN  │ ║
+║  │ /api/yelp.js │  │    Email     │  │  (pending)   │  │ KLOS 99.5FM │ ║
+║  │ Claude Cube  │  │ Notifications│  │  Contact btn │  │ 99.5 Mountain│ ║
 ║  └──────────────┘  └──────────────┘  └──────────────┘  └─────────────┘ ║
 ║                                                                          ║
 ╠══════════════════════════════════════════════════════════════════════════╣
 ║  DATA FLOW                                                               ║
-║  Browser → Netlify CDN (HTML pages)                                     ║
-║  Browser → Netlify Function → YouTube API (video markers + billboard)   ║
-║  Browser → Netlify Function → Yelp API (business POI data)              ║
-║  Browser → Supabase PostgREST (restaurants + properties queries)        ║
-║  Browser → Mapbox CDN (vector tiles, 3D buildings, fog layers)          ║
-║  Browser → StreamTheWorld CDN (KLOS / The Mountain live AAC audio)      ║
-╠══════════════════════════════════════════════════════════════════════════╣
-║  PAGES                                                                   ║
-║  /              index.html       Home · market selector                 ║
-║  /dtla          dtla.html        DTLA property map · 1116 lines         ║
-║  /lalife        lalife.html      DTLA life map · 541 lines              ║
-║  /laveen        laveen.html      Laveen AZ property map · 1133 lines    ║
-║  /desertlife    desertlife.html  Laveen life map · 668 lines            ║
-║  /dashboard     dashboard.html  Management dashboard · investor view    ║
+║  Browser → Vercel CDN (HTML pages from dist/)                           ║
+║  Browser → /api/yelp → Yelp Fusion API (Claude's Cube directory)        ║
+║  Browser → /api/places → Google Places API (POI markers)                ║
+║  Browser → /api/aerialview → Google Aerial View (property video)        ║
+║  Browser → /api/espn → ESPN public API (sports scores, no key)          ║
+║  Browser → Supabase PostgREST (restaurants + properties tables)         ║
+║  Browser → CesiumJS + Google 3D Tiles (photorealistic terrain + bldgs)  ║
+║  Browser → StreamTheWorld / AmperWave CDN (KLOS / The Mountain AAC)     ║
 ╚══════════════════════════════════════════════════════════════════════════╝
+```
+
+---
+
+## 0A. Navigation Map — All Pages & Links (v1.A)
+
+```
+requation.com/
+│
+├── /dtla ──────────────────────────────── DTLA South Park property
+│   │   Panel tabs: Property · Index · Directory · Waymo · Favorites
+│   │   Panel footer child nav:
+│   ├──────────────────→ /mylocal
+│   ├──────────────────→ /lalife/broadway
+│   ├──────────────────→ /lalife/venice
+│   └──────────────────→ /lalife/weho
+│
+├── /dtla-mall-map ──────────────────────── DTLA + ♥ Favorites header btn
+│   │   Header nav: ♥ Favorites → opens panel Favorites tab
+│   │   Panel footer child nav: (same as /dtla)
+│   ├──────────────────→ /mylocal
+│   ├──────────────────→ /lalife/broadway
+│   ├──────────────────→ /lalife/venice
+│   └──────────────────→ /lalife/weho
+│
+├── /laveen ─────────────────────────────── Laveen AZ property
+│   │   Panel tabs: Property · Index · Directory · Waymo · Favorites
+│   │   Panel footer child nav:
+│   ├──────────────────→ /laveenlocal
+│   ├──────────────────→ /desertlife/phoenix
+│   └──────────────────→ /desertlife/scottsdale
+│
+├── /laveen-mall-map ────────────────────── Laveen + ♥ Favorites header btn
+│   │   Header nav: ♥ Favorites → opens panel Favorites tab
+│   │   Panel footer child nav: (same as /laveen)
+│   ├──────────────────→ /laveenlocal
+│   ├──────────────────→ /desertlife/phoenix
+│   └──────────────────→ /desertlife/scottsdale
+│
+├── /mylocal ────────────────────────────── CA local listings (16 ZIPs)
+├── /laveenlocal ────────────────────────── AZ local listings (4 ZIPs)
+│
+├── /lalife ─────────────────────────────── DTLA life map
+│   ├── /lalife/broadway
+│   ├── /lalife/venice
+│   └── /lalife/weho
+│
+├── /desertlife ─────────────────────────── AZ life map
+│   ├── /desertlife/phoenix
+│   └── /desertlife/scottsdale
+│
+└── /dashboard ──────────────────────────── Admin / newsmap dashboard
+
+Cross-page hash navigation:
+  /dtla-mall-map → /dtla#favorites  (location.hash detector → openPanel + Favorites tab)
+  /laveen-mall-map → /laveen#favorites
+```
+
+---
+
+## 0B. Claude's Cube — Yelp API Data Flow
+
+```
+User taps a cell in the 5×5 PCUBE grid (Directory tab)
+           │
+           ▼
+    selectPCell(el, idx)
+           │
+           ▼
+  PCUBE_CATS[idx].yelpCats  ← Yelp API alias strings
+  e.g. 'restaurants,food,bars,coffee,bakeries,...'
+           │
+           ▼
+  MARKET_ZIPS.map(zip =>
+    fetch('/api/yelp?zip=ZIP&categories=CATS&sort_by=review_count'))
+           │
+    ┌──────┴──────────────────────────────────────────┐
+    │  Promise.allSettled — ALL ZIPS IN PARALLEL       │
+    │  DTLA: 16 ZIPs × 50 results = up to 800 raw     │
+    │  Laveen: 4 ZIPs × 50 results = up to 200 raw    │
+    └──────┬──────────────────────────────────────────┘
+           │
+           ▼
+  /api/yelp.js  (Vercel serverless)
+    → Yelp Fusion /v3/businesses/search?location=ZIP
+    → sort_by=review_count
+    → limit=50
+    → NO rating floor (ratingMin=0)
+           │
+           ▼
+  Client-side dedup: normName(b.name) → Set
+  Sort: review_count descending (most popular first)
+  cellCache[idx] = results  ← cached per cell
+           │
+           ▼
+  showCellResults(businesses)
+    → Panel Directory tab renders result cards
+    → Each card: name · rating · review count · category · address
+
+MARKET_ZIPS per market:
+  DTLA:   ['90017','90015','90013','90014','90021','90012','90007',
+            '90005','90006','90019','90036','90025','90024','90049','90069','90402']
+  Laveen: ['85339','85041','85042','85044']
+
+PCUBE grid — 25 cells (5×5):
+  Row 1: Food & Drink · Wellness · Grocery · Fitness · Medical
+  Row 2: Pharmacy · Shopping · Arts · Hotels · Parks
+  Row 3: Film · Library · Pets · Finance · Parking
+  Row 4: Taco Trucks · Events · Education · Services · Corner Store
+  Row 5: Cannabis · Transit · Real Estate · Pro Services · More
 ```
 
 ---
@@ -86,17 +192,14 @@ Requation (requation.com) is a living maps real estate intelligence platform bui
 | /desertlife | desertlife.html | Laveen/South Phoenix life map |
 | /dashboard | dashboard.html | Management dashboard — live DB, architecture, API status |
 
-**Navigation Flow**
-```
-/ → /dtla ──→ /lalife ──→ /dtla (back)
-  → /laveen → /desertlife → /laveen (back)
-```
+**Navigation Flow — see Section 0A for full link map**
 
-**Navigation Rules**
-- Any POI/RPOI click on /dtla → navigates to /lalife
-- Any POI/RPOI click on /laveen → navigates to /desertlife
-- Header title, "Home", nav-back on life pages → returns to property page
-- map.on('load') auto-opens the property panel after 1500ms on property pages
+**Navigation Rules (v1.A)**
+- /dtla panel footer → /mylocal · /lalife/broadway · /lalife/venice · /lalife/weho
+- /laveen panel footer → /laveenlocal · /desertlife/phoenix · /desertlife/scottsdale
+- /dtla-mall-map and /laveen-mall-map: same footers + ♥ Favorites header button
+- location.hash === '#favorites' on property pages → openPanel + Favorites tab (1800ms)
+- NEVER auto-open panel on load (openPanel calls hideMedia)
 
 ---
 
