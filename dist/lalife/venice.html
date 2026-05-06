@@ -31,19 +31,14 @@
     #route-nav {
       position:fixed; bottom:0; left:0; right:0; height:var(--route-h);
       background:rgba(255,255,255,.96); border-top:1.5px solid var(--rule-heavy);
-      display:flex; align-items:center; justify-content:center; z-index:100;
+      display:flex; align-items:center; justify-content:center; gap:6px; z-index:100;
       font-family:'DM Mono',monospace; font-size:.42rem; letter-spacing:.12em;
       text-transform:uppercase;
     }
-    .route-stop {
-      padding:0 14px; color:var(--text-muted); text-decoration:none;
-      border-right:1px solid var(--rule); line-height:var(--route-h);
-      transition:color .2s; white-space:nowrap;
-    }
-    .route-stop:last-child { border-right:none; }
-    .route-stop:hover { color:var(--ink); }
-    .route-stop.current { color:var(--ink); font-weight:500; border-bottom:2px solid var(--gold); }
-    .route-arrow { padding:0 8px; color:var(--text-muted); }
+    .route-stop { flex-shrink:0; padding:5px 11px; color:var(--text-muted); text-decoration:none; border:1px solid var(--rule-heavy); border-radius:2px; transition:all .15s; white-space:nowrap; }
+    .route-stop:hover { background:var(--gold); color:#fff; border-color:var(--gold); }
+    .route-stop.current { color:var(--ink); border-color:var(--gold); background:var(--gold-dim); }
+    .route-arrow { display:none; }
 
     header {
       position:fixed; top:0; left:0; right:0; height:var(--header-h); z-index:100;

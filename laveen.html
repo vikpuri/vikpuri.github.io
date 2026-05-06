@@ -9,6 +9,18 @@
   <meta property="og:title"       content="Urban Farmhouse — Requation Laveen AZ">
   <meta property="og:description" content="4BD/4.5BA · 5,400 sqft · 4.4 Acres · 11403 S 27th Dr · $2,000,000 · South Mountain views · Solar">
   <meta property="og:image"       content="https://i.imgur.com/0aYf87y.jpeg">
+  <meta property="og:site_name"   content="Requation — HyperlocalGPS">
+  <meta name="description"        content="4BD/4.5BA urban farmhouse on 4.4 acres in Laveen Village, Phoenix AZ 85339. 5,400 sqft · Solar · South Mountain views · Listed at $2,000,000.">
+  <meta name="keywords"           content="Laveen Village home for sale, Phoenix AZ farmhouse, 11403 S 27th Dr, Laveen AZ real estate, urban farmhouse Phoenix">
+  <meta name="robots"             content="index, follow">
+  <link rel="canonical"           href="https://requation.com/laveen">
+  <meta name="twitter:card"       content="summary_large_image">
+  <meta name="twitter:title"      content="Urban Farmhouse — Requation Laveen AZ">
+  <meta name="twitter:description" content="4BD/4.5BA · 5,400 sqft · 4.4 Acres · 11403 S 27th Dr · $2,000,000 · South Mountain views · Solar">
+  <meta name="twitter:image"      content="https://i.imgur.com/0aYf87y.jpeg">
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"RealEstateListing","name":"Urban Farmhouse — Laveen Village AZ 85339","description":"4-bedroom 4.5-bath urban farmhouse on 4.4 acres at 11403 S 27th Drive, Laveen Village AZ 85339. 5,400 sqft, solar, South Mountain views. Listed at $2,000,000.","url":"https://requation.com/laveen","image":"https://i.imgur.com/0aYf87y.jpeg","address":{"@type":"PostalAddress","streetAddress":"11403 S 27th Dr","addressLocality":"Phoenix","addressRegion":"AZ","postalCode":"85339","addressCountry":"US"},"offers":{"@type":"Offer","price":"2000000","priceCurrency":"USD","availability":"https://schema.org/InStock"}}
+  </script>
 
   <!-- CesiumJS 1.140 -->
   <link href="https://cesium.com/downloads/cesiumjs/releases/1.140/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
@@ -213,10 +225,10 @@
     .panel-cta { padding:13px 20px 18px; display:flex; flex-direction:column; gap:8px; border-top:2px solid var(--ink); flex-shrink:0; background:var(--cream); }
     .btn-primary { width:100%; padding:12px; background:var(--ink); color:var(--cream); border:none; font-family:'Source Serif 4',serif; font-size:.66rem; font-weight:600; letter-spacing:.18em; text-transform:uppercase; cursor:pointer; transition:background .2s; }
     .btn-secondary { width:100%; padding:11px; background:transparent; color:var(--ink); border:1px solid var(--rule-heavy); font-family:'Source Serif 4',serif; font-size:.66rem; letter-spacing:.18em; text-transform:uppercase; cursor:pointer; transition:background .2s; }
-    .panel-child-nav { display:flex; border:1px solid var(--rule-heavy); overflow:hidden; margin-bottom:2px; }
-    .pcn-link { flex:1; text-align:center; font-family:'DM Mono',monospace; font-size:.46rem; letter-spacing:.1em; text-transform:uppercase; color:var(--gold); text-decoration:none; padding:8px 2px; border-right:1px solid var(--rule-heavy); transition:background .15s,color .15s; }
-    .pcn-link:last-child { border-right:none; }
-    .pcn-link:hover { background:var(--ink); color:var(--cream); }
+    .panel-child-nav { display:flex; gap:5px; flex-wrap:wrap; overflow-x:auto; scrollbar-width:none; margin-bottom:8px; padding:2px 0; }
+    .panel-child-nav::-webkit-scrollbar { display:none; }
+    .pcn-link { flex-shrink:0; font-family:'DM Mono',monospace; font-size:.42rem; letter-spacing:.1em; text-transform:uppercase; padding:5px 11px; border:1px solid var(--gold-border); border-radius:2px; background:transparent; color:var(--gold); text-decoration:none; transition:all .15s; white-space:nowrap; }
+    .pcn-link:hover { background:var(--gold); color:#fff; border-color:var(--gold); }
 
     .modal-overlay { display:none; position:fixed; inset:0; background:rgba(28,28,28,.55); z-index:200; align-items:center; justify-content:center; backdrop-filter:blur(3px); }
     .modal-overlay.active { display:flex; }
@@ -316,7 +328,7 @@
     </div>
     <div class="panel-title" onclick="goHome()">Urban Farmhouse</div>
     <div class="panel-subtitle">11403 S 27th Dr · Laveen, AZ 85339</div>
-    <button id="panel-close" onclick="window.location.href='/laveenlocal'" title="→ LaveenLocal map">
+    <button id="panel-close" onclick="window.open('/laveenlocal','_blank')" title="→ LaveenLocal map">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 115 100" width="26" height="26" style="display:block">
         <text x="4" y="42" font-family="EB Garamond,Georgia,serif" font-size="46" font-weight="700" font-style="italic" fill="#B22234">r</text>
         <line x1="31" y1="76" x2="50" y2="41" stroke="#7A7A7A" stroke-width="6" stroke-linecap="round"/>
@@ -425,9 +437,9 @@
   </div>
   <div class="panel-cta">
     <div class="panel-child-nav">
-      <a href="/laveenlocal" class="pcn-link">Local</a>
-      <a href="/desertlife/phoenix" class="pcn-link">Phoenix</a>
-      <a href="/desertlife/scottsdale" class="pcn-link">Scottsdale</a>
+      <a href="/laveenlocal" class="pcn-link" target="_blank" rel="noopener">Local</a>
+      <a href="/desertlife/phoenix" class="pcn-link" target="_blank" rel="noopener">Phoenix</a>
+      <a href="/desertlife/scottsdale" class="pcn-link" target="_blank" rel="noopener">Scottsdale</a>
     </div>
     <button class="btn-primary" onclick="openModal('contact')">Contact Owner</button>
   </div>
@@ -451,7 +463,7 @@
     <span class="modal-tag">Get In Touch</span>
     <div class="modal-title">Contact Us</div>
     <div class="modal-divider"></div>
-    <div class="contact-row"><div class="contact-icon">☎</div><div class="contact-info"><strong>Phone</strong>+1 (213) 215-8870</div></div>
+    <div class="contact-row"><div class="contact-icon">☎</div><div class="contact-info"><strong>Phone</strong><a href="tel:+12132158870" style="color:inherit;text-decoration:none">+1 (213) 215-8870</a></div></div>
     <div class="modal-divider"></div>
     <div style="text-align:center;padding:8px 0 16px">
       <img src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=https://requation.com" alt="requation.com" style="width:160px;height:160px;border:1px solid var(--rule-heavy)">
@@ -672,8 +684,8 @@ function renderDir(data) {
   el.innerHTML = data.map(b => {
     const icon = DIR_ICONS[b.category] || '🏢';
     const ratingBadge = b.rating ? `<span style="font-size:.52rem;background:#FF6600;color:#fff;padding:2px 6px;border-radius:2px;font-weight:600">★ ${b.rating}</span>` : '';
-    const yelpBtn = b.yelp_url ? `<a href="${b.yelp_url}" target="_blank" onclick="event.stopPropagation()" style="font-size:.58rem;background:#B22234;color:#fff;padding:3px 8px;border-radius:2px;text-decoration:none;font-weight:600">Yelp →</a>` : '';
-    const waymoBtn = b.waymo_url ? `<a href="${b.waymo_url}" target="_blank" onclick="event.stopPropagation()" style="font-size:.58rem;background:#1A73E8;color:#fff;padding:3px 8px;border-radius:2px;text-decoration:none;font-weight:600">🚗 Waymo</a>` : '';
+    const yelpBtn = b.yelp_url ? `<a href="${b.yelp_url}" target="_blank" rel="noopener" onclick="event.stopPropagation()" style="font-size:.58rem;background:#B22234;color:#fff;padding:3px 8px;border-radius:2px;text-decoration:none;font-weight:600">Yelp →</a>` : '';
+    const waymoBtn = b.waymo_url ? `<a href="${b.waymo_url}" target="_blank" rel="noopener" onclick="event.stopPropagation()" style="font-size:.58rem;background:#1A73E8;color:#fff;padding:3px 8px;border-radius:2px;text-decoration:none;font-weight:600">Waymo →</a>` : '';
     const links = (yelpBtn||waymoBtn) ? `<div style="display:flex;gap:6px;margin-top:5px;align-items:center">${ratingBadge}${yelpBtn}${waymoBtn}</div>` : (ratingBadge ? `<div style="margin-top:4px">${ratingBadge}</div>` : '');
     return `<div class="dir-card"><div class="dir-icon">${icon}</div><div style="flex:1;min-width:0"><div class="dir-name">${b.name}</div><div class="dir-cat">${b.category}</div>${b.address?`<div class="dir-addr">${b.address}</div>`:''}${links}</div></div>`;
   }).join('');
@@ -798,8 +810,8 @@ function showCellResults(data, label) {
   if (!data.length) { res.innerHTML = `<div class="dir-empty">No ${label} found nearby</div>`; return; }
   res.innerHTML = data.map(b => {
     const stars = b.rating   ? `<span style="font-size:.5rem;background:#FF6600;color:#fff;padding:1px 4px;border-radius:2px;font-weight:700">★${b.rating}</span>` : '';
-    const yelp  = b.yelp_url ? `<a href="${b.yelp_url}" target="_blank" onclick="event.stopPropagation()" style="font-size:.52rem;background:#B22234;color:#fff;padding:2px 5px;border-radius:2px;text-decoration:none;font-weight:600">Yelp</a>` : '';
-    const waymo = b.waymo_url? `<a href="${b.waymo_url}" target="_blank" onclick="event.stopPropagation()" style="font-size:.52rem;background:#1A73E8;color:#fff;padding:2px 5px;border-radius:2px;text-decoration:none;font-weight:600">🚗 Waymo</a>` : '';
+    const yelp  = b.yelp_url ? `<a href="${b.yelp_url}" target="_blank" rel="noopener" onclick="event.stopPropagation()" style="font-size:.52rem;background:#B22234;color:#fff;padding:2px 5px;border-radius:2px;text-decoration:none;font-weight:600">Yelp →</a>` : '';
+    const waymo = b.waymo_url? `<a href="${b.waymo_url}" target="_blank" rel="noopener" onclick="event.stopPropagation()" style="font-size:.52rem;background:#1A73E8;color:#fff;padding:2px 5px;border-radius:2px;text-decoration:none;font-weight:600">Waymo →</a>` : '';
     return `<div class="dir-card"><div style="flex:1;min-width:0">` +
       `<div class="dir-name">${b.name}</div>` +
       (b.address ? `<div class="dir-addr">${b.address}</div>` : '') +

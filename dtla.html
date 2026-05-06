@@ -9,6 +9,18 @@
   <meta property="og:title"       content="South Park Brutalist — Requation DTLA">
   <meta property="og:description" content="2BR/2BA 16th Floor · 801 S Grand Ave · $885,000 · 3D neighborhood intelligence">
   <meta property="og:image"       content="https://i.imgur.com/3rFddwE.jpeg">
+  <meta property="og:site_name"   content="Requation — HyperlocalGPS">
+  <meta name="description"        content="2BR/2BA 16th floor at 801 S Grand Ave, DTLA 90017 · Listed at $885,000 · 3D neighborhood intelligence with live transit, dining, and cultural venues.">
+  <meta name="keywords"           content="DTLA condo for sale, South Park Los Angeles real estate, 801 S Grand Ave, downtown LA property, hyperlocal map DTLA">
+  <meta name="robots"             content="index, follow">
+  <link rel="canonical"           href="https://requation.com/dtla">
+  <meta name="twitter:card"       content="summary_large_image">
+  <meta name="twitter:title"      content="South Park Brutalist — Requation DTLA">
+  <meta name="twitter:description" content="2BR/2BA 16th Floor · 801 S Grand Ave · $885,000 · 3D neighborhood intelligence">
+  <meta name="twitter:image"      content="https://i.imgur.com/3rFddwE.jpeg">
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"RealEstateListing","name":"South Park Brutalist — DTLA 90017","description":"2BR/2BA 16th floor condominium at 801 S Grand Ave, Los Angeles CA 90017. Listed at $885,000. Downtown LA property with South Mountain views and 3D hyperlocal neighborhood directory.","url":"https://requation.com/dtla","image":"https://i.imgur.com/3rFddwE.jpeg","address":{"@type":"PostalAddress","streetAddress":"801 S Grand Ave","addressLocality":"Los Angeles","addressRegion":"CA","postalCode":"90017","addressCountry":"US"},"offers":{"@type":"Offer","price":"885000","priceCurrency":"USD","availability":"https://schema.org/InStock"}}
+  </script>
 
   <!-- CesiumJS 1.140 -->
   <link href="https://cesium.com/downloads/cesiumjs/releases/1.140/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
@@ -239,10 +251,10 @@
     .panel-cta { padding:13px 20px 18px; display:flex; flex-direction:column; gap:8px; border-top:2px solid var(--ink); flex-shrink:0; background:var(--cream); }
     .btn-primary { width:100%; padding:12px; background:var(--ink); color:var(--cream); border:none; font-family:'Source Serif 4',serif; font-size:.66rem; font-weight:600; letter-spacing:.18em; text-transform:uppercase; cursor:pointer; transition:background .2s; }
     .btn-secondary { width:100%; padding:11px; background:transparent; color:var(--ink); border:1px solid var(--rule-heavy); font-family:'Source Serif 4',serif; font-size:.66rem; letter-spacing:.18em; text-transform:uppercase; cursor:pointer; transition:background .2s; }
-    .panel-child-nav { display:flex; border:1px solid var(--rule-heavy); overflow:hidden; margin-bottom:2px; }
-    .pcn-link { flex:1; text-align:center; font-family:'DM Mono',monospace; font-size:.46rem; letter-spacing:.1em; text-transform:uppercase; color:var(--gold); text-decoration:none; padding:8px 2px; border-right:1px solid var(--rule-heavy); transition:background .15s,color .15s; }
-    .pcn-link:last-child { border-right:none; }
-    .pcn-link:hover { background:var(--ink); color:var(--cream); }
+    .panel-child-nav { display:flex; gap:5px; flex-wrap:wrap; overflow-x:auto; scrollbar-width:none; margin-bottom:8px; padding:2px 0; }
+    .panel-child-nav::-webkit-scrollbar { display:none; }
+    .pcn-link { flex-shrink:0; font-family:'DM Mono',monospace; font-size:.42rem; letter-spacing:.1em; text-transform:uppercase; padding:5px 11px; border:1px solid var(--gold-border); border-radius:2px; background:transparent; color:var(--gold); text-decoration:none; transition:all .15s; white-space:nowrap; }
+    .pcn-link:hover { background:var(--gold); color:#fff; border-color:var(--gold); }
 
     /* Modals */
     .modal-overlay { display:none; position:fixed; inset:0; background:rgba(28,28,28,.55); z-index:200; align-items:center; justify-content:center; backdrop-filter:blur(3px); }
@@ -359,7 +371,7 @@
     </div>
     <div class="panel-title" onclick="goHome()">South Park Brutalist</div>
     <div class="panel-subtitle">801 S Grand Ave, Unit 1612 · Los Angeles CA 90017</div>
-    <button id="panel-close" onclick="window.location.href='/mylocal'" title="→ MyLocal map">
+    <button id="panel-close" onclick="window.open('/mylocal','_blank')" title="→ MyLocal map">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 115 100" width="26" height="26" style="display:block">
         <text x="4" y="42" font-family="EB Garamond,Georgia,serif" font-size="46" font-weight="700" font-style="italic" fill="#B22234">r</text>
         <line x1="31" y1="76" x2="50" y2="41" stroke="#7A7A7A" stroke-width="6" stroke-linecap="round"/>
@@ -473,10 +485,10 @@
   </div><!-- /panel-body -->
   <div class="panel-cta">
     <div class="panel-child-nav">
-      <a href="/mylocal" class="pcn-link">MyLocal</a>
-      <a href="/lalife/broadway" class="pcn-link">Broadway</a>
-      <a href="/lalife/venice" class="pcn-link">Venice</a>
-      <a href="/lalife/weho" class="pcn-link">WeHo</a>
+      <a href="/mylocal" class="pcn-link" target="_blank" rel="noopener">MyLocal</a>
+      <a href="/lalife/broadway" class="pcn-link" target="_blank" rel="noopener">Broadway</a>
+      <a href="/lalife/venice" class="pcn-link" target="_blank" rel="noopener">Venice</a>
+      <a href="/lalife/weho" class="pcn-link" target="_blank" rel="noopener">WeHo</a>
     </div>
     <button class="btn-primary" onclick="openModal('contact')">Contact Owner</button>
   </div>
@@ -503,7 +515,7 @@
     <span class="modal-tag">Get In Touch</span>
     <div class="modal-title">Contact Us</div>
     <div class="modal-divider"></div>
-    <div class="contact-row"><div class="contact-icon">☎</div><div class="contact-info"><strong>Phone</strong>+1 (213) 215-8870</div></div>
+    <div class="contact-row"><div class="contact-icon">☎</div><div class="contact-info"><strong>Phone</strong><a href="tel:+12132158870" style="color:inherit;text-decoration:none">+1 (213) 215-8870</a></div></div>
     <div class="modal-divider"></div>
     <div style="text-align:center;padding:8px 0 16px">
       <img src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=https://requation.com" alt="requation.com" style="width:160px;height:160px;border:1px solid var(--rule-heavy)">
@@ -636,7 +648,7 @@ async function renderFavorites() {
   el.dataset.loaded = '1';
   // Render immediately — Yelp slots filled async below
   el.innerHTML = `
-    <a href="/lalife/broadway" style="display:flex;align-items:center;justify-content:space-between;padding:13px 16px;background:var(--ink);text-decoration:none;">
+    <a href="/lalife/broadway" target="_blank" rel="noopener" style="display:flex;align-items:center;justify-content:space-between;padding:13px 16px;background:var(--ink);text-decoration:none;">
       <div style="font-family:'Source Serif 4',serif;font-size:.82rem;font-weight:600;color:var(--cream)">Explore DTLA Neighborhood →</div>
       <div style="font-family:'DM Mono',monospace;font-size:.42rem;letter-spacing:.1em;text-transform:uppercase;color:var(--gold)">Live Map</div>
     </a>` +
@@ -659,7 +671,7 @@ async function renderFavorites() {
       const slot = document.getElementById(`fav-yelp-${i}`);
       if (!slot) return;
       const badge = `<span style="font-size:.52rem;background:#FF6600;color:#fff;padding:2px 6px;border-radius:2px;font-weight:600">★ ${b.rating}</span>`;
-      const btn   = `<a href="${b.url}" target="_blank" onclick="event.stopPropagation()" style="font-size:.58rem;background:#B22234;color:#fff;padding:3px 8px;border-radius:2px;text-decoration:none;font-weight:600">Yelp →</a>`;
+      const btn   = `<a href="${b.url}" target="_blank" rel="noopener" onclick="event.stopPropagation()" style="font-size:.58rem;background:#B22234;color:#fff;padding:3px 8px;border-radius:2px;text-decoration:none;font-weight:600">Yelp →</a>`;
       slot.innerHTML = `<div style="display:flex;gap:6px;align-items:center">${badge}${btn}</div>`;
     } catch(e) {}
   }));
@@ -797,9 +809,9 @@ function renderDir(data) {
       const ratingBadge = b.rating
         ? `<span style="font-size:.52rem;background:#FF6600;color:#fff;padding:2px 6px;border-radius:2px;font-weight:600">★ ${b.rating}</span>` : '';
       const yelpBtn = b.yelp_url
-        ? `<a href="${b.yelp_url}" target="_blank" onclick="event.stopPropagation()" style="font-size:.58rem;background:#B22234;color:#fff;padding:3px 8px;border-radius:2px;text-decoration:none;font-weight:600">Yelp →</a>` : '';
+        ? `<a href="${b.yelp_url}" target="_blank" rel="noopener" onclick="event.stopPropagation()" style="font-size:.58rem;background:#B22234;color:#fff;padding:3px 8px;border-radius:2px;text-decoration:none;font-weight:600">Yelp →</a>` : '';
       const waymoBtn = b.waymo_url
-        ? `<a href="${b.waymo_url}" target="_blank" onclick="event.stopPropagation()" style="font-size:.58rem;background:#1A73E8;color:#fff;padding:3px 8px;border-radius:2px;text-decoration:none;font-weight:600">🚗 Waymo</a>` : '';
+        ? `<a href="${b.waymo_url}" target="_blank" rel="noopener" onclick="event.stopPropagation()" style="font-size:.58rem;background:#1A73E8;color:#fff;padding:3px 8px;border-radius:2px;text-decoration:none;font-weight:600">Waymo →</a>` : '';
       const links = (yelpBtn||waymoBtn) ? `<div style="display:flex;gap:6px;margin-top:5px;align-items:center">${ratingBadge}${yelpBtn}${waymoBtn}</div>` : (ratingBadge ? `<div style="margin-top:4px">${ratingBadge}</div>` : '');
       return `<div class="dir-card">
         <div style="flex:1;min-width:0">
@@ -912,6 +924,7 @@ async function selectPCell(el, idx) {
           name:         b.name,
           category:     b.categories?.[0]?.title || cat.label,
           address:      b.location?.address1 || '',
+          phone:        b.phone || null,
           rating:       b.rating || null,
           review_count: b.review_count || 0,
           yelp_url:     b.url || null,
@@ -939,13 +952,19 @@ function showCellResults(data, label) {
   if (!res) return;
   if (!data.length) { res.innerHTML = `<div class="dir-empty">No ${label} found nearby</div>`; return; }
   res.innerHTML = data.map(b => {
-    const stars = b.rating   ? `<span style="font-size:.5rem;background:#FF6600;color:#fff;padding:1px 4px;border-radius:2px;font-weight:700">★${b.rating}</span>` : '';
-    const yelp  = b.yelp_url ? `<a href="${b.yelp_url}" target="_blank" onclick="event.stopPropagation()" style="font-size:.52rem;background:#B22234;color:#fff;padding:2px 5px;border-radius:2px;text-decoration:none;font-weight:600">Yelp</a>` : '';
-    const waymo = b.waymo_url? `<a href="${b.waymo_url}" target="_blank" onclick="event.stopPropagation()" style="font-size:.52rem;background:#1A73E8;color:#fff;padding:2px 5px;border-radius:2px;text-decoration:none;font-weight:600">🚗 Waymo</a>` : '';
+    const stars = b.rating
+      ? `<span style="font-size:.5rem;background:#FF6600;color:#fff;padding:1px 5px;border-radius:2px;font-weight:700">★ ${b.rating}</span>` : '';
+    const call  = b.phone
+      ? `<a href="tel:${b.phone}" onclick="event.stopPropagation()" style="font-size:.52rem;background:var(--gold);color:#fff;padding:2px 6px;border-radius:2px;text-decoration:none;font-weight:600">Call →</a>` : '';
+    const yelp  = b.yelp_url
+      ? `<a href="${b.yelp_url}" target="_blank" rel="noopener" onclick="event.stopPropagation()" style="font-size:.52rem;background:#B22234;color:#fff;padding:2px 6px;border-radius:2px;text-decoration:none;font-weight:600">Yelp →</a>` : '';
+    const waymo = b.waymo_url
+      ? `<a href="${b.waymo_url}" target="_blank" rel="noopener" onclick="event.stopPropagation()" style="font-size:.52rem;background:#1A73E8;color:#fff;padding:2px 6px;border-radius:2px;text-decoration:none;font-weight:600">Waymo →</a>` : '';
     return `<div class="dir-card"><div style="flex:1;min-width:0">` +
       `<div class="dir-name">${b.name}</div>` +
-      (b.address ? `<div class="dir-addr">${b.address}</div>` : '') +
-      `<div style="display:flex;gap:4px;margin-top:3px;align-items:center">${stars}${yelp}${waymo}</div>` +
+      (b.category ? `<div style="font-family:'DM Mono',monospace;font-size:.38rem;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);margin-top:1px">${b.category}</div>` : '') +
+      (b.address  ? `<div class="dir-addr">${b.address}</div>` : '') +
+      `<div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:5px;align-items:center">${stars}${call}${yelp}${waymo}</div>` +
       `</div></div>`;
   }).join('');
 }

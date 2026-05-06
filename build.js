@@ -81,7 +81,7 @@ HTML_FILES.forEach(f => {
 });
 
 // ── Copy static assets ────────────────────────────────────────────
-['CNAME'].forEach(item => copyItem(item, path.join('dist', item)));
+['CNAME', 'sitemap.xml', 'robots.txt', 'googlecf81d1466488054d.html'].forEach(item => copyItem(item, path.join('dist', item)));
 copyItem('assets', path.join('dist', 'assets'));
 
 console.log('\n✅  Build complete → dist/');

@@ -1,5 +1,27 @@
 # Requation — Claude Code Rules
 
+---
+## 🚨 911 — BEFORE BUILDING ANY NEW PAGE 🚨
+
+> **STOP. READ THIS FIRST. NO EXCEPTIONS.**
+>
+> All page templates are saved and confirmed working.
+> Building from scratch = wasted time + broken maps + angry captain.
+>
+> **Say this out loud before writing a single line of HTML:**
+> "Am I using the CesiumJS skeleton or the Google Maps skeleton?"
+>
+> → CesiumJS page (property pages with 3D): **read `project_ui_templates.md` → Section 4 → CesiumJS Page**
+> → Google Maps page (neighborhood/local maps): **read `project_ui_templates.md` → Section 4 → Google Maps Page**
+> → Tab/pill nav needed: **read `project_ui_templates.md` → Section 1 or 2**
+> → Filter pills needed: **read `project_ui_templates.md` → Section 3**
+>
+> **Templates include:** CSS, HTML structure, Supabase Yelp fallback, gold pill nav, route-stop nav, external link rules, phone tel: pattern.
+>
+> **Do not reinvent. Do not improvise. Load the template. Fill in the content.**
+
+---
+
 These rules are the result of real mistakes made in previous sessions.
 **Every rule here exists because something broke without it.**
 Read this fully before touching any file.

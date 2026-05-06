@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /dashboard
+Disallow: /dist/
+Disallow: /backups/
+Disallow: /node_modules/
+
+Sitemap: https://requation.com/sitemap.xml

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://requation.com/</loc><changefreq>weekly</changefreq><priority>1.0</priority></url>
+  <url><loc>https://requation.com/dtla</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://requation.com/laveen</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://requation.com/lalife</loc><changefreq>daily</changefreq><priority>0.8</priority></url>
+  <url><loc>https://requation.com/lalife/broadway</loc><changefreq>daily</changefreq><priority>0.7</priority></url>
+  <url><loc>https://requation.com/lalife/venice</loc><changefreq>daily</changefreq><priority>0.7</priority></url>
+  <url><loc>https://requation.com/lalife/weho</loc><changefreq>daily</changefreq><priority>0.7</priority></url>
+  <url><loc>https://requation.com/desertlife</loc><changefreq>daily</changefreq><priority>0.8</priority></url>
+  <url><loc>https://requation.com/desertlife/phoenix</loc><changefreq>daily</changefreq><priority>0.7</priority></url>
+  <url><loc>https://requation.com/desertlife/scottsdale</loc><changefreq>daily</changefreq><priority>0.7</priority></url>
+  <url><loc>https://requation.com/mylocal</loc><changefreq>daily</changefreq><priority>0.7</priority></url>
+  <url><loc>https://requation.com/laveenlocal</loc><changefreq>daily</changefreq><priority>0.7</priority></url>
+  <url><loc>https://requation.com/place</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
+</urlset>

@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mall Map — DTLA South Park</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,400;0,500;1,400&family=EB+Garamond:ital,wght@1,700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0c0c14;
+  --grid:#1e1e30;
+  --text:#f0ead6;
+  --muted:#8888aa;
+  --gold:#c9a84c;
+  --gap:3px;
+}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:'DM Mono',monospace;overflow:hidden}
+
+/* ── Header ─────────────────────────── */
+#header{
+  position:fixed;top:0;left:0;right:0;
+  height:52px;
+  background:#0c0c14;
+  border-bottom:1px solid var(--grid);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 18px;
+  z-index:100;
+}
+.h-you-are-here{
+  display:flex;align-items:center;gap:10px;
+}
+.h-star{color:var(--gold);font-size:.9rem}
+.h-title{font-size:.62rem;letter-spacing:.2em;text-transform:uppercase;color:var(--text)}
+.h-sub{font-size:.5rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-top:2px}
+.h-stats{
+  display:flex;gap:16px;
+}
+.h-stat{text-align:right}
+.h-stat-val{font-size:.78rem;font-weight:500;color:var(--gold)}
+.h-stat-lbl{font-size:.42rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.h-cta{
+  display:flex;gap:8px;
+}
+.btn-text-owner{
+  background:none;border:1px solid var(--gold);color:var(--gold);
+  font-family:'DM Mono',monospace;font-size:.5rem;letter-spacing:.15em;text-transform:uppercase;
+  padding:5px 10px;cursor:pointer;transition:all .2s;
+}
+.btn-text-owner:hover{background:var(--gold);color:#0c0c14}
+
+/* ── Map container ───────────────────── */
+#map-wrap{
+  position:fixed;
+  top:52px;bottom:44px;left:0;right:0;
+  overflow:hidden;
+}
+#treemap{
+  position:absolute;inset:var(--gap);
+}
+
+/* ── Treemap cells ───────────────────── */
+.cell{
+  position:absolute;
+  overflow:hidden;
+  cursor:pointer;
+  transition:filter .15s;
+  border:var(--gap) solid var(--bg);
+}
+.cell:hover{filter:brightness(1.18);z-index:10}
+.cell.active{z-index:20;filter:brightness(1.3)}
+.cell-inner{
+  position:absolute;inset:0;
+  display:flex;flex-direction:column;justify-content:flex-end;
+  padding:10px 12px;
+}
+.cell-icon{font-size:1.6rem;line-height:1;margin-bottom:4px;opacity:.9}
+.cell-name{
+  font-size:.58rem;letter-spacing:.18em;text-transform:uppercase;
+  font-weight:500;color:rgba(255,255,255,.95);
+  line-height:1.2;
+}
+.cell-count{
+  font-size:.46rem;letter-spacing:.1em;text-transform:uppercase;
+  color:rgba(255,255,255,.55);margin-top:2px;
+}
+.cell-scanline{
+  position:absolute;inset:0;pointer-events:none;
+  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.07) 2px,rgba(0,0,0,.07) 4px);
+}
+
+/* Small cell — hide icon */
+.cell.sm .cell-icon{display:none}
+.cell.sm .cell-name{font-size:.48rem}
+
+/* ── Business panel ──────────────────── */
+#biz-panel{
+  position:fixed;
+  top:52px;right:-320px;bottom:44px;
+  width:300px;
+  background:#13131f;
+  border-left:1px solid var(--grid);
+  z-index:50;
+  transition:right .28s cubic-bezier(.4,0,.2,1);
+  display:flex;flex-direction:column;
+  overflow:hidden;
+}
+#biz-panel.open{right:0}
+#biz-header{
+  padding:16px 16px 12px;
+  border-bottom:1px solid var(--grid);
+  display:flex;align-items:center;justify-content:space-between;
+}
+.biz-hname{font-size:.62rem;letter-spacing:.15em;text-transform:uppercase;font-weight:500}
+.biz-hcount{font-size:.48rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+#biz-close{
+  background:none;border:none;color:var(--muted);font-size:1rem;cursor:pointer;padding:0 4px;
+}
+#biz-close:hover{color:var(--text)}
+#biz-list{flex:1;overflow-y:auto;padding:8px 0}
+#biz-list::-webkit-scrollbar{width:3px}
+#biz-list::-webkit-scrollbar-thumb{background:var(--grid)}
+.biz-item{
+  padding:9px 16px;
+  border-bottom:1px solid var(--grid);
+  cursor:default;
+  transition:background .12s;
+}
+.biz-item:hover{background:rgba(255,255,255,.03)}
+.biz-name{font-size:.72rem;color:var(--text);margin-bottom:2px}
+.biz-meta{font-size:.5rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.biz-links{display:flex;gap:6px;margin-top:5px}
+.biz-link{
+  font-size:.46rem;letter-spacing:.1em;text-transform:uppercase;
+  padding:3px 7px;border:1px solid;text-decoration:none;
+  transition:all .15s;
+}
+.biz-link.yelp{color:#d32323;border-color:rgba(211,35,35,.4)}
+.biz-link.yelp:hover{background:#d32323;color:#fff}
+.biz-link.maps{color:#4285f4;border-color:rgba(66,133,244,.4)}
+.biz-link.maps:hover{background:#4285f4;color:#fff}
+.biz-link.waymo{color:#1a73e8;border-color:rgba(26,115,232,.4)}
+.biz-link.waymo:hover{background:#1a73e8;color:#fff}
+
+/* ── Footer nav ──────────────────────── */
+#footer{
+  position:fixed;bottom:0;left:0;right:0;height:44px;
+  background:#0c0c14;
+  border-top:1px solid var(--grid);
+  display:flex;align-items:center;justify-content:center;
+  gap:0;z-index:100;
+  overflow-x:auto;
+}
+.nav-link{
+  font-family:'DM Mono',monospace;
+  font-size:.44rem;letter-spacing:.15em;text-transform:uppercase;
+  color:var(--muted);
+  text-decoration:none;
+  padding:0 14px;
+  border-right:1px solid var(--grid);
+  white-space:nowrap;
+  transition:color .15s;
+  line-height:44px;
+}
+.nav-link:first-child{border-left:1px solid var(--grid)}
+.nav-link:hover{color:var(--gold)}
+.nav-link.here{color:var(--gold);pointer-events:none}
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div id="header">
+  <div class="h-you-are-here">
+    <span class="h-star">★</span>
+    <div>
+      <div class="h-title">South Park Brutalist — You Are Here</div>
+      <div class="h-sub">801 S Grand Ave · Unit 1612 · DTLA · Walk Score 98</div>
+    </div>
+  </div>
+  <div class="h-stats">
+    <div class="h-stat">
+      <div class="h-stat-val">$885K</div>
+      <div class="h-stat-lbl">Asking</div>
+    </div>
+    <div class="h-stat">
+      <div class="h-stat-val">2BR/2BA</div>
+      <div class="h-stat-lbl">1,300 SF</div>
+    </div>
+    <div class="h-stat">
+      <div class="h-stat-val">330+</div>
+      <div class="h-stat-lbl">Listings</div>
+    </div>
+  </div>
+  <div class="h-cta">
+    <button class="btn-text-owner" onclick="openText()">📱 Text Owner</button>
+  </div>
+</div>
+
+<!-- Treemap -->
+<div id="map-wrap">
+  <div id="treemap"></div>
+</div>
+
+<!-- Business panel -->
+<div id="biz-panel">
+  <div id="biz-header">
+    <div>
+      <div class="biz-hname" id="biz-hname">—</div>
+      <div class="biz-hcount" id="biz-hcount"></div>
+    </div>
+    <button id="biz-close" onclick="closePanel()">✕</button>
+  </div>
+  <div id="biz-list"></div>
+</div>
+
+<!-- Footer nav -->
+<div id="footer">
+  <a class="nav-link here" href="/dtla">★ DTLA</a>
+  <a class="nav-link" href="/mylocal">DTLA Local</a>
+  <a class="nav-link" href="/lalife/broadway">Broadway</a>
+  <a class="nav-link" href="/lalife/weho">WeHo</a>
+  <a class="nav-link" href="/lalife/venice">Venice</a>
+  <a class="nav-link" href="/desertlife/phoenix">Phoenix</a>
+  <a class="nav-link" href="/laveen">Laveen</a>
+</div>
+
+<script>
+/* ── Mock data (replace with live Yelp API) ─────────── */
+const CATS = [
+  {
+    name:'Restaurants', icon:'🍽', color:'#c0392b', value:47,
+    businesses:[
+      {name:'Bottega Louie',meta:'Café · Patisserie · 0.1mi',rating:4.4},
+      {name:'Perch LA',meta:'French · Rooftop · 0.2mi',rating:4.3},
+      {name:'Broken Spanish',meta:'Mexican · Fine Dining · 0.3mi',rating:4.5},
+      {name:'Otium',meta:'American · Museum Row · 0.4mi',rating:4.4},
+      {name:'Officine Brera',meta:'Italian · Industrial · 0.5mi',rating:4.6},
+      {name:'Bestia',meta:'Italian · Arts District · 0.9mi',rating:4.7},
+      {name:'Bavel',meta:'Middle Eastern · Arts District · 1.0mi',rating:4.8},
+      {name:'Republique',meta:'French · Mid-City · 1.2mi',rating:4.7},
+    ]
+  },
+  {
+    name:'Coffee', icon:'☕', color:'#d35400', value:19,
+    businesses:[
+      {name:'Philz Coffee',meta:'Specialty · 100ft',rating:4.5},
+      {name:'Groundwork Coffee',meta:'Organic · 0.3mi',rating:4.4},
+      {name:'Blue Bottle Coffee',meta:'Third Wave · 0.6mi',rating:4.3},
+      {name:'Stumptown Coffee',meta:'Portland · 0.8mi',rating:4.4},
+      {name:'Alfred Coffee',meta:'Trendy · Melrose · 0.9mi',rating:4.2},
+    ]
+  },
+  {
+    name:'Shopping', icon:'🛍', color:'#2980b9', value:31,
+    businesses:[
+      {name:'Apple Store Broadway',meta:'Electronics · 0.6mi',rating:4.5},
+      {name:'Adidas Broadway',meta:'Footwear · 0.6mi',rating:4.3},
+      {name:'West Elm',meta:'Home Goods · 0.6mi',rating:4.2},
+      {name:'Grand Central Market',meta:'Food Hall · 0.7mi',rating:4.5},
+      {name:'Jewelry District',meta:'Wholesale Gems · 0.4mi',rating:4.1},
+      {name:'The Grove',meta:'Shopping Mall · 3.2mi',rating:4.7},
+    ]
+  },
+  {
+    name:'Culture', icon:'🎨', color:'#6c3483', value:12,
+    businesses:[
+      {name:'The Broad',meta:'Contemporary Art · 0.8mi',rating:4.7},
+      {name:'MOCA Grand Ave',meta:'Modern Art · 0.9mi',rating:4.5},
+      {name:'Walt Disney Concert Hall',meta:'Philharmonic · 0.9mi',rating:4.9},
+      {name:'Grand Park',meta:'Civic Park · 1.0mi',rating:4.5},
+      {name:'LA Central Library',meta:'1926 Landmark · 0.5mi',rating:4.7},
+    ]
+  },
+  {
+    name:'Hotels', icon:'🏨', color:'#1a5276', value:16,
+    businesses:[
+      {name:'InterContinental DTLA',meta:'Luxury · 0.1mi',rating:4.6},
+      {name:'The Westin Bonaventure',meta:'Iconic Tower · 0.3mi',rating:4.2},
+      {name:'Freehand Los Angeles',meta:'Boutique · 0.5mi',rating:4.4},
+      {name:'NoMad Los Angeles',meta:'Design Hotel · 0.6mi',rating:4.5},
+    ]
+  },
+  {
+    name:'Fitness', icon:'💪', color:'#b7950b', value:13,
+    businesses:[
+      {name:'Equinox DTLA',meta:'Premium Gym · 0.3mi',rating:4.4},
+      {name:"Barry's Bootcamp",meta:'HIIT · 0.5mi',rating:4.5},
+      {name:'SoulCycle',meta:'Cycling · 0.6mi',rating:4.3},
+      {name:'CorePower Yoga',meta:'Yoga · 0.4mi',rating:4.4},
+    ]
+  },
+  {
+    name:'Beauty', icon:'✂', color:'#76448a', value:15,
+    businesses:[
+      {name:"Rudy's Barbershop",meta:'Cuts · 0.2mi',rating:4.4},
+      {name:'Headlines Salon DTLA',meta:'Salon · 0.4mi',rating:4.3},
+      {name:'Drybar',meta:'Blowouts · 0.7mi',rating:4.5},
+      {name:'MedSpa DTLA',meta:'Botox · Fillers · 0.3mi',rating:4.6},
+      {name:'Massage Envy',meta:'Spa · 0.5mi',rating:4.1},
+    ]
+  },
+  {
+    name:'Medical', icon:'🏥', color:'#1e8449', value:9,
+    businesses:[
+      {name:'Cedars-Sinai Downtown',meta:'Hospital · 1.5mi',rating:4.5},
+      {name:'One Medical DTLA',meta:'Primary Care · 0.4mi',rating:4.6},
+      {name:'CityMD',meta:'Urgent Care · 0.3mi',rating:4.2},
+      {name:'Keck USC Dental',meta:'Dentistry · 1.0mi',rating:4.3},
+    ]
+  },
+  {
+    name:'Entertainment', icon:'🎬', color:'#922b21', value:10,
+    businesses:[
+      {name:'Regal LA Live',meta:'Cinema · 0.8mi',rating:4.3},
+      {name:'AMC Broadway',meta:'Cinema · 0.6mi',rating:4.2},
+      {name:'Alamo Drafthouse',meta:'Dine-in Cinema · 1.2mi',rating:4.7},
+      {name:'LA Live',meta:'Entertainment Complex · 0.8mi',rating:4.6},
+    ]
+  },
+  {
+    name:'Grocery', icon:'🛒', color:'#1d6a39', value:8,
+    businesses:[
+      {name:'Whole Foods Market',meta:'Organic · 25ft',rating:4.5},
+      {name:'Ralphs DTLA',meta:'Supermarket · 0.4mi',rating:4.1},
+      {name:'Grand Central Market',meta:'Food Hall · 0.7mi',rating:4.5},
+    ]
+  }
+];
+
+/* ── Binary treemap layout ──────────────────────────── */
+function treemap(items, x, y, w, h) {
+  if (!items.length) return [];
+  if (items.length === 1) return [{ ...items[0], x, y, w, h }];
+
+  const total = items.reduce((s, i) => s + i.value, 0);
+  let acc = 0, split = 1;
+  for (let i = 0; i < items.length - 1; i++) {
+    acc += items[i].value;
+    split = i + 1;
+    if (acc >= total / 2) break;
+  }
+
+  const first = items.slice(0, split);
+  const second = items.slice(split);
+  const frac = first.reduce((s, i) => s + i.value, 0) / total;
+
+  if (w >= h) {
+    const w1 = w * frac;
+    return [
+      ...treemap(first,  x,      y, w1,     h),
+      ...treemap(second, x + w1, y, w - w1, h)
+    ];
+  } else {
+    const h1 = h * frac;
+    return [
+      ...treemap(first,  x, y,      w, h1),
+      ...treemap(second, x, y + h1, w, h - h1)
+    ];
+  }
+}
+
+/* ── Render ─────────────────────────────────────────── */
+function render() {
+  const wrap = document.getElementById('treemap');
+  const W = wrap.offsetWidth;
+  const H = wrap.offsetHeight;
+  if (!W || !H) return;
+
+  const sorted = [...CATS].sort((a, b) => b.value - a.value);
+  const cells = treemap(sorted, 0, 0, W, H);
+
+  wrap.innerHTML = '';
+  cells.forEach(c => {
+    const el = document.createElement('div');
+    el.className = 'cell' + (c.w < 120 || c.h < 80 ? ' sm' : '');
+    el.style.cssText = `left:${c.x}px;top:${c.y}px;width:${c.w}px;height:${c.h}px;background:${c.color}`;
+
+    el.innerHTML = `
+      <div class="cell-inner">
+        <div class="cell-icon">${c.icon}</div>
+        <div class="cell-name">${c.name}</div>
+        <div class="cell-count">${c.value} nearby</div>
+      </div>
+      <div class="cell-scanline"></div>`;
+
+    el.addEventListener('click', () => openCat(c));
+    wrap.appendChild(el);
+  });
+}
+
+/* ── Panel ──────────────────────────────────────────── */
+let activeCat = null;
+function openCat(cat) {
+  if (activeCat === cat.name) { closePanel(); return; }
+  activeCat = cat.name;
+
+  document.getElementById('biz-hname').textContent = cat.name;
+  document.getElementById('biz-hname').style.color = cat.color;
+  document.getElementById('biz-hcount').textContent = cat.value + ' businesses nearby';
+
+  const list = document.getElementById('biz-list');
+  list.innerHTML = cat.businesses.map(b => `
+    <div class="biz-item">
+      <div class="biz-name">${b.name}</div>
+      <div class="biz-meta">★${b.rating} · ${b.meta}</div>
+      <div class="biz-links">
+        <a class="biz-link yelp" href="#" target="_blank">Yelp →</a>
+        <a class="biz-link maps" href="https://maps.google.com/?q=${encodeURIComponent(b.name + ' DTLA')}" target="_blank">Maps →</a>
+      </div>
+    </div>`).join('');
+
+  document.getElementById('biz-panel').classList.add('open');
+
+  /* tighten treemap to make room */
+  document.getElementById('map-wrap').style.right = '300px';
+  setTimeout(render, 30);
+}
+
+function closePanel() {
+  activeCat = null;
+  document.getElementById('biz-panel').classList.remove('open');
+  document.getElementById('map-wrap').style.right = '0';
+  setTimeout(render, 30);
+}
+
+/* ── Twilio CTA ─────────────────────────────────────── */
+function openText() {
+  const msg = encodeURIComponent('Hi, I saw your DTLA listing on Requation. Can we talk?');
+  window.open(`sms:+12132158870?body=${msg}`, '_blank');
+}
+
+/* ── Init ───────────────────────────────────────────── */
+window.addEventListener('load', render);
+window.addEventListener('resize', render);
+</script>
+</body>
+</html>
