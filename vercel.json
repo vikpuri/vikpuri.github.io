@@ -18,6 +18,7 @@
     { "source": "/dashboard",             "destination": "/dashboard.html" },
     { "source": "/dtla-mall-map",         "destination": "/dtla-mall-map.html" },
     { "source": "/laveen-mall-map",       "destination": "/laveen-mall-map.html" },
-    { "source": "/cube-template",         "destination": "/cube-template.html" }
+    { "source": "/cube-template",         "destination": "/cube-template.html" },
+    { "source": "/i10",                   "destination": "/i10.html" }
   ]
 }

@@ -356,7 +356,7 @@
 </header>
 
 <div id="yt-strip">
-  <iframe id="yt-frame-strip" src="" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+  <iframe id="yt-frame-strip" src="https://www.youtube.com/embed/UpvkGg28f8A?autoplay=1&mute=1&loop=1&playlist=UpvkGg28f8A&controls=0&showinfo=0&rel=0&modestbranding=1" allow="autoplay; encrypted-media" allowfullscreen></iframe>
   <div id="yt-overlay" onclick="toggleStripSound()"></div>
   <div id="yt-label">▶ Loading…</div>
   <a id="yt-events-link" href="#" target="_blank" style="display:none;position:absolute;top:7px;right:8px;font-family:'DM Mono',monospace;font-size:.40rem;letter-spacing:.1em;text-transform:uppercase;color:#fff;background:rgba(0,0,0,.55);padding:3px 7px;border-radius:2px;text-decoration:none;z-index:5">Events →</a>
@@ -635,9 +635,14 @@ const MYLOCAL_FAVS = [
 function flyToFav(lat, lng) {
   closePanel();
   if (!window._viewer) return;
+  const H = 300, D = Cesium.Math.toRadians(200), P = Cesium.Math.toRadians(-35);
+  const hz = H / Math.tan(Math.abs(P));
+  const br = (D + Math.PI) % (2 * Math.PI);
+  const cl = lat + (hz * Math.cos(br)) / 111111;
+  const cn = lng + (hz * Math.sin(br)) / (111111 * Math.cos(lat * Math.PI / 180));
   window._viewer.camera.flyTo({
-    destination: Cesium.Cartesian3.fromDegrees(lng, lat, 300),
-    orientation: { heading: Cesium.Math.toRadians(200), pitch: Cesium.Math.toRadians(-35), roll: 0 },
+    destination: Cesium.Cartesian3.fromDegrees(cn, cl, H),
+    orientation: { heading: D, pitch: P, roll: 0 },
     duration: 1.5
   });
 }
@@ -671,8 +676,7 @@ async function renderFavorites() {
       const slot = document.getElementById(`fav-yelp-${i}`);
       if (!slot) return;
       const badge = `<span style="font-size:.52rem;background:#FF6600;color:#fff;padding:2px 6px;border-radius:2px;font-weight:600">★ ${b.rating}</span>`;
-      const btn   = `<a href="${b.url}" target="_blank" rel="noopener" onclick="event.stopPropagation()" style="font-size:.58rem;background:#B22234;color:#fff;padding:3px 8px;border-radius:2px;text-decoration:none;font-weight:600">Yelp →</a>`;
-      slot.innerHTML = `<div style="display:flex;gap:6px;align-items:center">${badge}${btn}</div>`;
+      slot.innerHTML = `<div style="display:flex;gap:6px;align-items:center">${badge}</div>`;
     } catch(e) {}
   }));
 }
@@ -808,11 +812,9 @@ function renderDir(data) {
     const cards = items.map(b => {
       const ratingBadge = b.rating
         ? `<span style="font-size:.52rem;background:#FF6600;color:#fff;padding:2px 6px;border-radius:2px;font-weight:600">★ ${b.rating}</span>` : '';
-      const yelpBtn = b.yelp_url
-        ? `<a href="${b.yelp_url}" target="_blank" rel="noopener" onclick="event.stopPropagation()" style="font-size:.58rem;background:#B22234;color:#fff;padding:3px 8px;border-radius:2px;text-decoration:none;font-weight:600">Yelp →</a>` : '';
       const waymoBtn = b.waymo_url
         ? `<a href="${b.waymo_url}" target="_blank" rel="noopener" onclick="event.stopPropagation()" style="font-size:.58rem;background:#1A73E8;color:#fff;padding:3px 8px;border-radius:2px;text-decoration:none;font-weight:600">Waymo →</a>` : '';
-      const links = (yelpBtn||waymoBtn) ? `<div style="display:flex;gap:6px;margin-top:5px;align-items:center">${ratingBadge}${yelpBtn}${waymoBtn}</div>` : (ratingBadge ? `<div style="margin-top:4px">${ratingBadge}</div>` : '');
+      const links = waymoBtn ? `<div style="display:flex;gap:6px;margin-top:5px;align-items:center">${ratingBadge}${waymoBtn}</div>` : (ratingBadge ? `<div style="margin-top:4px">${ratingBadge}</div>` : '');
       return `<div class="dir-card">
         <div style="flex:1;min-width:0">
           <div class="dir-name">${b.name}</div>
@@ -956,15 +958,13 @@ function showCellResults(data, label) {
       ? `<span style="font-size:.5rem;background:#FF6600;color:#fff;padding:1px 5px;border-radius:2px;font-weight:700">★ ${b.rating}</span>` : '';
     const call  = b.phone
       ? `<a href="tel:${b.phone}" onclick="event.stopPropagation()" style="font-size:.52rem;background:var(--gold);color:#fff;padding:2px 6px;border-radius:2px;text-decoration:none;font-weight:600">Call →</a>` : '';
-    const yelp  = b.yelp_url
-      ? `<a href="${b.yelp_url}" target="_blank" rel="noopener" onclick="event.stopPropagation()" style="font-size:.52rem;background:#B22234;color:#fff;padding:2px 6px;border-radius:2px;text-decoration:none;font-weight:600">Yelp →</a>` : '';
     const waymo = b.waymo_url
       ? `<a href="${b.waymo_url}" target="_blank" rel="noopener" onclick="event.stopPropagation()" style="font-size:.52rem;background:#1A73E8;color:#fff;padding:2px 6px;border-radius:2px;text-decoration:none;font-weight:600">Waymo →</a>` : '';
     return `<div class="dir-card"><div style="flex:1;min-width:0">` +
       `<div class="dir-name">${b.name}</div>` +
       (b.category ? `<div style="font-family:'DM Mono',monospace;font-size:.38rem;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);margin-top:1px">${b.category}</div>` : '') +
       (b.address  ? `<div class="dir-addr">${b.address}</div>` : '') +
-      `<div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:5px;align-items:center">${stars}${call}${yelp}${waymo}</div>` +
+      `<div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:5px;align-items:center">${stars}${call}${waymo}</div>` +
       `</div></div>`;
   }).join('');
 }
@@ -992,7 +992,7 @@ async function fetchYT(query) {
 function showStrip(idx) {
   const m   = STRIP_MONUMENTS[idx];
   const v   = stripVideos[idx];
-  const vid = v ? v.id : 'TXgFRbEJqR4';
+  const vid = v ? v.id : 'UpvkGg28f8A';
   document.getElementById('yt-frame-strip').src = `https://www.youtube.com/embed/${vid}?autoplay=1&mute=1&loop=1&playlist=${vid}&controls=0&showinfo=0&rel=0&modestbranding=1`;
   document.getElementById('yt-label').textContent = `▶ ${m.name} · ${m.venue} · Click to unmute`;
   const evLink = document.getElementById('yt-events-link');
@@ -1028,7 +1028,7 @@ async function addYTMarkers() {
   const result = await fetchYT('Grand Performances Los Angeles concert');
   if (result) { ytVideos = [result]; populateBillboard(result); }
   else {
-    const v = { id:'TXgFRbEJqR4', title:'Lobo — I\'d Love You to Want Me', channel:'Requation', thumb:'https://img.youtube.com/vi/TXgFRbEJqR4/hqdefault.jpg' };
+    const v = { id:'rjBzXreFeWg', title:'Lobo — I\'d Love You to Want Me', channel:'Requation', thumb:'https://img.youtube.com/vi/rjBzXreFeWg/hqdefault.jpg' };
     ytVideos = [v]; populateBillboard(v);
   }
 }
@@ -1127,14 +1127,17 @@ async function initCesium() {
   const tileset = await Cesium.createGooglePhotorealistic3DTileset({ key: 'AIzaSyD7UMA5ILPXv9QK2_gvxPVth30MavRd2WQ' });
   viewer.scene.primitives.add(tileset);
 
-  /* Fly to property — arrive tilted over South Park DTLA */
+  /* Fly to property — camera offset so property pin is at viewport center.
+     camera.flyTo destination = camera position, not the look-at target.
+     Compute camera position = property + inverse of look direction. */
+  const _D = Cesium.Math.toRadians(200), _P = Cesium.Math.toRadians(-35), _H = 420;
+  const _hz = _H / Math.tan(Math.abs(_P));
+  const _br = (_D + Math.PI) % (2 * Math.PI);
+  const _cl = CENTER.lat + (_hz * Math.cos(_br)) / 111111;
+  const _cn = CENTER.lng + (_hz * Math.sin(_br)) / (111111 * Math.cos(CENTER.lat * Math.PI / 180));
   viewer.camera.flyTo({
-    destination: Cesium.Cartesian3.fromDegrees(CENTER.lng, CENTER.lat, 420),
-    orientation: {
-      heading: Cesium.Math.toRadians(200),
-      pitch:   Cesium.Math.toRadians(-35),
-      roll:    0
-    },
+    destination: Cesium.Cartesian3.fromDegrees(_cn, _cl, _H),
+    orientation: { heading: _D, pitch: _P, roll: 0 },
     duration: 2
   });
 

@@ -589,9 +589,14 @@ const LAVEEN_FAVS = [
 function flyToFav(lat, lng) {
   closePanel();
   if (!window._viewer) return;
+  const H = 400, D = Cesium.Math.toRadians(190), P = Cesium.Math.toRadians(-35);
+  const hz = H / Math.tan(Math.abs(P));
+  const br = (D + Math.PI) % (2 * Math.PI);
+  const cl = lat + (hz * Math.cos(br)) / 111111;
+  const cn = lng + (hz * Math.sin(br)) / (111111 * Math.cos(lat * Math.PI / 180));
   window._viewer.camera.flyTo({
-    destination: Cesium.Cartesian3.fromDegrees(lng, lat, 400),
-    orientation: { heading: Cesium.Math.toRadians(190), pitch: Cesium.Math.toRadians(-35), roll: 0 },
+    destination: Cesium.Cartesian3.fromDegrees(cn, cl, H),
+    orientation: { heading: D, pitch: P, roll: 0 },
     duration: 1.5
   });
 }
@@ -684,9 +689,8 @@ function renderDir(data) {
   el.innerHTML = data.map(b => {
     const icon = DIR_ICONS[b.category] || '🏢';
     const ratingBadge = b.rating ? `<span style="font-size:.52rem;background:#FF6600;color:#fff;padding:2px 6px;border-radius:2px;font-weight:600">★ ${b.rating}</span>` : '';
-    const yelpBtn = b.yelp_url ? `<a href="${b.yelp_url}" target="_blank" rel="noopener" onclick="event.stopPropagation()" style="font-size:.58rem;background:#B22234;color:#fff;padding:3px 8px;border-radius:2px;text-decoration:none;font-weight:600">Yelp →</a>` : '';
     const waymoBtn = b.waymo_url ? `<a href="${b.waymo_url}" target="_blank" rel="noopener" onclick="event.stopPropagation()" style="font-size:.58rem;background:#1A73E8;color:#fff;padding:3px 8px;border-radius:2px;text-decoration:none;font-weight:600">Waymo →</a>` : '';
-    const links = (yelpBtn||waymoBtn) ? `<div style="display:flex;gap:6px;margin-top:5px;align-items:center">${ratingBadge}${yelpBtn}${waymoBtn}</div>` : (ratingBadge ? `<div style="margin-top:4px">${ratingBadge}</div>` : '');
+    const links = waymoBtn ? `<div style="display:flex;gap:6px;margin-top:5px;align-items:center">${ratingBadge}${waymoBtn}</div>` : (ratingBadge ? `<div style="margin-top:4px">${ratingBadge}</div>` : '');
     return `<div class="dir-card"><div class="dir-icon">${icon}</div><div style="flex:1;min-width:0"><div class="dir-name">${b.name}</div><div class="dir-cat">${b.category}</div>${b.address?`<div class="dir-addr">${b.address}</div>`:''}${links}</div></div>`;
   }).join('');
 }
@@ -810,12 +814,11 @@ function showCellResults(data, label) {
   if (!data.length) { res.innerHTML = `<div class="dir-empty">No ${label} found nearby</div>`; return; }
   res.innerHTML = data.map(b => {
     const stars = b.rating   ? `<span style="font-size:.5rem;background:#FF6600;color:#fff;padding:1px 4px;border-radius:2px;font-weight:700">★${b.rating}</span>` : '';
-    const yelp  = b.yelp_url ? `<a href="${b.yelp_url}" target="_blank" rel="noopener" onclick="event.stopPropagation()" style="font-size:.52rem;background:#B22234;color:#fff;padding:2px 5px;border-radius:2px;text-decoration:none;font-weight:600">Yelp →</a>` : '';
     const waymo = b.waymo_url? `<a href="${b.waymo_url}" target="_blank" rel="noopener" onclick="event.stopPropagation()" style="font-size:.52rem;background:#1A73E8;color:#fff;padding:2px 5px;border-radius:2px;text-decoration:none;font-weight:600">Waymo →</a>` : '';
     return `<div class="dir-card"><div style="flex:1;min-width:0">` +
       `<div class="dir-name">${b.name}</div>` +
       (b.address ? `<div class="dir-addr">${b.address}</div>` : '') +
-      `<div style="display:flex;gap:4px;margin-top:3px;align-items:center">${stars}${yelp}${waymo}</div>` +
+      `<div style="display:flex;gap:4px;margin-top:3px;align-items:center">${stars}${waymo}</div>` +
       `</div></div>`;
   }).join('');
 }
@@ -960,9 +963,15 @@ async function initCesium() {
   const tileset = await Cesium.createGooglePhotorealistic3DTileset();
   viewer.scene.primitives.add(tileset);
 
+  /* Camera offset so property pin is at viewport center — same math as dtla.html */
+  const _D = Cesium.Math.toRadians(190), _P = Cesium.Math.toRadians(-40), _H = 1200;
+  const _hz = _H / Math.tan(Math.abs(_P));
+  const _br = (_D + Math.PI) % (2 * Math.PI);
+  const _cl = CENTER.lat + (_hz * Math.cos(_br)) / 111111;
+  const _cn = CENTER.lng + (_hz * Math.sin(_br)) / (111111 * Math.cos(CENTER.lat * Math.PI / 180));
   viewer.camera.flyTo({
-    destination: Cesium.Cartesian3.fromDegrees(CENTER.lng, CENTER.lat, 1200),
-    orientation: { heading:Cesium.Math.toRadians(190), pitch:Cesium.Math.toRadians(-40), roll:0 },
+    destination: Cesium.Cartesian3.fromDegrees(_cn, _cl, _H),
+    orientation: { heading: _D, pitch: _P, roll: 0 },
     duration: 2
   });
 

@@ -110,7 +110,7 @@
     .card-btn:hover { opacity:.8; }
     .card-btn-primary { background:var(--ink); color:var(--cream); }
     .card-btn-waymo   { background:#1A73E8; color:#fff; }
-    .card-btn-redfin  { background:#cc3340; color:#fff; }
+    .card-btn-yelp    { background:#cc3340; color:#fff; }
 
     #legend {
       position:fixed; top:calc(var(--header-h) + 12px); right:12px; z-index:90;
@@ -247,7 +247,7 @@ async function loadYelp() {
           name:    b.name,
           addr:    b.location?.address1 || '',
           stats:   [b.categories?.[0]?.title, b.location?.zip_code].filter(Boolean),
-          primary: b.url ? { label: 'Yelp →', href: b.url } : null,
+          primary: null,
           waymo:   waymoDest(b.location?.address1 || b.name),
         });
       });
@@ -316,11 +316,11 @@ function showCard({ tag, name, addr, stats, primary, waymo }) {
   const actEl = document.getElementById('card-actions');
   actEl.innerHTML = '';
   if (primary) {
-    const a = Object.assign(document.createElement('a'), { className:'card-btn card-btn-redfin', textContent:primary.label, href:primary.href, target:'_blank' });
+    const a = Object.assign(document.createElement('a'), { className:'card-btn card-btn-yelp', textContent:primary.label, href:primary.href, target:'_blank', rel:'noopener noreferrer' });
     actEl.appendChild(a);
   }
   if (waymo) {
-    const a = Object.assign(document.createElement('a'), { className:'card-btn card-btn-waymo', textContent:'Waymo One →', href:waymo, target:'_blank' });
+    const a = Object.assign(document.createElement('a'), { className:'card-btn card-btn-waymo', textContent:'Waymo →', href:waymo, target:'_blank', rel:'noopener noreferrer' });
     actEl.appendChild(a);
   }
   const card = document.getElementById('info-card');

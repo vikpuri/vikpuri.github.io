@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>YT Cube — Template</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --gold: #C9A84C;
+      --cream: #FAF8F4;
+      --ink: #1C1C1C;
+      --text-muted: #6B6460;
+      --cols: 4;           /* ← change: 6 = landing page, 4 = section, 3 = sidebar */
+      --cell-gap: 3px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { background: #0F0E0B; color: var(--cream); font-family: 'DM Mono', monospace; }
+
+    /* ── Controls (dev only — strip in production) ── */
+    #controls {
+      display: flex; align-items: center; gap: 16px;
+      padding: 12px 20px;
+      background: rgba(255,255,255,.04);
+      border-bottom: 1px solid rgba(255,255,255,.08);
+      font-size: .52rem; letter-spacing: .08em; text-transform: uppercase;
+    }
+    #controls label { color: var(--text-muted); }
+    #controls select {
+      font-family: 'DM Mono', monospace; font-size: .52rem;
+      background: rgba(255,255,255,.06); color: var(--cream);
+      border: 1px solid rgba(255,255,255,.15); border-radius: 2px;
+      padding: 4px 8px; cursor: pointer;
+    }
+    .ctrl-note { margin-left: auto; color: rgba(255,255,255,.2); }
+
+    /* ── Grid ── */
+    #cube-grid {
+      display: grid;
+      grid-template-columns: repeat(var(--cols), 1fr);
+      gap: var(--cell-gap);
+      padding: var(--cell-gap);
+      width: 100%;
+    }
+
+    /* ── Cell ── */
+    .yt-cell {
+      position: relative;
+      aspect-ratio: 16/9;
+      background: #1A1A18;
+      overflow: hidden;
+      cursor: pointer;
+    }
+
+    /* Thumbnail */
+    .yt-thumb {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform .25s ease, filter .25s ease;
+    }
+    .yt-cell:hover .yt-thumb {
+      transform: scale(1.04);
+      filter: brightness(1.1);
+    }
+
+    /* Play overlay */
+    .yt-play {
+      position: absolute;
+      inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(0,0,0,.25);
+      transition: background .2s;
+    }
+    .yt-cell:hover .yt-play { background: rgba(0,0,0,.15); }
+    .yt-cell.playing .yt-play { display: none; }
+
+    .play-btn {
+      width: 40px; height: 40px;
+      background: rgba(201,168,76,.92);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      transition: transform .18s, background .18s;
+      flex-shrink: 0;
+    }
+    .yt-cell:hover .play-btn {
+      transform: scale(1.14);
+      background: var(--gold);
+    }
+    .play-btn svg { width: 14px; height: 14px; fill: #0F0E0B; margin-left: 2px; }
+
+    /* Label strip */
+    .yt-label {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      padding: 6px 8px 5px;
+      background: linear-gradient(transparent, rgba(0,0,0,.78));
+      font-size: .38rem; letter-spacing: .06em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,.85);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      pointer-events: none;
+    }
+    .yt-cell.playing .yt-label { display: none; }
+
+    /* Inline iframe */
+    .yt-frame {
+      display: none;
+      position: absolute;
+      inset: 0;
+      width: 100%; height: 100%;
+      border: none;
+    }
+    .yt-cell.playing .yt-frame { display: block; }
+
+    /* Empty slot */
+    .yt-cell.empty {
+      background: repeating-linear-gradient(
+        45deg,
+        rgba(255,255,255,.02) 0px, rgba(255,255,255,.02) 1px,
+        transparent 1px, transparent 8px
+      );
+      cursor: default;
+    }
+    .yt-cell.empty .yt-play { display: none; }
+  </style>
+</head>
+<body>
+
+<!-- Dev controls — remove before embedding in production -->
+<div id="controls">
+  <label>Grid:</label>
+  <select onchange="setGrid(this.value)">
+    <option value="6">6×6 — 36 slots (landing page banner)</option>
+    <option value="4" selected>4×4 — 16 slots (page section)</option>
+    <option value="3">3×3 — 9 slots (sidebar / mobile)</option>
+  </select>
+  <span class="ctrl-note">click any cell to play inline · no new URL · no new tab</span>
+</div>
+
+<div id="cube-grid"></div>
+
+<script>
+/* ── YT_VIDEOS — replace with real directory business videos ──────────────── */
+const YT_VIDEOS = [
+  { id: 'UpvkGg28f8A', label: 'DTLA Aerial' },
+  { id: 'rjBzXreFeWg', label: 'Lobo — Classic' },
+  { id: 'OVVlS4xHH2M', label: 'Woodstock 1969' },
+  { id: 'dQw4w9WgXcQ', label: 'Placeholder' },
+  { id: 'UpvkGg28f8A', label: 'DTLA Aerial 2' },
+  { id: 'rjBzXreFeWg', label: 'Lobo — Classic 2' },
+  { id: 'OVVlS4xHH2M', label: 'Woodstock 2' },
+  { id: 'dQw4w9WgXcQ', label: 'Placeholder 2' },
+  { id: 'UpvkGg28f8A', label: 'DTLA Aerial 3' },
+  { id: 'rjBzXreFeWg', label: 'Lobo — Classic 3' },
+  { id: 'OVVlS4xHH2M', label: 'Woodstock 3' },
+  { id: 'dQw4w9WgXcQ', label: 'Placeholder 3' },
+  { id: 'UpvkGg28f8A', label: 'DTLA Aerial 4' },
+  { id: 'rjBzXreFeWg', label: 'Lobo — Classic 4' },
+  { id: 'OVVlS4xHH2M', label: 'Woodstock 4' },
+  { id: 'dQw4w9WgXcQ', label: 'Placeholder 4' },
+  { id: 'UpvkGg28f8A', label: 'DTLA Aerial 5' },
+  { id: 'rjBzXreFeWg', label: 'Lobo — Classic 5' },
+  { id: 'OVVlS4xHH2M', label: 'Woodstock 5' },
+  { id: 'dQw4w9WgXcQ', label: 'Placeholder 5' },
+  { id: 'UpvkGg28f8A', label: 'DTLA Aerial 6' },
+  { id: 'rjBzXreFeWg', label: 'Lobo — Classic 6' },
+  { id: 'OVVlS4xHH2M', label: 'Woodstock 6' },
+  { id: 'dQw4w9WgXcQ', label: 'Placeholder 6' },
+  { id: 'UpvkGg28f8A', label: 'DTLA Aerial 7' },
+  { id: 'rjBzXreFeWg', label: 'Lobo — Classic 7' },
+  { id: 'OVVlS4xHH2M', label: 'Woodstock 7' },
+  { id: 'dQw4w9WgXcQ', label: 'Placeholder 7' },
+  { id: 'UpvkGg28f8A', label: 'DTLA Aerial 8' },
+  { id: 'rjBzXreFeWg', label: 'Lobo — Classic 8' },
+  { id: 'OVVlS4xHH2M', label: 'Woodstock 8' },
+  { id: 'dQw4w9WgXcQ', label: 'Placeholder 8' },
+  { id: 'UpvkGg28f8A', label: 'DTLA Aerial 9' },
+  { id: 'rjBzXreFeWg', label: 'Lobo — Classic 9' },
+  { id: 'OVVlS4xHH2M', label: 'Woodstock 9' },
+  { id: 'dQw4w9WgXcQ', label: 'Placeholder 9' },
+];
+/* ────────────────────────────────────────────────────────────────────────── */
+
+let currentCols = 4;
+let activeCell  = null;  // tracks which cell is playing so we can close it
+
+function ytEmbedUrl(id) {
+  return `https://www.youtube.com/embed/${id}?autoplay=1&rel=0&modestbranding=1`;
+}
+
+function thumbUrl(id) {
+  return `https://img.youtube.com/vi/${id}/mqdefault.jpg`;
+}
+
+function buildCell(video, idx) {
+  const cell = document.createElement('div');
+  cell.className = 'yt-cell';
+  cell.dataset.idx = idx;
+
+  if (!video) {
+    cell.classList.add('empty');
+    return cell;
+  }
+
+  cell.innerHTML = `
+    <img class="yt-thumb" src="${thumbUrl(video.id)}" alt="${video.label}" loading="lazy" />
+    <div class="yt-play">
+      <div class="play-btn">
+        <svg viewBox="0 0 10 12"><polygon points="0,0 10,6 0,12"/></svg>
+      </div>
+    </div>
+    <div class="yt-label">${video.label}</div>
+    <iframe class="yt-frame"
+      src=""
+      allow="autoplay; encrypted-media; picture-in-picture"
+      allowfullscreen>
+    </iframe>`;
+
+  cell.addEventListener('click', () => playCell(cell, video.id));
+  return cell;
+}
+
+function playCell(cell, id) {
+  if (activeCell && activeCell !== cell) {
+    stopCell(activeCell);
+  }
+  if (cell.classList.contains('playing')) {
+    stopCell(cell);
+    return;
+  }
+  const frame = cell.querySelector('.yt-frame');
+  frame.src = ytEmbedUrl(id);
+  cell.classList.add('playing');
+  activeCell = cell;
+}
+
+function stopCell(cell) {
+  const frame = cell.querySelector('.yt-frame');
+  if (frame) frame.src = '';
+  cell.classList.remove('playing');
+  if (activeCell === cell) activeCell = null;
+}
+
+function buildGrid(cols) {
+  currentCols = cols;
+  const grid = document.getElementById('cube-grid');
+  grid.innerHTML = '';
+  document.documentElement.style.setProperty('--cols', cols);
+
+  const slots = cols * cols;
+  for (let i = 0; i < slots; i++) {
+    const video = YT_VIDEOS[i] || null;
+    grid.appendChild(buildCell(video, i));
+  }
+}
+
+function setGrid(val) {
+  if (activeCell) stopCell(activeCell);
+  buildGrid(parseInt(val, 10));
+}
+
+/* init */
+buildGrid(currentCols);
+</script>
+</body>
+</html>

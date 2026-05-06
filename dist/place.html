@@ -269,10 +269,7 @@ if (!place) {
   };
   act.appendChild(yt);
 
-  /* Yelp button — live when Yelp data populated */
-  const yelp = Object.assign(document.createElement('button'), { className:'place-btn btn-maps', textContent:'Maps →' });
-  yelp.onclick = () => window.open('https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(place.addr), '_blank');
-  act.appendChild(yelp);
+  /* Maps → removed — place.html IS the map, already centered on this location */
 }
 
 /* ── Rule 3: map singleton centered on place ── */

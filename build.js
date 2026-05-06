@@ -52,6 +52,7 @@ const HTML_FILES = [
   'dtla-mall-map.html', 'laveen-mall-map.html',
   'lalife.html', 'desertlife.html',
   'cube-template.html',
+  'i10.html',
 ];
 HTML_FILES.forEach(f => {
   if (!fs.existsSync(f)) return;

@@ -305,12 +305,12 @@ async function loadRPOI() {
           addr:  priceK + (p.beds ? ' · ' + p.beds + ' BD / ' + p.baths + ' BA' : ''),
           cat:   (p.sqft || '—') + ' sqft',
           waymo: 'https://waymo.com/waymo-one/?destination=' + encodeURIComponent(p.address),
-          slug:  null,
+          lat:   p.lat, lng: p.lng,
         });
         if (p.redfin_url) {
           const btn = Object.assign(document.createElement('a'), {
             className:'card-btn card-btn-view', textContent:'Redfin →',
-            href:p.redfin_url, target:'_blank',
+            href:p.redfin_url, target:'_blank', rel:'noopener noreferrer',
           });
           document.getElementById('card-actions').appendChild(btn);
         }
@@ -339,7 +339,7 @@ async function loadYelp() {
           addr:    b.location?.address1 || '',
           cat:     b.categories?.[0]?.title || '',
           waymo:   'https://waymo.com/waymo-one/?destination=' + encodeURIComponent(b.location?.address1 || b.name),
-          yelpUrl: b.url,
+          lat:     b.coordinates.latitude, lng: b.coordinates.longitude,
         });
       });
     });
@@ -389,27 +389,30 @@ function loadHearts() {
         cat:      h.cat,
         ytSearch: h.ytSearch,
         waymo:    'https://waymo.com/waymo-one/?destination=' + encodeURIComponent(h.addr),
-        mapsUrl:  `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(h.name + ' ' + h.addr)}`,
+        lat:      h.lat, lng: h.lng,
       });
     });
   });
 }
 
-function showCard({ tag, name, addr, cat, ytSearch, waymo, mapsUrl, yelpUrl }) {
+function showCard({ tag, name, addr, cat, ytSearch, waymo, lat, lng, yelpUrl }) {
   document.getElementById('card-tag').textContent  = tag;
   document.getElementById('card-name').textContent = name;
   document.getElementById('card-addr').textContent = addr + (cat ? ' · ' + cat : '');
   const act = document.getElementById('card-actions');
   act.innerHTML = '';
-  if (mapsUrl) act.appendChild(Object.assign(document.createElement('a'), { className:'card-btn card-btn-view', textContent:'Maps →', href:mapsUrl, target:'_blank' }));
-  if (yelpUrl) act.appendChild(Object.assign(document.createElement('a'), { className:'card-btn card-btn-yelp', textContent:'Yelp →', href:yelpUrl, target:'_blank' }));
+  if (lat && lng) {
+    const mBtn = Object.assign(document.createElement('button'), { className:'card-btn card-btn-view', textContent:'Map →' });
+    mBtn.onclick = () => { map.panTo({ lat, lng }); map.setZoom(16); };
+    act.appendChild(mBtn);
+  }
   if (ytSearch) {
     const ytBtn = Object.assign(document.createElement('button'), { className:'card-btn card-btn-yt', textContent:'▶ YouTube' });
     ytBtn.onclick = async () => {
       const f = document.getElementById('card-yt');
       f.style.display = 'block';
       f.src = '';
-      let vid = 'TXgFRbEJqR4';
+      let vid = 'rjBzXreFeWg';
       try {
         const r = await fetch(`/api/youtube?q=${encodeURIComponent(ytSearch)}&maxResults=1`);
         if (r.ok) { const d = await r.json(); const v = (d.videos||[])[0]; if (v?.id) vid = v.id; }
@@ -419,7 +422,7 @@ function showCard({ tag, name, addr, cat, ytSearch, waymo, mapsUrl, yelpUrl }) {
     act.appendChild(ytBtn);
   }
   if (waymo) {
-    act.appendChild(Object.assign(document.createElement('a'), { className:'card-btn card-btn-waymo', textContent:'Waymo →', href:waymo, target:'_blank' }));
+    act.appendChild(Object.assign(document.createElement('a'), { className:'card-btn card-btn-waymo', textContent:'Waymo →', href:waymo, target:'_blank', rel:'noopener noreferrer' }));
   }
   document.getElementById('card-yt').style.display = 'none';
   document.getElementById('card-yt').src = '';

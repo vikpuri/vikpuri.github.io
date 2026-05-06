@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The I-10 Corridor — Los Angeles to Phoenix · Requation</title>
+  <meta name="description" content="The I-10 from Los Angeles to Phoenix — every anchor business, every underserved stop. Quartzsite, Blythe, Desert Hot Springs — one pin can transform a corridor." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,600;1,400&family=Source+Serif+4:wght@300;400;600&family=DM+Mono:wght@400;500&family=Raleway:wght@400;600&display=swap" rel="stylesheet">
+  <script src="https://cesium.com/downloads/cesiumjs/releases/1.116/Build/Cesium/Cesium.js"></script>
+  <link href="https://cesium.com/downloads/cesiumjs/releases/1.116/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
+  <style>
+    :root {
+      --gold: #B8922A; --gold-light: #C9A84C; --gold-dim: rgba(184,146,42,.08);
+      --cream: #FAF8F4; --cream-2: #F4F1EB; --cream-3: #EDE9E0;
+      --ink: #1C1C1C; --ink-2: #2E2E2E; --text-muted: #6B6460;
+      --rule: rgba(0,0,0,.08); --rule-heavy: rgba(0,0,0,.14);
+      --red: #B22234; --blue: #4F6FB8;
+      --h: 60px;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { background: #06060f; }
+    body { font-family: 'DM Mono', monospace; color: var(--ink); }
+
+    /* ── Header ── */
+    header {
+      position: sticky; top: 0; z-index: 200;
+      background: rgba(6,6,15,.92); backdrop-filter: blur(8px);
+      border-bottom: 1px solid rgba(184,146,42,.15);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 20px; height: var(--h);
+    }
+    .logo-wrap { text-decoration: none; display: flex; align-items: center; cursor: pointer; }
+    .nav-back {
+      font-size: .42rem; letter-spacing: .1em; text-transform: uppercase;
+      color: rgba(184,146,42,.7); text-decoration: none;
+      border: 1px solid rgba(184,146,42,.25); padding: 5px 12px; border-radius: 2px;
+      transition: all .15s;
+    }
+    .nav-back:hover { border-color: var(--gold); color: var(--gold); }
+
+    /* ── Map hero section ── */
+    #map-hero {
+      position: relative;
+      height: calc(60vh - var(--h));
+      min-height: 340px;
+      background: #06060f;
+    }
+    #cesiumContainer {
+      width: 100%; height: 100%;
+    }
+    /* Suppress CesiumJS branding */
+    .cesium-viewer-bottom { display: none !important; }
+    .cesium-viewer-toolbar { display: none !important; }
+    .cesium-widget-credits { display: none !important; }
+
+    /* Floating overlay on the map */
+    #map-label {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      padding: 12px 24px;
+      background: linear-gradient(to top, rgba(6,6,15,.9) 0%, transparent 100%);
+      display: flex; align-items: flex-end; justify-content: space-between;
+      pointer-events: none;
+    }
+    .map-title {
+      font-family: 'EB Garamond', serif; font-style: italic;
+      font-size: 1.5rem; color: rgba(201,168,76,.95); line-height: 1;
+    }
+    .map-subtitle {
+      font-family: 'DM Mono', monospace; font-size: .32rem;
+      letter-spacing: .16em; text-transform: uppercase;
+      color: rgba(184,146,42,.6); display: block; margin-top: 4px;
+    }
+    .map-stat {
+      text-align: right;
+      font-family: 'DM Mono', monospace; font-size: .32rem;
+      letter-spacing: .1em; color: rgba(184,146,42,.5);
+    }
+    .map-stat strong { color: rgba(201,168,76,.85); font-size: .52rem; display: block; }
+
+    /* ── Traffic data strip ── */
+    .data-strip {
+      display: flex; background: var(--cream-2);
+      border-bottom: 1px solid var(--rule); overflow-x: auto;
+    }
+    .data-cell {
+      flex: 1; min-width: 140px;
+      padding: 10px 20px; border-right: 1px solid var(--rule);
+    }
+    .data-cell:last-child { border-right: none; }
+    .data-value {
+      font-family: 'EB Garamond', serif; font-size: 1.3rem;
+      font-weight: 600; color: var(--ink); line-height: 1; display: block;
+    }
+    .data-value.gold { color: var(--gold); }
+    .data-label {
+      font-family: 'DM Mono', monospace; font-size: .3rem;
+      letter-spacing: .12em; text-transform: uppercase;
+      color: var(--text-muted); display: block; margin-top: 2px;
+    }
+
+    /* ── Page title bar ── */
+    .page-bar {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 20px 0; border-bottom: 1px solid var(--rule);
+      background: var(--cream);
+    }
+    .page-title {
+      font-family: 'EB Garamond', serif; font-style: italic;
+      font-size: 1.55rem; color: var(--ink); line-height: 1;
+    }
+    .page-title span { color: var(--gold-light); }
+    .corridor-tabs { display: flex; gap: 4px; padding-bottom: 14px; }
+    .ctab {
+      font-family: 'DM Mono', monospace; font-size: .42rem; letter-spacing: .1em;
+      text-transform: uppercase; padding: 6px 16px; border-radius: 2px;
+      border: 1px solid var(--rule-heavy); background: transparent;
+      color: var(--text-muted); cursor: pointer; transition: all .15s;
+    }
+    .ctab.active { background: var(--ink); color: var(--cream); border-color: var(--ink); }
+    .ctab:hover:not(.active) { border-color: var(--gold); color: var(--gold); }
+
+    /* ── Two-column layout ── */
+    .corridor-layout {
+      display: grid; grid-template-columns: 300px 1fr;
+      min-height: 60vh; align-items: start;
+      background: var(--cream);
+    }
+    .stop-list-col { border-right: 1px solid var(--rule-heavy); }
+    .stop-grid { display: flex; flex-direction: column; gap: 1px; background: var(--rule); }
+
+    .stop-card {
+      background: var(--cream); padding: 12px 14px;
+      cursor: pointer; transition: background .12s;
+      border-left: 3px solid transparent;
+    }
+    .stop-card:hover { background: var(--cream-2); border-left-color: var(--gold); }
+    .stop-card.active { background: var(--cream-2); border-left-color: var(--gold); }
+    .sc-city {
+      font-family: 'EB Garamond', serif; font-size: .88rem;
+      font-weight: 600; color: var(--ink); margin-bottom: 3px;
+    }
+    .sc-anchor {
+      font-family: 'Source Serif 4', serif; font-style: italic;
+      font-size: .72rem; color: var(--ink-2); margin-bottom: 5px;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .sc-meta { display: flex; align-items: center; justify-content: space-between; }
+    .sc-badges { display: flex; gap: 4px; }
+    .sc-badge {
+      font-size: .28rem; letter-spacing: .06em; text-transform: uppercase;
+      padding: 2px 6px; border-radius: 1px;
+    }
+    .sc-ca { background: rgba(178,34,52,.07); color: var(--red); border: 1px solid rgba(178,34,52,.2); }
+    .sc-az { background: rgba(79,111,184,.07); color: var(--blue); border: 1px solid rgba(79,111,184,.2); }
+    .sc-featured { background: var(--gold-dim); color: var(--gold); border: 1px solid rgba(184,146,42,.2); }
+    .sc-mile { font-family: 'DM Mono', monospace; font-size: .28rem; color: var(--text-muted); }
+    .sc-claim {
+      display: block; margin-top: 6px;
+      font-family: 'DM Mono', monospace; font-size: .3rem;
+      letter-spacing: .08em; text-transform: uppercase;
+      color: var(--gold); text-decoration: none;
+      padding: 4px 8px; border: 1px solid rgba(184,146,42,.3);
+      border-radius: 1px; text-align: center; transition: all .12s;
+    }
+    .sc-claim:hover { background: var(--gold); color: var(--cream); }
+
+    /* Vacant space cards */
+    .vacant-card { background: var(--cream); padding: 14px; }
+    .vacant-card:hover { background: var(--cream-2); }
+    .vc-type {
+      font-family: 'DM Mono', monospace; font-size: .28rem;
+      letter-spacing: .12em; text-transform: uppercase;
+      color: var(--gold); margin-bottom: 4px; display: block;
+    }
+    .vc-name { font-family: 'EB Garamond', serif; font-size: .9rem; font-weight: 600; color: var(--ink); margin-bottom: 2px; }
+    .vc-desc { font-size: .36rem; color: var(--text-muted); margin-bottom: 7px; line-height: 1.45; }
+    .vc-price { font-family: 'DM Mono', monospace; font-size: .32rem; color: var(--ink); }
+    .vc-price strong { color: var(--gold); }
+    .list-space-cta { padding: 16px 14px; background: var(--cream-2); border-top: 1px solid var(--rule); }
+    .list-space-cta p { font-size: .38rem; line-height: 1.5; color: var(--text-muted); margin-bottom: 10px; }
+    .list-btn {
+      display: block; width: 100%; text-align: center;
+      padding: 9px 16px;
+      font-family: 'DM Mono', monospace; font-size: .36rem;
+      letter-spacing: .1em; text-transform: uppercase;
+      background: var(--ink); color: var(--cream);
+      border: none; border-radius: 2px; cursor: pointer;
+      text-decoration: none; transition: background .15s;
+    }
+    .list-btn:hover { background: var(--gold); }
+
+    /* ── Featured panel ── */
+    .featured-panel {
+      position: sticky; top: var(--h);
+      height: calc(100vh - var(--h));
+      overflow-y: auto; padding: 28px 32px;
+      background: var(--cream);
+    }
+    .featured-panel::before {
+      content: ''; display: block; height: 3px;
+      background: linear-gradient(90deg, var(--gold-light), rgba(184,146,42,.15));
+      margin: -28px -32px 22px;
+    }
+    .fp-label {
+      font-family: 'DM Mono', monospace; font-size: .28rem;
+      letter-spacing: .18em; text-transform: uppercase;
+      color: var(--gold); margin-bottom: 6px; display: block;
+    }
+    .fp-header { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 16px; gap: 16px; }
+    .fp-header-left { flex: 1; min-width: 0; }
+    .fp-headline {
+      font-family: 'EB Garamond', serif; font-style: italic;
+      font-size: 1.7rem; line-height: 1.15; color: var(--ink);
+    }
+    .fp-location {
+      font-family: 'DM Mono', monospace; font-size: .32rem;
+      letter-spacing: .1em; text-transform: uppercase;
+      color: var(--text-muted); text-align: right; flex-shrink: 0;
+    }
+    .fp-tags { margin-bottom: 16px; }
+    .fp-tag {
+      display: inline-block; font-family: 'DM Mono', monospace;
+      font-size: .28rem; letter-spacing: .1em; text-transform: uppercase;
+      padding: 3px 8px; border-radius: 1px; margin-right: 4px; margin-bottom: 4px;
+    }
+    .fp-tag-gold { background: var(--gold-dim); color: var(--gold); border: 1px solid rgba(184,146,42,.2); }
+    .fp-tag-ink  { background: rgba(0,0,0,.04); color: var(--text-muted); border: 1px solid var(--rule-heavy); }
+    .fp-tag-blue { background: rgba(79,111,184,.07); color: var(--blue); border: 1px solid rgba(79,111,184,.2); }
+    .fp-body {
+      font-family: 'Source Serif 4', 'EB Garamond', serif; font-size: .92rem;
+      line-height: 1.7; color: var(--ink-2); margin-bottom: 12px;
+    }
+    .fp-divider { border: none; border-top: 1px solid var(--rule); margin: 22px 0; }
+    .fp-links-heading {
+      font-family: 'DM Mono', monospace; font-size: .28rem;
+      letter-spacing: .16em; text-transform: uppercase;
+      color: var(--text-muted); margin-bottom: 12px; display: block;
+    }
+    .fp-links-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-bottom: 22px; }
+    .fp-link-card {
+      display: block; text-decoration: none; padding: 12px 14px;
+      background: var(--cream-2); border: 1px solid var(--rule-heavy);
+      border-radius: 2px; border-top: 3px solid var(--rule-heavy);
+      transition: border-top-color .15s, background .15s;
+    }
+    .fp-link-card:hover { background: var(--cream-3); border-top-color: var(--gold); }
+    .fp-link-source {
+      font-family: 'DM Mono', monospace; font-size: .26rem;
+      letter-spacing: .12em; text-transform: uppercase;
+      color: var(--text-muted); margin-bottom: 5px; display: block;
+    }
+    .fp-link-title {
+      font-family: 'Source Serif 4', serif; font-style: italic;
+      font-size: .8rem; line-height: 1.35; color: var(--ink-2); display: block;
+    }
+    .fp-link-arrow { font-family: 'DM Mono', monospace; font-size: .34rem; color: var(--gold); margin-top: 6px; display: block; }
+    .fp-secondary { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: start; }
+    .fp-mini-label {
+      font-family: 'DM Mono', monospace; font-size: .26rem;
+      letter-spacing: .14em; text-transform: uppercase;
+      color: var(--text-muted); margin-bottom: 6px; display: block;
+    }
+    .fp-mini-name { font-family: 'EB Garamond', serif; font-style: italic; font-size: .95rem; color: var(--ink); margin-bottom: 2px; }
+    .fp-mini-loc { font-family: 'DM Mono', monospace; font-size: .30rem; letter-spacing: .08em; color: var(--text-muted); margin-bottom: 10px; }
+    .fp-mini-body { font-family: 'Source Serif 4', serif; font-size: .82rem; line-height: 1.6; color: var(--text-muted); }
+    .revenue-callout {
+      margin-top: 24px; padding: 16px 18px;
+      background: var(--gold-dim); border: 1px solid rgba(184,146,42,.25);
+      border-left: 4px solid var(--gold); border-radius: 2px;
+    }
+    .revenue-callout h3 {
+      font-family: 'DM Mono', monospace; font-size: .32rem;
+      letter-spacing: .14em; text-transform: uppercase; color: var(--gold); margin-bottom: 8px;
+    }
+    .revenue-callout p { font-family: 'Source Serif 4', serif; font-size: .82rem; line-height: 1.6; color: var(--ink-2); margin-bottom: 8px; }
+    .revenue-tiers { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+    .rev-tier {
+      font-family: 'DM Mono', monospace; font-size: .3rem;
+      padding: 4px 10px; border-radius: 2px;
+      background: var(--cream); border: 1px solid rgba(184,146,42,.3); color: var(--ink);
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 900px) {
+      .corridor-layout { grid-template-columns: 1fr; }
+      .featured-panel { position: static; height: auto; order: -1; }
+      .stop-list-col { border-right: none; border-top: 1px solid var(--rule-heavy); }
+      .fp-links-grid { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 640px) {
+      :root { --h: 52px; }
+      #map-hero { height: 45vh; }
+      .page-bar { flex-direction: column; align-items: flex-start; padding: 10px 16px 0; gap: 8px; }
+      .page-title { font-size: 1.15rem; }
+      .corridor-tabs { width: 100%; padding-bottom: 10px; }
+      .ctab { flex: 1; text-align: center; padding: 5px 0; font-size: .36rem; }
+      .data-cell { min-width: 110px; padding: 8px 14px; }
+      .data-value { font-size: 1.05rem; }
+      .featured-panel { padding: 20px 16px; }
+      .featured-panel::before { margin: -20px -16px 16px; }
+      .fp-header { flex-direction: column; align-items: flex-start; gap: 6px; }
+      .fp-headline { font-size: 1.3rem; }
+      .fp-links-grid { grid-template-columns: 1fr; }
+      .fp-secondary { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <a class="logo-wrap" href="/">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 440 100" height="48" preserveAspectRatio="xMinYMid meet" aria-label="Requation">
+      <defs><filter id="gb"><feGaussianBlur stdDeviation="1.2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+      <text x="6" y="42" font-family="EB Garamond,Georgia,serif" font-size="46" font-weight="700" font-style="italic" fill="#B22234">r</text>
+      <line x1="31" y1="76" x2="50" y2="41" stroke="#7A7A7A" stroke-width="5" stroke-linecap="round"/>
+      <text x="56" y="88" font-family="Raleway,Arial,sans-serif" font-size="92" font-weight="600" fill="#4F6FB8">Σ</text>
+      <text x="122" y="88" font-family="Raleway,Arial,sans-serif" font-size="24" font-weight="600" font-style="italic" fill="#D4A843" opacity="0.8" filter="url(#gb)" letter-spacing="2">quation</text>
+    </svg>
+  </a>
+  <a class="nav-back" href="/">← Home</a>
+</header>
+
+<!-- CesiumJS dark map hero -->
+<div id="map-hero">
+  <div id="cesiumContainer"></div>
+  <div id="map-label">
+    <div>
+      <div class="map-title">The I-10 Corridor</div>
+      <span class="map-subtitle">Los Angeles · Blythe · Quartzsite · Phoenix</span>
+    </div>
+    <div class="map-stat">
+      <strong>345,000</strong>
+      daily vehicles through DTLA
+    </div>
+  </div>
+</div>
+
+<!-- Traffic data strip -->
+<div class="data-strip">
+  <div class="data-cell">
+    <span class="data-value gold">345K</span>
+    <span class="data-label">Daily vehicles · DTLA (Caltrans 2023)</span>
+  </div>
+  <div class="data-cell">
+    <span class="data-value">386 mi</span>
+    <span class="data-label">Santa Monica → Phoenix</span>
+  </div>
+  <div class="data-cell">
+    <span class="data-value gold">1.5M</span>
+    <span class="data-label">Winter visitors · Quartzsite gem shows</span>
+  </div>
+  <div class="data-cell">
+    <span class="data-value">4 lanes</span>
+    <span class="data-label">Desert sections · Blythe to Quartzsite</span>
+  </div>
+  <div class="data-cell">
+    <span class="data-value gold">$1B</span>
+    <span class="data-label">Phoenix widening · 2026–2028</span>
+  </div>
+</div>
+
+<!-- Editorial section -->
+<div class="page-bar">
+  <h1 class="page-title">Corridor <span>Stops</span></h1>
+  <div class="corridor-tabs">
+    <button class="ctab active" onclick="showTab('stops',this)">All Stops</button>
+    <button class="ctab" onclick="showTab('vacant',this)">Vacant Spaces</button>
+  </div>
+</div>
+
+<div class="corridor-layout">
+
+  <!-- Left: stop list -->
+  <div class="stop-list-col">
+    <div id="tab-stops" class="stop-grid">
+
+      <div class="stop-card active" onclick="selectStop('quartzsite',this,-114.213,33.665,18000)">
+        <div class="sc-city">Quartzsite</div>
+        <div class="sc-anchor">Terribles + The Crystal Mile</div>
+        <div class="sc-meta">
+          <div class="sc-badges">
+            <span class="sc-badge sc-az">AZ</span>
+            <span class="sc-badge sc-featured">Featured</span>
+          </div>
+          <span class="sc-mile">Mile 265</span>
+        </div>
+        <a class="sc-claim" href="mailto:hello@requation.com?subject=I-10 Pin — Quartzsite" onclick="event.stopPropagation()">Claim pin · $1/day →</a>
+      </div>
+
+      <div class="stop-card" onclick="selectStop('dtla',this,-118.259,34.046,8000)">
+        <div class="sc-city">Los Angeles / DTLA</div>
+        <div class="sc-anchor">South Park · Requation Anchor</div>
+        <div class="sc-meta">
+          <div class="sc-badges"><span class="sc-badge sc-ca">CA</span></div>
+          <span class="sc-mile">Mile 0</span>
+        </div>
+        <a class="sc-claim" href="/dtla" onclick="event.stopPropagation()">View on map →</a>
+      </div>
+
+      <div class="stop-card" onclick="selectStop('palmsprings',this,-116.966,33.954,12000)">
+        <div class="sc-city">Palm Springs / Coachella</div>
+        <div class="sc-anchor">Tesla Supercharger · Resort corridor</div>
+        <div class="sc-meta">
+          <div class="sc-badges"><span class="sc-badge sc-ca">CA</span></div>
+          <span class="sc-mile">Mile 110</span>
+        </div>
+        <a class="sc-claim" href="mailto:hello@requation.com?subject=I-10 Pin — Palm Springs" onclick="event.stopPropagation()">Claim pin · $1/day →</a>
+      </div>
+
+      <div class="stop-card" onclick="selectStop('dhs',this,-116.501,33.961,10000)">
+        <div class="sc-city">Desert Hot Springs</div>
+        <div class="sc-anchor">Mineral springs · Cannabis cultivation</div>
+        <div class="sc-meta">
+          <div class="sc-badges"><span class="sc-badge sc-ca">CA</span></div>
+          <span class="sc-mile">Mile 115</span>
+        </div>
+        <a class="sc-claim" href="mailto:hello@requation.com?subject=I-10 Pin — Desert Hot Springs" onclick="event.stopPropagation()">Claim pin · $1/day →</a>
+      </div>
+
+      <div class="stop-card" onclick="selectStop('blythe',this,-114.596,33.619,14000)">
+        <div class="sc-city">Blythe</div>
+        <div class="sc-anchor">Starbucks anchor · Last CA stop</div>
+        <div class="sc-meta">
+          <div class="sc-badges"><span class="sc-badge sc-ca">CA</span></div>
+          <span class="sc-mile">Mile 224</span>
+        </div>
+        <a class="sc-claim" href="mailto:hello@requation.com?subject=I-10 Pin — Blythe" onclick="event.stopPropagation()">Claim pin · $1/day →</a>
+      </div>
+
+      <div class="stop-card" onclick="selectStop('casagrande',this,-111.802,32.879,14000)">
+        <div class="sc-city">Casa Grande</div>
+        <div class="sc-anchor">AZ checkpoint · I-10 midpoint</div>
+        <div class="sc-meta">
+          <div class="sc-badges"><span class="sc-badge sc-az">AZ</span></div>
+          <span class="sc-mile">Mile 340</span>
+        </div>
+        <a class="sc-claim" href="mailto:hello@requation.com?subject=I-10 Pin — Casa Grande" onclick="event.stopPropagation()">Claim pin · $1/day →</a>
+      </div>
+
+      <div class="stop-card" onclick="selectStop('laveen',this,-112.118,33.343,8000)">
+        <div class="sc-city">Laveen / Phoenix</div>
+        <div class="sc-anchor">Urban Farmhouse · Requation Anchor</div>
+        <div class="sc-meta">
+          <div class="sc-badges"><span class="sc-badge sc-az">AZ</span></div>
+          <span class="sc-mile">Mile 386</span>
+        </div>
+        <a class="sc-claim" href="/laveen" onclick="event.stopPropagation()">View on map →</a>
+      </div>
+
+    </div><!-- /tab-stops -->
+
+    <!-- Vacant Spaces tab -->
+    <div id="tab-vacant" style="display:none">
+      <div class="stop-grid">
+        <div class="vacant-card">
+          <span class="vc-type">Vacant Lot</span>
+          <div class="vc-name">Quartzsite Business 10</div>
+          <div class="vc-desc">0.4 acres · paved · high I-10 visibility · shade structure · restrooms on site</div>
+          <div class="vc-price">Sat–Sun available · <strong>Contact for rate</strong></div>
+        </div>
+        <div class="vacant-card">
+          <span class="vc-type">Church Hall</span>
+          <div class="vc-name">Desert Community Church — Blythe</div>
+          <div class="vc-desc">2,400 sq ft · A/C · 80-car parking · farmers market, dance, community events · no alcohol</div>
+          <div class="vc-price">Weekends + evenings · <strong>Contact for rate</strong></div>
+        </div>
+        <div class="vacant-card">
+          <span class="vc-type">Rooftop</span>
+          <div class="vc-name">DTLA South Park Garage</div>
+          <div class="vc-desc">12,000 sq ft open air · downtown views · pop-up market, outdoor cinema, food truck rally</div>
+          <div class="vc-price">Weekend mornings · <strong>Contact for rate</strong></div>
+        </div>
+      </div>
+      <div class="list-space-cta">
+        <p>Own a vacant lot, church hall, or unused commercial space on the I-10 corridor? List it for pop-up farmers markets, dance events, or community gatherings.</p>
+        <a class="list-btn" href="mailto:hello@requation.com?subject=List My Space — I-10 Corridor">List Your Space · $10/day →</a>
+      </div>
+    </div>
+
+  </div><!-- /stop-list-col -->
+
+  <!-- Right: featured editorial -->
+  <div class="featured-panel">
+    <div class="fp-header">
+      <div class="fp-header-left">
+        <span class="fp-label">Featured Stop · The Anchor Effect</span>
+        <h2 class="fp-headline">The Crystal Mile<br>&amp; Terribles</h2>
+      </div>
+      <p class="fp-location">Quartzsite, Arizona<br>85346 · Mile 265</p>
+    </div>
+
+    <div class="fp-tags">
+      <span class="fp-tag fp-tag-gold">Gem Capital of the World</span>
+      <span class="fp-tag fp-tag-ink">Pop. 2,431</span>
+      <span class="fp-tag fp-tag-blue">1.5M Winter Visitors</span>
+    </div>
+
+    <p class="fp-body">
+      A Terribles gas station opened on the dead main street of Quartzsite. Clean restrooms. Good selection. Family setting. Within three years: a Starbucks appeared. Then a Tesla Supercharger. The town, which had been invisible to commerce, became a corridor anchor.
+    </p>
+    <p class="fp-body">
+      This is the anchor effect. One quality business in a dead corridor validates the foot traffic that was always there. The second business takes the risk. The cluster forms. The invisible becomes investable.
+    </p>
+    <p class="fp-body">
+      Along Business Route 10 and Highway 95, crystal and gem vendors have operated for forty years. No website. No Google Maps presence. No digital address. They are the most visited roadside market in Arizona — and they don't exist on any map. One Requation pin changes that.
+    </p>
+
+    <hr class="fp-divider">
+
+    <span class="fp-links-heading">Corridor Research</span>
+    <div class="fp-links-grid">
+      <a class="fp-link-card" href="https://en.wikipedia.org/wiki/Quartzsite,_Arizona" target="_blank" rel="noopener">
+        <span class="fp-link-source">Wikipedia</span>
+        <span class="fp-link-title">Quartzsite, AZ — gem show capital of the world</span>
+        <span class="fp-link-arrow">→</span>
+      </a>
+      <a class="fp-link-card" href="https://i10wildhorsepasscorridor.com/" target="_blank" rel="noopener">
+        <span class="fp-link-source">ADOT</span>
+        <span class="fp-link-title">I-10 Wild Horse Pass — $1B Phoenix expansion, 2026–28</span>
+        <span class="fp-link-arrow">→</span>
+      </a>
+      <a class="fp-link-card" href="https://dot.ca.gov/programs/traffic-operations/census" target="_blank" rel="noopener">
+        <span class="fp-link-source">Caltrans</span>
+        <span class="fp-link-title">345,000 vehicles/day through DTLA — official traffic census</span>
+        <span class="fp-link-arrow">→</span>
+      </a>
+    </div>
+
+    <div class="fp-secondary">
+      <div>
+        <span class="fp-mini-label">Next Stop West · Mile 224</span>
+        <p class="fp-mini-name">Blythe, California</p>
+        <p class="fp-mini-loc">Riverside County · Pop. 16,600 · Last CA stop</p>
+        <p class="fp-mini-body">In 2017, McDonald's was the only decent option. Then a Starbucks arrived. Then Chipotle. Then a Grocery Outlet replaced the dead cinema. One anchor business changed what investors believed was possible here.</p>
+      </div>
+      <div>
+        <span class="fp-mini-label">The Eastern Anchor · Mile 386</span>
+        <p class="fp-mini-name">Laveen / Phoenix</p>
+        <p class="fp-mini-loc">Maricopa County · Arizona terminus</p>
+        <p class="fp-mini-body">Where the Urban Farmhouse sits at the edge of South Mountain. The I-10 ends here, or begins here, depending on which way you're going.</p>
+      </div>
+    </div>
+
+    <div class="revenue-callout">
+      <h3>Own a business on the I-10?</h3>
+      <p>Every stop on this corridor — gas station, farm stand, dispensary, motel, crystal vendor — can claim a Requation pin. Findable to 345,000 daily vehicles through DTLA and every EV driver watching their charge on the Phoenix run.</p>
+      <div class="revenue-tiers">
+        <span class="rev-tier">Pin · $1/day</span>
+        <span class="rev-tier">Profile + Video · $5/day</span>
+        <span class="rev-tier">Claude Cube · $25/day</span>
+        <span class="rev-tier">Vacant space · $10/day</span>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /corridor-layout -->
+
+<script>
+/* ── I-10 route waypoints (lng, lat) ── */
+const I10 = [
+  [-118.259, 34.046],  /* DTLA */
+  [-117.831, 33.830],  /* Ontario */
+  [-117.296, 34.064],  /* San Bernardino */
+  [-116.966, 33.954],  /* Palm Springs */
+  [-116.467, 33.919],  /* Coachella */
+  [-115.541, 33.734],  /* Chiriaco Summit */
+  [-114.596, 33.619],  /* Blythe CA */
+  [-114.213, 33.665],  /* Quartzsite AZ */
+  [-113.559, 33.536],  /* Brenda AZ */
+  [-112.842, 32.951],  /* Gila Bend */
+  [-112.118, 33.343],  /* Laveen/Phoenix */
+];
+
+/* Build cumulative segment lengths for uniform-speed interpolation */
+const _segs = [];
+let _total = 0;
+for (let i = 0; i < I10.length - 1; i++) {
+  const dx = I10[i+1][0] - I10[i][0], dy = I10[i+1][1] - I10[i][1];
+  const len = Math.sqrt(dx*dx + dy*dy);
+  _total += len;
+  _segs.push({ i, len, cum: _total });
+}
+
+function posAtT(t) {
+  const target = ((t % 1) + 1) % 1 * _total;
+  for (const s of _segs) {
+    if (s.cum >= target) {
+      const prev = s.cum - s.len;
+      const localT = (target - prev) / s.len;
+      const p1 = I10[s.i], p2 = I10[s.i + 1];
+      return Cesium.Cartesian3.fromDegrees(
+        p1[0] + (p2[0] - p1[0]) * localT,
+        p1[1] + (p2[1] - p1[1]) * localT,
+        80
+      );
+    }
+  }
+  return Cesium.Cartesian3.fromDegrees(I10[I10.length-1][0], I10[I10.length-1][1], 80);
+}
+
+/* Create glow dot canvas image */
+function glowDot(hex, size) {
+  const c = document.createElement('canvas');
+  c.width = c.height = size * 4;
+  const ctx = c.getContext('2d');
+  const g = ctx.createRadialGradient(size*2, size*2, 0, size*2, size*2, size*2);
+  g.addColorStop(0,   hex);
+  g.addColorStop(0.4, hex + 'AA');
+  g.addColorStop(1,   hex + '00');
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, size*4, size*4);
+  return c.toDataURL();
+}
+
+/* ── CesiumJS init — Mode A: dark corridor, no globe, no flash ── */
+const viewer = new Cesium.Viewer('cesiumContainer', {
+  globe: false,          // OEM: no globe = no Cesium Ion needed, no blank-globe flash
+  timeline: false, animation: false, baseLayerPicker: false,
+  geocoder: false, homeButton: false, sceneModePicker: false,
+  navigationHelpButton: false, infoBox: false, selectionIndicator: false,
+  fullscreenButton: false, vrButton: false,
+  skyBox: false, skyAtmosphere: false,
+});
+
+viewer.scene.backgroundColor = new Cesium.Color(0.024, 0.024, 0.055, 1.0);
+
+/* I-10 polyline — gold glow */
+viewer.entities.add({
+  polyline: {
+    positions: Cesium.Cartesian3.fromDegreesArray(I10.flat()),
+    width: 3,
+    material: new Cesium.PolylineGlowMaterialProperty({
+      glowPower: 0.35,
+      color: Cesium.Color.fromCssColorString('#C9A84C').withAlpha(0.9),
+    }),
+    clampToGround: false,
+  }
+});
+
+/* City label entities */
+const STOPS = [
+  { name: 'Los Angeles', lng: -118.259, lat: 34.046 },
+  { name: 'Palm Springs', lng: -116.966, lat: 33.954 },
+  { name: 'Blythe', lng: -114.596, lat: 33.619 },
+  { name: 'Quartzsite', lng: -114.213, lat: 33.665 },
+  { name: 'Phoenix', lng: -112.118, lat: 33.343 },
+];
+STOPS.forEach(s => {
+  viewer.entities.add({
+    position: Cesium.Cartesian3.fromDegrees(s.lng, s.lat, 2000),
+    point: { pixelSize: 5, color: Cesium.Color.fromCssColorString('#C9A84C'), outlineColor: Cesium.Color.fromCssColorString('#FAF8F4'), outlineWidth: 1.5 },
+    label: {
+      text: s.name,
+      font: '11px "DM Mono", monospace',
+      fillColor: Cesium.Color.fromCssColorString('#C9A84C').withAlpha(0.85),
+      outlineColor: Cesium.Color.BLACK,
+      outlineWidth: 2,
+      style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+      verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
+      pixelOffset: new Cesium.Cartesian2(0, -10),
+      disableDepthTestDistance: Number.POSITIVE_INFINITY,
+      show: true,
+    }
+  });
+});
+
+/* Traffic particles — headlights (white) going DTLA→PHX, taillights (red) going PHX→DTLA */
+const HEAD_IMG = glowDot('#F5F0E0', 8);
+const TAIL_IMG = glowDot('#FF6B6B', 7);
+
+const particles = [];
+const N_HEAD = 60, N_TAIL = 45;
+
+for (let i = 0; i < N_HEAD; i++) {
+  const t0 = i / N_HEAD;
+  const speed = 0.00012 + Math.random() * 0.00008;
+  const ent = viewer.entities.add({
+    position: posAtT(t0),
+    billboard: {
+      image: HEAD_IMG,
+      width: 14, height: 14,
+      disableDepthTestDistance: Number.POSITIVE_INFINITY,
+      scaleByDistance: new Cesium.NearFarScalar(50000, 1.2, 3000000, 0.3),
+    }
+  });
+  particles.push({ t: t0, speed, ent, dir: 1 });
+}
+for (let i = 0; i < N_TAIL; i++) {
+  const t0 = i / N_TAIL;
+  const speed = 0.00010 + Math.random() * 0.00008;
+  const ent = viewer.entities.add({
+    position: posAtT(1 - t0),
+    billboard: {
+      image: TAIL_IMG,
+      width: 12, height: 12,
+      disableDepthTestDistance: Number.POSITIVE_INFINITY,
+      scaleByDistance: new Cesium.NearFarScalar(50000, 1.0, 3000000, 0.25),
+    }
+  });
+  particles.push({ t: t0, speed, ent, dir: -1 });
+}
+
+/* Animate */
+viewer.scene.preRender.addEventListener(() => {
+  particles.forEach(p => {
+    p.t = (p.t + p.speed * p.dir + 1) % 1;
+    const pos = posAtT(p.t);
+    if (pos) p.ent.position = pos;
+  });
+});
+
+/* Initial camera — bird's eye over corridor */
+viewer.camera.flyTo({
+  destination: Cesium.Cartesian3.fromDegrees(-115.2, 33.7, 750000),
+  orientation: {
+    heading: Cesium.Math.toRadians(90),
+    pitch:   Cesium.Math.toRadians(-72),
+    roll:    0
+  },
+  duration: 0
+});
+
+window._viewer = viewer;
+
+/* ── Tab toggle ── */
+function showTab(tab, btn) {
+  document.querySelectorAll('.ctab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('tab-stops').style.display  = tab === 'stops'  ? '' : 'none';
+  document.getElementById('tab-vacant').style.display = tab === 'vacant' ? '' : 'none';
+}
+
+/* ── Stop card click — fly to location ── */
+function selectStop(id, card, lng, lat, alt) {
+  document.querySelectorAll('.stop-card').forEach(c => c.classList.remove('active'));
+  card.classList.add('active');
+  if (window._viewer) {
+    const D = Cesium.Math.toRadians(190), P = Cesium.Math.toRadians(-45), H = alt;
+    const hz = H / Math.tan(Math.abs(P));
+    const br = (D + Math.PI) % (2 * Math.PI);
+    const cl = lat + (hz * Math.cos(br)) / 111111;
+    const cn = lng + (hz * Math.sin(br)) / (111111 * Math.cos(lat * Math.PI / 180));
+    window._viewer.camera.flyTo({
+      destination: Cesium.Cartesian3.fromDegrees(cn, cl, H),
+      orientation: { heading: D, pitch: P, roll: 0 },
+      duration: 1.8
+    });
+  }
+  /* Scroll map into view */
+  document.getElementById('map-hero').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+</script>
+
+</body>
+</html>
