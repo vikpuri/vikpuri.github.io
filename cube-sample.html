@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Claude Cube — Bottega Louie · DTLA · Sample</title>
+  <meta name="description" content="A Claude Cube. One business, one block, in 3D. The product when a Yelp red dot is paid up at $25/day on Requation." />
+  <!-- Analytics + Search Console (injected by build.js from env GA_ID + GSC_TOKEN) -->
+  <meta name="google-site-verification" content="__GSC_TOKEN__" />
+  <script async src="https://www.googletagmanager.com/gtag/js?id=__GA_ID__"></script>
+  <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','__GA_ID__');</script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,600;1,400;1,600&family=Source+Serif+4:wght@300;400;600&family=DM+Mono:wght@400;500&family=Raleway:wght@400;600&display=swap" rel="stylesheet">
+  <script src="https://cesium.com/downloads/cesiumjs/releases/1.116/Build/Cesium/Cesium.js"></script>
+  <link href="https://cesium.com/downloads/cesiumjs/releases/1.116/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
+  <style>
+    :root {
+      --gold:#B8922A; --gold-light:#C9A84C; --gold-dim:rgba(184,146,42,.1); --gold-border:rgba(184,146,42,.3);
+      --cream:#FAF8F4; --cream-2:#F4F1EB; --cream-3:#EDE9E0;
+      --ink:#1C1C1C; --ink-2:#2E2E2E; --text-muted:#6B6460;
+      --rule:rgba(0,0,0,.08); --rule-heavy:rgba(0,0,0,.14);
+      --red:#B22234; --green:#2D6A2D;
+      --h:60px;
+    }
+    *,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
+    html,body { background:#06060f; height:100%; }
+    body { font-family:'Source Serif 4',Georgia,serif; color:var(--ink); }
+
+    /* Header */
+    header {
+      position:sticky; top:0; z-index:200;
+      background:rgba(6,6,15,.92); backdrop-filter:blur(8px);
+      border-bottom:1px solid rgba(184,146,42,.15);
+      display:flex; align-items:center; justify-content:space-between;
+      padding:0 20px; height:var(--h);
+    }
+    .nav-back {
+      font-size:.42rem; letter-spacing:.1em; text-transform:uppercase;
+      color:rgba(184,146,42,.7); text-decoration:none;
+      border:1px solid rgba(184,146,42,.25); padding:5px 12px; border-radius:2px;
+    }
+    .nav-back:hover { border-color:var(--gold); color:var(--gold); }
+
+    /* Cube — 3D map area */
+    #cube {
+      position:relative; height:calc(100vh - var(--h));
+      min-height:520px; background:#06060f;
+    }
+    #cesiumContainer { width:100%; height:100%; }
+    .cesium-viewer-bottom { display:none !important; }
+    .cesium-viewer-toolbar { display:none !important; }
+    .cesium-widget-credits { display:none !important; }
+
+    /* Floating overlay — top-left identification */
+    .cube-id {
+      position:absolute; top:18px; left:18px; z-index:50;
+      background:rgba(6,6,15,.7); backdrop-filter:blur(8px);
+      border:1px solid rgba(184,146,42,.25); border-left:3px solid var(--gold);
+      padding:14px 18px; border-radius:2px;
+      max-width:340px;
+    }
+    .cube-id-eyebrow {
+      font-family:'DM Mono',monospace; font-size:.32rem;
+      letter-spacing:.18em; text-transform:uppercase;
+      color:var(--gold); margin-bottom:6px;
+    }
+    .cube-id-name {
+      font-family:'EB Garamond',serif; font-style:italic;
+      font-size:1.4rem; color:#fff; line-height:1.15; margin-bottom:6px;
+    }
+    .cube-id-addr {
+      font-family:'DM Mono',monospace; font-size:.36rem;
+      letter-spacing:.06em; color:rgba(201,168,76,.75); line-height:1.5;
+    }
+
+    /* Floating overlay — top-right tier badge */
+    .cube-tier {
+      position:absolute; top:18px; right:18px; z-index:50;
+      background:rgba(6,6,15,.7); backdrop-filter:blur(8px);
+      border:1px solid rgba(184,146,42,.4);
+      padding:10px 14px; border-radius:2px;
+      text-align:right;
+    }
+    .cube-tier-label {
+      font-family:'DM Mono',monospace; font-size:.3rem;
+      letter-spacing:.18em; text-transform:uppercase;
+      color:rgba(201,168,76,.75); margin-bottom:4px;
+    }
+    .cube-tier-price {
+      font-family:'EB Garamond',serif; font-style:italic;
+      font-size:1.35rem; color:var(--gold-light); line-height:1;
+    }
+    .cube-tier-price small {
+      font-size:.62rem; color:rgba(255,255,255,.6); margin-left:2px;
+    }
+
+    /* Loading state */
+    .cube-loading {
+      position:absolute; inset:0; z-index:30;
+      display:flex; align-items:center; justify-content:center;
+      background:#06060f;
+      transition:opacity .4s ease;
+    }
+    .cube-loading.hidden { opacity:0; pointer-events:none; }
+    .cube-loading-text {
+      font-family:'DM Mono',monospace; font-size:.42rem;
+      letter-spacing:.2em; text-transform:uppercase;
+      color:rgba(201,168,76,.7);
+    }
+    .cube-loading-text::after {
+      content:'…'; animation:dots 1.4s infinite;
+    }
+    @keyframes dots {
+      0%   { content:''; }
+      33%  { content:'.'; }
+      66%  { content:'..'; }
+      100% { content:'…'; }
+    }
+
+    /* Editorial section below map */
+    .below {
+      background:var(--cream); padding:48px 32px 60px;
+    }
+    .below-grid {
+      max-width:1200px; margin:0 auto;
+      display:grid; grid-template-columns:1.4fr 1fr; gap:40px;
+      align-items:start;
+    }
+    @media (max-width:900px) { .below-grid { grid-template-columns:1fr; gap:28px; } }
+
+    /* Left column — story */
+    .story-eyebrow {
+      font-family:'DM Mono',monospace; font-size:.36rem;
+      letter-spacing:.18em; text-transform:uppercase;
+      color:var(--gold); margin-bottom:14px;
+    }
+    .story-headline {
+      font-family:'EB Garamond',serif; font-style:italic;
+      font-size:2rem; line-height:1.18; color:var(--ink); margin-bottom:18px;
+    }
+    .story-headline span { color:var(--gold-light); }
+    .story-body {
+      font-family:'Source Serif 4',serif; font-size:1.02rem;
+      line-height:1.65; color:var(--ink-2); margin-bottom:14px;
+    }
+    .story-body strong { color:var(--ink); }
+
+    /* Video embed */
+    .video-wrap {
+      position:relative; aspect-ratio:16/9;
+      margin:20px 0; border:1px solid var(--rule-heavy);
+      background:#1C1C1C;
+    }
+    .video-wrap iframe { width:100%; height:100%; border:none; display:block; }
+
+    /* Right column — actions */
+    .action-card {
+      background:var(--cream-2); border:1px solid var(--rule-heavy);
+      border-radius:3px; padding:24px;
+      position:sticky; top:calc(var(--h) + 18px);
+    }
+    .action-eyebrow {
+      font-family:'DM Mono',monospace; font-size:.32rem;
+      letter-spacing:.16em; text-transform:uppercase;
+      color:var(--text-muted); margin-bottom:8px;
+    }
+    .action-headline {
+      font-family:'EB Garamond',serif; font-style:italic;
+      font-size:1.3rem; color:var(--ink); margin-bottom:14px;
+      line-height:1.2;
+    }
+    .qr-block {
+      display:flex; gap:14px; align-items:center;
+      padding:14px; background:var(--cream); border:1px solid var(--rule);
+      border-left:3px solid var(--gold); border-radius:2px; margin-bottom:14px;
+    }
+    .qr-square {
+      width:84px; height:84px; flex-shrink:0;
+      background:
+        repeating-linear-gradient(45deg, var(--ink) 0 2.5px, transparent 2.5px 5px),
+        repeating-linear-gradient(-45deg, var(--ink) 0 2.5px, transparent 2.5px 5px),
+        var(--cream);
+      background-blend-mode:multiply;
+      border:1px solid var(--ink); border-radius:2px;
+    }
+    .qr-text {
+      font-family:'EB Garamond',serif; font-style:italic;
+      font-size:.86rem; color:var(--ink-2); line-height:1.35;
+    }
+    .qr-text strong { color:var(--gold); font-style:normal; }
+    .qr-expiry {
+      font-family:'DM Mono',monospace; font-size:.34rem;
+      letter-spacing:.08em; color:var(--text-muted); margin-top:5px;
+    }
+    .btn-row { display:grid; gap:8px; margin-top:6px; }
+    .btn {
+      display:block; text-align:center;
+      font-family:'DM Mono',monospace; font-size:.4rem;
+      letter-spacing:.1em; text-transform:uppercase;
+      padding:11px 14px; border-radius:2px;
+      text-decoration:none; transition:background .15s;
+    }
+    .btn-primary { background:var(--ink); color:var(--cream); }
+    .btn-primary:hover { background:var(--gold); }
+    .btn-meet { background:var(--green); color:#fff; }
+    .btn-meet:hover { background:#1F4D1F; }
+    .btn-yelp { background:var(--red); color:#fff; }
+    .btn-yelp:hover { background:#8B1A28; }
+    .btn-secondary {
+      background:transparent; color:var(--ink-2);
+      border:1px solid var(--rule-heavy);
+    }
+    .btn-secondary:hover { border-color:var(--gold); color:var(--gold); }
+
+    /* Stats */
+    .stats {
+      display:grid; grid-template-columns:1fr 1fr; gap:1px;
+      background:var(--rule); margin-top:18px;
+      border:1px solid var(--rule); border-radius:2px;
+      overflow:hidden;
+    }
+    .stat { background:var(--cream); padding:12px 14px; }
+    .stat-value {
+      font-family:'EB Garamond',serif; font-size:1.15rem;
+      font-weight:600; color:var(--ink); display:block; line-height:1;
+    }
+    .stat-value.gold { color:var(--gold); }
+    .stat-label {
+      font-family:'DM Mono',monospace; font-size:.3rem;
+      letter-spacing:.1em; text-transform:uppercase;
+      color:var(--text-muted); margin-top:4px; display:block;
+    }
+
+    /* Bottom claim banner */
+    .claim-banner {
+      max-width:1200px; margin:36px auto 0; padding:28px 32px;
+      background:var(--ink); color:var(--cream);
+      border-radius:3px; display:flex; align-items:center;
+      justify-content:space-between; gap:24px;
+    }
+    @media (max-width:700px) { .claim-banner { flex-direction:column; align-items:stretch; text-align:center; } }
+    .claim-text {
+      font-family:'EB Garamond',serif; font-style:italic;
+      font-size:1.15rem; line-height:1.4;
+    }
+    .claim-text strong { color:var(--gold-light); font-style:normal; }
+    .claim-cta {
+      font-family:'DM Mono',monospace; font-size:.42rem;
+      letter-spacing:.12em; text-transform:uppercase;
+      padding:13px 24px; border-radius:2px;
+      background:var(--gold); color:#fff; text-decoration:none;
+      flex-shrink:0;
+    }
+    .claim-cta:hover { background:var(--gold-light); color:var(--ink); }
+
+    .demo-mark {
+      position:fixed; bottom:10px; right:14px;
+      font-family:'DM Mono',monospace; font-size:.3rem;
+      letter-spacing:.16em; text-transform:uppercase;
+      color:rgba(184,146,42,.55); pointer-events:none; z-index:300;
+    }
+
+    /* Camera HUD — tuning aid (remove for production) */
+    #camHud {
+      position:fixed; bottom:20px; left:20px; z-index:300;
+      font-family:'DM Mono',monospace; font-size:11px;
+      color:#C9A84C; background:rgba(6,6,15,.72);
+      padding:10px 14px; border:1px solid rgba(201,168,76,.3);
+      border-left:3px solid #C9A84C;
+      border-radius:3px; line-height:1.7;
+      backdrop-filter:blur(8px); pointer-events:none;
+      min-width:170px;
+    }
+    #camHud .hud-stage {
+      font-weight:700; letter-spacing:.16em;
+      color:#FAF8F4; margin-bottom:4px;
+      padding-bottom:4px; border-bottom:1px solid rgba(201,168,76,.2);
+    }
+    #camHud .hud-row { display:flex; justify-content:space-between; gap:14px; }
+    #camHud .hud-row span:first-child { color:rgba(201,168,76,.65); letter-spacing:.08em; }
+    #camHud .hud-row span:last-child { color:#FAF8F4; font-weight:700; }
+    @media (max-width:640px) { #camHud { font-size:9px; padding:7px 10px; min-width:130px; } }
+
+    @media (max-width:640px) {
+      :root { --h:52px; }
+      .cube-id { max-width:240px; padding:10px 12px; top:12px; left:12px; }
+      .cube-id-name { font-size:1.05rem; }
+      .cube-tier { padding:8px 12px; top:12px; right:12px; }
+      .cube-tier-price { font-size:1.05rem; }
+      .below { padding:32px 18px; }
+      .story-headline { font-size:1.4rem; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <a class="logo-wrap" href="/" style="text-decoration:none;">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 440 100" height="48" preserveAspectRatio="xMinYMid meet" aria-label="Requation">
+      <defs><filter id="gb"><feGaussianBlur stdDeviation="1.2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+      <text x="6" y="42" font-family="EB Garamond,Georgia,serif" font-size="46" font-weight="700" font-style="italic" fill="#B22234">r</text>
+      <line x1="31" y1="76" x2="50" y2="41" stroke="#7A7A7A" stroke-width="5" stroke-linecap="round"/>
+      <text x="56" y="88" font-family="Raleway,Arial,sans-serif" font-size="92" font-weight="600" fill="#4F6FB8">Σ</text>
+      <text x="122" y="88" font-family="Raleway,Arial,sans-serif" font-size="24" font-weight="600" font-style="italic" fill="#D4A843" opacity="0.8" filter="url(#gb)" letter-spacing="2">quation</text>
+    </svg>
+  </a>
+  <a class="nav-back" href="/">← Home</a>
+</header>
+
+<!-- 3D cube -->
+<div id="cube">
+  <div id="cesiumContainer"></div>
+
+  <div class="cube-id">
+    <div class="cube-id-eyebrow">Claude Cube · DTLA · Sample</div>
+    <div class="cube-id-name">Bottega Louie</div>
+    <div class="cube-id-addr">700 S Grand Ave<br>Los Angeles, CA 90017</div>
+  </div>
+
+  <div class="cube-tier">
+    <div class="cube-tier-label">Tier 3</div>
+    <div class="cube-tier-price">$25<small>/day</small></div>
+  </div>
+
+  <div class="cube-loading" id="loader">
+    <div class="cube-loading-text">Loading 3D tiles</div>
+  </div>
+</div>
+
+<!-- Camera HUD — exposes current state so we can dial the angle -->
+<div id="camHud">
+  <div class="hud-stage" id="hudStage">PRE-FLIGHT</div>
+  <div class="hud-row"><span>HDG</span><span><span id="hudHeading">—</span>°</span></div>
+  <div class="hud-row"><span>PITCH</span><span><span id="hudPitch">—</span>°</span></div>
+  <div class="hud-row"><span>ALT</span><span><span id="hudAlt">—</span> m</span></div>
+  <div class="hud-row"><span>DIST</span><span><span id="hudDist">—</span> m</span></div>
+</div>
+
+<!-- Editorial section -->
+<section class="below">
+  <div class="below-grid">
+    <!-- Left: story -->
+    <div>
+      <div class="story-eyebrow">Why This Building, This Block, This Cube</div>
+      <h1 class="story-headline">A red dot on Yelp is a name on a list. <span>This is the building, on its block, in 3D.</span></h1>
+
+      <p class="story-body">
+        Bottega Louie sits on the corner of 7th and Grand, half a block from the Pershing Square station, two blocks from Bunker Hill. The macarons leave the kitchen at 6 AM. The marble counters hold up dinner until midnight. None of that is on Yelp. None of that is on Google's flat list of nearby restaurants.
+      </p>
+
+      <p class="story-body">
+        <strong>A Claude Cube is what happens when a listing gets a body.</strong> Real GPS. Real building. Real video. The visitor lands here from a friend's text and sees the whole block — the door they'll walk through, the patio they'll sit on, the line they'll wait in. They book the table without leaving the page.
+      </p>
+
+      <div class="video-wrap">
+        <iframe
+          src="https://www.youtube.com/embed/HrxX9TBj2zY?rel=0&modestbranding=1"
+          title="Bottega Louie walkthrough — sample placeholder"
+          allowfullscreen
+          loading="lazy"></iframe>
+      </div>
+
+      <p class="story-body">
+        <strong>One URL.</strong> Paste it into a press release, an Instagram bio, a postcard QR. The cube doesn't live inside an app — it lives at <em>requation.com/cube/bottega-louie</em>, on the open web, owned by the business, indexed by Google.
+      </p>
+
+      <p class="story-body">
+        Every Yelp red dot in DTLA could have one. Most don't. The ones who do, get found.
+      </p>
+    </div>
+
+    <!-- Right: action card -->
+    <aside>
+      <div class="action-card">
+        <div class="action-eyebrow">Today at Bottega Louie</div>
+        <div class="action-headline">Half-price macarons after 7 PM</div>
+
+        <div class="qr-block">
+          <div class="qr-square" aria-hidden="true"></div>
+          <div>
+            <div class="qr-text"><strong>$9</strong> for a box of six.<br>Walk in with this code.</div>
+            <div class="qr-expiry">Expires 9:00 PM today</div>
+          </div>
+        </div>
+
+        <div class="btn-row">
+          <a class="btn btn-meet" href="#">Book a Tasting Consult →</a>
+          <a class="btn btn-yelp" href="https://www.yelp.com/biz/bottega-louie-los-angeles" target="_blank" rel="noopener">Yelp →</a>
+          <a class="btn btn-secondary" href="https://www.google.com/maps/search/?api=1&query=Bottega+Louie+700+S+Grand+Ave" target="_blank" rel="noopener">Google Maps →</a>
+        </div>
+
+        <div class="stats">
+          <div class="stat">
+            <span class="stat-value gold">★ 4.2</span>
+            <span class="stat-label">Yelp · 12K reviews</span>
+          </div>
+          <div class="stat">
+            <span class="stat-value">700</span>
+            <span class="stat-label">S Grand Ave · DTLA</span>
+          </div>
+          <div class="stat">
+            <span class="stat-value gold">7AM–11PM</span>
+            <span class="stat-label">Open today</span>
+          </div>
+          <div class="stat">
+            <span class="stat-value">90017</span>
+            <span class="stat-label">DTLA territory</span>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <!-- Bottom banner -->
+  <div class="claim-banner">
+    <div class="claim-text">
+      Your business in 3D, on its actual block. <strong>$25 a day.</strong> Cancel by not paying tomorrow.
+    </div>
+    <a class="claim-cta" href="mailto:hello@requation.com?subject=Claim+a+Cube">Claim a Cube →</a>
+  </div>
+</section>
+
+<div class="demo-mark">Demo · Bottega Louie used as illustrative sample</div>
+
+<script>
+  /* GCP API key (publishable, client-safe — same pattern as other Requation pages) */
+  Cesium.GoogleMaps.defaultApiKey = 'AIzaSyD7UMA5ILPXv9QK2_gvxPVth30MavRd2WQ';
+
+  /* Bottega Louie GPS — 700 S Grand Ave, DTLA */
+  const TARGET = { lng: -118.2569, lat: 34.0461, name: 'Bottega Louie' };
+
+  /* A few neighboring DTLA businesses — gray ghost pins per ad model */
+  const NEIGHBORS = [
+    { lng: -118.2606, lat: 34.0468, name: 'Philz Coffee' },
+    { lng: -118.2577, lat: 34.0463, name: 'Whole Foods Market' },
+    { lng: -118.2530, lat: 34.0510, name: 'The Broad' },
+    { lng: -118.2542, lat: 34.0455, name: 'Pershing Square' },
+  ];
+
+  /* Glow dot helper — high-res canvas */
+  function dot(hex, size, withWhiteCenter) {
+    const S = size * 5;
+    const c = document.createElement('canvas');
+    c.width = c.height = S;
+    const ctx = c.getContext('2d');
+    const cx = S / 2, r = S / 2;
+    const g = ctx.createRadialGradient(cx, cx, 0, cx, cx, r);
+    if (withWhiteCenter) {
+      g.addColorStop(0,    '#FFFFFF');
+      g.addColorStop(0.18, hex + 'EE');
+      g.addColorStop(0.45, hex + '88');
+      g.addColorStop(0.85, hex + '22');
+      g.addColorStop(1,    hex + '00');
+    } else {
+      g.addColorStop(0,    hex + 'CC');
+      g.addColorStop(0.4,  hex + '66');
+      g.addColorStop(1,    hex + '00');
+    }
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, S, S);
+    return c.toDataURL();
+  }
+
+  /* Init viewer — photorealistic 3D, no globe, no Cesium UI */
+  const viewer = new Cesium.Viewer('cesiumContainer', {
+    globe: false,
+    timeline: false, animation: false, baseLayerPicker: false,
+    geocoder: false, homeButton: false, sceneModePicker: false,
+    navigationHelpButton: false, infoBox: true, selectionIndicator: false,
+    fullscreenButton: false, vrButton: false,
+    skyBox: false, skyAtmosphere: false,
+    scene3DOnly: true,
+  });
+  viewer.scene.backgroundColor = new Cesium.Color(0.024, 0.024, 0.055, 1.0);
+
+  /* Active pin builder — gold glow + white center */
+  const ACTIVE_IMG = dot('#C9A84C', 22, true);
+  const GHOST_IMG  = dot('#8E8E8E', 14, false);
+
+  /* InfoBox HTML — TIER DASHBOARD pattern.
+     Every pin click opens a 4-tier selector (Free/$1/$5/$25) in identical sized cards
+     plus a 3-button visitor strip (Yelp / Maps / Waymo) below. No vacant space. */
+  function tierDashboardCard({ name, addr, rating, currentTier, yelpUrl, lat, lng }) {
+    const waymoUrl = `https://waymo.com/app/?dropoff_lat=${lat}&dropoff_lng=${lng}&dropoff_label=${encodeURIComponent(name)}`;
+    const tiers = [
+      { tier:0, label:'Free',    bg:'#8B0F18', fg:'#fff',    desc:'Gray dot · invisible',    subj:'' },
+      { tier:1, label:'$1/day',  bg:'#157A40', fg:'#fff',    desc:"Gold pin + today's QR",   subj:'Tier+1+%C2%B7+%241%2Fday' },
+      { tier:2, label:'$5/day',  bg:'#C49500', fg:'#1A1500', desc:'Video + Meet booking',    subj:'Tier+2+%C2%B7+%245%2Fday' },
+      { tier:3, label:'$25/day', bg:'#C7144A', fg:'#fff',    desc:'3D cube · cinematic',     subj:'Tier+3+%C2%B7+%2425%2Fday' },
+    ];
+    const cards = tiers.map(t => {
+      const isCurrent = t.tier === currentTier;
+      const ring = isCurrent ? 'box-shadow:inset 0 0 0 2px rgba(255,255,255,.95);' : '';
+      const tag  = isCurrent ? 'CURRENT' : `Tier ${t.tier}`;
+      const href = t.tier === 0
+        ? '#'
+        : `mailto:hello@requation.com?subject=Claim+${t.subj}+%C2%B7+${encodeURIComponent(name)}`;
+      return `<a href="${href}" style="background:${t.bg};color:${t.fg};padding:8px 10px;text-decoration:none;border-radius:2px;display:block;${ring}">
+        <div style="font-family:'DM Mono',monospace;font-size:8.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;opacity:.85;">${tag}</div>
+        <div style="font-family:'EB Garamond',serif;font-style:italic;font-size:14px;font-weight:600;line-height:1.05;margin-top:2px;">${t.label}</div>
+        <div style="font-family:'DM Mono',monospace;font-size:8.5px;opacity:.85;margin-top:2px;line-height:1.25;">${t.desc}</div>
+      </a>`;
+    }).join('');
+
+    const visitorBtns = `<div style="margin-top:8px;padding-top:7px;border-top:1px solid rgba(0,0,0,.08);display:flex;gap:4px;">
+      ${yelpUrl ? `<a href="${yelpUrl}" target="_blank" rel="noopener" style="flex:1;text-align:center;background:#B22234;color:#fff;padding:5px;font-size:9px;font-family:'DM Mono',monospace;text-decoration:none;font-weight:700;letter-spacing:.08em;text-transform:uppercase;border-radius:2px;">Yelp →</a>` : ''}
+      <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(name + ' ' + (addr || ''))}" target="_blank" rel="noopener" style="flex:1;text-align:center;background:#1A1A1A;color:#fff;padding:5px;font-size:9px;font-family:'DM Mono',monospace;text-decoration:none;font-weight:700;letter-spacing:.08em;text-transform:uppercase;border-radius:2px;">Maps →</a>
+      <a href="${waymoUrl}" target="_blank" rel="noopener" style="flex:1;text-align:center;background:#0F2D52;color:#fff;padding:5px;font-size:9px;font-family:'DM Mono',monospace;text-decoration:none;font-weight:700;letter-spacing:.08em;text-transform:uppercase;border-radius:2px;">Waymo →</a>
+    </div>`;
+
+    const eyebrowColor = currentTier === 0 ? '#888' : '#B8922A';
+    const eyebrowText  = currentTier === 0 ? 'Pick your tier · unclaimed' : 'Pick your tier · upgrade or downgrade';
+
+    return `<div style="font-family:'Source Serif 4',serif;color:#1C1C1C;padding:6px;">
+      <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:${eyebrowColor};margin-bottom:3px;">${eyebrowText}</div>
+      <div style="font-family:'EB Garamond',serif;font-style:italic;font-size:17px;color:#1C1C1C;line-height:1.15;margin-bottom:1px;">${name}</div>
+      <div style="font-family:'DM Mono',monospace;font-size:9px;color:#666;margin-bottom:8px;">${addr || ''}${rating ? ' · ★ ' + rating : ''}</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;">${cards}</div>
+      ${visitorBtns}
+    </div>`;
+  }
+
+  /* HUD updater — runs every render frame */
+  const hudStage   = document.getElementById('hudStage');
+  const hudHeading = document.getElementById('hudHeading');
+  const hudPitch   = document.getElementById('hudPitch');
+  const hudAlt     = document.getElementById('hudAlt');
+  const hudDist    = document.getElementById('hudDist');
+  function setStage(label) { hudStage.textContent = label; }
+
+  /* Add pins after tileset loads */
+  async function init() {
+    try {
+      const tileset = await Cesium.createGooglePhotorealistic3DTileset();
+      /* Preload tiles ahead of camera flight so transitions don't hitch */
+      tileset.preloadFlightDestinations = true;
+      tileset.preloadWhenHidden = true;
+      viewer.scene.primitives.add(tileset);
+
+      /* HUD updates each frame — shows live camera state */
+      const targetCart = Cesium.Cartesian3.fromDegrees(TARGET.lng, TARGET.lat, 0);
+      viewer.scene.postRender.addEventListener(() => {
+        const cam = viewer.camera;
+        hudHeading.textContent = Cesium.Math.toDegrees(cam.heading).toFixed(0);
+        hudPitch.textContent   = Cesium.Math.toDegrees(cam.pitch).toFixed(0);
+        const carto = Cesium.Cartographic.fromCartesian(cam.position);
+        hudAlt.textContent  = (carto.height).toFixed(0);
+        hudDist.textContent = Cesium.Cartesian3.distance(cam.position, targetCart).toFixed(0);
+      });
+
+      /* Active pin — Bottega Louie · clamp to ground so it sits at street level on the building */
+      viewer.entities.add({
+        position: Cesium.Cartesian3.fromDegrees(TARGET.lng, TARGET.lat),
+        billboard: {
+          image: ACTIVE_IMG, width: 56, height: 56,
+          verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
+          heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
+          disableDepthTestDistance: Number.POSITIVE_INFINITY,
+        },
+        label: {
+          text: TARGET.name,
+          font: '600 14px "DM Mono", monospace',
+          fillColor: Cesium.Color.fromCssColorString('#FAF8F4'),
+          outlineColor: Cesium.Color.fromCssColorString('#06060f'),
+          outlineWidth: 3,
+          style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+          verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
+          pixelOffset: new Cesium.Cartesian2(0, -56),
+          disableDepthTestDistance: Number.POSITIVE_INFINITY,
+        },
+        name: TARGET.name,
+        description: tierDashboardCard({
+          name: TARGET.name,
+          addr: '700 S Grand Ave · DTLA · 90017',
+          rating: '4.2',
+          currentTier: 3,
+          yelpUrl: 'https://www.yelp.com/biz/bottega-louie-los-angeles',
+          lat: TARGET.lat, lng: TARGET.lng,
+        }),
+      });
+
+      /* Ghost pins — neighbors · clamped to ground */
+      NEIGHBORS.forEach(n => {
+        viewer.entities.add({
+          position: Cesium.Cartesian3.fromDegrees(n.lng, n.lat),
+          billboard: {
+            image: GHOST_IMG, width: 32, height: 32,
+            color: Cesium.Color.WHITE.withAlpha(0.55),
+            verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
+            heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
+            disableDepthTestDistance: Number.POSITIVE_INFINITY,
+          },
+          label: {
+            text: n.name,
+            font: '11px "DM Mono", monospace',
+            fillColor: Cesium.Color.fromCssColorString('#FAF8F4').withAlpha(0.55),
+            outlineColor: Cesium.Color.fromCssColorString('#06060f'),
+            outlineWidth: 2,
+            style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+            verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
+            pixelOffset: new Cesium.Cartesian2(0, -32),
+            disableDepthTestDistance: Number.POSITIVE_INFINITY,
+          },
+          name: n.name,
+          description: tierDashboardCard({
+            name: n.name,
+            addr: 'DTLA · 90017',
+            currentTier: 0,
+            yelpUrl: null,
+            lat: n.lat, lng: n.lng,
+          }),
+        });
+      });
+
+      /* ──────────────────────────────────────────────────────────────────
+         CINEMATIC FLY-IN — LAX → SWLA → DTLA → Bottega Louie
+         Smoothed: linear easing on cruise, gentle ease-out on landing
+         Final stage locks onto Bottega Louie via lookAtTransform + rotateRight
+         ────────────────────────────────────────────────────────────────── */
+
+      /* Stage 0 — opening shot: high above Pacific west of LAX, looking ENE */
+      setStage('STAGE 0 · OPENING');
+      viewer.camera.setView({
+        destination: Cesium.Cartesian3.fromDegrees(-118.55, 33.83, 9000),
+        orientation: {
+          heading: Cesium.Math.toRadians(60),
+          pitch:   Cesium.Math.toRadians(-22),
+          roll:    0
+        }
+      });
+
+      /* Hide loader once first frame is up */
+      requestAnimationFrame(() => {
+        setTimeout(() => document.getElementById('loader').classList.add('hidden'), 800);
+      });
+
+      /* flyTo helper — promisified, with per-stage easing */
+      const flyTo = ({ lng, lat, alt, heading, pitch, duration, easing }) => new Promise(resolve => {
+        viewer.camera.flyTo({
+          destination: Cesium.Cartesian3.fromDegrees(lng, lat, alt),
+          orientation: {
+            heading: Cesium.Math.toRadians(heading),
+            pitch:   Cesium.Math.toRadians(pitch),
+            roll:    0
+          },
+          duration: duration,
+          easingFunction: easing || Cesium.EasingFunction.LINEAR,
+          complete: resolve,
+        });
+      });
+
+      /* User-cancellable cinematic — first interaction kills the chain + releases lock */
+      let cinematicCancelled = false;
+      let orbitListener = null;
+      const releaseAndCancel = () => {
+        cinematicCancelled = true;
+        if (orbitListener) { orbitListener(); orbitListener = null; }
+        viewer.camera.lookAtTransform(Cesium.Matrix4.IDENTITY);  // free the camera
+      };
+      ['mousedown','wheel','touchstart'].forEach(ev =>
+        viewer.canvas.addEventListener(ev, releaseAndCancel, { once: true, passive: true })
+      );
+
+      /* Run the chain */
+      (async () => {
+        await new Promise(r => setTimeout(r, 1500));   // hold the wide shot
+        if (cinematicCancelled) return;
+
+        /* Stage 1 — descend over LAX · ease out of stationary opening (8s) */
+        setStage('STAGE 1 · LAX DESCENT');
+        await flyTo({
+          lng: -118.408, lat: 33.945, alt: 2800,
+          heading: 60, pitch: -20, duration: 8.0,
+          easing: Cesium.EasingFunction.QUADRATIC_OUT
+        });
+        if (cinematicCancelled) return;
+
+        /* Stage 2 — cruise NE over SWLA · LINEAR for constant velocity (10s) */
+        setStage('STAGE 2 · SWLA CRUISE');
+        await flyTo({
+          lng: -118.32, lat: 34.000, alt: 1700,
+          heading: 50, pitch: -22, duration: 10.0,
+          easing: Cesium.EasingFunction.LINEAR
+        });
+        if (cinematicCancelled) return;
+
+        /* Stage 3 — approach DTLA from SW · LINEAR continues constant velocity (8s) */
+        setStage('STAGE 3 · DTLA APPROACH');
+        await flyTo({
+          lng: -118.272, lat: 34.040, alt: 700,
+          heading: 40, pitch: -28, duration: 8.0,
+          easing: Cesium.EasingFunction.LINEAR
+        });
+        if (cinematicCancelled) return;
+
+        /* Stage 4 — settle on Bottega Louie · QUADRATIC_IN to decelerate (7s) */
+        setStage('STAGE 4 · BOTTEGA LOUIE');
+        await flyTo({
+          lng: TARGET.lng - 0.0009,
+          lat: TARGET.lat - 0.0007,
+          alt: 180,
+          heading: 35, pitch: -32, duration: 7.0,
+          easing: Cesium.EasingFunction.QUADRATIC_IN
+        });
+        if (cinematicCancelled) return;
+
+        /* LOCK + ORBIT — vendor pattern: lookAtTransform centers the camera on Bottega Louie,
+           then rotateRight orbits around it. The camera STAYS pointed at the building. */
+        setStage('ORBIT · LOCKED');
+        const target = Cesium.Cartesian3.fromDegrees(TARGET.lng, TARGET.lat, 0);
+        const transform = Cesium.Transforms.eastNorthUpToFixedFrame(target);
+        viewer.camera.lookAtTransform(transform, new Cesium.HeadingPitchRange(
+          Cesium.Math.toRadians(35),    // heading from north (E-of-N)
+          Cesium.Math.toRadians(-32),   // pitch downward
+          240                            // distance from target in meters
+        ));
+
+        let lastOrbit = performance.now();
+        orbitListener = viewer.scene.postRender.addEventListener(() => {
+          if (cinematicCancelled) return;
+          const now = performance.now();
+          const dt  = (now - lastOrbit) / 1000;
+          lastOrbit = now;
+          viewer.camera.rotateRight(0.06 * dt);   // ~21°/sec — full orbit ~17 seconds
+        });
+      })();
+
+    } catch (err) {
+      console.error('Cesium init failed:', err);
+      document.getElementById('loader').innerHTML =
+        '<div class="cube-loading-text" style="color:#B22234;">3D tiles failed to load — check console</div>';
+    }
+  }
+
+  init();
+</script>
+
+</body>
+</html>

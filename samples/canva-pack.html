@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Requation Canva Pack — 4 Templates · Jewel Palette</title>
+  <meta name="description" content="Four Canva-ready layouts for Requation tier customers. QR Flash poster · Instagram square · countertop card · 1920x1080 digital signage. Jewel palette." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,600;1,400;1,600&family=Source+Serif+4:wght@400;600&family=DM+Mono:wght@400;500;700&family=Raleway:wght@600;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --gold:#F2B900; --gold-deep:#C49500; --gold-soft:#FFE26B;
+      --hot:#FF1F5C; --hot-deep:#C7144A;
+      --green:#1FA85A; --green-deep:#157A40; --green-soft:#4FE38C;
+      --red:#E61E2B; --red-deep:#B0141C;
+      --ink:#0E0E0E; --ink-2:#222;
+      --cream:#FAF8F4; --cream-2:#F4F1EB;
+      --rule:rgba(0,0,0,.1);
+    }
+    *,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
+    html,body { background:#1C1C1C; color:#E5E5E5; font-family:'Source Serif 4',Georgia,serif; }
+    body { padding:30px 20px 80px; min-height:100vh; }
+
+    /* Page header */
+    .page-head { max-width:1200px; margin:0 auto 40px; text-align:center; }
+    .page-head h1 {
+      font-family:'EB Garamond',serif; font-style:italic;
+      font-size:2.2rem; line-height:1.15;
+      color:var(--gold); margin-bottom:8px;
+    }
+    .page-head p {
+      font-family:'DM Mono',monospace; font-size:.46rem;
+      letter-spacing:.16em; text-transform:uppercase;
+      color:#888;
+    }
+    .page-head a {
+      display:inline-block; margin-top:14px; padding:8px 16px;
+      font-family:'DM Mono',monospace; font-size:.4rem; letter-spacing:.12em;
+      text-transform:uppercase; color:var(--gold);
+      border:1px solid rgba(242,185,0,.3); border-radius:2px;
+      text-decoration:none;
+    }
+    .page-head a:hover { background:var(--gold); color:#1C1C1C; }
+
+    /* Asset grid */
+    .grid {
+      max-width:1200px; margin:0 auto;
+      display:flex; flex-direction:column; gap:60px;
+    }
+    .asset {
+      display:flex; gap:32px; align-items:flex-start;
+    }
+    @media (max-width:900px) { .asset { flex-direction:column; gap:18px; } }
+
+    .asset-meta {
+      flex:0 0 240px; padding:14px 0;
+    }
+    @media (max-width:900px) { .asset-meta { flex:1 1 auto; } }
+    .asset-num {
+      font-family:'DM Mono',monospace; font-size:.42rem;
+      letter-spacing:.2em; text-transform:uppercase;
+      color:var(--gold); margin-bottom:8px;
+    }
+    .asset-title {
+      font-family:'EB Garamond',serif; font-style:italic;
+      font-size:1.4rem; color:#fff; margin-bottom:6px;
+    }
+    .asset-spec {
+      font-family:'DM Mono',monospace; font-size:.38rem;
+      letter-spacing:.06em; color:#aaa; margin-bottom:12px; line-height:1.6;
+    }
+    .asset-spec strong { color:#fff; }
+    .asset-use {
+      font-family:'Source Serif 4',serif; font-size:.85rem;
+      line-height:1.55; color:#bbb; font-style:italic;
+    }
+
+    .asset-canvas {
+      flex:1; min-width:0;
+      background:repeating-linear-gradient(45deg, #232323 0 8px, #1A1A1A 8px 16px);
+      padding:24px; border:1px solid rgba(255,255,255,.06); border-radius:3px;
+      display:flex; align-items:center; justify-content:center;
+      overflow:hidden;
+    }
+
+    /* ───────────────────── 1) QR FLASH POSTER · 8.5x11 ──────────────────── */
+    .poster {
+      width:340px; aspect-ratio:8.5/11;
+      background:linear-gradient(180deg, #FAF8F4 0%, #F4F1EB 100%);
+      border-radius:4px; box-shadow:0 14px 40px rgba(0,0,0,.5);
+      display:flex; flex-direction:column;
+      padding:28px 26px 24px; position:relative;
+      font-family:'Source Serif 4',serif; color:#1C1C1C;
+    }
+    .poster .top-rule {
+      height:3px; background:linear-gradient(90deg, var(--gold), var(--hot)); margin-bottom:18px;
+    }
+    .poster .pre {
+      font-family:'DM Mono',monospace; font-size:.34rem;
+      letter-spacing:.18em; text-transform:uppercase;
+      color:var(--gold-deep); margin-bottom:8px;
+    }
+    .poster h2 {
+      font-family:'EB Garamond',serif; font-style:italic; font-weight:600;
+      font-size:1.7rem; line-height:1.1;
+      color:#0E0E0E; margin-bottom:6px;
+    }
+    .poster h2 span { color:var(--hot); font-style:normal; }
+    .poster .biz-line {
+      font-family:'DM Mono',monospace; font-size:.4rem; letter-spacing:.06em;
+      color:#666; margin-bottom:14px;
+    }
+    .poster .ribbon {
+      background:var(--green); color:#fff; padding:14px 18px;
+      border-radius:3px; margin-bottom:20px; position:relative;
+    }
+    .poster .ribbon-tag {
+      font-family:'DM Mono',monospace; font-weight:700; font-size:.34rem;
+      letter-spacing:.18em; text-transform:uppercase; opacity:.85;
+    }
+    .poster .ribbon-offer {
+      font-family:'EB Garamond',serif; font-style:italic; font-weight:600;
+      font-size:1.4rem; line-height:1.05; margin-top:4px;
+    }
+    .poster .ribbon-offer strong { color:var(--gold-soft); font-style:normal; }
+    .poster .qr {
+      align-self:center; width:170px; height:170px;
+      background:
+        repeating-linear-gradient(45deg, #0E0E0E 0 4px, transparent 4px 8px),
+        repeating-linear-gradient(-45deg, #0E0E0E 0 4px, transparent 4px 8px),
+        #FAF8F4;
+      background-blend-mode:multiply;
+      border:2px solid #0E0E0E; border-radius:3px;
+      margin-bottom:18px;
+    }
+    .poster .footer {
+      margin-top:auto;
+      display:flex; justify-content:space-between; align-items:flex-end;
+      padding-top:14px; border-top:1px solid var(--rule);
+    }
+    .poster .footer-left {
+      font-family:'DM Mono',monospace; font-size:.32rem;
+      letter-spacing:.12em; text-transform:uppercase; color:#666;
+      line-height:1.5;
+    }
+    .poster .footer-left strong { color:#0E0E0E; }
+    .poster .footer-right {
+      font-family:'EB Garamond',serif; font-style:italic;
+      font-size:.7rem; color:var(--gold-deep);
+    }
+
+    /* ───────────────────── 2) SOCIAL SQUARE · 1080x1080 ──────────────────── */
+    .social {
+      width:380px; height:380px; position:relative;
+      background:linear-gradient(135deg, #C7144A 0%, #FF5C8A 50%, #C7144A 100%);
+      background-size:200% 200%;
+      border-radius:6px; box-shadow:0 14px 40px rgba(0,0,0,.5);
+      padding:32px; display:flex; flex-direction:column; justify-content:space-between;
+      color:#fff; overflow:hidden;
+    }
+    .social::before {
+      content:''; position:absolute; inset:0;
+      background:
+        radial-gradient(circle at 25% 25%, rgba(255,255,255,.18), transparent 50%),
+        radial-gradient(circle at 75% 80%, rgba(255,255,255,.06), transparent 50%);
+    }
+    .social-top { position:relative; }
+    .social .pre {
+      font-family:'DM Mono',monospace; font-weight:700; font-size:.36rem;
+      letter-spacing:.2em; text-transform:uppercase;
+      color:rgba(255,255,255,.85); margin-bottom:10px;
+    }
+    .social h2 {
+      font-family:'EB Garamond',serif; font-style:italic; font-weight:600;
+      font-size:2.2rem; line-height:.95;
+      color:#fff;
+    }
+    .social-mid { position:relative; flex:1; display:flex; align-items:center; }
+    .social-mid p {
+      font-family:'EB Garamond',serif; font-style:italic;
+      font-size:1rem; line-height:1.3;
+      color:rgba(255,255,255,.95);
+    }
+    .social-mid p strong { color:#FFE26B; font-style:normal; font-weight:600; }
+    .social-bot { position:relative; }
+    .social-bot {
+      display:flex; justify-content:space-between; align-items:flex-end;
+    }
+    .social-biz {
+      font-family:'EB Garamond',serif; font-style:italic;
+      font-size:1.05rem; color:#fff; line-height:1.15;
+    }
+    .social-biz small {
+      display:block; font-family:'DM Mono',monospace; font-size:.32rem;
+      letter-spacing:.08em; color:rgba(255,255,255,.7);
+      font-style:normal; margin-top:4px;
+    }
+    .social-tag {
+      font-family:'DM Mono',monospace; font-weight:700; font-size:.34rem;
+      letter-spacing:.14em; text-transform:uppercase;
+      color:#1C1C1C; background:#FFE26B;
+      padding:6px 12px; border-radius:2px;
+    }
+
+    /* ───────────────────── 3) COUNTERTOP CARD · 5x7 horizontal ──────────────────── */
+    .countertop {
+      width:430px; aspect-ratio:5/3.5;
+      background:linear-gradient(135deg, #157A40 0%, #1FA85A 50%, #157A40 100%);
+      border-radius:6px; box-shadow:0 14px 40px rgba(0,0,0,.5);
+      padding:24px; display:grid; grid-template-columns:1fr 130px; gap:20px;
+      color:#fff; position:relative; overflow:hidden;
+    }
+    .countertop::before {
+      content:''; position:absolute; inset:0;
+      background:radial-gradient(ellipse at 30% 30%, rgba(120,255,170,.25), transparent 55%);
+    }
+    .countertop-l { display:flex; flex-direction:column; justify-content:space-between; position:relative; }
+    .countertop-pre {
+      font-family:'DM Mono',monospace; font-weight:700; font-size:.32rem;
+      letter-spacing:.18em; text-transform:uppercase;
+      color:rgba(255,255,255,.85);
+    }
+    .countertop h2 {
+      font-family:'EB Garamond',serif; font-style:italic; font-weight:600;
+      font-size:1.4rem; line-height:1.1;
+      color:#fff; margin:6px 0 10px;
+    }
+    .countertop p {
+      font-family:'Source Serif 4',serif; font-size:.78rem;
+      line-height:1.4; color:rgba(255,255,255,.85);
+    }
+    .countertop-biz {
+      margin-top:auto; padding-top:12px;
+      border-top:1px solid rgba(255,255,255,.25);
+      font-family:'EB Garamond',serif; font-style:italic;
+      font-size:.95rem; color:#fff;
+    }
+    .countertop-biz small {
+      display:block; font-family:'DM Mono',monospace; font-style:normal;
+      font-size:.3rem; letter-spacing:.08em;
+      color:rgba(255,255,255,.7); margin-top:3px;
+    }
+    .countertop-r {
+      background:#fff; border-radius:3px;
+      padding:14px; display:flex; flex-direction:column; align-items:center; justify-content:center;
+      position:relative;
+    }
+    .countertop-r .qr {
+      width:90px; height:90px;
+      background:
+        repeating-linear-gradient(45deg, #0E0E0E 0 3px, transparent 3px 6px),
+        repeating-linear-gradient(-45deg, #0E0E0E 0 3px, transparent 3px 6px),
+        #FAF8F4;
+      background-blend-mode:multiply;
+      border:1.5px solid #0E0E0E; margin-bottom:8px;
+    }
+    .countertop-r .scan {
+      font-family:'DM Mono',monospace; font-weight:700; font-size:.3rem;
+      letter-spacing:.16em; text-transform:uppercase; color:#0E0E0E;
+    }
+
+    /* ───────────────────── 4) DIGITAL SIGNAGE · 1920x1080 ──────────────────── */
+    .signage {
+      width:640px; aspect-ratio:16/9; position:relative;
+      background:linear-gradient(135deg, #6B0A11 0%, #C2161F 35%, #FF3F4F 50%, #C2161F 65%, #6B0A11 100%);
+      background-size:220% 220%;
+      border-radius:6px; box-shadow:0 14px 40px rgba(0,0,0,.5);
+      overflow:hidden;
+    }
+    .signage::before {
+      content:''; position:absolute; inset:0;
+      background:
+        radial-gradient(ellipse at 28% 30%, rgba(255,90,100,.55), transparent 55%),
+        radial-gradient(ellipse at 72% 78%, rgba(180,15,28,.55), transparent 55%);
+    }
+    .signage-frame {
+      position:relative; height:100%;
+      display:grid; grid-template-rows:auto 1fr auto;
+      padding:32px 36px 24px; color:#fff;
+    }
+    .signage-top {
+      display:flex; justify-content:space-between; align-items:flex-start;
+    }
+    .signage-pre {
+      font-family:'DM Mono',monospace; font-weight:700; font-size:.42rem;
+      letter-spacing:.22em; text-transform:uppercase;
+      color:rgba(255,255,255,.85);
+    }
+    .signage-clock {
+      font-family:'DM Mono',monospace; font-size:.42rem; letter-spacing:.1em;
+      color:rgba(255,255,255,.8);
+    }
+    .signage-mid {
+      display:flex; align-items:center; justify-content:space-between;
+      gap:30px;
+    }
+    .signage-mid-l { flex:1; }
+    .signage-mid h2 {
+      font-family:'EB Garamond',serif; font-style:italic; font-weight:600;
+      font-size:2.6rem; line-height:.98;
+      color:#fff; margin-bottom:14px;
+    }
+    .signage-mid h2 span { color:#FFE26B; font-style:normal; }
+    .signage-mid p {
+      font-family:'Source Serif 4',serif; font-size:1rem;
+      line-height:1.4; color:rgba(255,255,255,.95); max-width:380px;
+    }
+    .signage-mid p strong { color:#fff; }
+    .signage-qr {
+      flex:0 0 130px; background:#fff; padding:12px;
+      border-radius:4px; text-align:center;
+    }
+    .signage-qr .q {
+      width:106px; height:106px; margin:0 auto;
+      background:
+        repeating-linear-gradient(45deg, #0E0E0E 0 3.5px, transparent 3.5px 7px),
+        repeating-linear-gradient(-45deg, #0E0E0E 0 3.5px, transparent 3.5px 7px),
+        #FAF8F4;
+      background-blend-mode:multiply;
+      border:1.5px solid #0E0E0E;
+    }
+    .signage-qr .lbl {
+      font-family:'DM Mono',monospace; font-weight:700; font-size:.3rem;
+      letter-spacing:.16em; text-transform:uppercase;
+      color:#0E0E0E; margin-top:6px;
+    }
+    .signage-bot {
+      display:flex; justify-content:space-between; align-items:flex-end;
+      padding-top:14px; border-top:1px solid rgba(255,255,255,.22);
+    }
+    .signage-biz {
+      font-family:'EB Garamond',serif; font-style:italic;
+      font-size:1.05rem; color:#fff;
+    }
+    .signage-biz small {
+      display:block; font-family:'DM Mono',monospace; font-style:normal;
+      font-size:.34rem; letter-spacing:.08em;
+      color:rgba(255,255,255,.7); margin-top:3px;
+    }
+    .signage-pwr {
+      font-family:'DM Mono',monospace; font-size:.32rem; letter-spacing:.14em;
+      text-transform:uppercase; color:rgba(255,255,255,.65);
+    }
+
+    /* Footer note */
+    .footnote {
+      max-width:1200px; margin:60px auto 0; padding:24px 28px;
+      background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.08);
+      border-left:3px solid var(--gold); border-radius:3px;
+      font-family:'Source Serif 4',serif; font-size:.85rem;
+      line-height:1.6; color:#bbb;
+    }
+    .footnote h3 {
+      font-family:'EB Garamond',serif; font-style:italic;
+      font-size:1.1rem; color:var(--gold); margin-bottom:10px;
+    }
+    .footnote ol { margin-left:20px; }
+    .footnote li { margin-bottom:6px; }
+    .footnote code {
+      background:rgba(255,255,255,.08); padding:1px 6px; border-radius:2px;
+      font-family:'DM Mono',monospace; font-size:.78rem;
+    }
+  </style>
+</head>
+<body>
+
+<div class="page-head">
+  <h1>Canva Pack — Jewel Palette</h1>
+  <p>Four templates · One brand · Print, social, retail, signage</p>
+  <a href="/samples/tab-card">← back to tab card</a>
+</div>
+
+<div class="grid">
+
+  <!-- 1) QR Flash Poster — 8.5x11 portrait -->
+  <div class="asset">
+    <div class="asset-meta">
+      <div class="asset-num">01 · QR FLASH POSTER</div>
+      <div class="asset-title">8.5 × 11 portrait</div>
+      <div class="asset-spec">
+        <strong>2550 × 3300 px</strong> @ 300 DPI<br>
+        Print at home or local FedEx<br>
+        <strong>$1/day Tier 1</strong> customers
+      </div>
+      <p class="asset-use">Tape on the door. Stick on the register. The QR scans straight to the customer's listing on requation.com — no app, no friction. Today's offer is the headline. The business name is the footer.</p>
+    </div>
+    <div class="asset-canvas">
+      <div class="poster">
+        <div class="top-rule"></div>
+        <div class="pre">Today only · scan to claim</div>
+        <h2>Half-price <span>macarons</span> after 7 PM</h2>
+        <div class="biz-line">Walk in · scan in-store · expires 9 PM</div>
+        <div class="ribbon">
+          <div class="ribbon-tag">Save big</div>
+          <div class="ribbon-offer"><strong>$9</strong> for a box of six (was $18)</div>
+        </div>
+        <div class="qr"></div>
+        <div class="footer">
+          <div class="footer-left">
+            <strong>Bottega Louie</strong><br>
+            700 S Grand Ave · DTLA
+          </div>
+          <div class="footer-right">requation.com</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2) Instagram Square — 1080x1080 -->
+  <div class="asset">
+    <div class="asset-meta">
+      <div class="asset-num">02 · INSTAGRAM SQUARE</div>
+      <div class="asset-title">1080 × 1080</div>
+      <div class="asset-spec">
+        <strong>Square</strong> · IG feed + Reels cover<br>
+        Rubellite gradient (Tier 3 palette)<br>
+        Headline-first, brand-second
+      </div>
+      <p class="asset-use">Drop on the business's IG. The hot-pink jewel gradient is the brand signal — every Requation customer's social post recognizable across feeds. Headline = today's hook. Footer = name + tier.</p>
+    </div>
+    <div class="asset-canvas">
+      <div class="social">
+        <div class="social-top">
+          <div class="pre">Featured today · /samples/tab-card</div>
+          <h2>Your dot just<br>turned gold.</h2>
+        </div>
+        <div class="social-mid">
+          <p>Half-price macarons after 7 PM. <strong>$9</strong> for a box of six. Scan the QR at the door.</p>
+        </div>
+        <div class="social-bot">
+          <div class="social-biz">
+            Bottega Louie
+            <small>700 S Grand Ave · DTLA</small>
+          </div>
+          <div class="social-tag">Tier 3 · Cube</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3) Countertop Card — 5x7 horizontal -->
+  <div class="asset">
+    <div class="asset-meta">
+      <div class="asset-num">03 · COUNTERTOP CARD</div>
+      <div class="asset-title">5 × 7 horizontal</div>
+      <div class="asset-spec">
+        <strong>1500 × 2100 px</strong> @ 300 DPI<br>
+        Sits next to register / on bar<br>
+        Emerald palette (Tier 1 GO)
+      </div>
+      <p class="asset-use">For the actual point-of-sale moment. Customer at the register reaches for their phone, scans the QR, the offer applies before they pay. The 5×7 fits in any acrylic standee from the dollar store.</p>
+    </div>
+    <div class="asset-canvas">
+      <div class="countertop">
+        <div class="countertop-l">
+          <div>
+            <div class="countertop-pre">Tier 1 · QR Flash · today only</div>
+            <h2>20% off pre-rolls<br>before 8 PM</h2>
+            <p>Scan, show the screen at checkout, save. One per visit. Today only — fresh offer tomorrow.</p>
+          </div>
+          <div class="countertop-biz">
+            Sample Dispensary
+            <small>5701 W Baseline Rd · Laveen, AZ</small>
+          </div>
+        </div>
+        <div class="countertop-r">
+          <div class="qr"></div>
+          <div class="scan">Scan</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4) Digital Signage — 1920x1080 -->
+  <div class="asset">
+    <div class="asset-meta">
+      <div class="asset-num">04 · DIGITAL SIGNAGE</div>
+      <div class="asset-title">1920 × 1080 landscape</div>
+      <div class="asset-spec">
+        <strong>16:9 full-screen</strong><br>
+        For OptiSigns / Yodeck / kiosk<br>
+        Ruby palette (Tier 0 → Tier 1 conversion)
+      </div>
+      <p class="asset-use">The Line 3 product. Loads as a URL on any HTML5 kiosk display. Auto-refreshes the offer + clock + QR. Replaces $2K-10K/month agency content for $1/day. The Walmart-vs-Ralph's pitch made visible.</p>
+    </div>
+    <div class="asset-canvas">
+      <div class="signage">
+        <div class="signage-frame">
+          <div class="signage-top">
+            <div class="signage-pre">In store · today's offer · expires 9 PM</div>
+            <div class="signage-clock">7:42 PM</div>
+          </div>
+          <div class="signage-mid">
+            <div class="signage-mid-l">
+              <h2>Half-price <span>macarons</span><br>after 7 PM</h2>
+              <p><strong>$9 for a box of six.</strong> Walk to the counter, scan the QR, save. Today only — kitchen rotates the offer at midnight.</p>
+            </div>
+            <div class="signage-qr">
+              <div class="q"></div>
+              <div class="lbl">Scan</div>
+            </div>
+          </div>
+          <div class="signage-bot">
+            <div class="signage-biz">
+              Bottega Louie
+              <small>700 S Grand Ave · Los Angeles, CA 90017</small>
+            </div>
+            <div class="signage-pwr">Powered by Requation · $1/day</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="footnote">
+  <h3>How to publish to Canva</h3>
+  <ol>
+    <li>Take a screenshot of each asset above (full quality, single asset per shot).</li>
+    <li>Open Canva → <strong>Create a design</strong> → choose the matching size:
+      <ul style="margin-left:20px; margin-top:4px;">
+        <li><code>8.5 × 11"</code> for the QR Flash Poster</li>
+        <li><code>1080 × 1080</code> for the Instagram Square</li>
+        <li><code>5 × 7"</code> for the Countertop Card</li>
+        <li><code>1920 × 1080</code> for Digital Signage</li>
+      </ul>
+    </li>
+    <li>Drop the screenshot in as a base layer; overlay your editable text + QR using Canva's tools.</li>
+    <li>Save as a Canva template; submit to Canva's template marketplace as <strong>"Designed for Requation."</strong></li>
+    <li>Each Canva template links back to <code>requation.com</code> via Canva's brand attribution. Their 100M+ users see our brand on every download.</li>
+  </ol>
+  <p style="margin-top:10px; font-style:italic; color:#888;">Per <code>project_templates_anywhere.md</code>: their distribution problem solves ours.</p>
+</div>
+
+</body>
+</html>

@@ -265,8 +265,15 @@ Every named object added to any Requation map must have a corresponding URL slug
 | `YELP_API_KEY` | Yelp Fusion |
 | `RESEND_API_KEY` | Contact form email delivery |
 | `SUPABASE_KEY` | Supabase POI data |
+| `STRIPE_SECRET_KEY` | Stripe charges + Customer + Payment Link API · server-side only |
+| `STRIPE_PUBLISHABLE_KEY` | Stripe.js client-side initialization (pk_live_... or pk_test_...) |
+| `STRIPE_WEBHOOK_SECRET` | Stripe webhook signature verification (`/api/stripe-webhook`) |
+| `GA_ID` | Google Analytics 4 Measurement ID (G-XXXXXXXXXX) — empty string disables analytics |
+| `GSC_TOKEN` | Google Search Console verification token — empty string disables verification meta |
 
 **Removed:** `PREDICTHQ_KEY`, `MAPBOX_TOKEN` — no longer used.
+
+**Stripe — confirmed account exists 2026-05-08.** Account billing connected to bank, ready for Payment Links + Charges. The DOD product (`project_dispensary_dod.md`) routes payments through Stripe Payment Links with `client_reference_id={wmid}` so the webhook resolves the dispensary on completion. Same pattern used for Requation Cube tier purchases. **Never put STRIPE_SECRET_KEY in client-side code or git** — server-side serverless functions only.
 
 ---
 

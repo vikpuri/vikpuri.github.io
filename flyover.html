@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Requation FlyOver — LAX → DTLA Glider Tour · 4 sample customers</title>
+  <meta name="description" content="A photorealistic glider tour from LAX to four DTLA businesses — boutique restaurant, two boutique hotels, one chain hotel. Same takeoff, three markets." />
+  <meta name="google-site-verification" content="__GSC_TOKEN__" />
+  <script async src="https://www.googletagmanager.com/gtag/js?id=__GA_ID__"></script>
+  <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','__GA_ID__');</script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,600;1,400;1,600&family=Source+Serif+4:wght@400;600&family=DM+Mono:wght@400;500;700&family=Raleway:wght@400;600&display=swap" rel="stylesheet">
+  <script src="https://cesium.com/downloads/cesiumjs/releases/1.116/Build/Cesium/Cesium.js"></script>
+  <link href="https://cesium.com/downloads/cesiumjs/releases/1.116/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
+  <style>
+    :root {
+      --gold:#C9A84C; --gold-deep:#8E6B00;
+      --hot:#FF1F5C; --green:#1FA85A; --red:#B22234;
+      --ink:#06060f; --cream:#FAF8F4;
+      --rule:rgba(201,168,76,.25);
+      --h:54px;
+    }
+    *,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
+    html,body { height:100%; background:var(--ink); color:var(--cream); font-family:'EB Garamond',serif; overflow:hidden; }
+
+    header {
+      position:fixed; top:0; left:0; right:0; z-index:200; height:var(--h);
+      background:rgba(6,6,15,.86); backdrop-filter:blur(8px);
+      border-bottom:1px solid var(--rule);
+      display:flex; align-items:center; justify-content:space-between;
+      padding:0 18px;
+    }
+    header .title {
+      font-style:italic; font-size:1.1rem; color:var(--gold);
+    }
+    header .title small {
+      font-family:'DM Mono',monospace; font-size:.4rem; letter-spacing:.16em;
+      text-transform:uppercase; color:rgba(201,168,76,.6); margin-left:8px;
+    }
+    .nav-back {
+      font-family:'DM Mono',monospace;
+      font-size:.42rem; letter-spacing:.1em; text-transform:uppercase;
+      color:rgba(201,168,76,.7); text-decoration:none;
+      border:1px solid var(--rule); padding:5px 12px; border-radius:2px;
+    }
+    .nav-back:hover { border-color:var(--gold); color:var(--gold); }
+
+    #cesiumContainer { position:absolute; inset:var(--h) 0 0 0; }
+    .cesium-viewer-bottom, .cesium-viewer-toolbar, .cesium-widget-credits { display:none !important; }
+
+    /* Loading state */
+    #loader {
+      position:absolute; inset:var(--h) 0 0 0; z-index:30;
+      display:flex; align-items:center; justify-content:center;
+      background:var(--ink); transition:opacity .4s ease;
+    }
+    #loader.hidden { opacity:0; pointer-events:none; }
+    #loader span {
+      font-family:'DM Mono',monospace; font-size:.5rem; letter-spacing:.2em;
+      text-transform:uppercase; color:rgba(201,168,76,.7);
+    }
+
+    /* Stop indicator — bottom-left, big, cinematic */
+    #stopCard {
+      position:absolute; bottom:24px; left:24px; z-index:80;
+      background:rgba(6,6,15,.78); backdrop-filter:blur(8px);
+      border:1px solid var(--rule); border-left:3px solid var(--gold);
+      padding:18px 22px 16px; border-radius:3px;
+      max-width:380px;
+      transform:translateY(0); opacity:0;
+      transition:opacity .5s ease, transform .5s ease;
+    }
+    #stopCard.show { opacity:1; }
+    #stopCard.takeoff { opacity:1; }
+    #stopCard .stage-no {
+      font-family:'DM Mono',monospace; font-weight:700;
+      font-size:.36rem; letter-spacing:.22em; text-transform:uppercase;
+      color:var(--gold); margin-bottom:6px;
+    }
+    #stopCard .biz {
+      font-family:'EB Garamond',serif; font-style:italic; font-weight:600;
+      font-size:1.5rem; line-height:1.1; color:#fff;
+      margin-bottom:6px;
+    }
+    #stopCard .market {
+      font-family:'Source Serif 4',serif; font-size:.92rem; font-style:italic;
+      line-height:1.4; color:rgba(250,248,244,.8); margin-bottom:8px;
+    }
+    #stopCard .pitch {
+      font-family:'DM Mono',monospace; font-size:.36rem;
+      letter-spacing:.08em; line-height:1.55;
+      color:var(--gold); padding-top:8px; border-top:1px solid rgba(201,168,76,.18);
+    }
+    #stopCard .pitch strong { color:#FFE26B; font-weight:700; }
+
+    /* HUD — top right, compact */
+    #hud {
+      position:absolute; top:calc(var(--h) + 14px); right:14px; z-index:80;
+      background:rgba(6,6,15,.72); backdrop-filter:blur(8px);
+      border:1px solid var(--rule);
+      padding:10px 14px; border-radius:2px;
+      font-family:'DM Mono',monospace; font-size:11px;
+      pointer-events:none; min-width:140px;
+    }
+    #hud .row { display:flex; justify-content:space-between; gap:12px; line-height:1.6; }
+    #hud .row span:first-child { color:rgba(201,168,76,.6); letter-spacing:.08em; }
+    #hud .row span:last-child { color:#fff; font-weight:700; }
+
+    /* Final tour-complete overlay */
+    #finalCard {
+      position:absolute; inset:var(--h) 0 0 0; z-index:90;
+      background:rgba(6,6,15,.86); backdrop-filter:blur(8px);
+      display:none; align-items:center; justify-content:center;
+      padding:30px;
+    }
+    #finalCard.show { display:flex; }
+    #finalCard .final-inner {
+      max-width:680px; text-align:center;
+    }
+    #finalCard h2 {
+      font-family:'EB Garamond',serif; font-style:italic;
+      font-size:2.4rem; color:var(--gold); line-height:1.15;
+      margin-bottom:18px;
+    }
+    #finalCard h2 span { color:var(--hot); font-style:normal; font-weight:600; }
+    #finalCard p {
+      font-family:'Source Serif 4',serif; font-size:1.05rem;
+      line-height:1.55; color:rgba(250,248,244,.85);
+      margin-bottom:14px;
+    }
+    #finalCard p strong { color:#fff; }
+    #finalCard .ctas {
+      display:flex; gap:10px; flex-wrap:wrap; justify-content:center;
+      margin-top:24px;
+    }
+    #finalCard .cta {
+      font-family:'DM Mono',monospace; font-weight:700;
+      font-size:.42rem; letter-spacing:.14em; text-transform:uppercase;
+      padding:11px 22px; border-radius:2px;
+      text-decoration:none;
+    }
+    #finalCard .cta-claim { background:var(--hot); color:#fff; }
+    #finalCard .cta-claim:hover { background:var(--gold); color:var(--ink); }
+    #finalCard .cta-restart { background:transparent; color:var(--gold); border:1px solid var(--rule); }
+    #finalCard .cta-restart:hover { background:var(--gold); color:var(--ink); }
+
+    @media (max-width:640px) {
+      #stopCard { left:12px; bottom:12px; padding:13px 16px; max-width:280px; }
+      #stopCard .biz { font-size:1.1rem; }
+      #stopCard .market { font-size:.78rem; }
+      #hud { font-size:9px; padding:7px 10px; min-width:120px; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="title">Requation FlyOver <small>· LAX → DTLA · 4 sample customers</small></div>
+  <a class="nav-back" href="/cube-sample">← Cube</a>
+</header>
+
+<div id="cesiumContainer"></div>
+
+<div id="loader"><span>Loading 3D tiles…</span></div>
+
+<!-- Stop card — updates per stage -->
+<div id="stopCard">
+  <div class="stage-no" id="stopNo">TAKEOFF · LAX</div>
+  <div class="biz" id="stopBiz">Pacific Coast · 5,000 m</div>
+  <div class="market" id="stopMarket">Glider tour starting — heading northeast over Los Angeles</div>
+  <div class="pitch" id="stopPitch">→ Same takeoff, three markets: boutique restaurant · boutique hotels · chain hotel</div>
+</div>
+
+<!-- HUD -->
+<div id="hud">
+  <div class="row"><span>HDG</span><span><span id="hudHeading">—</span>°</span></div>
+  <div class="row"><span>ALT</span><span><span id="hudAlt">—</span> m</span></div>
+  <div class="row"><span>STOP</span><span><span id="hudStopNum">0</span>/4</span></div>
+</div>
+
+<!-- Tour-complete overlay -->
+<div id="finalCard">
+  <div class="final-inner">
+    <h2>Same takeoff. Three markets. <span>One framework.</span></h2>
+    <p>Bottega Louie pitches Cheesecake Factory. Level + Freehand pitch boutique hotel groups. Hotel Per La pitches the chain players. <strong>Each pin is the same $25/day Claude Cube — different content, same engine.</strong></p>
+    <p style="font-style:italic;color:rgba(201,168,76,.85);">Producer: Vik Puri · Director / Cinematographer: Claude · Cesium + Google Photorealistic 3D Tiles</p>
+    <div class="ctas">
+      <a class="cta cta-claim" href="mailto:hello@requation.com?subject=Claim+a+Cube+like+this">Claim a cube like this →</a>
+      <a class="cta cta-restart" href="javascript:location.reload()">↻ Replay tour</a>
+    </div>
+  </div>
+</div>
+
+<script>
+  Cesium.GoogleMaps.defaultApiKey = 'AIzaSyD7UMA5ILPXv9QK2_gvxPVth30MavRd2WQ';
+
+  /* ── 4 DTLA endpoints — clustered within ~500m, hit 3 markets ── */
+  const STOPS = [
+    {
+      name:    'Bottega Louie',
+      lat:      34.0461, lng: -118.2569,
+      addr:    '700 S Grand Ave · DTLA',
+      market:  'Boutique restaurant · Italian + pasticceria · Yelp ★ 4.2',
+      pitch:   'Pitch path: <strong>Cheesecake Factory</strong> + Earl of Sandwich + every casual-luxe chain',
+      heading: 35, pitch: -28, alt: 220,
+    },
+    {
+      name:    'Level Hotels & Furnished',
+      lat:      34.0438, lng: -118.2604,
+      addr:    '888 S Olive St · DTLA',
+      market:  'Boutique hotel · long-stay luxury furnished',
+      pitch:   'Pitch path: <strong>boutique hotel groups</strong> · indie-mid (Ace, Hoxton, Standard, Freehand)',
+      heading: 320, pitch: -28, alt: 200,
+    },
+    {
+      name:    'Freehand Los Angeles',
+      lat:      34.0464, lng: -118.2553,
+      addr:    '416 W 8th St · DTLA',
+      market:  'Boutique hotel · hostel + suites · rooftop pool',
+      pitch:   'Pitch path: <strong>Sydell Group</strong> + Generator + every design-forward indie chain',
+      heading: 270, pitch: -28, alt: 200,
+    },
+    {
+      name:    'Hotel Per La',
+      lat:      34.0457, lng: -118.2580,
+      addr:    '649 S Olive St · DTLA · ⚠ confirm GPS for "LA\'Opera"',
+      market:  'Marriott Autograph Collection · large chain owned · former NoMad LA',
+      pitch:   'Pitch path: <strong>Marriott · IHG · Hyatt · Hilton</strong> · large chain enterprise tier',
+      heading: 30, pitch: -25, alt: 280,
+    },
+  ];
+
+  /* ── Cesium init ── */
+  const viewer = new Cesium.Viewer('cesiumContainer', {
+    globe: false,
+    timeline: false, animation: false, baseLayerPicker: false,
+    geocoder: false, homeButton: false, sceneModePicker: false,
+    navigationHelpButton: false, infoBox: true, selectionIndicator: false,
+    fullscreenButton: false, vrButton: false,
+    skyBox: false, skyAtmosphere: false,
+    scene3DOnly: true,
+  });
+  viewer.scene.backgroundColor = new Cesium.Color(0.024, 0.024, 0.055, 1.0);
+
+  /* HUD elements */
+  const hudHeading = document.getElementById('hudHeading');
+  const hudAlt     = document.getElementById('hudAlt');
+  const hudStopNum = document.getElementById('hudStopNum');
+  const stopCard   = document.getElementById('stopCard');
+  const stopNo     = document.getElementById('stopNo');
+  const stopBiz    = document.getElementById('stopBiz');
+  const stopMarket = document.getElementById('stopMarket');
+  const stopPitch  = document.getElementById('stopPitch');
+
+  /* Update HUD per frame */
+  viewer.scene.postRender.addEventListener(() => {
+    const cam = viewer.camera;
+    hudHeading.textContent = Cesium.Math.toDegrees(cam.heading).toFixed(0);
+    const carto = Cesium.Cartographic.fromCartesian(cam.position);
+    hudAlt.textContent = carto.height.toFixed(0);
+  });
+
+  function setStopCard({ stage, biz, market, pitch }) {
+    stopNo.textContent     = stage;
+    stopBiz.textContent    = biz;
+    stopMarket.textContent = market;
+    stopPitch.innerHTML    = pitch;
+    stopCard.classList.add('show');
+  }
+
+  /* Pin canvas — gold glow with white center */
+  function glowPin(hex, size) {
+    const S = size * 5;
+    const c = document.createElement('canvas');
+    c.width = c.height = S;
+    const ctx = c.getContext('2d');
+    const cx = S / 2, r = S / 2;
+    const g = ctx.createRadialGradient(cx, cx, 0, cx, cx, r);
+    g.addColorStop(0,    '#FFFFFF');
+    g.addColorStop(0.18, hex + 'EE');
+    g.addColorStop(0.45, hex + '88');
+    g.addColorStop(0.85, hex + '22');
+    g.addColorStop(1,    hex + '00');
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, S, S);
+    return c.toDataURL();
+  }
+  const PIN_GOLD = glowPin('#C9A84C', 22);
+
+  /* Tier dashboard InfoBox content */
+  function tierCard(stop) {
+    const waymoUrl = `https://waymo.com/app/?dropoff_lat=${stop.lat}&dropoff_lng=${stop.lng}&dropoff_label=${encodeURIComponent(stop.name)}`;
+    const tiers = [
+      { tier:0, label:'Free',    bg:'#8B0F18', fg:'#fff',    desc:'Gray dot · invisible' },
+      { tier:1, label:'$1/day',  bg:'#157A40', fg:'#fff',    desc:'Gold pin · QR offer' },
+      { tier:2, label:'$5/day',  bg:'#C49500', fg:'#1A1500', desc:'Video + booking' },
+      { tier:3, label:'$25/day', bg:'#C7144A', fg:'#fff',    desc:'3D cube (you are here)' },
+    ];
+    const cards = tiers.map(t => {
+      const ring = t.tier === 3 ? 'box-shadow:inset 0 0 0 2px rgba(255,255,255,.95);' : '';
+      const tag  = t.tier === 3 ? 'CURRENT' : `Tier ${t.tier}`;
+      return `<div style="background:${t.bg};color:${t.fg};padding:8px 10px;border-radius:2px;${ring}">
+        <div style="font-family:'DM Mono',monospace;font-size:8.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;opacity:.85;">${tag}</div>
+        <div style="font-family:'EB Garamond',serif;font-style:italic;font-size:14px;font-weight:600;line-height:1.05;margin-top:2px;">${t.label}</div>
+        <div style="font-family:'DM Mono',monospace;font-size:8.5px;opacity:.85;margin-top:2px;line-height:1.25;">${t.desc}</div>
+      </div>`;
+    }).join('');
+
+    return `<div style="font-family:'EB Garamond',serif;color:#1C1C1C;padding:6px;">
+      <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:#B8922A;margin-bottom:3px;">Featured cube · ${stop.market.split('·')[0].trim()}</div>
+      <div style="font-style:italic;font-size:17px;color:#1C1C1C;line-height:1.15;margin-bottom:1px;">${stop.name}</div>
+      <div style="font-family:'DM Mono',monospace;font-size:9px;color:#666;margin-bottom:8px;">${stop.addr}</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;">${cards}</div>
+      <a href="mailto:hello@requation.com?subject=Claim+a+Cube+like+${encodeURIComponent(stop.name)}"
+         style="display:block;text-align:center;margin-top:8px;background:#1A1A1A;color:#fff;padding:7px;font-family:'DM Mono',monospace;font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;text-decoration:none;border-radius:2px;">
+        Claim a cube like this · $25/day →
+      </a>
+    </div>`;
+  }
+
+  /* Init: load tileset, drop pins, run cinematic */
+  async function init() {
+    try {
+      const tileset = await Cesium.createGooglePhotorealistic3DTileset();
+      tileset.preloadFlightDestinations = true;
+      viewer.scene.primitives.add(tileset);
+
+      /* Drop pins for all 4 stops, store entity refs for auto-select */
+      const entities = STOPS.map(stop => viewer.entities.add({
+        position: Cesium.Cartesian3.fromDegrees(stop.lng, stop.lat),
+        billboard: {
+          image: PIN_GOLD, width: 56, height: 56,
+          verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
+          heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
+          disableDepthTestDistance: Number.POSITIVE_INFINITY,
+        },
+        label: {
+          text: stop.name,
+          font: '600 13px "DM Mono", monospace',
+          fillColor: Cesium.Color.fromCssColorString('#FAF8F4'),
+          outlineColor: Cesium.Color.fromCssColorString('#06060f'),
+          outlineWidth: 3,
+          style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+          verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
+          pixelOffset: new Cesium.Cartesian2(0, -56),
+          disableDepthTestDistance: Number.POSITIVE_INFINITY,
+          scaleByDistance: new Cesium.NearFarScalar(200, 1.0, 5000, 0.3),
+        },
+        name: stop.name,
+        description: tierCard(stop),
+      }));
+
+      /* Stage 0 — Pacific opening, glider altitude (5000m, low pitch) */
+      viewer.camera.setView({
+        destination: Cesium.Cartesian3.fromDegrees(-118.55, 33.83, 5000),
+        orientation: {
+          heading: Cesium.Math.toRadians(55),
+          pitch:   Cesium.Math.toRadians(-15),
+          roll:    0
+        }
+      });
+      requestAnimationFrame(() => {
+        setTimeout(() => document.getElementById('loader').classList.add('hidden'), 800);
+      });
+
+      /* Promisified flyTo helper */
+      const flyTo = (params) => new Promise(resolve => {
+        viewer.camera.flyTo({ ...params, complete: resolve });
+      });
+
+      /* User-cancellable */
+      let cancelled = false;
+      ['mousedown','wheel','touchstart'].forEach(ev =>
+        viewer.canvas.addEventListener(ev, () => { cancelled = true; }, { once: true, passive: true })
+      );
+
+      const wait = (ms) => new Promise(r => setTimeout(r, ms));
+
+      (async () => {
+        await wait(1500);
+        if (cancelled) return;
+
+        /* APPROACH PHASE — LAX → DTLA, glider style, low altitude */
+
+        setStopCard({
+          stage: 'GLIDE 1 · LAX',
+          biz: 'Pacific approach · 1,800 m',
+          market: 'Descending into Los Angeles · low-altitude glider angle (-15° pitch)',
+          pitch: '→ Constant velocity · linear easing · no banking jerks',
+        });
+        await flyTo({
+          destination: Cesium.Cartesian3.fromDegrees(-118.408, 33.945, 1800),
+          orientation: { heading: Cesium.Math.toRadians(55), pitch: Cesium.Math.toRadians(-15), roll: 0 },
+          duration: 7.0,
+          easingFunction: Cesium.EasingFunction.QUADRATIC_OUT,
+        });
+        if (cancelled) return;
+
+        setStopCard({
+          stage: 'GLIDE 2 · SWLA',
+          biz: 'Inglewood / Crenshaw · 800 m',
+          market: 'Cruise altitude · the city begins to resolve in 3D',
+          pitch: '→ Linear cruise · the camera is the producer\'s eye',
+        });
+        await flyTo({
+          destination: Cesium.Cartesian3.fromDegrees(-118.32, 34.005, 800),
+          orientation: { heading: Cesium.Math.toRadians(45), pitch: Cesium.Math.toRadians(-18), roll: 0 },
+          duration: 7.0,
+          easingFunction: Cesium.EasingFunction.LINEAR,
+        });
+        if (cancelled) return;
+
+        setStopCard({
+          stage: 'GLIDE 3 · DTLA',
+          biz: 'Approaching downtown · 400 m',
+          market: 'Skyline emerges · Bunker Hill on the left, South Park dead ahead',
+          pitch: '→ Banking gently east · setting up the 4-stop cluster',
+        });
+        await flyTo({
+          destination: Cesium.Cartesian3.fromDegrees(-118.272, 34.038, 400),
+          orientation: { heading: Cesium.Math.toRadians(40), pitch: Cesium.Math.toRadians(-25), roll: 0 },
+          duration: 5.0,
+          easingFunction: Cesium.EasingFunction.LINEAR,
+        });
+        if (cancelled) return;
+
+        /* CLUSTER PHASE — 4 stops within 500m of each other */
+        for (let i = 0; i < STOPS.length; i++) {
+          if (cancelled) return;
+          const stop = STOPS[i];
+
+          /* Glide to this stop */
+          hudStopNum.textContent = (i + 1).toString();
+          setStopCard({
+            stage: `STOP ${i + 1} OF 4 · ${stop.name.toUpperCase()}`,
+            biz: stop.name,
+            market: stop.market,
+            pitch: '→ ' + stop.pitch,
+          });
+
+          /* Camera offset from stop — glider stays close, slight SW perspective */
+          const camLng = stop.lng - 0.0009;
+          const camLat = stop.lat - 0.0007;
+          await flyTo({
+            destination: Cesium.Cartesian3.fromDegrees(camLng, camLat, stop.alt),
+            orientation: {
+              heading: Cesium.Math.toRadians(stop.heading),
+              pitch:   Cesium.Math.toRadians(stop.pitch),
+              roll:    0,
+            },
+            duration: i === 0 ? 5.0 : 3.5,    // first stop gets a longer arrival
+            easingFunction: Cesium.EasingFunction.QUADRATIC_IN_OUT,
+          });
+          if (cancelled) return;
+
+          /* Auto-open InfoBox */
+          viewer.selectedEntity = entities[i];
+
+          /* Hold on this stop */
+          await wait(4500);
+          if (cancelled) return;
+
+          /* Close InfoBox before next glide */
+          viewer.selectedEntity = undefined;
+        }
+
+        /* FINAL — show the tour-complete overlay */
+        if (cancelled) return;
+        document.getElementById('finalCard').classList.add('show');
+      })();
+
+    } catch (err) {
+      console.error('Cesium init failed:', err);
+      document.getElementById('loader').innerHTML =
+        '<span style="color:#FF1F5C;">3D tiles failed to load — check console</span>';
+    }
+  }
+
+  init();
+</script>
+
+</body>
+</html>

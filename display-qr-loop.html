@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=1920, initial-scale=1.0" />
+  <title>Requation Display — QR Loop · 1920×1080</title>
+  <meta name="description" content="Full-screen kiosk display loop. Loads on OptiSigns, Yodeck, Screenly, Mvix or any HTML5 signage. $1/day content for the small business." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,600;1,400;1,600&family=Source+Serif+4:wght@400;600&family=DM+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    *,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
+    html,body { width:100vw; height:100vh; overflow:hidden; background:#000; }
+    body { font-family:'Source Serif 4',serif; }
+
+    .stage {
+      position:fixed; inset:0;
+      display:grid; grid-template-rows:1fr;
+    }
+    .slide {
+      position:absolute; inset:0;
+      display:grid; grid-template-rows:auto 1fr auto;
+      padding:60px 70px 40px;
+      color:#fff; opacity:0;
+      transition:opacity 1.2s ease-in-out;
+      overflow:hidden;
+    }
+    .slide.active { opacity:1; }
+    .slide::before {
+      content:''; position:absolute; inset:0; z-index:0;
+    }
+
+    /* Slide 1 — Ruby (today's offer / urgency) */
+    .slide.s1 { background:linear-gradient(135deg, #6B0A11 0%, #C2161F 35%, #FF3F4F 50%, #C2161F 65%, #6B0A11 100%); background-size:240% 240%; animation:shimmer 18s ease-in-out infinite; }
+    .slide.s1::before { background:radial-gradient(ellipse at 28% 30%, rgba(255,90,100,.55), transparent 55%), radial-gradient(ellipse at 72% 78%, rgba(180,15,28,.55), transparent 55%); }
+
+    /* Slide 2 — Emerald (your dot turned gold) */
+    .slide.s2 { background:linear-gradient(135deg, #0E6230 0%, #1FA85A 35%, #4FE38C 50%, #1FA85A 65%, #0E6230 100%); background-size:240% 240%; animation:shimmer 22s ease-in-out infinite; }
+    .slide.s2::before { background:radial-gradient(ellipse at 22% 28%, rgba(120,255,170,.50), transparent 55%), radial-gradient(ellipse at 78% 76%, rgba(15,90,50,.55), transparent 55%); }
+
+    /* Slide 3 — Topaz (premium / video tier) */
+    .slide.s3 { background:linear-gradient(135deg, #8E6B00 0%, #F2B900 35%, #FFE26B 50%, #F2B900 65%, #8E6B00 100%); background-size:240% 240%; animation:shimmer 24s ease-in-out infinite; color:#1A1500; }
+    .slide.s3::before { background:radial-gradient(ellipse at 25% 28%, rgba(255,250,180,.65), transparent 55%), radial-gradient(ellipse at 75% 78%, rgba(170,120,0,.55), transparent 55%); }
+
+    /* Slide 4 — Rubellite (3D cube / hero tier) */
+    .slide.s4 { background:linear-gradient(135deg, #8B0E37 0%, #E0184F 35%, #FF5C8A 50%, #E0184F 65%, #8B0E37 100%); background-size:240% 240%; animation:shimmer 16s ease-in-out infinite; }
+    .slide.s4::before { background:radial-gradient(ellipse at 30% 28%, rgba(255,170,210,.60), transparent 55%), radial-gradient(ellipse at 72% 78%, rgba(140,15,75,.60), transparent 55%); }
+
+    @keyframes shimmer {
+      0%,100% { background-position:0% 50%; }
+      50%     { background-position:100% 50%; }
+    }
+
+    /* Inner slide layout */
+    .slide-top, .slide-mid, .slide-bot { position:relative; z-index:1; }
+    .slide-top {
+      display:flex; align-items:flex-start; justify-content:space-between;
+      gap:24px;
+    }
+    .pre {
+      font-family:'DM Mono',monospace; font-weight:700; font-size:18px;
+      letter-spacing:.22em; text-transform:uppercase;
+      opacity:.85;
+    }
+    .clock {
+      font-family:'DM Mono',monospace; font-size:18px;
+      letter-spacing:.1em; opacity:.85;
+    }
+
+    .slide-mid {
+      display:flex; align-items:center; justify-content:space-between;
+      gap:50px; padding:30px 0;
+    }
+    .slide-mid-l { flex:1; }
+    .slide h1 {
+      font-family:'EB Garamond',serif; font-style:italic; font-weight:600;
+      font-size:124px; line-height:.95;
+      margin-bottom:24px;
+    }
+    .slide h1 span { font-style:normal; font-weight:600; }
+    .slide.s1 h1 span { color:#FFE26B; }
+    .slide.s2 h1 span { color:#FFE26B; }
+    .slide.s3 h1 span { color:#1A1500; opacity:.7; }
+    .slide.s4 h1 span { color:#FFE26B; }
+    .slide p {
+      font-family:'Source Serif 4',serif; font-size:34px;
+      line-height:1.32; opacity:.95; max-width:920px;
+    }
+    .slide p strong { font-weight:700; }
+    .slide.s3 p strong { color:#0E0E0E; }
+
+    .qr-box {
+      flex:0 0 320px;
+      background:#fff; padding:26px;
+      border-radius:8px; text-align:center;
+    }
+    .qr-box .q {
+      width:268px; height:268px; margin:0 auto;
+      background:
+        repeating-linear-gradient(45deg, #0E0E0E 0 6px, transparent 6px 12px),
+        repeating-linear-gradient(-45deg, #0E0E0E 0 6px, transparent 6px 12px),
+        #FAF8F4;
+      background-blend-mode:multiply;
+      border:3px solid #0E0E0E;
+    }
+    .qr-box .lbl {
+      font-family:'DM Mono',monospace; font-weight:700; font-size:18px;
+      letter-spacing:.18em; text-transform:uppercase;
+      color:#0E0E0E; margin-top:12px;
+    }
+
+    .slide-bot {
+      display:flex; justify-content:space-between; align-items:flex-end;
+      padding-top:22px; border-top:1px solid rgba(255,255,255,.22);
+    }
+    .slide.s3 .slide-bot { border-top-color:rgba(0,0,0,.18); }
+    .biz {
+      font-family:'EB Garamond',serif; font-style:italic;
+      font-size:38px; line-height:1.1;
+    }
+    .biz small {
+      display:block; font-family:'DM Mono',monospace; font-style:normal;
+      font-size:17px; letter-spacing:.08em;
+      opacity:.7; margin-top:6px;
+    }
+    .pwr {
+      font-family:'DM Mono',monospace; font-size:15px; letter-spacing:.16em;
+      text-transform:uppercase; opacity:.65;
+    }
+
+    /* Progress dots — bottom edge */
+    .dots {
+      position:fixed; bottom:14px; left:50%; transform:translateX(-50%);
+      display:flex; gap:8px; z-index:100;
+    }
+    .dots .dot {
+      width:38px; height:3px; background:rgba(255,255,255,.25);
+      border-radius:1px; transition:background .3s;
+    }
+    .dots .dot.on { background:rgba(255,255,255,.85); }
+
+    /* If viewport is smaller than 1920×1080, scale gracefully */
+    @media (max-width:1600px) {
+      .slide { padding:40px 50px 30px; }
+      .slide h1 { font-size:96px; }
+      .slide p { font-size:28px; }
+      .qr-box { flex-basis:240px; padding:18px; }
+      .qr-box .q { width:204px; height:204px; }
+      .biz { font-size:30px; }
+    }
+    @media (max-width:1100px) {
+      .slide { padding:24px 28px 20px; }
+      .slide h1 { font-size:64px; }
+      .slide p { font-size:20px; }
+      .pre { font-size:13px; }
+      .clock { font-size:13px; }
+      .qr-box { flex-basis:170px; padding:12px; }
+      .qr-box .q { width:146px; height:146px; }
+      .biz { font-size:22px; }
+      .biz small { font-size:12px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="stage">
+
+  <!-- Slide 1: Ruby — today's offer urgency -->
+  <section class="slide s1 active">
+    <div class="slide-top">
+      <div class="pre">Today only · expires 9 PM</div>
+      <div class="clock" id="clock">—</div>
+    </div>
+    <div class="slide-mid">
+      <div class="slide-mid-l">
+        <h1>Half-price <span>macarons</span><br>after 7 PM</h1>
+        <p><strong>$9 for a box of six.</strong> Walk to the counter, scan the QR, save. Today only — kitchen rotates the offer at midnight.</p>
+      </div>
+      <div class="qr-box">
+        <div class="q"></div>
+        <div class="lbl">Scan</div>
+      </div>
+    </div>
+    <div class="slide-bot">
+      <div class="biz">Bottega Louie<small>700 S Grand Ave · Los Angeles, CA 90017</small></div>
+      <div class="pwr">Powered by Requation · $1/day</div>
+    </div>
+  </section>
+
+  <!-- Slide 2: Emerald — your dot just turned gold -->
+  <section class="slide s2">
+    <div class="slide-top">
+      <div class="pre">Featured today · requation.com</div>
+      <div class="clock">—</div>
+    </div>
+    <div class="slide-mid">
+      <div class="slide-mid-l">
+        <h1>Your gray dot just<br>turned <span>gold</span>.</h1>
+        <p>The map sees you now. Bottega Louie joined Tier 3 on requation.com — three-D photorealistic, scrollable URL, shareable everywhere. <strong>$1 a day at your tier.</strong></p>
+      </div>
+      <div class="qr-box">
+        <div class="q"></div>
+        <div class="lbl">Visit</div>
+      </div>
+    </div>
+    <div class="slide-bot">
+      <div class="biz">Bottega Louie<small>requation.com/cube-sample</small></div>
+      <div class="pwr">Powered by Requation · $1/day</div>
+    </div>
+  </section>
+
+  <!-- Slide 3: Topaz — premium video tier -->
+  <section class="slide s3">
+    <div class="slide-top">
+      <div class="pre">Tier 2 · video + booking</div>
+      <div class="clock">—</div>
+    </div>
+    <div class="slide-mid">
+      <div class="slide-mid-l">
+        <h1>Book a tasting<br><span>before midnight</span></h1>
+        <p>Google Meet. Same-day. <strong>No app, no friction.</strong> Sit at the counter, scan, pick a slot. Sommelier walks you through tomorrow's table reservation in 90 seconds.</p>
+      </div>
+      <div class="qr-box">
+        <div class="q"></div>
+        <div class="lbl">Book</div>
+      </div>
+    </div>
+    <div class="slide-bot">
+      <div class="biz">Bottega Louie<small>700 S Grand Ave · Los Angeles, CA 90017</small></div>
+      <div class="pwr">Powered by Requation · $5/day</div>
+    </div>
+  </section>
+
+  <!-- Slide 4: Rubellite — 3D cube / hero tier -->
+  <section class="slide s4">
+    <div class="slide-top">
+      <div class="pre">Tier 3 · cinematic 3D · /cube-sample</div>
+      <div class="clock">—</div>
+    </div>
+    <div class="slide-mid">
+      <div class="slide-mid-l">
+        <h1>Your block.<br>In <span>3D</span>. On a URL.</h1>
+        <p>Photorealistic Google tiles. Camera orbits the building. Your video plays inside it. Your QR sits at the bottom. <strong>Paste the link anywhere — Instagram, text, press release.</strong></p>
+      </div>
+      <div class="qr-box">
+        <div class="q"></div>
+        <div class="lbl">Step in</div>
+      </div>
+    </div>
+    <div class="slide-bot">
+      <div class="biz">Bottega Louie<small>requation.com/cube-sample</small></div>
+      <div class="pwr">Powered by Requation · $25/day</div>
+    </div>
+  </section>
+
+</div>
+
+<div class="dots">
+  <div class="dot on"></div>
+  <div class="dot"></div>
+  <div class="dot"></div>
+  <div class="dot"></div>
+</div>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  const dots   = document.querySelectorAll('.dots .dot');
+  let idx = 0;
+  const SLIDE_MS = 8000;
+
+  setInterval(() => {
+    slides[idx].classList.remove('active');
+    dots[idx].classList.remove('on');
+    idx = (idx + 1) % slides.length;
+    slides[idx].classList.add('active');
+    dots[idx].classList.add('on');
+  }, SLIDE_MS);
+
+  /* Live clock — 12-hour */
+  function tickClock() {
+    const now = new Date();
+    let h = now.getHours();
+    const m = now.getMinutes().toString().padStart(2, '0');
+    const ampm = h >= 12 ? 'PM' : 'AM';
+    h = h % 12; if (h === 0) h = 12;
+    const txt = `${h}:${m} ${ampm}`;
+    document.querySelectorAll('.clock').forEach(el => el.textContent = txt);
+  }
+  tickClock();
+  setInterval(tickClock, 30000);
+</script>
+
+</body>
+</html>

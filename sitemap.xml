@@ -13,4 +13,11 @@
   <url><loc>https://requation.com/mylocal</loc><changefreq>daily</changefreq><priority>0.7</priority></url>
   <url><loc>https://requation.com/laveenlocal</loc><changefreq>daily</changefreq><priority>0.7</priority></url>
   <url><loc>https://requation.com/place</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://requation.com/i10</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://requation.com/cube-sample</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://requation.com/samples/tab-card</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://requation.com/cube-template</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://requation.com/dtla-mall-map</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://requation.com/laveen-mall-map</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://requation.com/dashboard</loc><changefreq>weekly</changefreq><priority>0.4</priority></url>
 </urlset>

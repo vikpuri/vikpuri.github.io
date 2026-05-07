@@ -42,8 +42,8 @@
     /* ── Map hero section ── */
     #map-hero {
       position: relative;
-      height: calc(60vh - var(--h));
-      min-height: 340px;
+      height: calc(100vh - var(--h));
+      min-height: 560px;
       background: #06060f;
     }
     #cesiumContainer {
@@ -54,14 +54,8 @@
     .cesium-viewer-toolbar { display: none !important; }
     .cesium-widget-credits { display: none !important; }
 
-    /* Floating overlay on the map */
-    #map-label {
-      position: absolute; bottom: 0; left: 0; right: 0;
-      padding: 12px 24px;
-      background: linear-gradient(to top, rgba(6,6,15,.9) 0%, transparent 100%);
-      display: flex; align-items: flex-end; justify-content: space-between;
-      pointer-events: none;
-    }
+    /* Floating overlay on the map — hidden, map is pure */
+    #map-label { display: none; }
     .map-title {
       font-family: 'EB Garamond', serif; font-style: italic;
       font-size: 1.5rem; color: rgba(201,168,76,.95); line-height: 1;
@@ -398,6 +392,16 @@
         <a class="sc-claim" href="/dtla" onclick="event.stopPropagation()">View on map →</a>
       </div>
 
+      <div class="stop-card" onclick="selectStop('dhs',this,-116.501,33.961,10000)">
+        <div class="sc-city">Desert Hot Springs</div>
+        <div class="sc-anchor">Mineral springs · Cannabis cultivation hub</div>
+        <div class="sc-meta">
+          <div class="sc-badges"><span class="sc-badge sc-ca">CA</span></div>
+          <span class="sc-mile">Mile 115</span>
+        </div>
+        <a class="sc-claim" href="mailto:hello@requation.com?subject=I-10 Pin — Desert Hot Springs" onclick="event.stopPropagation()">Claim pin · $1/day →</a>
+      </div>
+
       <div class="stop-card" onclick="selectStop('palmsprings',this,-116.966,33.954,12000)">
         <div class="sc-city">Palm Springs / Coachella</div>
         <div class="sc-anchor">Tesla Supercharger · Resort corridor</div>
@@ -408,14 +412,24 @@
         <a class="sc-claim" href="mailto:hello@requation.com?subject=I-10 Pin — Palm Springs" onclick="event.stopPropagation()">Claim pin · $1/day →</a>
       </div>
 
-      <div class="stop-card" onclick="selectStop('dhs',this,-116.501,33.961,10000)">
-        <div class="sc-city">Desert Hot Springs</div>
-        <div class="sc-anchor">Mineral springs · Cannabis cultivation</div>
+      <div class="stop-card" onclick="selectStop('joshuatree',this,-116.311,34.134,12000)">
+        <div class="sc-city">Joshua Tree</div>
+        <div class="sc-anchor">National Park gateway · Crystal vendors · Off-grid</div>
         <div class="sc-meta">
           <div class="sc-badges"><span class="sc-badge sc-ca">CA</span></div>
-          <span class="sc-mile">Mile 115</span>
+          <span class="sc-mile">CA-62 · Mile 125</span>
         </div>
-        <a class="sc-claim" href="mailto:hello@requation.com?subject=I-10 Pin — Desert Hot Springs" onclick="event.stopPropagation()">Claim pin · $1/day →</a>
+        <a class="sc-claim" href="mailto:hello@requation.com?subject=I-10 Pin — Joshua Tree" onclick="event.stopPropagation()">Claim pin · $1/day →</a>
+      </div>
+
+      <div class="stop-card" onclick="selectStop('29palms',this,-116.054,34.136,10000)">
+        <div class="sc-city">29 Palms</div>
+        <div class="sc-anchor">Marine Corps base · Desert art community</div>
+        <div class="sc-meta">
+          <div class="sc-badges"><span class="sc-badge sc-ca">CA</span></div>
+          <span class="sc-mile">CA-62 · Mile 140</span>
+        </div>
+        <a class="sc-claim" href="mailto:hello@requation.com?subject=I-10 Pin — 29 Palms" onclick="event.stopPropagation()">Claim pin · $1/day →</a>
       </div>
 
       <div class="stop-card" onclick="selectStop('blythe',this,-114.596,33.619,14000)">
@@ -599,126 +613,142 @@ function posAtT(t) {
   return Cesium.Cartesian3.fromDegrees(I10[I10.length-1][0], I10[I10.length-1][1], 80);
 }
 
-/* Create glow dot canvas image */
+/* High-res glow dot — 5x canvas for retina-sharp edges */
 function glowDot(hex, size) {
+  const S = size * 5;
   const c = document.createElement('canvas');
-  c.width = c.height = size * 4;
+  c.width = c.height = S;
   const ctx = c.getContext('2d');
-  const g = ctx.createRadialGradient(size*2, size*2, 0, size*2, size*2, size*2);
-  g.addColorStop(0,   hex);
-  g.addColorStop(0.4, hex + 'AA');
-  g.addColorStop(1,   hex + '00');
+  const cx = S / 2, r = S / 2;
+  const g = ctx.createRadialGradient(cx, cx, 0, cx, cx, r);
+  g.addColorStop(0,    hex + 'FF');
+  g.addColorStop(0.15, hex + 'EE');
+  g.addColorStop(0.4,  hex + '88');
+  g.addColorStop(0.75, hex + '22');
+  g.addColorStop(1,    hex + '00');
   ctx.fillStyle = g;
-  ctx.fillRect(0, 0, size*4, size*4);
+  ctx.fillRect(0, 0, S, S);
   return c.toDataURL();
 }
 
-/* ── CesiumJS init — Mode A: dark corridor, no globe, no flash ── */
+/* Property anchor dot — larger, pulsing-white center */
+function propDot() {
+  const S = 120;
+  const c = document.createElement('canvas');
+  c.width = c.height = S;
+  const ctx = c.getContext('2d');
+  const cx = S / 2, r = S / 2;
+  const g = ctx.createRadialGradient(cx, cx, 0, cx, cx, r);
+  g.addColorStop(0,    '#FFFFFF');
+  g.addColorStop(0.12, '#FAF8F4EE');
+  g.addColorStop(0.3,  '#C9A84C99');
+  g.addColorStop(0.6,  '#C9A84C33');
+  g.addColorStop(1,    '#C9A84C00');
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, S, S);
+  return c.toDataURL();
+}
+
+/* ── CesiumJS init — pure dark canvas, entities only ── */
 const viewer = new Cesium.Viewer('cesiumContainer', {
-  globe: false,          // OEM: no globe = no Cesium Ion needed, no blank-globe flash
+  globe: false,
   timeline: false, animation: false, baseLayerPicker: false,
   geocoder: false, homeButton: false, sceneModePicker: false,
   navigationHelpButton: false, infoBox: false, selectionIndicator: false,
   fullscreenButton: false, vrButton: false,
   skyBox: false, skyAtmosphere: false,
+  scene3DOnly: true,
 });
-
 viewer.scene.backgroundColor = new Cesium.Color(0.024, 0.024, 0.055, 1.0);
 
-/* I-10 polyline — gold glow */
+/* I-10 polyline — gold glow, 5km altitude so it sits above the canvas */
 viewer.entities.add({
   polyline: {
-    positions: Cesium.Cartesian3.fromDegreesArray(I10.flat()),
-    width: 3,
+    positions: Cesium.Cartesian3.fromDegreesArrayHeights(I10.map(([lng,lat]) => [lng,lat,5000]).flat()),
+    width: 20,
     material: new Cesium.PolylineGlowMaterialProperty({
-      glowPower: 0.35,
-      color: Cesium.Color.fromCssColorString('#C9A84C').withAlpha(0.9),
+      glowPower: 0.7,
+      color: Cesium.Color.fromCssColorString('#C9A84C').withAlpha(0.95),
     }),
     clampToGround: false,
   }
 });
 
-/* City label entities */
+/* City label entities — endpoints prominent, midpoints smaller */
+/* Corridor stops — intermediate cities only (endpoints are separate property pins below) */
 const STOPS = [
-  { name: 'Los Angeles', lng: -118.259, lat: 34.046 },
-  { name: 'Palm Springs', lng: -116.966, lat: 33.954 },
-  { name: 'Blythe', lng: -114.596, lat: 33.619 },
-  { name: 'Quartzsite', lng: -114.213, lat: 33.665 },
-  { name: 'Phoenix', lng: -112.118, lat: 33.343 },
+  { name: 'Desert Hot Springs', lng: -116.501, lat: 33.961, size: 9  },
+  { name: 'Palm Springs',       lng: -116.966, lat: 33.954, size: 10 },
+  { name: 'Joshua Tree',        lng: -116.311, lat: 34.134, size: 9  },
+  { name: '29 Palms',           lng: -116.054, lat: 34.136, size: 9  },
+  { name: 'Blythe',             lng: -114.596, lat: 33.619, size: 10 },
+  { name: 'Quartzsite',         lng: -114.213, lat: 33.665, size: 10 },
 ];
 STOPS.forEach(s => {
   viewer.entities.add({
-    position: Cesium.Cartesian3.fromDegrees(s.lng, s.lat, 2000),
-    point: { pixelSize: 5, color: Cesium.Color.fromCssColorString('#C9A84C'), outlineColor: Cesium.Color.fromCssColorString('#FAF8F4'), outlineWidth: 1.5 },
+    position: Cesium.Cartesian3.fromDegrees(s.lng, s.lat, 8000),
+    point: {
+      pixelSize: s.endpoint ? 9 : 5,
+      color: Cesium.Color.fromCssColorString(s.endpoint ? '#FAF8F4' : '#C9A84C'),
+      outlineColor: Cesium.Color.fromCssColorString('#C9A84C'),
+      outlineWidth: s.endpoint ? 2 : 1,
+    },
     label: {
       text: s.name,
-      font: '11px "DM Mono", monospace',
-      fillColor: Cesium.Color.fromCssColorString('#C9A84C').withAlpha(0.85),
+      font: `${s.endpoint ? '600' : '400'} ${s.size}px "DM Mono", monospace`,
+      fillColor: Cesium.Color.fromCssColorString(s.endpoint ? '#FAF8F4' : '#C9A84C').withAlpha(s.endpoint ? 1.0 : 0.75),
       outlineColor: Cesium.Color.BLACK,
       outlineWidth: 2,
       style: Cesium.LabelStyle.FILL_AND_OUTLINE,
       verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
-      pixelOffset: new Cesium.Cartesian2(0, -10),
+      pixelOffset: new Cesium.Cartesian2(0, -14),
       disableDepthTestDistance: Number.POSITIVE_INFINITY,
-      show: true,
     }
   });
 });
 
-/* Traffic particles — headlights (white) going DTLA→PHX, taillights (red) going PHX→DTLA */
+/* Traffic particles — CallbackProperty drives its own render loop (isConstant:false) */
 const HEAD_IMG = glowDot('#F5F0E0', 8);
 const TAIL_IMG = glowDot('#FF6B6B', 7);
-
-const particles = [];
 const N_HEAD = 60, N_TAIL = 45;
 
 for (let i = 0; i < N_HEAD; i++) {
-  const t0 = i / N_HEAD;
-  const speed = 0.00012 + Math.random() * 0.00008;
-  const ent = viewer.entities.add({
-    position: posAtT(t0),
+  const s = { t: i / N_HEAD, spd: 0.00012 + Math.random() * 0.00008 };
+  viewer.entities.add({
+    position: new Cesium.CallbackProperty(() => {
+      s.t = (s.t + s.spd) % 1;
+      return posAtT(s.t);
+    }, false),
     billboard: {
-      image: HEAD_IMG,
-      width: 14, height: 14,
+      image: HEAD_IMG, width: 14, height: 14,
       disableDepthTestDistance: Number.POSITIVE_INFINITY,
       scaleByDistance: new Cesium.NearFarScalar(50000, 1.2, 3000000, 0.3),
     }
   });
-  particles.push({ t: t0, speed, ent, dir: 1 });
 }
 for (let i = 0; i < N_TAIL; i++) {
-  const t0 = i / N_TAIL;
-  const speed = 0.00010 + Math.random() * 0.00008;
-  const ent = viewer.entities.add({
-    position: posAtT(1 - t0),
+  const s = { t: i / N_TAIL, spd: 0.00010 + Math.random() * 0.00008 };
+  viewer.entities.add({
+    position: new Cesium.CallbackProperty(() => {
+      s.t = (s.t + s.spd) % 1;
+      return posAtT(1 - s.t);
+    }, false),
     billboard: {
-      image: TAIL_IMG,
-      width: 12, height: 12,
+      image: TAIL_IMG, width: 12, height: 12,
       disableDepthTestDistance: Number.POSITIVE_INFINITY,
       scaleByDistance: new Cesium.NearFarScalar(50000, 1.0, 3000000, 0.25),
     }
   });
-  particles.push({ t: t0, speed, ent, dir: -1 });
 }
 
-/* Animate */
-viewer.scene.preRender.addEventListener(() => {
-  particles.forEach(p => {
-    p.t = (p.t + p.speed * p.dir + 1) % 1;
-    const pos = posAtT(p.t);
-    if (pos) p.ent.position = pos;
-  });
-});
-
-/* Initial camera — bird's eye over corridor */
-viewer.camera.flyTo({
-  destination: Cesium.Cartesian3.fromDegrees(-115.2, 33.7, 750000),
+/* Camera — low enough that DTLA→LAVEEN fills most of the viewport width */
+viewer.camera.setView({
+  destination: Cesium.Cartesian3.fromDegrees(-115.2, 33.7, 380000),
   orientation: {
-    heading: Cesium.Math.toRadians(90),
-    pitch:   Cesium.Math.toRadians(-72),
+    heading: Cesium.Math.toRadians(0),
+    pitch:   Cesium.Math.toRadians(-90),
     roll:    0
-  },
-  duration: 0
+  }
 });
 
 window._viewer = viewer;

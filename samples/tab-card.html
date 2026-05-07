@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Requation — Tier Strip · The Walk-Away From the Wait</title>
+  <meta name="description" content="$1 a day. Your gray pin turns gold. Stop waiting." />
+  <!-- Analytics + Search Console (injected by build.js from env GA_ID + GSC_TOKEN) -->
+  <meta name="google-site-verification" content="__GSC_TOKEN__" />
+  <script async src="https://www.googletagmanager.com/gtag/js?id=__GA_ID__"></script>
+  <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','__GA_ID__');</script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,600;1,600&family=Source+Serif+4:wght@400;600&family=DM+Mono:wght@400;500;700&family=Raleway:wght@600;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --cream:#FAF8F4; --cream-2:#F4F1EB; --cream-3:#EDE9E0;
+      --ink:#0E0E0E; --ink-2:#222; --text-muted:#666;
+      --rule:rgba(0,0,0,.08); --rule-heavy:rgba(0,0,0,.14);
+
+      /* Candy aisle palette */
+      --red:#E61E2B;       --red-deep:#B0141C;
+      --green:#1FA85A;     --green-deep:#157A40;
+      --gold:#F2B900;      --gold-deep:#C49500;
+      --hot:#FF1F5C;       --hot-deep:#C7144A;
+
+      --h:54px;
+    }
+    *,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
+    html,body { background:var(--cream); }
+    body {
+      font-family:'Source Serif 4',Georgia,serif;
+      color:var(--ink); line-height:1.5;
+      -webkit-font-smoothing:antialiased;
+    }
+
+    /* Compact header */
+    header {
+      position:sticky; top:0; z-index:200;
+      background:var(--cream); border-bottom:1px solid var(--rule);
+      display:flex; align-items:center; justify-content:space-between;
+      padding:0 16px; height:var(--h);
+    }
+    .nav-back {
+      font-family:'DM Mono',monospace;
+      font-size:.4rem; letter-spacing:.1em; text-transform:uppercase;
+      color:var(--text-muted); text-decoration:none;
+      padding:5px 10px; border:1px solid var(--rule-heavy); border-radius:2px;
+    }
+    .nav-back:hover { color:var(--gold-deep); border-color:var(--gold); }
+
+    /* Newsreel column — narrow, centered, scannable in one glance */
+    .reel { max-width:460px; margin:0 auto; padding:28px 16px 28px; }
+
+    /* Intro — condensed, defiant */
+    .intro { padding:6px 4px 22px; text-align:center; border-bottom:1px solid var(--rule); margin-bottom:22px; }
+    .eyebrow {
+      font-family:'DM Mono',monospace;
+      font-size:.42rem; letter-spacing:.2em; text-transform:uppercase;
+      color:var(--hot); font-weight:700;
+      margin-bottom:14px;
+    }
+    .head {
+      font-family:'EB Garamond',Georgia,serif;
+      font-style:italic; font-size:1.6rem; line-height:1.18;
+      color:var(--ink); margin-bottom:12px;
+    }
+    .head span.gold { color:var(--gold-deep); font-style:normal; font-weight:600; }
+    .head span.green { color:var(--green-deep); font-style:normal; font-weight:600; }
+    .head span.hot { color:var(--hot); font-style:normal; font-weight:600; }
+    .door {
+      font-family:'Source Serif 4',serif;
+      font-size:.92rem; line-height:1.5; color:var(--ink-2);
+      max-width:380px; margin:0 auto;
+    }
+    .door strong { color:var(--ink); }
+
+    /* Map context — single line, tiny */
+    .ctx {
+      display:flex; align-items:center; gap:10px;
+      padding:10px 12px; margin-bottom:14px;
+      background:var(--cream-2); border:1px solid var(--rule);
+      border-radius:3px;
+    }
+    .ctx-dot {
+      width:11px; height:11px; border-radius:50%;
+      background:var(--red);
+      box-shadow:0 0 0 3px rgba(230,30,43,.18);
+      animation:pulse 2s infinite;
+      flex-shrink:0;
+    }
+    @keyframes pulse {
+      0%,100% { box-shadow:0 0 0 3px rgba(230,30,43,.18); }
+      50% { box-shadow:0 0 0 5px rgba(230,30,43,.28); }
+    }
+    .ctx-text {
+      font-family:'DM Mono',monospace; font-size:.36rem;
+      letter-spacing:.06em; color:var(--text-muted);
+      flex:1; line-height:1.4;
+    }
+    .ctx-text strong { color:var(--ink); font-family:'EB Garamond',serif; font-style:italic; font-weight:600; font-size:.8rem; letter-spacing:0; display:block; margin-bottom:1px; }
+
+    /* Tier strips — vertical newsreel · live jewel backgrounds */
+    .strip {
+      position:relative; isolation:isolate;
+      display:block; cursor:pointer; text-decoration:none;
+      padding:18px 18px 16px;
+      margin-bottom:10px; border-radius:5px;
+      color:#fff;
+      transition:transform .14s ease, box-shadow .14s ease, filter .14s ease;
+      overflow:hidden;
+      box-shadow:0 2px 8px rgba(0,0,0,.10), inset 0 1px 0 rgba(255,255,255,.16);
+    }
+    .strip:hover { transform:translateY(-2px); box-shadow:0 12px 28px rgba(0,0,0,.22), inset 0 1px 0 rgba(255,255,255,.22); filter:saturate(1.18) brightness(1.04); }
+    .strip:active { transform:translateY(0); }
+
+    /* Base jewel-shimmer on every strip */
+    .strip::before {
+      content:''; position:absolute; inset:0; z-index:-2;
+      background-size:220% 220%;
+      animation:jewel-drift 16s ease-in-out infinite;
+    }
+    /* Glint sweep — light source travelling across the gem */
+    .strip::after {
+      content:''; position:absolute; inset:0; z-index:-1;
+      background:linear-gradient(115deg,
+        transparent 30%,
+        rgba(255,255,255,.22) 48%,
+        rgba(255,255,255,.32) 50%,
+        rgba(255,255,255,.22) 52%,
+        transparent 70%);
+      background-size:300% 100%;
+      mix-blend-mode:overlay;
+      pointer-events:none;
+      animation:jewel-glint 11s ease-in-out infinite;
+    }
+
+    @keyframes jewel-drift {
+      0%,100% { background-position:0% 50%; }
+      50%     { background-position:100% 50%; }
+    }
+    @keyframes jewel-glint {
+      0%     { background-position:-60% 0; opacity:.0; }
+      18%    { opacity:.85; }
+      50%    { background-position:50% 0;  opacity:.95; }
+      82%    { opacity:.7; }
+      100%   { background-position:160% 0; opacity:0; }
+    }
+
+    /* Tier 0 — RUBY (red urgency) */
+    .strip.t0 { border:1px solid #6B0A11; background:#8B0F18; cursor:default; }
+    .strip.t0:hover { transform:none; box-shadow:0 2px 8px rgba(0,0,0,.10), inset 0 1px 0 rgba(255,255,255,.16); filter:none; }
+    .strip.t0::before {
+      background:
+        radial-gradient(ellipse at 28% 30%, rgba(255,90,100,.55), transparent 55%),
+        radial-gradient(ellipse at 72% 78%, rgba(180,15,28,.55), transparent 55%),
+        linear-gradient(135deg, #6B0A11, #C2161F 35%, #FF3F4F 50%, #C2161F 65%, #6B0A11);
+      background-size:220% 220%;
+      animation-duration:14s;
+    }
+    .strip.t0::after { animation-duration:13s; }
+
+    /* Tier 1 — EMERALD (green GO) */
+    .strip.t1 { border:1px solid #0E6230; background:#157A40; }
+    .strip.t1::before {
+      background:
+        radial-gradient(ellipse at 22% 28%, rgba(120,255,170,.50), transparent 55%),
+        radial-gradient(ellipse at 78% 76%, rgba(15,90,50,.55), transparent 55%),
+        linear-gradient(135deg, #0E6230, #1FA85A 35%, #4FE38C 50%, #1FA85A 65%, #0E6230);
+      background-size:220% 220%;
+      animation-duration:17s;
+    }
+    .strip.t1::after { animation-duration:12s; }
+
+    /* Tier 2 — TOPAZ / GOLD (premium) */
+    .strip.t2 { border:1px solid #8E6B00; background:#C49500; color:#1A1500; }
+    .strip.t2::before {
+      background:
+        radial-gradient(ellipse at 25% 28%, rgba(255,250,180,.65), transparent 55%),
+        radial-gradient(ellipse at 75% 78%, rgba(170,120,0,.55), transparent 55%),
+        linear-gradient(135deg, #8E6B00, #F2B900 35%, #FFE26B 50%, #F2B900 65%, #8E6B00);
+      background-size:220% 220%;
+      animation-duration:19s;
+    }
+    .strip.t2::after {
+      background:linear-gradient(115deg,
+        transparent 30%,
+        rgba(255,255,255,.40) 48%,
+        rgba(255,255,255,.55) 50%,
+        rgba(255,255,255,.40) 52%,
+        transparent 70%);
+      background-size:300% 100%;
+      animation-duration:10s;
+    }
+
+    /* Tier 3 — RUBELLITE (hot pink/magenta peak) */
+    .strip.t3 { border:1px solid #8B0E37; background:#C7144A; }
+    .strip.t3::before {
+      background:
+        radial-gradient(ellipse at 30% 28%, rgba(255,170,210,.60), transparent 55%),
+        radial-gradient(ellipse at 72% 78%, rgba(140,15,75,.60), transparent 55%),
+        linear-gradient(135deg, #8B0E37, #E0184F 35%, #FF5C8A 50%, #E0184F 65%, #8B0E37);
+      background-size:220% 220%;
+      animation-duration:13s;
+    }
+    .strip.t3::after { animation-duration:9s; }
+
+    /* Final — OBSIDIAN (back home, period after the four exclamations) */
+    .strip.t-home { border:1px solid rgba(255,255,255,.10); background:#0E0E0E; }
+    .strip.t-home::before {
+      background:
+        radial-gradient(ellipse at 28% 28%, rgba(242,185,0,.18), transparent 55%),
+        radial-gradient(ellipse at 76% 76%, rgba(255,255,255,.04), transparent 55%),
+        linear-gradient(135deg, #050505, #1F1F1F 50%, #050505);
+      background-size:220% 220%;
+      animation-duration:24s;
+    }
+    .strip.t-home::after {
+      animation-duration:15s;
+      background:linear-gradient(115deg,
+        transparent 35%,
+        rgba(242,185,0,.20) 49%,
+        rgba(242,185,0,.30) 50%,
+        rgba(242,185,0,.20) 51%,
+        transparent 65%);
+      background-size:300% 100%;
+    }
+
+    /* Reduced motion — keep saturated base, drop animation */
+    @media (prefers-reduced-motion: reduce) {
+      .strip::before, .strip::after { animation:none; }
+    }
+
+    /* Strip composition */
+    .strip-row1 {
+      display:flex; align-items:baseline; justify-content:space-between;
+      gap:12px; margin-bottom:6px;
+    }
+    .strip-tag {
+      font-family:'DM Mono',monospace; font-weight:700;
+      font-size:.42rem; letter-spacing:.2em; text-transform:uppercase;
+      opacity:.85;
+    }
+    .strip-price {
+      font-family:'EB Garamond',Georgia,serif;
+      font-style:italic; font-weight:600;
+      font-size:1.5rem; line-height:1;
+      letter-spacing:-.01em;
+    }
+    .strip-price small {
+      font-family:'DM Mono',monospace; font-style:normal; font-weight:500;
+      font-size:.55rem; letter-spacing:.05em; opacity:.85; margin-left:2px;
+    }
+    .strip-line {
+      font-family:'Source Serif 4',Georgia,serif;
+      font-size:.95rem; line-height:1.35; font-weight:600;
+      margin-bottom:4px;
+    }
+    .strip-sub {
+      font-family:'DM Mono',monospace;
+      font-size:.36rem; letter-spacing:.05em;
+      opacity:.85; line-height:1.45;
+    }
+    .strip-sub.qr { display:flex; align-items:center; gap:8px; margin-top:8px; }
+    .strip-sub.qr .qr-mini {
+      width:32px; height:32px; flex-shrink:0;
+      background:
+        repeating-linear-gradient(45deg, currentColor 0 1.6px, transparent 1.6px 3.2px),
+        repeating-linear-gradient(-45deg, currentColor 0 1.6px, transparent 1.6px 3.2px);
+      opacity:.92; border:1px solid currentColor;
+    }
+    .strip-foot {
+      display:flex; align-items:center; justify-content:space-between;
+      gap:10px; margin-top:10px;
+      padding-top:8px; border-top:1px solid rgba(255,255,255,.22);
+    }
+    .strip.t2 .strip-foot { border-top-color:rgba(0,0,0,.18); }
+    .strip-cta {
+      font-family:'DM Mono',monospace; font-weight:700;
+      font-size:.4rem; letter-spacing:.18em; text-transform:uppercase;
+    }
+    .strip-cta::after { content:' →'; }
+
+    /* Tier 0 has no foot/cta — just the urgency line */
+    .strip.t0 .strip-foot { display:none; }
+
+    /* Bottom CTA — one line, hot */
+    .bottom {
+      margin-top:18px; padding:18px 18px;
+      background:var(--ink); color:var(--cream);
+      border-radius:4px; text-align:center;
+    }
+    .bottom-line {
+      font-family:'EB Garamond',Georgia,serif;
+      font-style:italic; font-size:1.05rem; line-height:1.35;
+      margin-bottom:10px;
+    }
+    .bottom-line strong { color:var(--gold); font-style:normal; font-weight:600; }
+    .bottom a {
+      display:inline-block; font-family:'DM Mono',monospace;
+      font-weight:700; font-size:.42rem; letter-spacing:.16em;
+      text-transform:uppercase; padding:10px 18px;
+      background:var(--hot); color:#fff; text-decoration:none;
+      border-radius:2px;
+    }
+    .bottom a:hover { background:var(--gold); color:var(--ink); }
+
+    /* Demo + footer marks */
+    .marks {
+      max-width:460px; margin:18px auto 60px; padding:0 18px;
+      text-align:center;
+      font-family:'DM Mono',monospace;
+      font-size:.32rem; letter-spacing:.16em; text-transform:uppercase;
+      color:var(--text-muted); line-height:1.6;
+    }
+    .marks span { color:var(--hot); }
+
+    @media (max-width:480px) {
+      :root { --h:48px; }
+      .reel { padding:20px 12px; }
+      .head { font-size:1.32rem; }
+      .strip-price { font-size:1.3rem; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <a class="logo-wrap" href="/" style="text-decoration:none;">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 440 100" height="40" preserveAspectRatio="xMinYMid meet" aria-label="Requation">
+      <defs><filter id="gb"><feGaussianBlur stdDeviation="1.2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+      <text x="6" y="42" font-family="EB Garamond,Georgia,serif" font-size="46" font-weight="700" font-style="italic" fill="#E61E2B">r</text>
+      <line x1="31" y1="76" x2="50" y2="41" stroke="#7A7A7A" stroke-width="5" stroke-linecap="round"/>
+      <text x="56" y="88" font-family="Raleway,Arial,sans-serif" font-size="92" font-weight="600" fill="#1FA85A">Σ</text>
+      <text x="122" y="88" font-family="Raleway,Arial,sans-serif" font-size="24" font-weight="600" font-style="italic" fill="#F2B900" filter="url(#gb)" letter-spacing="2">quation</text>
+    </svg>
+  </a>
+  <a class="nav-back" href="/">← Home</a>
+</header>
+
+<div class="reel">
+
+  <!-- Defiant intro -->
+  <section class="intro">
+    <div class="eyebrow">Fuck godot. Fuck depression.</div>
+    <h1 class="head">Your dot is <span class="hot">gray</span>.<br>That's the wait.</h1>
+    <p class="door">
+      <strong>$1 a day turns it gold.</strong><br>
+      No subscription. No meeting. No pitch deck.<br>Pay for the day. Walk away from the wait.
+    </p>
+  </section>
+
+  <!-- Map context — Bottega Louie as the demo subject -->
+  <div class="ctx">
+    <div class="ctx-dot" aria-hidden="true"></div>
+    <div class="ctx-text">
+      <strong>Bottega Louie · DTLA</strong>
+      Yelp red dot · 700 S Grand Ave · 90017
+    </div>
+  </div>
+
+  <!-- Tier strips — newsreel -->
+
+  <!-- Tier 0 — red urgency -->
+  <div class="strip t0">
+    <div class="strip-row1">
+      <span class="strip-tag">Tier 0 · Free</span>
+      <span class="strip-price">$0</span>
+    </div>
+    <div class="strip-line">You're listed. Nobody finds you.</div>
+    <div class="strip-sub">Gray pin · scrolled past · same as the 6,000 other red dots</div>
+  </div>
+
+  <!-- Tier 1 — green GO -->
+  <a class="strip t1" href="mailto:hello@requation.com?subject=Claim+Tier+1+%C2%B7+%241%2Fday">
+    <div class="strip-row1">
+      <span class="strip-tag">Tier 1 · QR Flash</span>
+      <span class="strip-price">$1<small>/day</small></span>
+    </div>
+    <div class="strip-line">Your dot turns gold. Today's offer goes in a QR.</div>
+    <div class="strip-sub qr">
+      <div class="qr-mini" aria-hidden="true"></div>
+      <span>20% off pre-rolls · expires 9 PM · scan in-store</span>
+    </div>
+    <div class="strip-foot">
+      <span class="strip-sub">No subscription · cancel by not paying tomorrow</span>
+      <span class="strip-cta">Claim</span>
+    </div>
+  </a>
+
+  <!-- Tier 2 — gold SHINE -->
+  <a class="strip t2" href="mailto:hello@requation.com?subject=Claim+Tier+2+%C2%B7+%245%2Fday">
+    <div class="strip-row1">
+      <span class="strip-tag">Tier 2 · Profile Plus</span>
+      <span class="strip-price">$5<small>/day</small></span>
+    </div>
+    <div class="strip-line">90-second video. Google Meet booking. Right inside the map.</div>
+    <div class="strip-sub">Visitors don't leave the page · same-day booking link · no app needed</div>
+    <div class="strip-foot">
+      <span class="strip-sub">Walmart-checkout impulse · feels good · can't hurt</span>
+      <span class="strip-cta">Claim</span>
+    </div>
+  </a>
+
+  <!-- Tier 3 — hot pink PEAK -->
+  <a class="strip t3" href="/cube-sample">
+    <div class="strip-row1">
+      <span class="strip-tag">Tier 3 · Claude Cube</span>
+      <span class="strip-price">$25<small>/day</small></span>
+    </div>
+    <div class="strip-line">Your block. In 3D. On a shareable URL.</div>
+    <div class="strip-sub">Photorealistic Google tiles · camera orbits your building · paste the link anywhere</div>
+    <div class="strip-foot">
+      <span class="strip-sub">Click to step inside the cube</span>
+      <span class="strip-cta">Open</span>
+    </div>
+  </a>
+
+  <!-- Final tab — back to requation.com (the way home, after the impulse aisle) -->
+  <a class="strip t-home" href="https://requation.com">
+    <div class="strip-row1">
+      <span class="strip-tag">requation.com</span>
+      <span class="strip-price" style="font-style:normal;font-weight:600;">←</span>
+    </div>
+    <div class="strip-line">Back to the rest of the map.</div>
+    <div class="strip-sub">DTLA · Laveen · I-10 corridor · cannabis · real estate · the whole atlas</div>
+  </a>
+
+  <!-- Bottom — single line, hot pink CTA -->
+  <div class="bottom">
+    <div class="bottom-line">
+      Pick the day. Pay for the day.<br>
+      <strong>Your gray pin turns gold the same hour.</strong>
+    </div>
+    <a href="mailto:hello@requation.com?subject=Claim+a+Tier">hello@requation.com →</a>
+  </div>
+
+</div>
+
+<div class="marks">
+  Demo · Bottega Louie illustrative · <span>built with Claude · for the smallest business in the corridor</span>
+</div>
+
+</body>
+</html>

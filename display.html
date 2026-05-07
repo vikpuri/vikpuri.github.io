@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Requation Display — $1/day kiosk content for OptiSigns, Yodeck, Screenly</title>
+  <meta name="description" content="Replace your $2,000/month agency content with a $1/day URL. Auto-rotating jewel-tone offer loops for any HTML5 digital signage system." />
+  <meta name="google-site-verification" content="__GSC_TOKEN__" />
+  <script async src="https://www.googletagmanager.com/gtag/js?id=__GA_ID__"></script>
+  <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','__GA_ID__');</script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,600;1,400;1,600&family=Source+Serif+4:wght@400;600&family=DM+Mono:wght@400;500;700&family=Raleway:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --gold:#B8922A; --gold-light:#C9A84C; --gold-dim:rgba(184,146,42,.1); --gold-border:rgba(184,146,42,.3);
+      --cream:#FAF8F4; --cream-2:#F4F1EB; --cream-3:#EDE9E0;
+      --ink:#1C1C1C; --ink-2:#2E2E2E; --text-muted:#6B6460;
+      --rule:rgba(0,0,0,.08); --rule-heavy:rgba(0,0,0,.14);
+      --red:#B22234; --green:#2D6A2D; --hot:#FF1F5C;
+      --h:60px;
+    }
+    *,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
+    html { background:var(--cream); }
+    body { font-family:'Source Serif 4',Georgia,serif; color:var(--ink); line-height:1.55; }
+
+    header {
+      position:sticky; top:0; z-index:200;
+      background:var(--cream); border-bottom:1px solid var(--rule);
+      display:flex; align-items:center; justify-content:space-between;
+      padding:0 20px; height:var(--h);
+    }
+    .nav-back {
+      font-family:'DM Mono',monospace;
+      font-size:.42rem; letter-spacing:.1em; text-transform:uppercase;
+      color:var(--text-muted); text-decoration:none;
+      border:1px solid var(--rule-heavy); padding:5px 12px; border-radius:2px;
+    }
+    .nav-back:hover { border-color:var(--gold); color:var(--gold); }
+
+    /* Hero — math-first */
+    .hero {
+      max-width:980px; margin:0 auto; padding:50px 28px 30px; text-align:center;
+    }
+    .hero-eyebrow {
+      font-family:'DM Mono',monospace; font-size:.4rem;
+      letter-spacing:.2em; text-transform:uppercase;
+      color:var(--gold); margin-bottom:14px;
+    }
+    .hero h1 {
+      font-family:'EB Garamond',Georgia,serif; font-style:italic;
+      font-size:2.4rem; line-height:1.15;
+      color:var(--ink); margin-bottom:18px;
+    }
+    .hero h1 span.crossed { color:var(--text-muted); text-decoration:line-through; }
+    .hero h1 span.gold { color:var(--gold); font-style:normal; font-weight:600; }
+    .hero p {
+      font-size:1.05rem; line-height:1.6; color:var(--ink-2);
+      max-width:680px; margin:0 auto 14px;
+    }
+    .hero p strong { color:var(--ink); }
+
+    /* Live preview iframe */
+    .preview-wrap {
+      max-width:1180px; margin:24px auto 36px; padding:0 28px;
+    }
+    .preview-frame {
+      position:relative; aspect-ratio:16/9;
+      background:#000; border:1px solid var(--rule-heavy);
+      border-radius:5px; overflow:hidden;
+      box-shadow:0 14px 40px rgba(0,0,0,.18);
+    }
+    .preview-frame iframe {
+      width:100%; height:100%; border:none; display:block;
+    }
+    .preview-label {
+      text-align:center; font-family:'DM Mono',monospace; font-size:.36rem;
+      letter-spacing:.16em; text-transform:uppercase;
+      color:var(--text-muted); margin-top:12px;
+    }
+    .preview-label strong { color:var(--ink); font-weight:700; }
+    .preview-label a { color:var(--gold); text-decoration:none; }
+    .preview-label a:hover { color:var(--hot); }
+
+    /* The math table */
+    .math {
+      max-width:980px; margin:0 auto 50px; padding:0 28px;
+    }
+    .math h2 {
+      font-family:'EB Garamond',Georgia,serif; font-style:italic;
+      font-size:1.6rem; color:var(--ink); margin-bottom:18px; text-align:center;
+    }
+    .math h2 span { color:var(--gold-light); }
+    .math-table {
+      width:100%; border-collapse:collapse;
+      background:var(--cream-2); border-radius:5px; overflow:hidden;
+      box-shadow:0 6px 20px rgba(0,0,0,.06);
+    }
+    .math-table th, .math-table td {
+      padding:14px 18px; text-align:left;
+      font-size:.92rem; border-bottom:1px solid var(--rule);
+    }
+    .math-table th {
+      background:var(--ink); color:var(--cream);
+      font-family:'DM Mono',monospace; font-weight:700;
+      font-size:.4rem; letter-spacing:.12em; text-transform:uppercase;
+    }
+    .math-table td {
+      font-family:'Source Serif 4',serif;
+    }
+    .math-table .row-old td { color:var(--text-muted); text-decoration:line-through; }
+    .math-table .row-new { background:rgba(45,106,45,.06); }
+    .math-table .row-new td { font-weight:600; color:var(--ink); }
+    .math-table .row-new td strong { color:var(--green); font-weight:700; }
+    .math-table .price { font-family:'EB Garamond',serif; font-style:italic; font-size:1.1rem; }
+    .math-table .save {
+      display:inline-block; padding:3px 9px; background:var(--green);
+      color:#fff; border-radius:2px;
+      font-family:'DM Mono',monospace; font-weight:700; font-size:.36rem;
+      letter-spacing:.1em; text-transform:uppercase;
+    }
+
+    /* Add-to-platform section */
+    .add-section {
+      background:var(--ink); color:var(--cream); padding:44px 28px 50px;
+    }
+    .add-grid {
+      max-width:980px; margin:0 auto;
+    }
+    .add-grid h2 {
+      font-family:'EB Garamond',serif; font-style:italic;
+      font-size:1.7rem; color:var(--gold-light); margin-bottom:8px; text-align:center;
+    }
+    .add-grid > p {
+      text-align:center; font-size:.95rem; line-height:1.5;
+      color:rgba(250,248,244,.7); margin-bottom:32px;
+    }
+    .add-grid > p code {
+      background:rgba(184,146,42,.18); color:var(--gold-light);
+      padding:3px 9px; border-radius:2px;
+      font-family:'DM Mono',monospace; font-size:.86em;
+    }
+    .platforms {
+      display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));
+      gap:18px;
+    }
+    .platform {
+      background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.08);
+      border-left:3px solid var(--gold); border-radius:3px;
+      padding:18px 20px;
+    }
+    .platform h3 {
+      font-family:'EB Garamond',serif; font-style:italic;
+      font-size:1.1rem; color:var(--gold-light); margin-bottom:6px;
+    }
+    .platform p {
+      font-family:'Source Serif 4',serif; font-size:.82rem;
+      line-height:1.55; color:rgba(250,248,244,.8); margin-bottom:10px;
+    }
+    .platform .steps {
+      font-family:'DM Mono',monospace; font-size:.34rem;
+      letter-spacing:.06em; line-height:1.7;
+      color:rgba(250,248,244,.65);
+      counter-reset:s;
+    }
+    .platform .steps span {
+      display:block; padding-left:22px; position:relative;
+    }
+    .platform .steps span::before {
+      counter-increment:s;
+      content: counter(s);
+      position:absolute; left:0; top:1px;
+      width:14px; height:14px; border-radius:50%;
+      background:var(--gold); color:var(--ink);
+      font-weight:700; font-size:9px;
+      display:flex; align-items:center; justify-content:center;
+    }
+
+    /* Bottom CTA */
+    .cta-bottom {
+      max-width:780px; margin:50px auto 60px; padding:32px 36px;
+      background:linear-gradient(135deg, #FFE26B 0%, #F2B900 100%);
+      border-radius:5px; text-align:center;
+      box-shadow:0 12px 36px rgba(242,185,0,.35);
+    }
+    .cta-bottom h2 {
+      font-family:'EB Garamond',serif; font-style:italic;
+      font-size:1.6rem; color:var(--ink); margin-bottom:10px;
+    }
+    .cta-bottom p {
+      font-size:1rem; line-height:1.55; color:var(--ink-2);
+      margin-bottom:18px;
+    }
+    .cta-bottom a.email {
+      display:inline-block; font-family:'DM Mono',monospace; font-weight:700;
+      font-size:.46rem; letter-spacing:.14em; text-transform:uppercase;
+      padding:13px 26px; border-radius:3px;
+      background:var(--ink); color:var(--cream); text-decoration:none;
+    }
+    .cta-bottom a.email:hover { background:var(--hot); color:#fff; }
+    .cta-bottom .url {
+      display:inline-block; margin-top:14px;
+      font-family:'DM Mono',monospace; font-size:.4rem;
+      color:var(--ink-2); letter-spacing:.06em;
+    }
+    .cta-bottom .url code {
+      background:rgba(0,0,0,.12); padding:3px 8px; border-radius:2px;
+      font-weight:700;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <a href="/" style="text-decoration:none;">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 440 100" height="44" preserveAspectRatio="xMinYMid meet" aria-label="Requation">
+      <text x="6" y="42" font-family="EB Garamond,Georgia,serif" font-size="46" font-weight="700" font-style="italic" fill="#B22234">r</text>
+      <line x1="31" y1="76" x2="50" y2="41" stroke="#7A7A7A" stroke-width="5" stroke-linecap="round"/>
+      <text x="56" y="88" font-family="Raleway,Arial,sans-serif" font-size="92" font-weight="600" fill="#4F6FB8">Σ</text>
+      <text x="122" y="88" font-family="Raleway,Arial,sans-serif" font-size="24" font-weight="600" font-style="italic" fill="#D4A843" letter-spacing="2">quation</text>
+    </svg>
+  </a>
+  <a class="nav-back" href="/">← Home</a>
+</header>
+
+<section class="hero">
+  <div class="hero-eyebrow">Display · Line 3 · Kiosk content</div>
+  <h1>Replace <span class="crossed">$2,000/month</span> agency content with a <span class="gold">$1/day</span> URL.</h1>
+  <p>One URL. Loops your offers. Refreshes daily. Plays on any HTML5 signage system — <strong>OptiSigns, Yodeck, Screenly, Mvix, Samsung MagicINFO,</strong> or a $50 Amazon Fire stick locked to a browser.</p>
+  <p>Built on the same jewel-tone engine that powers your $1/day map pin. Same brand. Three surfaces.</p>
+</section>
+
+<div class="preview-wrap">
+  <div class="preview-frame">
+    <iframe src="/display-qr-loop" title="Live preview · QR Loop kiosk display" loading="lazy"></iframe>
+  </div>
+  <p class="preview-label">
+    <strong>Live preview · the URL your kiosk loads</strong>
+    · open at full screen: <a href="/display-qr-loop" target="_blank">requation.com/display-qr-loop →</a>
+  </p>
+</div>
+
+<section class="math">
+  <h2>The math, per <span>screen</span>, per month</h2>
+  <table class="math-table">
+    <thead>
+      <tr><th>Layer</th><th>Without us</th><th>With us</th><th>You save</th></tr>
+    </thead>
+    <tbody>
+      <tr class="row-old">
+        <td>CMS software (OptiSigns Standard)</td>
+        <td class="price">$10/mo</td>
+        <td class="price">$10/mo</td>
+        <td>—</td>
+      </tr>
+      <tr class="row-old">
+        <td>Content production (agency)</td>
+        <td class="price">$2,000–10,000/mo</td>
+        <td>—</td>
+        <td>—</td>
+      </tr>
+      <tr class="row-new">
+        <td>Requation Display URL</td>
+        <td>—</td>
+        <td class="price"><strong>$30/mo</strong> ($1/day)</td>
+        <td>—</td>
+      </tr>
+      <tr class="row-new">
+        <td><strong>Total per screen / month</strong></td>
+        <td class="price">$2,010–10,010</td>
+        <td class="price"><strong>$40</strong></td>
+        <td><span class="save">98–99.6% off</span></td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<section class="add-section">
+  <div class="add-grid">
+    <h2>Add to your kiosk in 60 seconds</h2>
+    <p>Your URL: <code>requation.com/display-qr-loop</code> (or your custom slug once we set you up)</p>
+
+    <div class="platforms">
+      <div class="platform">
+        <h3>OptiSigns</h3>
+        <p>Open marketplace. The "Web App" feature lets you load any URL.</p>
+        <div class="steps">
+          <span>Apps → Web App</span>
+          <span>Paste URL · save</span>
+          <span>Schedule to your screen</span>
+        </div>
+      </div>
+      <div class="platform">
+        <h3>Yodeck</h3>
+        <p>Adds URLs as "Webpages" — supports auto-refresh.</p>
+        <div class="steps">
+          <span>Media → Webpages</span>
+          <span>Paste URL · save</span>
+          <span>Add to playlist</span>
+        </div>
+      </div>
+      <div class="platform">
+        <h3>Screenly</h3>
+        <p>Open-source friendly. Pi-based players accept URLs natively.</p>
+        <div class="steps">
+          <span>Add Asset → URL</span>
+          <span>Paste URL · save</span>
+          <span>Assign to screen</span>
+        </div>
+      </div>
+      <div class="platform">
+        <h3>Samsung MagicINFO / LG webOS</h3>
+        <p>Enterprise CMS. Add as Web Content Source.</p>
+        <div class="steps">
+          <span>Add Content → Web</span>
+          <span>Paste URL · save</span>
+          <span>Schedule to screen</span>
+        </div>
+      </div>
+      <div class="platform">
+        <h3>Amazon Fire / Android</h3>
+        <p>Cheapest path. Use a kiosk browser app set to fullscreen.</p>
+        <div class="steps">
+          <span>Install Fully Kiosk Browser</span>
+          <span>Set start URL</span>
+          <span>Reboot · plug into TV</span>
+        </div>
+      </div>
+      <div class="platform">
+        <h3>Any HTML5 browser</h3>
+        <p>Press F11 for fullscreen. Tape an iPad to your wall. Done.</p>
+        <div class="steps">
+          <span>Open URL in browser</span>
+          <span>Press F11 fullscreen</span>
+          <span>Lock device</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="cta-bottom">
+  <h2>Get a custom URL with your business</h2>
+  <p>We swap the offers, business name, QR target, and rotation cadence for your store. Same hour. <strong>$1/day per screen, billed monthly.</strong> Cancel by not paying tomorrow.</p>
+  <a class="email" href="mailto:hello@requation.com?subject=Display+URL+for+my+business">hello@requation.com →</a>
+  <div class="url">or open the demo: <code>requation.com/display-qr-loop</code></div>
+</div>
+
+</body>
+</html>

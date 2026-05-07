@@ -19,6 +19,12 @@
     { "source": "/dtla-mall-map",         "destination": "/dtla-mall-map.html" },
     { "source": "/laveen-mall-map",       "destination": "/laveen-mall-map.html" },
     { "source": "/cube-template",         "destination": "/cube-template.html" },
-    { "source": "/i10",                   "destination": "/i10.html" }
+    { "source": "/i10",                   "destination": "/i10.html" },
+    { "source": "/cube-sample",           "destination": "/cube-sample.html" },
+    { "source": "/samples/tab-card",      "destination": "/samples/tab-card.html" },
+    { "source": "/samples/canva-pack",    "destination": "/samples/canva-pack.html" },
+    { "source": "/display",               "destination": "/display.html" },
+    { "source": "/display-qr-loop",       "destination": "/display-qr-loop.html" },
+    { "source": "/flyover",               "destination": "/flyover.html" }
   ]
 }

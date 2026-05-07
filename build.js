@@ -18,15 +18,22 @@ if (fs.existsSync('.env')) {
   });
 }
 
-const SB_KEY = process.env.SUPABASE_KEY;
+const SB_KEY    = process.env.SUPABASE_KEY;
+const GA_ID     = process.env.GA_ID     || '';   // GA4 Measurement ID — empty = analytics off
+const GSC_TOKEN = process.env.GSC_TOKEN || '';   // Google Search Console verification token
 
 if (!SB_KEY) {
   console.warn('WARN: SUPABASE_KEY not set — key already embedded in source files, continuing build');
 }
+if (!GA_ID)     console.warn('WARN: GA_ID not set — Google Analytics 4 will not record traffic until env is set in Vercel');
+if (!GSC_TOKEN) console.warn('WARN: GSC_TOKEN not set — Google Search Console verification will fail until env is set in Vercel');
 
 // ── Helpers ───────────────────────────────────────────────────────
 function inject(str) {
-  return str.split('__SB_KEY__').join(SB_KEY);
+  return str
+    .split('__SB_KEY__').join(SB_KEY)
+    .split('__GA_ID__').join(GA_ID)
+    .split('__GSC_TOKEN__').join(GSC_TOKEN);
 }
 
 function copyItem(src, dst) {
@@ -53,6 +60,10 @@ const HTML_FILES = [
   'lalife.html', 'desertlife.html',
   'cube-template.html',
   'i10.html',
+  'cube-sample.html',
+  'display.html',
+  'display-qr-loop.html',
+  'flyover.html',
 ];
 HTML_FILES.forEach(f => {
   if (!fs.existsSync(f)) return;
@@ -60,8 +71,8 @@ HTML_FILES.forEach(f => {
   console.log('  ✓', f);
 });
 
-// ── Copy sub-page directories (lalife, desertlife) — full directory ──
-['lalife', 'desertlife'].forEach(dir => {
+// ── Copy sub-page directories (lalife, desertlife, samples) — full directory ──
+['lalife', 'desertlife', 'samples'].forEach(dir => {
   if (!fs.existsSync(dir)) return;
   fs.mkdirSync(path.join('dist', dir), { recursive: true });
   fs.readdirSync(dir).forEach(f => {
